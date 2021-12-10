@@ -36,36 +36,87 @@ namespace OdantDev
             this.InitializeComponent();
             this.DataContext = this;
         }
-
+        #region Connect to oda and get data
         private void Connect(object sender, RoutedEventArgs e)
         {
-            FileInfo fileInfo = new FileInfo(Extension.GetOdaPath());
-            string serverCorePath = Path.Combine(fileInfo.DirectoryName, "server");
-            Extension.LoadServerLibraries(serverCorePath, "x86", "odaClient.dll", "fastxmlparser.dll");
-            if (!Common.Connection.Login()) return;
-            Common.Connection.CoreMode = CoreMode.AddIn;
-            OdaModel.Nodes = new ObservableCollection<Node<StructureItem>>(Common.Connection.Hosts.Cast<Host>().AsParallel().Select(host => host.GetChildren()));
-            //OdaTree.ItemsSource = Common.Connection.Hosts.Cast<Host>().AsParallel().Select(host => host.GetChildren());
-            spConnect.Visibility = Visibility.Collapsed;
-            OdaModel.Developers = new ObservableCollection<DomainDeveloper>(Common.Connection.LocalHost.Develope.Domains.Cast<DomainDeveloper>());
-            CommonButtons.Visibility = Visibility.Visible;
+            var LoadOdaLibrariesResult = LoadOdaLibraries();
+            if (LoadOdaLibrariesResult.Success.Not())
+            {
+                ShowException(LoadOdaLibrariesResult.Error);
+                return;
+            }
+            var UpdateModelResult = UpdateModel(OdaModel,Common.Connection);
+            if (UpdateModelResult.Success.Not())
+            {
+                ShowException(UpdateModelResult.Error);
+                return;
+            }
         }
-
-        private void button2_Click(object sender, RoutedEventArgs e)
+        private (bool Success, string Error) LoadOdaLibraries()
         {
-           // OdaModel.Nodes = null;
-            OdaModel.Nodes = new ObservableCollection<Node<StructureItem>>(Common.Connection.Hosts.Cast<Host>().AsParallel().Select(host => host.GetChildren())); ;
+            try
+            {
+                FileInfo fileInfo = new FileInfo(Extension.GetOdaPath());
+                string serverCorePath = Path.Combine(fileInfo.DirectoryName, "server");
+                Extension.LoadServerLibraries(serverCorePath, "x86", "odaClient.dll", "fastxmlparser.dll");
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+        private (bool Success, string Error) UpdateModel(OdaModel odaModel,Connection connection)
+        {
+            var GetDataResult = odaModel.GetData(connection);
+            if (GetDataResult.Success)
+            {
+                spConnect.Visibility = Visibility.Collapsed;
+                CommonButtons.Visibility = Visibility.Visible;
+                ErrorSp.Visibility = Visibility.Collapsed;
+                return (true,null);
+            }
+            else
+            {
+                return (false, GetDataResult.Error);
+            }
+        }
+        private void ShowException(string message)
+        {
+            ErrorSp.Visibility = Visibility.Visible;
+            spConnect.Visibility = Visibility.Visible;
+            CommonButtons.Visibility = Visibility.Collapsed;
+            ErrorTb.Text = message;
+        }
+        #endregion
+
+        #region main button logic
+        private void RefreshTreeButton_Click(object sender, RoutedEventArgs e)
+        {
+            var UpdateModelResult = UpdateModel(OdaModel,Common.Connection);
+            if (UpdateModelResult.Success.Not())
+            {
+                ShowException(UpdateModelResult.Error);
+                return;
+            }
         }
 
-        private void button3_Click(object sender, RoutedEventArgs e)
+        private void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
 
         }
 
-        private void button3_Click_1(object sender, RoutedEventArgs e)
+        private void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
         {
-            var root = Common.Connection.LocalHost.FindDomain("H:1D670A1783307C2/D:WORK/D:1D71734AE4F4847");
 
         }
+
+        private void OpenModuleButton_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            OdantDevPackage.Env_DTE.Solution.Open(@"D:\localoda\d.Develope\d.Пономарев\d.OLAP\OLAP\CLASS\modules\OLAP-1CDF86EB999F00F.sln");
+            var selectedItem = (OdaTree.SelectedItem as Node<StructureItem>).Item.Dir.GetDir("modules").Path;
+        }
+        #endregion
     }
 }

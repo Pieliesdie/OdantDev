@@ -24,5 +24,20 @@ namespace OdantDev
         public ObservableCollection<Node<StructureItem>> Nodes { get => nodes; set { nodes = value;  NotifyPropertyChanged("Nodes");  } }
 
         public ObservableCollection<DomainDeveloper> Developers { get => developers; set { developers = value; NotifyPropertyChanged("Developers"); } }
+        public (bool Success, string Error) GetData(Connection connection)
+        {
+            try
+            {
+                if (connection.Login().Not()) { return (false, "Can't connect to oda"); }
+                connection.CoreMode = CoreMode.AddIn;
+                this.Nodes = new ObservableCollection<Node<StructureItem>>(connection.Hosts.Cast<Host>().AsParallel().Select(host => Node<StructureItem>.GetChildren(host)));
+                this.Developers = new ObservableCollection<DomainDeveloper>(connection.LocalHost.Develope.Domains.Cast<DomainDeveloper>());
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
     }
 }

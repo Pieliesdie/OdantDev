@@ -3,53 +3,194 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0" 
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+             xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:odantdev="clr-namespace:OdantDev"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
              Name="MyToolWindow"
              Background="{DynamicResource MaterialDesignPaper}"
              FontFamily="{DynamicResource MaterialDesignFont}">
     <UserControl.Resources>
         <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
             <ResourceDictionary.MergedDictionaries>
-                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="DeepPurple" SecondaryColor="Lime" />
+                <materialDesign:BundledTheme BaseTheme="Light"
+                                             PrimaryColor="DeepPurple"
+                                             SecondaryColor="Purple" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel>
-        <StackPanel Orientation="Vertical" DockPanel.Dock="Top" Visibility="Visible" x:Name="spConnect">
-            <TextBlock Margin="10" HorizontalAlignment="Center">ODANT</TextBlock>
-            <Button Content="Connect" Click="Connect" Width="120" Height="31" Name="button1" Margin="10,100,10,10"/>
+        <StackPanel Orientation="Vertical"
+                    DockPanel.Dock="Top"
+                    Visibility="Visible"
+                    x:Name="spConnect"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+            <TextBlock Margin="10"
+                       HorizontalAlignment="Center">ODANT</TextBlock>
+            <Button Content="Connect"
+                    Click="Connect"
+                    Width="120"
+                    Height="31"
+                    Name="button1"
+                    Margin="10,100,10,10" />
+            <StackPanel Orientation="Horizontal"
+                        x:Name="ErrorSp"
+                        Visibility="Hidden">
+                <materialDesign:PackIcon Kind="ExclamationThick"
+                                         Height="25"
+                                         Width="25" />
+                <TextBlock TextWrapping="Wrap"
+                           MaxWidth="200"
+                           Padding="0,0,0,0"
+                           x:Name="ErrorTb">
+                    Error
+                </TextBlock>
+            </StackPanel>
         </StackPanel>
-        
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Visibility="Collapsed" x:Name="CommonButtons">
-            <Button Width="125" Height="25" Name="RefreshTreeButton" FontSize="12" Click="button3_Click" Margin="5">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="Autorenew" Margin="0,0,5,0" Height="18" Width="18"/>
-                    <TextBlock VerticalAlignment="Center" >Refresh Tree</TextBlock>
-                </StackPanel>
-            </Button>
-            <Button Width="100" Height="25" Name="button4" FontSize="12" Click="button3_Click" Margin="5">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="FolderPlusOutline" Margin="0,0,5,0" Height="18" Width="18"/>
-                    <TextBlock VerticalAlignment="Center" >Create</TextBlock>
-                </StackPanel>
-        </Button>
-            <Button Content="Download" Width="100" Height="25" Name="button2" FontSize="12" Click="button2_Click" Margin="5"/>
-            <Button Content="Open" Width="100" Height="25" Name="button3" FontSize="12" Click="button3_Click_1" />
-            <Label Margin="5">Разработчик:</Label>
-            <ComboBox Margin="5" SelectedValue="{Binding OdaModel.Developers[0]}" ItemsSource="{Binding OdaModel.Developers}" x:Name="Developers"></ComboBox>
+
+        <StackPanel DockPanel.Dock="Top"
+                    Visibility="Collapsed"
+                    x:Name="CommonButtons">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                        Margin="5,0,0,0">
+                <materialDesign:PackIcon Kind="Database"
+                                         Width="20"
+                                         Height="20" />
+                <TextBlock Margin="5,5,10,0"
+                           FontSize="12">ODANT</TextBlock>
+            </StackPanel>
+            <StackPanel>
+                <ComboBox Style="{StaticResource MaterialDesignFilledComboBox}"
+                          x:Name="DeveloperCb"
+                          materialDesign:HintAssist.Hint="Developer domain"
+                          ItemsSource="{Binding OdaModel.Developers}"
+                          materialDesign:TextFieldAssist.HasClearButton="True"
+                          ToolTip="Please select developer domain on localhost"
+                          Margin="5,0,5,20">
+                    <ComboBox.SelectedItem>
+                        <Binding Path="Name"
+                                 UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <odantdev:NotEmptyRule ValidatesOnTargetUpdated="True" />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </ComboBox.SelectedItem>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Width="90"
+                        HorizontalContentAlignment="Center"
+                        Height="25"
+                        Name="RefreshTreeButton"
+                        FontSize="12"
+                        Click="RefreshTreeButton_Click"
+                        Margin="3"
+                        ToolTip="Create tree again">
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center">
+                        <materialDesign:PackIcon Kind="Autorenew"
+                                                 Margin="-5,0,5,0"
+                                                 Height="18"
+                                                 Width="18" />
+                        <TextBlock VerticalAlignment="Center">Refresh</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button Width="90"
+                        Height="25"
+                        Name="CreateModuleButton"
+                        FontSize="12"
+                        Click="CreateModuleButton_Click"
+                        Margin="3"
+                        IsEnabled="True"
+                        ToolTip="Create new module in selected item">
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="FolderPlusOutline"
+                                                 Margin="-5,0,5,0"
+                                                 Height="18"
+                                                 Width="18" />
+                        <TextBlock VerticalAlignment="Center">Create</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button Width="105"
+                        Height="25"
+                        Name="DownloadModuleButton"
+                        FontSize="12"
+                        Click="DownloadModuleButton_Click"
+                        Margin="3"
+                        ToolTip="Download module to selected local developer domain"
+                        ToolTipService.ShowOnDisabled="True">
+                    <Button.IsEnabled>
+                        <MultiBinding Converter="{StaticResource BooleanAllConverter}">
+                            <Binding ElementName="OdaTree"
+                                     Path="SelectedItem.Item.HasModule"
+                                     TargetNullValue="false"
+                                     FallbackValue="false" />
+                            <Binding ElementName="OdaTree"
+                                     Path="SelectedItem.Item.Host.IsLocal"
+                                     TargetNullValue="false"
+                                     FallbackValue="false"
+                                     Converter="{StaticResource InvertBooleanConverter}"/>
+                        </MultiBinding>
+                    </Button.IsEnabled>
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="DownloadOutline"
+                                                 Margin="-5,0,5,0"
+                                                 Height="18"
+                                                 Width="18" />
+                        <TextBlock VerticalAlignment="Center">Download</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button Width="80"
+                        Height="25"
+                        Name="OpenModuleButton"
+                        FontSize="12"
+                        Click="OpenModuleButton_Click"
+                        Margin="3"
+                        ToolTip="Open local module"
+                        ToolTipService.ShowOnDisabled="True">
+                    <Button.IsEnabled>
+                        <MultiBinding Converter="{StaticResource BooleanAllConverter}">
+                            <Binding ElementName="OdaTree"
+                                     Path="SelectedItem.Item.HasModule"
+                                     TargetNullValue="false"
+                                     FallbackValue="false" />
+                            <Binding ElementName="OdaTree"
+                                     Path="SelectedItem.Item.Host.IsLocal"
+                                     TargetNullValue="false"
+                                     FallbackValue="false" />
+                        </MultiBinding>
+                    </Button.IsEnabled>
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="FolderOpenOutline"
+                                                 Margin="-5,0,5,0"
+                                                 Height="18"
+                                                 Width="18" />
+                        <TextBlock VerticalAlignment="Center">Open</TextBlock>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </StackPanel>
         <!--<WindowsFormsHost x:Name="winHost"></WindowsFormsHost>-->
 
-        <TreeView x:Name="OdaTree" ItemsSource="{Binding OdaModel.Nodes}">
+        <TreeView x:Name="OdaTree"
+                  ItemsSource="{Binding OdaModel.Nodes}">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Path=Children}">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="{Binding Path=Icon}" Width="16" Margin="0,0,10,0"/>
-                        <TextBlock Text="{Binding }" FontSize="14"/>
+                        <Image Source="{Binding Path=Icon}"
+                               Width="16"
+                               Margin="0,0,10,0" />
+                        <TextBlock Text="{Binding }"
+                                   FontSize="14" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>

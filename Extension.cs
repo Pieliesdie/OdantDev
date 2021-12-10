@@ -12,6 +12,7 @@ namespace OdantDev
 {
     public static class Extension
     {
+        public static bool Not(this bool boolean) => !boolean;
         public static BitmapImage ConvertToBitmapImage(this Bitmap src)
         {
             if (src == null) return null;
@@ -24,19 +25,7 @@ namespace OdantDev
             image.EndInit();
             return image;
         }
-        public static Node<StructureItem> GetChildren(this StructureItem root)
-        {
-            var children = root.getChilds(ItemType.All, Deep.Near);
-            var rootNode = new Node<StructureItem>(root);
-            rootNode.Children = children?.Cast<StructureItem>().AsParallel().Select(child => child.GetChildren());
-            return rootNode;
-        }
-
-        public static async Task<Node<StructureItem>> GetChildrenAsync(this StructureItem root)
-        {
-            return await Task.Run(() => { return root.GetChildren(); });
-        }
-
+       
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
 
