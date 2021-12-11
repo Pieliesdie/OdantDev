@@ -76,6 +76,7 @@
                         <Binding Path="Name"
                                  UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>
+                                <ExceptionValidationRule></ExceptionValidationRule>
                                 <odantdev:NotEmptyRule ValidatesOnTargetUpdated="True" />
                             </Binding.ValidationRules>
                         </Binding>

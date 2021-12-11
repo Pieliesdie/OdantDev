@@ -59,6 +59,7 @@ namespace OdantDev
                 FileInfo fileInfo = new FileInfo(Extension.GetOdaPath());
                 string serverCorePath = Path.Combine(fileInfo.DirectoryName, "server");
                 Extension.LoadServerLibraries(serverCorePath, "x86", "odaClient.dll", "fastxmlparser.dll");
+                Extension.LoadServerLibraries(serverCorePath, "x64", "odaClient.dll", "fastxmlparser.dll");
                 return (true, null);
             }
             catch (Exception ex)
@@ -74,6 +75,7 @@ namespace OdantDev
                 spConnect.Visibility = Visibility.Collapsed;
                 CommonButtons.Visibility = Visibility.Visible;
                 ErrorSp.Visibility = Visibility.Collapsed;
+                OdaTree.Visibility = Visibility.Visible;
                 return (true,null);
             }
             else
@@ -86,6 +88,7 @@ namespace OdantDev
             ErrorSp.Visibility = Visibility.Visible;
             spConnect.Visibility = Visibility.Visible;
             CommonButtons.Visibility = Visibility.Collapsed;
+            OdaTree.Visibility = Visibility.Collapsed;
             ErrorTb.Text = message;
         }
         #endregion

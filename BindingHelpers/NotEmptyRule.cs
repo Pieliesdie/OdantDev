@@ -15,6 +15,7 @@ namespace OdantDev
             switch (value)
             {
                 case null:
+                case "MyToolWindow":
                     return new ValidationResult(false, "Value can't be null");
                 default:
                     return new ValidationResult(true, null);

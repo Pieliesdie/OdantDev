@@ -31,7 +31,7 @@ namespace OdantDev
                 if (connection.Login().Not()) { return (false, "Can't connect to oda"); }
                 connection.CoreMode = CoreMode.AddIn;
                 this.Nodes = new ObservableCollection<Node<StructureItem>>(connection.Hosts.Cast<Host>().AsParallel().Select(host => Node<StructureItem>.GetChildren(host)));
-                this.Developers = new ObservableCollection<DomainDeveloper>(connection.LocalHost.Develope.Domains.Cast<DomainDeveloper>());
+                this.Developers = new ObservableCollection<DomainDeveloper>(connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>() ?? new List<DomainDeveloper>());
                 return (true, null);
             }
             catch (Exception ex)

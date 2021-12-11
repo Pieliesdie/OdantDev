@@ -66,18 +66,18 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="odaCore">
-      <HintPath>D:\ODANT_18DEV\odaCore.dll</HintPath>
+      <HintPath>F:\ODA\odaCore.dll</HintPath>
     </Reference>
     <Reference Include="odaLib">
-      <HintPath>D:\ODANT_18DEV\odaLib.dll</HintPath>
+      <HintPath>F:\ODA\odaLib.dll</HintPath>
     </Reference>
     <Reference Include="odaShare, Version=2.1.8003.20300, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>D:\ODANT_18DEV\odaShare.dll</HintPath>
+      <HintPath>F:\ODA\odaShare.dll</HintPath>
     </Reference>
     <Reference Include="odaXML, Version=2.1.8003.20301, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>D:\ODANT_18DEV\odaXML.dll</HintPath>
+      <HintPath>F:\ODA\odaXML.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
