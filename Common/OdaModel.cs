@@ -11,8 +11,8 @@ namespace OdantDev
 {
     public class OdaModel : INotifyPropertyChanged
     {
-        private ObservableCollection<Node<StructureItem>> nodes;
-        private ObservableCollection<DomainDeveloper> developers;
+        private IEnumerable<Node<StructureItem>> nodes;
+        private IEnumerable<DomainDeveloper> developers;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -21,17 +21,17 @@ namespace OdantDev
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
-        public ObservableCollection<Node<StructureItem>> Nodes { get => nodes; set { nodes = value;  NotifyPropertyChanged("Nodes");  } }
+        public IEnumerable<Node<StructureItem>> Nodes { get => nodes; set { nodes = value;  NotifyPropertyChanged("Nodes");  } }
 
-        public ObservableCollection<DomainDeveloper> Developers { get => developers; set { developers = value; NotifyPropertyChanged("Developers"); } }
+        public IEnumerable<DomainDeveloper> Developers { get => developers; set { developers = value; NotifyPropertyChanged("Developers"); } }
         public (bool Success, string Error) GetData(Connection connection)
         {
             try
             {
                 if (connection.Login().Not()) { return (false, "Can't connect to oda"); }
                 connection.CoreMode = CoreMode.AddIn;
-                this.Nodes = new ObservableCollection<Node<StructureItem>>(connection.Hosts.Cast<Host>().AsParallel().Select(host => Node<StructureItem>.GetChildren(host)));
-                this.Developers = new ObservableCollection<DomainDeveloper>(connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>() ?? new List<DomainDeveloper>());
+                this.Nodes = connection.Hosts.Cast<Host>().AsParallel().Select(host => new Node<StructureItem>(host));
+                this.Developers = connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>();
                 return (true, null);
             }
             catch (Exception ex)

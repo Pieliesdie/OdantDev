@@ -18,7 +18,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <materialDesign:BundledTheme BaseTheme="Light"
                                              PrimaryColor="DeepPurple"
-                                             SecondaryColor="Purple" />
+                                             SecondaryColor="DeepOrange" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -27,7 +27,7 @@
         <StackPanel Orientation="Vertical"
                     DockPanel.Dock="Top"
                     Visibility="Visible"
-                    x:Name="spConnect"
+                    x:Name="spConnect"                   
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center">
             <TextBlock Margin="10"
@@ -67,7 +67,10 @@
             <StackPanel>
                 <ComboBox Style="{StaticResource MaterialDesignFilledComboBox}"
                           x:Name="DeveloperCb"
+                          IsEditable="False"
                           materialDesign:HintAssist.Hint="Developer domain"
+                          materialDesign:HintAssist.HelperText="Please select developer domain on localhost"
+                          materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
                           ItemsSource="{Binding OdaModel.Developers}"
                           materialDesign:TextFieldAssist.HasClearButton="True"
                           ToolTip="Please select developer domain on localhost"
@@ -75,10 +78,9 @@
                     <ComboBox.SelectedItem>
                         <Binding Path="Name"
                                  UpdateSourceTrigger="PropertyChanged">
-                            <Binding.ValidationRules>
-                                <ExceptionValidationRule></ExceptionValidationRule>
+                            <!--<Binding.ValidationRules>
                                 <odantdev:NotEmptyRule ValidatesOnTargetUpdated="True" />
-                            </Binding.ValidationRules>
+                            </Binding.ValidationRules>-->
                         </Binding>
                     </ComboBox.SelectedItem>
                 </ComboBox>
@@ -191,7 +193,32 @@
                                Width="16"
                                Margin="0,0,10,0" />
                         <TextBlock Text="{Binding }"
-                                   FontSize="14" />
+                                   FontSize="14" >
+                            <TextBlock.ToolTip>
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Type: "/>
+                                        <TextBlock Text="{Binding Item.ItemType}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Name: "/>
+                                        <TextBlock Text="{Binding Item.Name}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="FullId: "/>
+                                        <TextBlock Text="{Binding Item.FullId}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Rights: "/>
+                                        <TextBlock Text="{Binding Item.AccessLevel}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Has Module: "/>
+                                        <TextBlock Text="{Binding Item.Class.HasModule, FallbackValue=False}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
                     </StackPanel>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>

@@ -1,5 +1,6 @@
 ﻿using oda;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +11,8 @@ namespace OdantDev
 {
     public class Node<T> where T : StructureItem
     {
+
+        public event PropertyChangedEventHandler PropertyChanged;
         public T Item { get; }
 
         public ImageSource Icon => Extension.ConvertToBitmapImage(Item?.Class?.Icon ?? Images.getImage(Item));
@@ -20,23 +23,17 @@ namespace OdantDev
         public Node(T item)
         {
             Item = item;
+            this.Children = item.getChilds(ItemType.All, Deep.Near).Cast<T>().AsParallel().Select(child => new Node<T>(child));
         }
 
         public override string ToString()
         {
             return $"{Item}";
         }
-
-        public static Node<T> GetChildren(T root)
+        private void NotifyPropertyChanged(string name)
         {
-            var children = root.getChilds(ItemType.All, Deep.Near);
-            var rootNode = new Node<T>(root);
-            rootNode.Children = children?.Cast<T>().AsParallel().Select(child => GetChildren(child));
-            return rootNode;
-        }
-        public static async Task<Node<T>> GetChildrenAsync(T root)
-        {
-            return await Task.Run(() => { return GetChildren(root); });
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
     }
 }
