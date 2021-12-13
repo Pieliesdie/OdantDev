@@ -1,11 +1,10 @@
 ﻿using oda;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace OdantDev
 {
@@ -21,17 +20,40 @@ namespace OdantDev
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
-        public IEnumerable<Node<StructureItem>> Nodes { get => nodes; set { nodes = value;  NotifyPropertyChanged("Nodes");  } }
+        public IEnumerable<Node<StructureItem>> Nodes { get => nodes; set { nodes = value; NotifyPropertyChanged("Nodes"); } }
 
         public IEnumerable<DomainDeveloper> Developers { get => developers; set { developers = value; NotifyPropertyChanged("Developers"); } }
-        public (bool Success, string Error) GetData(Connection connection)
+
+        public Connection Connection { get; }
+
+        public OdaModel(Connection connection)
+        {
+            this.Connection = connection;
+        }
+        public (bool Success, string Error) Load()
         {
             try
             {
-                if (connection.Login().Not()) { return (false, "Can't connect to oda"); }
-                connection.CoreMode = CoreMode.AddIn;
-                this.Nodes = connection.Hosts.Cast<Host>().AsParallel().Select(host => new Node<StructureItem>(host));
-                this.Developers = connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>();
+                if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
+                Connection.CoreMode = CoreMode.AddIn;
+                this.Nodes = Connection.Hosts.AsParallel().Cast<Host>().Select(host => new Node<StructureItem>(host));
+                this.Developers = Connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>();
+                return (true, null);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+        public static (bool Success, string Error) LoadOdaLibraries(DirectoryInfo OdaFolder)
+        {
+            try
+            {
+                var odaClientLibraries = new string[] { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
+                var odaServerLibraries = new string[] { "odaClient.dll", "fastxmlparser.dll" };
+                Extension.LoadServerLibraries(OdaFolder.FullName, Bitness.x86, odaServerLibraries);
+                Extension.LoadServerLibraries(OdaFolder.FullName, Bitness.x64, odaServerLibraries);
+                Extension.LoadClientLibraries(OdaFolder.FullName, odaClientLibraries);
                 return (true, null);
             }
             catch (Exception ex)

@@ -46,6 +46,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Common\Bitness.cs" />
     <Compile Include="Extension.cs" />
     <Compile Include="Common\OdaModel.cs" />
     <Compile Include="Common\Node.cs" />
@@ -66,18 +67,16 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="odaCore">
-      <HintPath>F:\ODA\odaCore.dll</HintPath>
+      <HintPath>..\..\ODANT_18DEV\odaCore.dll</HintPath>
     </Reference>
     <Reference Include="odaLib">
-      <HintPath>F:\ODA\odaLib.dll</HintPath>
+      <HintPath>..\..\ODANT_18DEV\odaLib.dll</HintPath>
     </Reference>
-    <Reference Include="odaShare, Version=2.1.8003.20300, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\ODA\odaShare.dll</HintPath>
+    <Reference Include="odaShare">
+      <HintPath>..\..\ODANT_18DEV\odaShare.dll</HintPath>
     </Reference>
-    <Reference Include="odaXML, Version=2.1.8003.20301, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>F:\ODA\odaXML.dll</HintPath>
+    <Reference Include="odaXML">
+      <HintPath>..\..\ODANT_18DEV\odaXML.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -93,6 +92,9 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MaterialDesignColors">
+      <Version>2.0.4</Version>
+    </PackageReference>
     <PackageReference Include="MaterialDesignThemes">
       <Version>4.3.0</Version>
     </PackageReference>

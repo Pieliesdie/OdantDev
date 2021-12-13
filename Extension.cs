@@ -1,9 +1,11 @@
 ﻿using Microsoft.Win32;
 using oda;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
@@ -25,18 +27,23 @@ namespace OdantDev
             image.EndInit();
             return image;
         }
-       
+
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
 
-        public static void LoadServerLibraries(string serverCorePath, string bitness, string odaClient, string fastxmlparser)
+        public static List<IntPtr> LoadServerLibraries(string odaPath, Bitness bitness, params string[] libPaths)
         {
-            serverCorePath = Path.Combine(serverCorePath, bitness);
-            LoadLibraryEx(Path.Combine(serverCorePath, odaClient), IntPtr.Zero, 8U);
-            LoadLibraryEx(Path.Combine(serverCorePath, fastxmlparser), IntPtr.Zero, 8U);
+            var serverPath = Path.Combine(odaPath, "server", Enum.GetName(typeof(Bitness), bitness));
+            return libPaths.Select(path => LoadLibraryEx(Path.Combine(serverPath, path), IntPtr.Zero, 8U)).ToList();
+        }
+        public static List<Assembly> LoadClientLibraries(string path, params string[] libPaths)
+        {
+            return libPaths.Select(libPath => Assembly.LoadFrom(Path.Combine(path, libPath))).ToList();
         }
 
-        public static string GetOdaPath()
+        public static DirectoryInfo OdaFolder => OdaPath().Directory;
+        
+        public static FileInfo OdaPath()
         {
             string[] strArray = new string[2] { "oda", "odant" };
             foreach (string name1 in strArray)
@@ -57,7 +64,7 @@ namespace OdantDev
                                 registryKey2.Close();
                                 string str1 = obj.ToString();
                                 string str2 = str1.Substring(str1.IndexOf("\"") + 1);
-                                return str2.Substring(0, str2.IndexOf("\""));
+                                return new FileInfo(str2.Substring(0, str2.IndexOf("\"")));
                             }
                         }
                     }
@@ -66,7 +73,7 @@ namespace OdantDev
                 {
                 }
             }
-            return string.Empty;
+            return null;
         }
     }
 }
