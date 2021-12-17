@@ -22,9 +22,9 @@ namespace OdantDev
         /// Initializes a new instance of the <see cref="ToolWindow"/> class.
         /// </summary>
         public ToolWindow() : base(null)
-        {
+        {        
             this.Caption = "ToolWindow";
-            this.Content = new ToolWindow1Control();
+            this.Content = new ToolWindow1Control(OdantDevPackage.Env_DTE);
         }
     }
 }

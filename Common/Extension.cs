@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using EnvDTE80;
+using Microsoft.Win32;
 using oda;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
 namespace OdantDev
@@ -74,6 +74,11 @@ namespace OdantDev
                 }
             }
             return null;
+        }
+
+        public static void OpenOdaModule(this DTE2 envDTE, StructureItem item)
+        {
+
         }
     }
 }

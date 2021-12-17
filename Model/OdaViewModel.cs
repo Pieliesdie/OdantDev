@@ -1,4 +1,5 @@
 ﻿using oda;
+using OdantDev.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,7 +9,7 @@ using System.Reflection;
 
 namespace OdantDev
 {
-    public class OdaModel : INotifyPropertyChanged
+    public class OdaViewModel : INotifyPropertyChanged
     {
         private IEnumerable<Node<StructureItem>> nodes;
         private IEnumerable<DomainDeveloper> developers;
@@ -21,12 +22,11 @@ namespace OdantDev
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
         public IEnumerable<Node<StructureItem>> Nodes { get => nodes; set { nodes = value; NotifyPropertyChanged("Nodes"); } }
-
         public IEnumerable<DomainDeveloper> Developers { get => developers; set { developers = value; NotifyPropertyChanged("Developers"); } }
 
         public Connection Connection { get; }
 
-        public OdaModel(Connection connection)
+        public OdaViewModel(Connection connection)
         {
             this.Connection = connection;
         }

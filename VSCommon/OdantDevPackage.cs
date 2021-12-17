@@ -48,7 +48,7 @@ namespace OdantDev
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-            OdantDevPackage.Env_DTE = await this.GetServiceAsync(typeof(DTE)) as DTE2;
+            OdantDevPackage.Env_DTE = await this.GetServiceAsync<DTE,DTE2>();
             await ToolWindowCommand.InitializeAsync(this);
         }
 

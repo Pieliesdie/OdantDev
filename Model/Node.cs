@@ -1,13 +1,10 @@
 ﻿using oda;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
-namespace OdantDev
+namespace OdantDev.Model
 {
     public class Node<T> : INotifyPropertyChanged where T : StructureItem
     {
@@ -19,13 +16,10 @@ namespace OdantDev
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
-        public T Item { get; private set; }
+        public virtual T Item { get; private set; }
 
-        public string Category { get; private set; }
-
-        public ImageSource Icon => Extension.ConvertToBitmapImage(Item?.Class?.Icon ?? Images.getImage(Item));
-
-        public IEnumerable<Node<T>> Children { get => children; set { children = value; NotifyPropertyChanged("Children"); } }
+        public virtual ImageSource Icon => Extension.ConvertToBitmapImage((Item as Class)?.Icon ?? Images.getImage(Item));
+        public virtual IEnumerable<Node<T>> Children { get => children; set { children = value; NotifyPropertyChanged("Children"); } }
         public Node() { }
 
         public Node(T item)
@@ -37,12 +31,12 @@ namespace OdantDev
                 .AsParallel()
                 .GroupBy(x => x.TypeLabel)
                 .Select(x => new Node<T>() { Category = x.Key.ToString(), Children = x.Select(y => new Node<T>(y)) } );*/
-            this.Children = item.getChilds(ItemType.All, Deep.Near).AsParallel().Cast<T>().Select(child => new Node<T>(child));
+            this.Children = Item.getChilds(ItemType.All,Deep.Near).AsParallel().Cast<T>().Select(child => new Node<T>(child));
         }
 
         public override string ToString()
         {
-            return Category == null ? $"{Item}" : $"{Category}/{Item}";
+            return $"{Item}";
         }
     }
 }

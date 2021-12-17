@@ -17,11 +17,12 @@
     <RootNamespace>OdantDev</RootNamespace>
     <AssemblyName>OdantDev</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+	<LangVersion>8.0</LangVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
-    <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
-    <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
+    <IncludeDebugSymbolsInVSIXContainer>true</IncludeDebugSymbolsInVSIXContainer>
+    <IncludeDebugSymbolsInLocalVSIXDeployment>true</IncludeDebugSymbolsInLocalVSIXDeployment>
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
     <StartAction>Program</StartAction>
@@ -36,6 +37,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -47,20 +49,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Common\Bitness.cs" />
-    <Compile Include="Extension.cs" />
-    <Compile Include="Common\OdaModel.cs" />
-    <Compile Include="Common\Node.cs" />
+    <Compile Include="Common\Extension.cs" />
+    <Compile Include="Model\OdaAddinModel.cs" />
+    <Compile Include="Model\OdaViewModel.cs" />
+    <Compile Include="Model\Node.cs" />
     <Compile Include="BindingHelpers\NotEmptyRule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="OdantDevPackage.cs" />
-    <Compile Include="ToolWindow.cs" />
-    <Compile Include="ToolWindowCommand.cs" />
+    <Compile Include="VSCommon\OdantDevPackage.cs" />
+    <Compile Include="VSCommon\ToolWindow.cs" />
+    <Compile Include="VSCommon\ToolWindowCommand.cs" />
     <Compile Include="ToolWindowControl.xaml.cs">
       <DependentUpon>ToolWindowControl.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="source.extension.vsixmanifest">
+    <None Include="VSCommon\source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
@@ -117,7 +120,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <VSCTCompile Include="OdantDevPackage.vsct">
+    <VSCTCompile Include="VSCommon\OdantDevPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>
   </ItemGroup>

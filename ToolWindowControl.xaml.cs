@@ -1,22 +1,16 @@
-﻿using Microsoft.VisualStudio.Threading;
-using Microsoft.Win32;
+﻿using EnvDTE80;
+using MaterialDesignColors;
+using MaterialDesignThemes.Wpf;
 using oda;
-using odaServer;
+using OdantDev.Model;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Xml;
+using System.Windows.Media;
+
 namespace OdantDev
 {
     /// <summary>
@@ -24,7 +18,10 @@ namespace OdantDev
     /// </summary>
     public partial class ToolWindow1Control : UserControl, INotifyPropertyChanged
     {
-        private OdaModel odaModel;
+        private OdaViewModel odaModel;
+        private DTE2 DTE2 { get; }
+
+        private OdaAddinModel odaAddinModel;
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(string name)
@@ -32,20 +29,40 @@ namespace OdantDev
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
-        public OdaModel OdaModel { get => odaModel; set { odaModel = value; NotifyPropertyChanged("OdaModel"); } }
+        public OdaViewModel OdaModel { get => odaModel; set { odaModel = value; NotifyPropertyChanged("OdaModel"); } }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolWindow1Control"/> class.
         /// </summary>
-        public ToolWindow1Control()
+        public ToolWindow1Control(DTE2 dTE2)
         {
-            Extension.LoadClientLibraries(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "MaterialDesignThemes.Wpf.dll", "MaterialDesignColors.dll");
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            InitializeMaterialDesign();
             this.InitializeComponent();
+            this.DTE2 = dTE2;
+            System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.SustainedLowLatency;
+
         }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            this.ShowException((e.ExceptionObject as Exception).Message);
+        }
+
+        private void InitializeMaterialDesign()
+        {
+            // Create dummy objects to force the MaterialDesign assemblies to be loaded
+            // from this assembly, which causes the MaterialDesign assemblies to be searched
+            // relative to this assembly's path. Otherwise, the MaterialDesign assemblies
+            // are searched relative to Eclipse's path, so they're not found.
+            var card = new Card();
+            var hue = new Hue("Dummy", Colors.Black, Colors.White);
+        }
+
         #region Connect to oda and get data
         private void Connect(object sender, RoutedEventArgs e)
         {
-            var LoadOdaLibrariesResult = OdaModel.LoadOdaLibraries(Extension.OdaFolder);
+            var LoadOdaLibrariesResult = OdaViewModel.LoadOdaLibraries(Extension.OdaFolder);
             if (LoadOdaLibrariesResult.Success.Not())
             {
                 ShowException(LoadOdaLibrariesResult.Error);
@@ -57,10 +74,11 @@ namespace OdantDev
                 ShowException(UpdateModelResult.Error);
                 return;
             }
+            odaAddinModel = new OdaAddinModel(Extension.OdaFolder, DTE2);
         }
         private (bool Success, string Error) LoadModel()
         {
-            OdaModel = new OdaModel(Common.Connection);
+            OdaModel = new OdaViewModel(Common.Connection);
             var GetDataResult = OdaModel.Load();
             if (GetDataResult.Success)
             {
@@ -69,7 +87,6 @@ namespace OdantDev
                 ErrorSp.Visibility = Visibility.Collapsed;
                 OdaTree.Visibility = Visibility.Visible;
                 this.DataContext = this;
-                Common.Env_DTE = OdantDevPackage.Env_DTE;
                 return (true, null);
             }
             else
@@ -100,7 +117,6 @@ namespace OdantDev
 
         private void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
@@ -108,13 +124,11 @@ namespace OdantDev
 
         }
 
-        private void OpenModuleButton_Click(object sender, RoutedEventArgs e)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
+        private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-            Solution.OpenModule((OdaTree.SelectedItem as Node<StructureItem>).Item, false);
-
-            Common.Env_DTE = OdantDevPackage.Env_DTE;
-
+            await odaAddinModel.OpenModuleAsync((OdaTree.SelectedItem as Node<StructureItem>).Item);
+            //EnvDTE.Solution.AddFromFile
         }
         #endregion
     }

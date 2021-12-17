@@ -136,7 +136,7 @@
                                      TargetNullValue="false"
                                      FallbackValue="false" />
                             <Binding ElementName="OdaTree"
-                                     Path="SelectedItem.Item.Host.IsLocal"
+                                     Path="SelectedItem.Item.IsLocal"
                                      TargetNullValue="false"
                                      FallbackValue="false"
                                      Converter="{StaticResource InvertBooleanConverter}"/>
@@ -189,7 +189,7 @@
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Path=Children}">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="{Binding Path=Icon}"
+                        <Image Source="{Binding Path = Icon}"
                                Width="16"
                                Margin="0,0,10,0" />
                         <TextBlock Text="{Binding }"
@@ -214,7 +214,7 @@
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Has Module: "/>
-                                        <TextBlock Text="{Binding Item.Class.HasModule, FallbackValue=False}"/>
+                                        <TextBlock Text="{Binding Item.HasModule, FallbackValue=False}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </TextBlock.ToolTip>
