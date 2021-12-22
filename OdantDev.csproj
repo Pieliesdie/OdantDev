@@ -17,7 +17,7 @@
     <RootNamespace>OdantDev</RootNamespace>
     <AssemblyName>OdantDev</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-	<LangVersion>8.0</LangVersion>
+    <LangVersion>8.0</LangVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -37,7 +37,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -71,15 +71,19 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="odaCore">
       <HintPath>..\..\ODANT_18DEV\odaCore.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="odaLib">
       <HintPath>..\..\ODANT_18DEV\odaLib.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="odaShare">
       <HintPath>..\..\ODANT_18DEV\odaShare.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="odaXML">
       <HintPath>..\..\ODANT_18DEV\odaXML.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -101,10 +105,10 @@
     <PackageReference Include="MaterialDesignThemes">
       <Version>4.3.0</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.0.206" ExcludeAssets="runtime">
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.0.31902.203" ExcludeAssets="runtime">
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="16.11.16">
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.0.5232">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
