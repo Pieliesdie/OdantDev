@@ -63,9 +63,9 @@ namespace OdantDev.Model
         }
         public async Task<bool> OpenModuleAsync(StructureItem item)
         {
-            if (item == null) { throw new NullReferenceException("Item was null"); }
-            await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            _ = item ?? throw new NullReferenceException("Item was null"); 
             var moduleDir = DownloadModule(item) ?? throw new DirectoryNotFoundException("Module csproj file not found");
+            await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             if (EnvDTE.Solution.IsOpen.Not())
             {
                 EnvDTE.Solution.Create(AddinFolder.FullName, item.Host.Name);

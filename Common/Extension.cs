@@ -19,7 +19,7 @@ namespace OdantDev
         {
             if (src == null) return null;
             MemoryStream ms = new MemoryStream();
-            ((System.Drawing.Bitmap)src).Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+            src.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
             BitmapImage image = new BitmapImage();
             image.BeginInit();
             ms.Seek(0, SeekOrigin.Begin);
@@ -34,7 +34,13 @@ namespace OdantDev
         public static List<IntPtr> LoadServerLibraries(string odaPath, Bitness bitness, params string[] libPaths)
         {
             var serverPath = Path.Combine(odaPath, "server", Enum.GetName(typeof(Bitness), bitness));
-            return libPaths.Select(path => LoadLibraryEx(Path.Combine(serverPath, path), IntPtr.Zero, 8U)).ToList();
+            var output = new List<IntPtr>();
+            foreach(var path in libPaths)
+            {
+                var assembly = LoadLibraryEx(Path.Combine(serverPath, path), IntPtr.Zero, 8U);
+                output.Add(assembly);
+            }
+            return output;
         }
         public static List<Assembly> LoadClientLibraries(string path, params string[] libPaths)
         {
@@ -74,11 +80,6 @@ namespace OdantDev
                 }
             }
             return null;
-        }
-
-        public static void OpenOdaModule(this DTE2 envDTE, StructureItem item)
-        {
-
         }
     }
 }

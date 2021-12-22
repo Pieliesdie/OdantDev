@@ -24,18 +24,24 @@ namespace OdantDev
         public IEnumerable<Node<StructureItem>> Nodes { get => nodes; set { nodes = value; NotifyPropertyChanged("Nodes"); } }
         public IEnumerable<DomainDeveloper> Developers { get => developers; set { developers = value; NotifyPropertyChanged("Developers"); } }
 
+        public static List<IntPtr> ServerAssemblies { get; set; }
+
+        public static List<Assembly> ClientAssemblies { get; set; }
+
         public Connection Connection { get; }
 
         public OdaViewModel(Connection connection)
         {
             this.Connection = connection;
         }
+
+        public static Bitness Platform => IntPtr.Size == 4 ? Bitness.x86 : Bitness.x64;
         public (bool Success, string Error) Load()
         {
             try
             {
                 if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
-                Connection.CoreMode = CoreMode.AddIn;
+                Connection.CoreMode = CoreMode.Debug;
                 this.Nodes = Connection.Hosts.AsParallel().Cast<Host>().Select(host => new Node<StructureItem>(host));
                 this.Developers = Connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>();
                 return (true, null);
@@ -50,10 +56,9 @@ namespace OdantDev
             try
             {
                 var odaClientLibraries = new string[] { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
-                var odaServerLibraries = new string[] { "odaClient.dll", "fastxmlparser.dll" };
-                Extension.LoadServerLibraries(OdaFolder.FullName, Bitness.x86, odaServerLibraries);
-                Extension.LoadServerLibraries(OdaFolder.FullName, Bitness.x64, odaServerLibraries);
-                Extension.LoadClientLibraries(OdaFolder.FullName, odaClientLibraries);
+                var odaServerLibraries = new string[] { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
+                ServerAssemblies = Extension.LoadServerLibraries(OdaFolder.FullName, Platform, odaServerLibraries);
+                ClientAssemblies = Extension.LoadClientLibraries(OdaFolder.FullName, odaClientLibraries);             
                 return (true, null);
             }
             catch (Exception ex)

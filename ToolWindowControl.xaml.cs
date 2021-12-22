@@ -37,11 +37,15 @@ namespace OdantDev
         public ToolWindow1Control(DTE2 dTE2)
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            InitializeMaterialDesign();
-            this.InitializeComponent();
             this.DTE2 = dTE2;
-            System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.SustainedLowLatency;
-
+            InitializeMaterialDesign();
+            InitializeComponent();
+            InitializeOdaComponents();
+            /*if (OdantDevPackage.Env_DTE.Solution.IsOpen.Not())
+            {
+                OdantDevPackage.Env_DTE.Solution.Create(Extension.OdaFolder.CreateSubdirectory("AddIn").FullName, "localhost");
+            }*/
+            OdantDevPackage.Env_DTE.Solution.AddFromFile(@"D:\localoda\d.Develope\d.Ponomarev\d.AutoExport\AutoExport\CLASS\modules\AutoExport-1D7E52C8141E449.csproj");
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -59,8 +63,7 @@ namespace OdantDev
             var hue = new Hue("Dummy", Colors.Black, Colors.White);
         }
 
-        #region Connect to oda and get data
-        private void Connect(object sender, RoutedEventArgs e)
+        private void InitializeOdaComponents()
         {
             var LoadOdaLibrariesResult = OdaViewModel.LoadOdaLibraries(Extension.OdaFolder);
             if (LoadOdaLibrariesResult.Success.Not())
@@ -68,6 +71,11 @@ namespace OdantDev
                 ShowException(LoadOdaLibrariesResult.Error);
                 return;
             }
+        }
+
+        #region Connect to oda and get data
+        private void Connect(object sender, RoutedEventArgs e)
+        {
             var UpdateModelResult = LoadModel();
             if (UpdateModelResult.Success.Not())
             {
@@ -128,7 +136,6 @@ namespace OdantDev
         private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
         {
             await odaAddinModel.OpenModuleAsync((OdaTree.SelectedItem as Node<StructureItem>).Item);
-            //EnvDTE.Solution.AddFromFile
         }
         #endregion
     }
