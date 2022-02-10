@@ -41,11 +41,6 @@ namespace OdantDev
             InitializeMaterialDesign();
             InitializeComponent();
             InitializeOdaComponents();
-            /*if (OdantDevPackage.Env_DTE.Solution.IsOpen.Not())
-            {
-                OdantDevPackage.Env_DTE.Solution.Create(Extension.OdaFolder.CreateSubdirectory("AddIn").FullName, "localhost");
-            }*/
-            OdantDevPackage.Env_DTE.Solution.AddFromFile(@"D:\localoda\d.Develope\d.Ponomarev\d.AutoExport\AutoExport\CLASS\modules\AutoExport-1D7E52C8141E449.csproj");
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -74,7 +69,7 @@ namespace OdantDev
         }
 
         #region Connect to oda and get data
-        private void Connect(object sender, RoutedEventArgs e)
+        private async void Connect(object sender, RoutedEventArgs e)
         {
             var UpdateModelResult = LoadModel();
             if (UpdateModelResult.Success.Not())
@@ -83,6 +78,11 @@ namespace OdantDev
                 return;
             }
             odaAddinModel = new OdaAddinModel(Extension.OdaFolder, DTE2);
+            await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            if (OdantDevPackage.Env_DTE.Solution.IsOpen.Not())
+            {
+                OdantDevPackage.Env_DTE.Solution.Create(Extension.OdaFolder.CreateSubdirectory("AddIn").FullName, "ODANT");
+            }
         }
         private (bool Success, string Error) LoadModel()
         {

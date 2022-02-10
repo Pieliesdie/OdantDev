@@ -23,7 +23,7 @@ namespace OdantDev
         /// </summary>
         public ToolWindow() : base(null)
         {        
-            this.Caption = "ToolWindow";
+            this.Caption = "ODANT Dev";
             this.Content = new ToolWindow1Control(OdantDevPackage.Env_DTE);
         }
     }
