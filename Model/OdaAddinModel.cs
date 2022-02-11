@@ -1,5 +1,7 @@
 ﻿using EnvDTE;
 using EnvDTE80;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using oda;
 using System;
 using System.Collections.Generic;
@@ -8,22 +10,28 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using File = System.IO.File;
 
 namespace OdantDev.Model
 {
     public class OdaAddinModel
     {
         private BuildEvents BuildEvents { get; }
-        public DTE2 EnvDTE { get; }
+        private DTE2 envDTE { get; }
+
+        private IServiceProvider serviceProvider { get; }
         public DirectoryInfo AddinFolder { get; }
         public OdaAddinModel(DirectoryInfo odaFolder, DTE2 DTE)
         {
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             AddinFolder = odaFolder.CreateSubdirectory("AddIn");
-            EnvDTE = DTE;
-            if (EnvDTE.Solution.IsOpen)
+            envDTE = DTE
+                ?? throw new NullReferenceException("Can't get EnvDTE from visual studio");
+            serviceProvider = new ServiceProvider((Microsoft.VisualStudio.OLE.Interop.IServiceProvider)DTE)
+                ?? throw new NullReferenceException("Can't get ServiceProvider from visual studio"); ;
+            if (envDTE.Solution.IsOpen)
             {
-                EnvDTE.Solution.Close();
+                envDTE.Solution.Close();
             }
             BuildEvents = DTE.Events.BuildEvents;
             BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
@@ -31,25 +39,25 @@ namespace OdantDev.Model
         }
         public bool IncreaseVersion(Project project)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-            var assemblyInfo = new FileInfo(project.FileName).Directory.GetFiles("AssemblyInfo.cs").FirstOrDefault();
-            if (assemblyInfo == null) { return false; }
-            var assemblyFile = System.IO.File.ReadAllLines(assemblyInfo.FullName);
-            for (int i = 0; i < assemblyFile.Length; i++)
+            ThreadHelper.ThrowIfNotOnUIThread();
+            var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().Where(x => x.Name == "AssemblyInfo.cs").FirstOrDefault();
+            if (assemblyInfo == null) { throw new NullReferenceException("Need to add AssemblyInfo.cs"); }
+            var version = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>().Where(x => x.Name == "AssemblyVersion").FirstOrDefault();
+            if (version == null)
             {
-                if (assemblyFile[i].Contains("[assembly: AssemblyVersion"))
-                {
-                    int.TryParse(Regex.Match(assemblyFile[i], @"\d+[.]\d+[.]\d+[.](\d+)").Groups[1].Value, out var currentVersion);
-                    int.TryParse(Utils.Version.Substring(Utils.Version.LastIndexOf('.') + 1), out var minorVersion);
-                    assemblyFile[i] = Regex.Replace(assemblyFile[i], "\".*\"", $"\"{Utils.MajorVersion}.{Utils.ShortVersion}.{Math.Max(currentVersion + 1, minorVersion)}\"");
-                }
+                assemblyInfo.FileCodeModel.AddAttribute("AssemblyVersion", $"\"{Utils.Version}\"");
             }
-            System.IO.File.WriteAllLines(assemblyInfo.FullName, assemblyFile);
+            else
+            {
+                var currentVersion = Version.Parse(version.Value.Replace("\"", string.Empty));
+                var currentOdantVersion = Version.Parse(Utils.Version);
+                version.Value = $"\"{Utils.MajorVersion}.{Utils.ShortVersion}.{Math.Max(currentOdantVersion.Revision, currentVersion.Revision + 1)}\"";
+            }
             return true;
         }
         public bool CopyToOdaBin(Project project)
         {
-            
+
             return true;
         }
 
@@ -57,10 +65,10 @@ namespace OdantDev.Model
         public async void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
         {
             if (Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll) { return; }
-            await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            foreach (Project project in EnvDTE.Solution.Projects)
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            foreach (Project project in envDTE.Solution.Projects)
             {
-                
+
             }
         }
 
@@ -68,13 +76,13 @@ namespace OdantDev.Model
         public async void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
         {
             if (Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll) { return; }
-            await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            foreach (Project project in EnvDTE.Solution.Projects)
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            foreach (Project project in envDTE.Solution.Projects)
             {
                 IncreaseVersion(project);
             }
         }
-        public Task<FileInfo> DownloadModuleAsync(StructureItem item) => Task.Run(() => DownloadModule(item));
+        public Task<FileInfo> DownloadModuleAsync(StructureItem item) => System.Threading.Tasks.Task.Run(() => DownloadModule(item));
         public FileInfo DownloadModule(StructureItem item)
         {
             using var moduleDir = item.Dir.GetDir("modules");
@@ -88,20 +96,37 @@ namespace OdantDev.Model
         {
             _ = item ?? throw new NullReferenceException("Item was null");
             var moduleDir = DownloadModule(item) ?? throw new DirectoryNotFoundException("Module csproj file not found");
-            await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            if (EnvDTE.Solution.IsOpen.Not())
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            if (envDTE.Solution.IsOpen.Not())
             {
-                EnvDTE.Solution.Create(AddinFolder.FullName, item.Host.Name);
+                envDTE.Solution.Create(AddinFolder.FullName, item.Host.Name);
             }
             try
             {
-                EnvDTE.Solution.AddFromFile(moduleDir.FullName);
+                var project = envDTE.Solution.AddFromFile(moduleDir.FullName);
+                ValidateProject(project);
             }
             catch
             {
                 return false;
             }
             return true;
+        }
+
+        private void ValidateProject(Project project)
+        {
+            if (project == null) { throw new NullReferenceException(nameof(project)); }
+            ThreadHelper.ThrowIfNotOnUIThread();
+            var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().Where(x => x.Name == "AssemblyInfo.cs").FirstOrDefault();
+            var assemblyFile = (@$"{new FileInfo(project.FullName).Directory}\AssemblyInfo.cs");
+            if (assemblyInfo == null || File.Exists(assemblyFile).Not())
+            {
+                if (File.Exists(assemblyFile))
+                {
+                    File.Delete(assemblyFile);
+                }
+                assemblyInfo = project.ProjectItems.AddFromFileCopy(@"Templates\AssemblyInfo.cs");
+            }
         }
 
     }

@@ -41,7 +41,7 @@ namespace OdantDev
             try
             {
                 if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
-                Connection.CoreMode = CoreMode.Debug;
+                Connection.CoreMode = CoreMode.AddIn;
                 this.Nodes = Connection.Hosts.AsParallel().Cast<Host>().Select(host => new Node<StructureItem>(host));
                 this.Developers = Connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>();
                 return (true, null);

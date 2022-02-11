@@ -53,6 +53,8 @@ namespace OdantDev
         }
 
         public static DTE2 Env_DTE { get; set; }
+
+        public static IServiceProvider ServiceProvider { get; set; }
         #endregion
     }
 }
