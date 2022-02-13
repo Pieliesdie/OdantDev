@@ -42,8 +42,8 @@
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-      <Button guid="guidOdantDevPackageCmdSet" id="ToolWindow1CommandId" priority="0x0100" type="Button">
-        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
+      <Button guid="guidOdantDevPackageCmdSet" id="ToolWindow1CommandId" priority="0x0001" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_VIEW_DEV_WINDOWS"/>
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
           <ButtonText>ODANT Dev</ButtonText>

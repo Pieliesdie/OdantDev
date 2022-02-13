@@ -1,12 +1,11 @@
 ﻿using EnvDTE80;
 using MaterialDesignColors;
 using MaterialDesignThemes.Wpf;
+using Microsoft.VisualStudio.PlatformUI;
 using oda;
 using OdantDev.Model;
 using System;
 using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -20,8 +19,19 @@ namespace OdantDev
     {
         private OdaViewModel odaModel;
         private DTE2 DTE2 { get; }
-
         private OdaAddinModel odaAddinModel;
+        private bool isDarkTheme;
+        public bool IsDarkTheme
+        {
+            get => isDarkTheme;
+            set
+            {
+                ITheme theme = this.Resources.GetTheme();
+                theme.SetBaseTheme(value ? Theme.Dark : Theme.Light);
+                this.Resources.SetTheme(theme);
+                isDarkTheme = value;
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(string name)
@@ -41,8 +51,14 @@ namespace OdantDev
             InitializeMaterialDesign();
             InitializeComponent();
             InitializeOdaComponents();
+            VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
+            ThemeCheckBox.IsChecked = IsVisualStudioDark();
         }
 
+        private void VSColorTheme_ThemeChanged(Microsoft.VisualStudio.PlatformUI.ThemeChangedEventArgs e)
+        {
+            ThemeCheckBox.IsChecked = IsVisualStudioDark();
+        }
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             this.ShowException((e.ExceptionObject as Exception).Message);
@@ -68,6 +84,12 @@ namespace OdantDev
             }
         }
 
+        private bool IsVisualStudioDark()
+        {
+            var defaultBackground = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowBackgroundColorKey);
+            var isDarkTheme = (384 - defaultBackground.R - defaultBackground.G - defaultBackground.B) > 0 ? true : false;
+            return isDarkTheme;
+        }
         #region Connect to oda and get data
         private async void Connect(object sender, RoutedEventArgs e)
         {
@@ -136,6 +158,14 @@ namespace OdantDev
         private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
         {
             await odaAddinModel.OpenModuleAsync((OdaTree.SelectedItem as Node<StructureItem>).Item);
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox)
+            {
+                IsDarkTheme = checkBox.IsChecked ?? false;
+            }
         }
         #endregion
     }

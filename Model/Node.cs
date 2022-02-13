@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace OdantDev.Model
@@ -19,25 +20,36 @@ namespace OdantDev.Model
         }
         public virtual T Item { get => item; private set { item = value; NotifyPropertyChanged("Item"); } }
 
-        public virtual ImageSource Icon => Extension.ConvertToBitmapImage(Images.GetImage(Item.ImageIndex));
+        public virtual string Category { get; set; }
+
+        public virtual ImageSource Icon => Extension.ConvertToBitmapImage(Images.GetImage(Item?.ImageIndex ?? Images.GetImageIndex(Icons.Module)));
         public virtual IEnumerable<Node<T>> Children { get => children; set { children = value; NotifyPropertyChanged("Children"); } }
         public Node() { }
 
         public Node(T item)
         {
             Item = item;
-            //Tree with groups
-            /*this.Children = item.getChilds(ItemType.All, Deep.Near)
-                .Cast<T>()
-                .AsParallel()
-                .GroupBy(x => x.TypeLabel)
-                .Select(x => new Node<T>() { Category = x.Key.ToString(), Children = x.Select(y => new Node<T>(y)) } );*/
-            this.Children = Item.getChilds(ItemType.All, Deep.Near).AsParallel().Cast<T>().Select(child => new Node<T>(child));
-        }
+            Category = item.ItemType.ToString();
 
+            var children = Item.getChilds(ItemType.All, Deep.Near).AsParallel().OfType<T>();
+            this.Children = children
+                .Where(x => x.ItemType != ItemType.Module)
+                .Select(child => new Node<T>(child));
+            var modules = children
+                .Where(x => x.ItemType == ItemType.Module);
+            if (modules.Any())
+            {
+                this.Children = this.Children.Append(
+                    new Node<T>() 
+                    { 
+                        Category = "Модули",
+                        Children = modules.Select(child => new Node<T>(child)) 
+                    });
+            }
+        }
         public override string ToString()
         {
-            return $"{Item}";
+            return $"{Item?.ToString() ?? Category}";
         }
     }
 }

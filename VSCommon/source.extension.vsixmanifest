@@ -3,8 +3,9 @@
     <Metadata>
         <Identity Id="OdantDev.e72cd637-63b6-4219-a90f-fd8231cd4c0f" Version="1.0" Language="en-US" Publisher="haketxx" />
         <DisplayName>OdantDev</DisplayName>
-        <Description xml:space="preserve">Addin for odant modulesAddin for odant mod</Description>
+        <Description xml:space="preserve">Addin for odant modules</Description>
         <Icon>Resources\infostandart-1.png</Icon>
+        <Preview>true</Preview>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0)">

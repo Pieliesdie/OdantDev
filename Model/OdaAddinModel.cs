@@ -23,7 +23,7 @@ namespace OdantDev.Model
         public DirectoryInfo AddinFolder { get; }
         public OdaAddinModel(DirectoryInfo odaFolder, DTE2 DTE)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            ThreadHelper.ThrowIfNotOnUIThread();
             AddinFolder = odaFolder.CreateSubdirectory("AddIn");
             envDTE = DTE
                 ?? throw new NullReferenceException("Can't get EnvDTE from visual studio");
@@ -41,7 +41,7 @@ namespace OdantDev.Model
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().Where(x => x.Name == "AssemblyInfo.cs").FirstOrDefault();
-            if (assemblyInfo == null) { throw new NullReferenceException("Need to add AssemblyInfo.cs"); }
+            if (assemblyInfo == null) { throw new NullReferenceException($"Missing AssemblyInfo.cs in {project.Name}"); }
             var version = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>().Where(x => x.Name == "AssemblyVersion").FirstOrDefault();
             if (version == null)
             {
@@ -55,6 +55,7 @@ namespace OdantDev.Model
             }
             return true;
         }
+
         public bool CopyToOdaBin(Project project)
         {
 
@@ -68,7 +69,7 @@ namespace OdantDev.Model
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             foreach (Project project in envDTE.Solution.Projects)
             {
-
+                CopyToOdaBin(project);
             }
         }
 
@@ -104,7 +105,7 @@ namespace OdantDev.Model
             try
             {
                 var project = envDTE.Solution.AddFromFile(moduleDir.FullName);
-                ValidateProject(project);
+                ValidateProject(project,item);
             }
             catch
             {
@@ -113,7 +114,7 @@ namespace OdantDev.Model
             return true;
         }
 
-        private void ValidateProject(Project project)
+        private void ValidateProject(Project project,StructureItem sourceItem)
         {
             if (project == null) { throw new NullReferenceException(nameof(project)); }
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -125,9 +126,26 @@ namespace OdantDev.Model
                 {
                     File.Delete(assemblyFile);
                 }
-                assemblyInfo = project.ProjectItems.AddFromFileCopy(@"Templates\AssemblyInfo.cs");
+                assemblyInfo =  project.ProjectItems.AddFromFileCopy(@"Templates\AssemblyInfo.cs");
+            }
+            var attributes = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>();
+            setAttr(attributes, assemblyInfo, "AssemblyTitle", project.Name);
+            setAttr(attributes, assemblyInfo, "AssemblyDescription", sourceItem.Description ?? string.Empty);
+            setAttr(attributes, assemblyInfo, "AssemblyCopyright", $"ООО «Инфостандарт» © 2012 — {DateTime.Now.Year}");
+
+        }
+        private void setAttr(IEnumerable<CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            var attribute = codeAttributes.Where(x => x.Name == name).FirstOrDefault();
+            if (attribute == null)
+            {
+                projectItem.FileCodeModel.AddAttribute(name, $"\"{value}\"");
+            }
+            else
+            {
+                attribute.Value = $"\"{value}\"";
             }
         }
-
     }
 }

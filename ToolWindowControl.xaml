@@ -11,27 +11,38 @@
              d:DesignWidth="300"
              Name="MyToolWindow"
              Background="{DynamicResource MaterialDesignPaper}"
-             FontFamily="{DynamicResource MaterialDesignFont}">
+             FontFamily="{DynamicResource MaterialDesignFont}"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}">
     <UserControl.Resources>
         <ResourceDictionary>
             <BooleanToVisibilityConverter x:Key="BoolToVis" />
             <ResourceDictionary.MergedDictionaries>
-                <materialDesign:BundledTheme BaseTheme="Light"
+                <materialDesign:BundledTheme  BaseTheme="Dark"                                       
                                              PrimaryColor="DeepPurple"
-                                             SecondaryColor="DeepOrange" />
+                                             SecondaryColor="Blue"
+                                             ColorAdjustment="{materialDesign:ColorAdjustment}"/>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Top"
+                        Margin="0,0,10,0">
+            <CheckBox IsChecked="{x:Null}" Content="Dark theme" ToolTip="Change color theme" x:Name="ThemeCheckBox" Unchecked="CheckBox_Checked" Checked="CheckBox_Checked"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" DockPanel.Dock="Top"
+                        Margin="5,0,0,0">
+            <materialDesign:PackIcon Kind="Database"
+                                         Width="20"
+                                         Height="20" />
+            <TextBlock Text="ODANT" Margin="5,5,10,0" FontSize="12"/>
+        </StackPanel>
         <StackPanel Orientation="Vertical"
                     DockPanel.Dock="Top"
                     Visibility="Visible"
                     x:Name="spConnect"                   
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center">
-            <TextBlock Margin="10"
-                       HorizontalAlignment="Center">ODANT</TextBlock>
             <Button Content="Connect"
                     Click="Connect"
                     Width="120"
@@ -55,15 +66,8 @@
 
         <StackPanel DockPanel.Dock="Top"
                     Visibility="Collapsed"
-                    x:Name="CommonButtons">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
-                        Margin="5,0,0,0">
-                <materialDesign:PackIcon Kind="Database"
-                                         Width="20"
-                                         Height="20" />
-                <TextBlock Margin="5,5,10,0"
-                           FontSize="12">ODANT</TextBlock>
-            </StackPanel>
+                    x:Name="CommonButtons"
+                    materialDesign:ThemeAssist.Theme="Inherit">
             <StackPanel>
                 <ComboBox Style="{StaticResource MaterialDesignFilledComboBox}"
                           x:Name="DeveloperCb"
@@ -78,14 +82,11 @@
                     <ComboBox.SelectedItem>
                         <Binding Path="Name"
                                  UpdateSourceTrigger="PropertyChanged">
-                            <!--<Binding.ValidationRules>
-                                <odantdev:NotEmptyRule ValidatesOnTargetUpdated="True" />
-                            </Binding.ValidationRules>-->
                         </Binding>
                     </ComboBox.SelectedItem>
                 </ComboBox>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            <WrapPanel Orientation="Horizontal">
                 <Button Width="90"
                         HorizontalContentAlignment="Center"
                         Height="25"
@@ -93,7 +94,8 @@
                         FontSize="12"
                         Click="RefreshTreeButton_Click"
                         Margin="3"
-                        ToolTip="Create tree again">
+                        ToolTip="Create tree again"
+                        Style="{StaticResource MaterialDesignFlatDarkBgButton}">
                     <StackPanel Orientation="Horizontal"
                                 VerticalAlignment="Center"
                                 HorizontalAlignment="Center">
@@ -111,7 +113,8 @@
                         Click="CreateModuleButton_Click"
                         Margin="3"
                         IsEnabled="True"
-                        ToolTip="Create new module in selected item">
+                        ToolTip="Create new module in selected item"
+                        Style="{StaticResource MaterialDesignFlatDarkBgButton}">
                     <StackPanel Orientation="Horizontal"
                                 VerticalAlignment="Center">
                         <materialDesign:PackIcon Kind="FolderPlusOutline"
@@ -128,7 +131,8 @@
                         Click="DownloadModuleButton_Click"
                         Margin="3"
                         ToolTip="Download module to selected local developer domain"
-                        ToolTipService.ShowOnDisabled="True">
+                        ToolTipService.ShowOnDisabled="True"
+                        Style="{StaticResource MaterialDesignFlatDarkBgButton}">
                     <Button.IsEnabled>
                         <MultiBinding Converter="{StaticResource BooleanAllConverter}">
                             <Binding ElementName="OdaTree"
@@ -158,7 +162,8 @@
                         Click="OpenModuleButton_Click"
                         Margin="3"
                         ToolTip="Open local module"
-                        ToolTipService.ShowOnDisabled="True">
+                        ToolTipService.ShowOnDisabled="True"
+                        Style="{StaticResource MaterialDesignFlatDarkBgButton}">
                     <Button.IsEnabled>
                         <MultiBinding Converter="{StaticResource BooleanAllConverter}">
                             <Binding ElementName="OdaTree"
@@ -180,7 +185,7 @@
                         <TextBlock VerticalAlignment="Center">Open</TextBlock>
                     </StackPanel>
                 </Button>
-            </StackPanel>
+            </WrapPanel>
         </StackPanel>
         <!--<WindowsFormsHost x:Name="winHost"></WindowsFormsHost>-->
 
@@ -189,11 +194,11 @@
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Path=Children}">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="{Binding Path = Icon}"
+                        <Image Source="{Binding Path = Icon}"                         
                                Width="16"
                                Margin="0,0,10,0" />
                         <TextBlock Text="{Binding }"
-                                   FontSize="14" >
+                                   FontSize="14"   Style="{StaticResource MaterialDesignHeadline5TextBlock}">
                             <TextBlock.ToolTip>
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal">
@@ -207,6 +212,14 @@
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="FullId: "/>
                                         <TextBlock Text="{Binding Item.FullId}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Id: "/>
+                                        <TextBlock Text="{Binding Item.Id}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Base Id: "/>
+                                        <TextBlock Text="{Binding Item.Base.Id}"/>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Rights: "/>
