@@ -15,6 +15,59 @@ namespace OdantDev
     public static class Extension
     {
         public static bool Not(this bool boolean) => !boolean;
+
+        public static bool CopyToDir(this FileSystemInfo fileSystemInfo, DirectoryInfo destinationDir)
+        {
+            if (fileSystemInfo is DirectoryInfo directoryInfo)
+            {
+                CopyDirectory(directoryInfo, Directory.CreateDirectory(Path.Combine(destinationDir.FullName,directoryInfo.Name)));
+                return true;
+            }
+            else if (fileSystemInfo is FileInfo fileInfo)
+            {
+                return fileInfo.CopyTo(Path.Combine(destinationDir.FullName, fileInfo.Name)) != null;
+            }
+            return false;
+        }
+
+        public static void CopyDirectory(DirectoryInfo source, DirectoryInfo target)
+        {
+            Directory.CreateDirectory(target.FullName);
+
+            // Copy each file into the new directory.
+            foreach (FileInfo fi in source.GetFiles())
+            {
+                fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
+            }
+
+            // Copy each subdirectory using recursion.
+            foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+            {
+                DirectoryInfo nextTargetSubDir =
+                    target.CreateSubdirectory(diSourceSubDir.Name);
+                CopyDirectory(diSourceSubDir, nextTargetSubDir);
+            }
+        }
+        public static DirectoryInfo Clear(this DirectoryInfo directoryInfo)
+        {
+            if (directoryInfo == null) { return null; }
+            try
+            {
+                foreach (FileInfo file in directoryInfo.EnumerateFiles())
+                {
+                    file.Delete();
+                }
+                foreach (DirectoryInfo dir in directoryInfo.EnumerateDirectories())
+                {
+                    dir.Delete(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return directoryInfo;
+        }
         public static BitmapImage ConvertToBitmapImage(this Bitmap src)
         {
             if (src == null) return null;
@@ -35,7 +88,7 @@ namespace OdantDev
         {
             var serverPath = Path.Combine(odaPath, "server", Enum.GetName(typeof(Bitness), bitness));
             var output = new List<IntPtr>();
-            foreach(var path in libPaths)
+            foreach (var path in libPaths)
             {
                 var assembly = LoadLibraryEx(Path.Combine(serverPath, path), IntPtr.Zero, 8U);
                 output.Add(assembly);
@@ -48,7 +101,7 @@ namespace OdantDev
         }
 
         public static DirectoryInfo OdaFolder => OdaPath().Directory;
-        
+
         public static FileInfo OdaPath()
         {
             string[] strArray = new string[2] { "oda", "odant" };
