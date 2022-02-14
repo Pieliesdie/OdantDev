@@ -6,6 +6,7 @@ using oda;
 using OdantDev.Model;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -18,6 +19,7 @@ namespace OdantDev
     public partial class ToolWindow1Control : UserControl, INotifyPropertyChanged
     {
         private OdaViewModel odaModel;
+        private DirectoryInfo OdaFolder;
         private DTE2 DTE2 { get; }
         private OdaAddinModel odaAddinModel;
         private bool isDarkTheme;
@@ -54,7 +56,6 @@ namespace OdantDev
             VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
             ThemeCheckBox.IsChecked = IsVisualStudioDark();
         }
-
         private void VSColorTheme_ThemeChanged(Microsoft.VisualStudio.PlatformUI.ThemeChangedEventArgs e)
         {
             ThemeCheckBox.IsChecked = IsVisualStudioDark();
@@ -76,7 +77,8 @@ namespace OdantDev
 
         private void InitializeOdaComponents()
         {
-            var LoadOdaLibrariesResult = OdaViewModel.LoadOdaLibraries(Extension.OdaFolder);
+            OdaFolder = Extension.OdaFolder;
+            var LoadOdaLibrariesResult = OdaViewModel.LoadOdaLibraries(OdaFolder);
             if (LoadOdaLibrariesResult.Success.Not())
             {
                 ShowException(LoadOdaLibrariesResult.Error);
@@ -99,11 +101,11 @@ namespace OdantDev
                 ShowException(UpdateModelResult.Error);
                 return;
             }
-            odaAddinModel = new OdaAddinModel(Extension.OdaFolder, DTE2);
+            odaAddinModel = new OdaAddinModel(OdaFolder, DTE2);
             await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             if (OdantDevPackage.Env_DTE.Solution.IsOpen.Not())
             {
-                OdantDevPackage.Env_DTE.Solution.Create(Extension.OdaFolder.CreateSubdirectory("AddIn").FullName, "ODANT");
+                OdantDevPackage.Env_DTE.Solution.Create(OdaFolder.CreateSubdirectory("AddIn").FullName, "ODANT");
             }
         }
         private (bool Success, string Error) LoadModel()

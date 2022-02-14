@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Common\Bitness.cs" />
     <Compile Include="Common\Extension.cs" />
+    <Compile Include="Model\BuildInfo.cs" />
     <Compile Include="Model\ModuleDir.cs" />
     <Compile Include="Model\OdaAddinModel.cs" />
     <Compile Include="Model\OdaViewModel.cs" />

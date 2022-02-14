@@ -22,13 +22,7 @@ namespace OdantDev.Model
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs");
             Name = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>()
-                .Where(x => x.Name == "AssemblyMetadata")
-                .Select(x =>
-                {
-                    var keyValue = Regex.Match(x.Value, "\"(.*)\"\\s*,\\s*\"(.*)\"");
-                    return new { Name = keyValue.Groups[1].Value, Value = keyValue.Groups[2].Value };
-                })
-                .FirstOrDefault(x => x.Name == "ModuleName")?.Value;
+                .FirstOrDefault(x => x.Name == "AssemblyDefaultAlias")?.Value.Replace("\"",string.Empty);
 
             string fullPath = project.Properties.Item("FullPath").Value.ToString();
             string outputPath = project.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value.ToString();

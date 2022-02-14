@@ -1,6 +1,7 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using oda;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,14 @@ using File = System.IO.File;
 
 namespace OdantDev.Model
 {
-    public class OdaAddinModel
+    public partial class OdaAddinModel
     {
         private BuildEvents BuildEvents { get; }
+        private SolutionEvents SolutionEvents { get; }
         private DTE2 envDTE { get; }
-        public DirectoryInfo AddinFolder { get; }
-        public DirectoryInfo OdaFolder { get; }
+        private Dictionary<string, BuildInfo> LoadedModules { get; } = new Dictionary<string, BuildInfo>();
+        private DirectoryInfo AddinFolder { get; }
+        private DirectoryInfo OdaFolder { get; }
         public OdaAddinModel(DirectoryInfo odaFolder, DTE2 DTE)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -30,29 +33,55 @@ namespace OdantDev.Model
             {
                 envDTE.Solution.Close();
             }
+            SolutionEvents = (DTE.Events as Events2).SolutionEvents;
+            SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;
+            SolutionEvents.Opened += SolutionEvents_Opened;
             BuildEvents = (DTE.Events as Events2).BuildEvents;
             BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
             BuildEvents.OnBuildDone += BuildEvents_OnBuildDone;
+            BuildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
+            BuildEvents.OnBuildProjConfigBegin += BuildEvents_OnBuildProjConfigBegin;
+        }
+        private void SolutionEvents_Opened()
+        {
+            LoadedModules.Clear();
+        }
+        private void SolutionEvents_ProjectRemoved(Project Project)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            LoadedModules.Remove(Project.ExtenderCATID);
+        }
+        private void BuildEvents_OnBuildProjConfigBegin(string Project, string ProjectConfig, string Platform, string SolutionConfig)
+        {
+
+        }
+        private void BuildEvents_OnBuildProjConfigDone(string Project, string ProjectConfig, string Platform, string SolutionConfig, bool Success)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            Project proj = envDTE.Solution.Item(Project);
+            LoadedModules[proj.ExtenderCATID].isBuildSuccess = Success;
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
         public async void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
         {
-            if (Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll) { return; }
+            if ((Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll)) { return; }
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            foreach (Project project in envDTE.Solution.Projects)
+            foreach (Project project in envDTE.ActiveSolutionProjects as object[])
             {
-                CopyToOdaBin(project);
+                if (LoadedModules[project.ExtenderCATID].isBuildSuccess)
+                {
+                    CopyToOdaBin(project);
+                }
             }
-
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
         public async void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
         {
             if (Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll) { return; }
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            foreach (Project project in envDTE.Solution.Projects)
+            foreach (Project project in envDTE.ActiveSolutionProjects as object[])
             {
-                IncreaseVersion(project);             
+                IncreaseVersion(project);
             }
         }
         public bool CopyToOdaBin(Project project)
@@ -71,23 +100,31 @@ namespace OdantDev.Model
                 var outputDir = new FileInfo(project.FullName).Directory.Parent.CreateSubdirectory("bin").Clear();
                 var outputBinDir = outputDir.CreateSubdirectory(versionPath);
                 var moduleDir = new ModuleDir(project);
-
                 var clientBinDir = OdaFolder.CreateSubdirectory(Path.Combine("bin", versionPath, moduleDir.Name));
 
                 moduleDir.BinInfo.CopyToDir(clientBinDir);
                 moduleDir.BinInfo.CopyToDir(outputBinDir);
                 moduleDir.PdbInfo.CopyToDir(outputBinDir);
+
+                var buildInfo = LoadedModules[project.ExtenderCATID];
+                var remoteBinDir = buildInfo.RemoteDir.Class.Dir.OpenOrCreateFolder("bin");
+                var remoteVersionDir = remoteBinDir.OpenOrCreateFolder(versionPath);
+                remoteVersionDir.SaveFile(moduleDir.BinInfo.FullName);
+                remoteVersionDir.SaveFile(moduleDir.PdbInfo.FullName);
+
                 if (moduleDir.Refs.Any())
                 {
                     var refDir = outputDir.CreateSubdirectory("ref");
+                    var remoteRefDir = remoteBinDir.OpenOrCreateFolder("ref");
                     var clientRefDir = OdaFolder.CreateSubdirectory(Path.Combine("bin", "ref"));
                     moduleDir.Refs.ToList().ForEach(x =>
                     {
                         x.CopyToDir(refDir);
                         if (x is FileInfo fileInfo && x.Extension == ".dll")
                         {
-                            var isValidVersion = Version.TryParse( FileVersionInfo.GetVersionInfo(x.FullName).FileVersion, out var FileVersion);
-                            x.CopyToDir(isValidVersion? clientRefDir.CreateSubdirectory(FileVersion.ToString()) : clientRefDir);
+                            var isValidVersion = Version.TryParse(FileVersionInfo.GetVersionInfo(x.FullName).FileVersion, out var FileVersion);
+                            x.CopyToDir(isValidVersion ? clientRefDir.CreateSubdirectory(FileVersion.ToString()) : clientRefDir);
+                            remoteRefDir.SaveFile(x.FullName);
                         }
                     });
                 }
@@ -130,20 +167,21 @@ namespace OdantDev.Model
                 return false;
             }
         }
-        public Task<FileInfo> DownloadModuleAsync(StructureItem item) => Task.Run(() => DownloadModule(item));
-        public FileInfo DownloadModule(StructureItem item)
+        public Task<(FileInfo csProj, Dir moduleDir, DirectoryInfo localDir)> DownloadModuleAsync(StructureItem item) => Task.Run(() => DownloadModule(item));
+        public (FileInfo csProj, Dir remoteDir, DirectoryInfo localDir) DownloadModule(StructureItem item)
         {
-            using var moduleDir = item.Dir.GetDir("modules");
-            return moduleDir
-                .ServerToFolder()
-                .GetFiles("*.csproj")
-                .OrderByDescending(x => x.LastWriteTime)
-                .FirstOrDefault();
+            var localDir = item.Dir.ServerToFolder();
+            var moduleDir = localDir.GetDirectories("modules").FirstOrDefault();
+            return (moduleDir
+                ?.GetFiles("*.csproj")
+                ?.OrderByDescending(x => x.LastWriteTime)
+                .FirstOrDefault(), item.Dir, localDir);
         }
         public async Task<bool> OpenModuleAsync(StructureItem item)
         {
             _ = item ?? throw new NullReferenceException("Item was null");
-            var moduleDir = DownloadModule(item) ?? throw new DirectoryNotFoundException("Module csproj file not found");
+            var module = DownloadModule(item);
+            var csProj = module.csProj ?? throw new DirectoryNotFoundException("Module csproj file not found");
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             if (envDTE.Solution.IsOpen.Not())
             {
@@ -151,8 +189,9 @@ namespace OdantDev.Model
             }
             try
             {
-                var project = envDTE.Solution.AddFromFile(moduleDir.FullName);
-                ValidateProject(project, item);
+                var project = envDTE.Solution.AddFromFile(csProj.FullName);
+                LoadedModules.Add(project.ExtenderCATID, new BuildInfo(project.UniqueName, module.remoteDir, module.localDir));
+                InitProject(project, item);
             }
             catch
             {
@@ -160,11 +199,11 @@ namespace OdantDev.Model
             }
             return true;
         }
-        private void ValidateProject(Project project, StructureItem sourceItem)
+        private void InitProject(Project project, StructureItem sourceItem)
         {
             if (project == null) { throw new NullReferenceException(nameof(project)); }
             ThreadHelper.ThrowIfNotOnUIThread();
-            project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartAction").Value = VSLangProj.prjStartAction.prjStartActionProgram;
+            project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartAction").Value = prjStartAction.prjStartActionProgram;
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartProgram").Value = Path.Combine(OdaFolder.FullName, "oda.wrapper32.exe");
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartArguments").Value = "debug";
             var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().Where(x => x.Name == "AssemblyInfo.cs").FirstOrDefault();
@@ -181,7 +220,7 @@ namespace OdantDev.Model
             SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyTitle", $"{sourceItem.Name}-{sourceItem.Id}");
             SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyDescription", sourceItem.Hint ?? string.Empty);
             SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyCopyright", $"ООО «Инфостандарт» © 2012 — {DateTime.Now.Year}");
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyMetadata", $"ModuleName\",\"{sourceItem.Name}");
+            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyDefaultAlias", $"{sourceItem.Name}");
             if (assemblyInfo.IsOpen.Not()) { assemblyInfo.Open(); }
             assemblyInfo.Save();
         }
