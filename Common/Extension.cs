@@ -20,12 +20,12 @@ namespace OdantDev
         {
             if (fileSystemInfo is DirectoryInfo directoryInfo)
             {
-                CopyDirectory(directoryInfo, Directory.CreateDirectory(Path.Combine(destinationDir.FullName,directoryInfo.Name)));
+                CopyDirectory(directoryInfo, Directory.CreateDirectory(Path.Combine(destinationDir.FullName, directoryInfo.Name)));
                 return true;
             }
             else if (fileSystemInfo is FileInfo fileInfo)
             {
-                return fileInfo.CopyTo(Path.Combine(destinationDir.FullName, fileInfo.Name)) != null;
+                return fileInfo.CopyTo(Path.Combine(destinationDir.FullName, fileInfo.Name), true) != null;
             }
             return false;
         }

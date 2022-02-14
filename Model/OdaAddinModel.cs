@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using oda;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -73,14 +74,24 @@ namespace OdantDev.Model
                 var outputBinDir = outputDir.CreateSubdirectory(versionPath);
                 var moduleDir = new ModuleDir(project);
 
-                var clientBinDir = OdaFolder.CreateSubdirectory(Path.Combine("bin", versionPath));
+                var clientBinDir = OdaFolder.CreateSubdirectory(Path.Combine("bin", versionPath, moduleDir.Name));
 
+                moduleDir.BinInfo.CopyToDir(clientBinDir);
                 moduleDir.BinInfo.CopyToDir(outputBinDir);
                 moduleDir.PdbInfo.CopyToDir(outputBinDir);
                 if (moduleDir.Refs.Any())
                 {
                     var refDir = outputDir.CreateSubdirectory("ref");
-                    moduleDir.Refs.ToList().ForEach(x => x.CopyToDir(refDir));
+                    var clientRefDir = OdaFolder.CreateSubdirectory(Path.Combine("bin", "ref"));
+                    moduleDir.Refs.ToList().ForEach(x =>
+                    {
+                        x.CopyToDir(refDir);
+                        if (x is FileInfo fileInfo && x.Extension == ".dll")
+                        {
+                            var isValidVersion = Version.TryParse( FileVersionInfo.GetVersionInfo(x.FullName).FileVersion, out var FileVersion);
+                            x.CopyToDir(isValidVersion? clientRefDir.CreateSubdirectory(FileVersion.ToString()) : clientRefDir);
+                        }
+                    });
                 }
             }
             catch (Exception ex)
@@ -107,6 +118,11 @@ namespace OdantDev.Model
                     var currentOdantVersion = Version.Parse(Utils.Version);
                     version.Value = $"\"{Utils.MajorVersion}.{Utils.ShortVersion}.{Math.Max(currentOdantVersion.Revision, currentVersion.Revision + 1)}\"";
                 }
+                if (assemblyInfo.IsOpen.Not())
+                {
+                    assemblyInfo.Open();
+                }
+                assemblyInfo.Save();
                 return true;
             }
             catch (Exception ex)
