@@ -1,16 +1,14 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using oda;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using VSLangProj;
 using File = System.IO.File;
 
 namespace OdantDev.Model
@@ -54,7 +52,7 @@ namespace OdantDev.Model
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             foreach (Project project in envDTE.Solution.Projects)
             {
-                IncreaseVersion(project);
+                IncreaseVersion(project);             
             }
         }
         public bool CopyToOdaBin(Project project)
@@ -166,6 +164,9 @@ namespace OdantDev.Model
         {
             if (project == null) { throw new NullReferenceException(nameof(project)); }
             ThreadHelper.ThrowIfNotOnUIThread();
+            project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartAction").Value = VSLangProj.prjStartAction.prjStartActionProgram;
+            project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartProgram").Value = Path.Combine(OdaFolder.FullName, "oda.wrapper32.exe");
+            project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartArguments").Value = "debug";
             var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().Where(x => x.Name == "AssemblyInfo.cs").FirstOrDefault();
             var assemblyFile = (@$"{new FileInfo(project.FullName).Directory}\AssemblyInfo.cs");
             if (assemblyInfo == null || File.Exists(assemblyFile).Not())
@@ -177,14 +178,14 @@ namespace OdantDev.Model
                 assemblyInfo = project.ProjectItems.AddFromFileCopy(@"Templates\AssemblyInfo.cs");
             }
             var attributes = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>();
-            setAttr(attributes, assemblyInfo, "AssemblyTitle", $"{sourceItem.Name}-{sourceItem.Id}");
-            setAttr(attributes, assemblyInfo, "AssemblyDescription", sourceItem.Hint ?? string.Empty);
-            setAttr(attributes, assemblyInfo, "AssemblyCopyright", $"ООО «Инфостандарт» © 2012 — {DateTime.Now.Year}");
-            setAttr(attributes, assemblyInfo, "AssemblyMetadata", $"ModuleName\",\"{sourceItem.Name}");
+            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyTitle", $"{sourceItem.Name}-{sourceItem.Id}");
+            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyDescription", sourceItem.Hint ?? string.Empty);
+            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyCopyright", $"ООО «Инфостандарт» © 2012 — {DateTime.Now.Year}");
+            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyMetadata", $"ModuleName\",\"{sourceItem.Name}");
             if (assemblyInfo.IsOpen.Not()) { assemblyInfo.Open(); }
             assemblyInfo.Save();
         }
-        private void setAttr(IEnumerable<CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
+        private void SetAttributeToProjectItem(IEnumerable<CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             var attribute = codeAttributes.Where(x => x.Name == name).FirstOrDefault();

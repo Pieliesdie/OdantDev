@@ -123,8 +123,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\infostandart.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="Resources\Icon.png">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="Templates\AssemblyInfo.cs">
