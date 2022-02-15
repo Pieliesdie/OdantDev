@@ -59,7 +59,8 @@ namespace OdantDev
                 }
                 foreach (DirectoryInfo dir in directoryInfo.EnumerateDirectories())
                 {
-                    dir.Delete(true);
+                    dir.Clear();
+                    dir.Delete();
                 }
             }
             catch (Exception ex)

@@ -1,5 +1,6 @@
 ﻿using EnvDTE;
 using EnvDTE80;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using oda;
@@ -16,12 +17,16 @@ namespace OdantDev.Model
 {
     public partial class OdaAddinModel
     {
+        #region Global Variables
         private BuildEvents BuildEvents { get; }
         private SolutionEvents SolutionEvents { get; }
+        private ProjectsEvents ProjectsEvents { get; }
         private DTE2 envDTE { get; }
-        private Dictionary<string, BuildInfo> LoadedModules { get; } = new Dictionary<string, BuildInfo>();
+        private IServiceProvider serviceProvider { get; }
+        private Dictionary<Guid, BuildInfo> LoadedModules { get; } = new Dictionary<Guid, BuildInfo>();
         private DirectoryInfo AddinFolder { get; }
         private DirectoryInfo OdaFolder { get; }
+        #endregion
         public OdaAddinModel(DirectoryInfo odaFolder, DTE2 DTE)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -29,6 +34,8 @@ namespace OdantDev.Model
             AddinFolder = odaFolder.CreateSubdirectory("AddIn");
             envDTE = DTE
                 ?? throw new NullReferenceException("Can't get EnvDTE from visual studio");
+            serviceProvider = new ServiceProvider((Microsoft.VisualStudio.OLE.Interop.IServiceProvider)envDTE)
+                ?? throw new NullReferenceException("Can't get ServiceProvider from vusial studio's EnvDTE");
             if (envDTE.Solution.IsOpen)
             {
                 envDTE.Solution.Close();
@@ -36,12 +43,16 @@ namespace OdantDev.Model
             SolutionEvents = (DTE.Events as Events2).SolutionEvents;
             SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;
             SolutionEvents.Opened += SolutionEvents_Opened;
+
+            ProjectsEvents = (DTE.Events as Events2).ProjectsEvents;
+
             BuildEvents = (DTE.Events as Events2).BuildEvents;
             BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
             BuildEvents.OnBuildDone += BuildEvents_OnBuildDone;
             BuildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
             BuildEvents.OnBuildProjConfigBegin += BuildEvents_OnBuildProjConfigBegin;
         }
+        #region Visual studio events
         private void SolutionEvents_Opened()
         {
             LoadedModules.Clear();
@@ -49,7 +60,9 @@ namespace OdantDev.Model
         private void SolutionEvents_ProjectRemoved(Project Project)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            LoadedModules.Remove(Project.ExtenderCATID);
+            var guid = GetProjectGuid(Project);
+            LoadedModules[GetProjectGuid(Project)].Dispose();
+            LoadedModules.Remove(GetProjectGuid(Project));
         }
         private void BuildEvents_OnBuildProjConfigBegin(string Project, string ProjectConfig, string Platform, string SolutionConfig)
         {
@@ -58,20 +71,22 @@ namespace OdantDev.Model
         private void BuildEvents_OnBuildProjConfigDone(string Project, string ProjectConfig, string Platform, string SolutionConfig, bool Success)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            Project proj = envDTE.Solution.Item(Project);
-            LoadedModules[proj.ExtenderCATID].isBuildSuccess = Success;
+            Project project = envDTE.Solution.Item(Project);
+            LoadedModules[GetProjectGuid(project)].isBuildSuccess = Success;
+            if (Success.Not())
+            {
+                envDTE.ExecuteCommand("Build.Cancel");
+            }
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
         public async void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
         {
             if ((Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll)) { return; }
+            if (LoadedModules.Values.ToList().TrueForAll(x => x.isBuildSuccess).Not()) { return; }
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             foreach (Project project in envDTE.ActiveSolutionProjects as object[])
             {
-                if (LoadedModules[project.ExtenderCATID].isBuildSuccess)
-                {
-                    CopyToOdaBin(project);
-                }
+                CopyToOdaBin(project);
             }
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
@@ -79,11 +94,17 @@ namespace OdantDev.Model
         {
             if (Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll) { return; }
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            VSErrors.Clear();
             foreach (Project project in envDTE.ActiveSolutionProjects as object[])
             {
-                IncreaseVersion(project);
+                if (IncreaseVersion(project).Not())
+                {
+                    envDTE.ExecuteCommand("Build.Cancel");
+                }
             }
         }
+        #endregion
+        #region Common Methods for Project item
         public bool CopyToOdaBin(Project project)
         {
             try
@@ -106,11 +127,16 @@ namespace OdantDev.Model
                 moduleDir.BinInfo.CopyToDir(outputBinDir);
                 moduleDir.PdbInfo.CopyToDir(outputBinDir);
 
-                var buildInfo = LoadedModules[project.ExtenderCATID];
+                var buildInfo = LoadedModules[GetProjectGuid(project)];
                 var remoteBinDir = buildInfo.RemoteDir.Class.Dir.OpenOrCreateFolder("bin");
                 var remoteVersionDir = remoteBinDir.OpenOrCreateFolder(versionPath);
-                remoteVersionDir.SaveFile(moduleDir.BinInfo.FullName);
-                remoteVersionDir.SaveFile(moduleDir.PdbInfo.FullName);
+
+                var isCopyBinToServerSuccess = remoteVersionDir.SaveFile(moduleDir.BinInfo.FullName);
+
+                if ((remoteVersionDir.SaveFile(moduleDir.BinInfo.FullName) && remoteVersionDir.SaveFile(moduleDir.PdbInfo.FullName)).Not())
+                {
+                    throw new OdaException("Can't copy bin to server", remoteVersionDir);
+                }
 
                 if (moduleDir.Refs.Any())
                 {
@@ -128,12 +154,27 @@ namespace OdantDev.Model
                         }
                     });
                 }
+                CopyModuleDirToServer(buildInfo);
             }
             catch (Exception ex)
             {
                 project.ShowError($"Error in Method: {System.Reflection.MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
             }
             return true;
+        }
+        private bool CopyModuleDirToServer(BuildInfo buildInfo)
+        {
+            try
+            {
+                var isCopied = buildInfo.RemoteDir.Class.Dir.OpenOrCreateFolder("modules").FolderToServer(buildInfo.LocalDir.CreateSubdirectory("modules"));
+                var isSaved = buildInfo.RemoteDir.Class.Save();
+                buildInfo.RemoteDir.Class.Dir.Reset();
+                return isCopied && isSaved;
+            }
+            catch
+            {
+                return false;
+            }
         }
         public bool IncreaseVersion(Project project)
         {
@@ -163,9 +204,65 @@ namespace OdantDev.Model
             catch (Exception ex)
             {
                 project.ShowError($"Error in Method: {System.Reflection.MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
-                envDTE.ExecuteCommand("Build.Cancel");
                 return false;
             }
+        }
+        private Guid GetProjectGuid(Project project)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            var solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
+            IVsHierarchy hierarchy;
+
+            solution.GetProjectOfUniqueName(project.FullName, out hierarchy);
+            if (hierarchy == null) { return Guid.Empty; }
+            hierarchy.GetGuidProperty(
+                        VSConstants.VSITEMID_ROOT,
+                        (int)__VSHPROPID.VSHPROPID_ProjectIDGuid,
+                        out var projectGuid);
+            return projectGuid;
+        }
+        private void SetAttributeToProjectItem(IDictionary<string, CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            codeAttributes.TryGetValue(name, out var attribute);
+            if (attribute == null)
+            {
+                projectItem.FileCodeModel.AddAttribute(name, $"\"{value}\"");
+            }
+            else
+            {
+                attribute.Value = $"\"{value}\"";
+            }
+        }
+        #endregion
+        #region Download and init  logic for Module
+        public async Task<bool> OpenModuleAsync(StructureItem item)
+        {
+            Project project = null;
+            try
+            {
+                _ = item ?? throw new NullReferenceException("Item was null");
+                var module = DownloadModule(item);
+                var csProj = module.csProj ?? throw new DirectoryNotFoundException("Module csproj file not found");
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                if (envDTE.Solution.IsOpen.Not())
+                {
+                    envDTE.Solution.Create(AddinFolder.FullName, item.Host.Name);
+                }
+
+                project = envDTE.Solution.AddFromFile(csProj.FullName);
+                InitProject(project, item);
+                Common.DebugINI.Write("DEBUG", item.FullId, true);
+                IncreaseVersion(project);
+                LoadedModules.Add(GetProjectGuid(project), new BuildInfo(project.UniqueName, module.remoteDir, module.localDir));
+            }
+            catch (Exception ex)
+            {
+                project?.Delete();
+                envDTE.ShowError($"Error while load project from item {item.Name}: {ex.Message}");
+                return false;
+            }
+            return true;
         }
         public Task<(FileInfo csProj, Dir moduleDir, DirectoryInfo localDir)> DownloadModuleAsync(StructureItem item) => Task.Run(() => DownloadModule(item));
         public (FileInfo csProj, Dir remoteDir, DirectoryInfo localDir) DownloadModule(StructureItem item)
@@ -177,32 +274,11 @@ namespace OdantDev.Model
                 ?.OrderByDescending(x => x.LastWriteTime)
                 .FirstOrDefault(), item.Dir, localDir);
         }
-        public async Task<bool> OpenModuleAsync(StructureItem item)
-        {
-            _ = item ?? throw new NullReferenceException("Item was null");
-            var module = DownloadModule(item);
-            var csProj = module.csProj ?? throw new DirectoryNotFoundException("Module csproj file not found");
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            if (envDTE.Solution.IsOpen.Not())
-            {
-                envDTE.Solution.Create(AddinFolder.FullName, item.Host.Name);
-            }
-            try
-            {
-                var project = envDTE.Solution.AddFromFile(csProj.FullName);
-                LoadedModules.Add(project.ExtenderCATID, new BuildInfo(project.UniqueName, module.remoteDir, module.localDir));
-                InitProject(project, item);
-            }
-            catch
-            {
-                return false;
-            }
-            return true;
-        }
         private void InitProject(Project project, StructureItem sourceItem)
         {
             if (project == null) { throw new NullReferenceException(nameof(project)); }
             ThreadHelper.ThrowIfNotOnUIThread();
+            project.Name = $"{sourceItem.Name}-{sourceItem.Id}";
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartAction").Value = prjStartAction.prjStartActionProgram;
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartProgram").Value = Path.Combine(OdaFolder.FullName, "oda.wrapper32.exe");
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartArguments").Value = "debug";
@@ -216,26 +292,16 @@ namespace OdantDev.Model
                 }
                 assemblyInfo = project.ProjectItems.AddFromFileCopy(@"Templates\AssemblyInfo.cs");
             }
-            var attributes = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>();
+            var attributes = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>().ToDictionary(x => x.Name);
             SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyTitle", $"{sourceItem.Name}-{sourceItem.Id}");
             SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyDescription", sourceItem.Hint ?? string.Empty);
             SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyCopyright", $"ООО «Инфостандарт» © 2012 — {DateTime.Now.Year}");
             SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyDefaultAlias", $"{sourceItem.Name}");
+            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyCompany", $"Infostandart");
+            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyTrademark", $"www.infostandart.com");
             if (assemblyInfo.IsOpen.Not()) { assemblyInfo.Open(); }
             assemblyInfo.Save();
         }
-        private void SetAttributeToProjectItem(IEnumerable<CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
-        {
-            ThreadHelper.ThrowIfNotOnUIThread();
-            var attribute = codeAttributes.Where(x => x.Name == name).FirstOrDefault();
-            if (attribute == null)
-            {
-                projectItem.FileCodeModel.AddAttribute(name, $"\"{value}\"");
-            }
-            else
-            {
-                attribute.Value = $"\"{value}\"";
-            }
-        }
+        #endregion
     }
 }

@@ -11,6 +11,9 @@ namespace OdantDev
 {
     public class OdaViewModel : INotifyPropertyChanged
     {
+        public static readonly string[] odaClientLibraries = new string[] { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
+        public static readonly string[] odaServerLibraries = new string[] { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
+
         private IEnumerable<Node<StructureItem>> nodes;
         private IEnumerable<DomainDeveloper> developers;
 
@@ -51,12 +54,22 @@ namespace OdantDev
                 return (false, ex.Message);
             }
         }
+        public (bool Success, string Error) Refresh()
+        {
+            try
+            {
+                this.Connection.ResetUser();
+                return this.Load();
+            }
+            catch(Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
         public static (bool Success, string Error) LoadOdaLibraries(DirectoryInfo OdaFolder)
         {
             try
             {
-                var odaClientLibraries = new string[] { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
-                var odaServerLibraries = new string[] { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
                 ServerAssemblies = Extension.LoadServerLibraries(OdaFolder.FullName, Platform, odaServerLibraries);
                 ClientAssemblies = Extension.LoadClientLibraries(OdaFolder.FullName, odaClientLibraries);             
                 return (true, null);

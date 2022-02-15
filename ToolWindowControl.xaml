@@ -191,6 +191,26 @@
 
         <TreeView x:Name="OdaTree"
                   ItemsSource="{Binding OdaModel.Nodes}">
+            <TreeView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Name="MenuItemRefresh" Click="MenuItemRefresh_Click">
+                        <MenuItem.Header>
+                            <TextBlock Text="Refresh"/>
+                        </MenuItem.Header>
+                        <MenuItem.Icon>
+                            <materialDesign:PackIcon Kind="Refresh" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Name="MenuItemInfo" Click="MenuItemInfo_Click">
+                        <MenuItem.Header>
+                            <TextBlock Text="Info" />
+                        </MenuItem.Header>
+                        <MenuItem.Icon>
+                            <materialDesign:PackIcon Kind="InformationCircleOutline" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </TreeView.ContextMenu>
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Path=Children}">
                     <StackPanel Orientation="Horizontal" Margin="-5,0,0,0">

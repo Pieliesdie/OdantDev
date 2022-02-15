@@ -139,7 +139,7 @@ namespace OdantDev
         #region main button logic
         private void RefreshTreeButton_Click(object sender, RoutedEventArgs e)
         {
-            var UpdateModelResult = LoadModel();
+            var UpdateModelResult = OdaModel.Refresh();
             if (UpdateModelResult.Success.Not())
             {
                 ShowException(UpdateModelResult.Error);
@@ -170,5 +170,15 @@ namespace OdantDev
             }
         }
         #endregion
+
+        private void MenuItemRefresh_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void MenuItemInfo_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
