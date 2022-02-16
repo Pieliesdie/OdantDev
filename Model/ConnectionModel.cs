@@ -9,12 +9,12 @@ using System.Reflection;
 
 namespace OdantDev
 {
-    public class OdaViewModel : INotifyPropertyChanged
+    public class ConnectionModel : INotifyPropertyChanged
     {
         public static readonly string[] odaClientLibraries = new string[] { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
         public static readonly string[] odaServerLibraries = new string[] { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
 
-        private IEnumerable<Node<StructureItem>> nodes;
+        private IEnumerable<StructureItemViewModel<StructureItem>> nodes;
         private IEnumerable<DomainDeveloper> developers;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -24,7 +24,7 @@ namespace OdantDev
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
-        public IEnumerable<Node<StructureItem>> Nodes { get => nodes; set { nodes = value; NotifyPropertyChanged("Nodes"); } }
+        public IEnumerable<StructureItemViewModel<StructureItem>> Nodes { get => nodes; set { nodes = value; NotifyPropertyChanged("Nodes"); } }
         public IEnumerable<DomainDeveloper> Developers { get => developers; set { developers = value; NotifyPropertyChanged("Developers"); } }
 
         public static List<IntPtr> ServerAssemblies { get; set; }
@@ -33,7 +33,7 @@ namespace OdantDev
 
         public Connection Connection { get; }
 
-        public OdaViewModel(Connection connection)
+        public ConnectionModel(Connection connection)
         {
             this.Connection = connection;
         }
@@ -45,7 +45,7 @@ namespace OdantDev
             {
                 if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
                 Connection.CoreMode = CoreMode.AddIn;
-                this.Nodes = Connection.Hosts.AsParallel().Cast<Host>().Select(host => new Node<StructureItem>(host));
+                this.Nodes = Connection.Hosts.AsParallel().Cast<Host>().Select(host => new StructureItemViewModel<StructureItem>(host));
                 this.Developers = Connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>();
                 return (true, null);
             }

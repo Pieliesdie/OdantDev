@@ -18,10 +18,10 @@ namespace OdantDev
     /// </summary>
     public partial class ToolWindow1Control : UserControl, INotifyPropertyChanged
     {
-        private OdaViewModel odaModel;
+        private ConnectionModel odaModel;
         private DirectoryInfo OdaFolder;
         private DTE2 DTE2 { get; }
-        private OdaAddinModel odaAddinModel;
+        private VisualStudioIntegration odaAddinModel;
         private bool isDarkTheme;
         public bool IsDarkTheme
         {
@@ -41,7 +41,7 @@ namespace OdantDev
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
-        public OdaViewModel OdaModel { get => odaModel; set { odaModel = value; NotifyPropertyChanged("OdaModel"); } }
+        public ConnectionModel OdaModel { get => odaModel; set { odaModel = value; NotifyPropertyChanged("OdaModel"); } }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolWindow1Control"/> class.
@@ -78,7 +78,7 @@ namespace OdantDev
         private void InitializeOdaComponents()
         {
             OdaFolder = Extension.OdaFolder;
-            var LoadOdaLibrariesResult = OdaViewModel.LoadOdaLibraries(OdaFolder);
+            var LoadOdaLibrariesResult = ConnectionModel.LoadOdaLibraries(OdaFolder);
             if (LoadOdaLibrariesResult.Success.Not())
             {
                 ShowException(LoadOdaLibrariesResult.Error);
@@ -101,7 +101,7 @@ namespace OdantDev
                 ShowException(UpdateModelResult.Error);
                 return;
             }
-            odaAddinModel = new OdaAddinModel(OdaFolder, DTE2);
+            odaAddinModel = new VisualStudioIntegration(OdaFolder, DTE2);
             await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             if (OdantDevPackage.Env_DTE.Solution.IsOpen.Not())
             {
@@ -110,7 +110,7 @@ namespace OdantDev
         }
         private (bool Success, string Error) LoadModel()
         {
-            OdaModel = new OdaViewModel(Common.Connection);
+            OdaModel = new ConnectionModel(Common.Connection);
             var GetDataResult = OdaModel.Load();
             if (GetDataResult.Success)
             {
@@ -149,6 +149,7 @@ namespace OdantDev
 
         private void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
+            MessageContainer.MessageQueue.Enqueue("test!");
         }
 
         private void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
@@ -159,7 +160,7 @@ namespace OdantDev
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
         private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
         {
-            await odaAddinModel.OpenModuleAsync((OdaTree.SelectedItem as Node<StructureItem>).Item);
+            await odaAddinModel.OpenModuleAsync((OdaTree.SelectedItem as StructureItemViewModel<StructureItem>).Item);
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)

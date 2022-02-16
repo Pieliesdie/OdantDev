@@ -15,7 +15,7 @@ using File = System.IO.File;
 
 namespace OdantDev.Model
 {
-    public partial class OdaAddinModel
+    public partial class VisualStudioIntegration
     {
         #region Global Variables
         private BuildEvents BuildEvents { get; }
@@ -27,7 +27,7 @@ namespace OdantDev.Model
         private DirectoryInfo AddinFolder { get; }
         private DirectoryInfo OdaFolder { get; }
         #endregion
-        public OdaAddinModel(DirectoryInfo odaFolder, DTE2 DTE)
+        public VisualStudioIntegration(DirectoryInfo odaFolder, DTE2 DTE)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             OdaFolder = odaFolder;

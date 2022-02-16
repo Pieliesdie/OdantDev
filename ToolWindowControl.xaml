@@ -190,34 +190,41 @@
         <!--<WindowsFormsHost x:Name="winHost"></WindowsFormsHost>-->
 
         <TreeView x:Name="OdaTree"
-                  ItemsSource="{Binding OdaModel.Nodes}">
-            <TreeView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Name="MenuItemRefresh" Click="MenuItemRefresh_Click">
-                        <MenuItem.Header>
-                            <TextBlock Text="Refresh"/>
-                        </MenuItem.Header>
-                        <MenuItem.Icon>
-                            <materialDesign:PackIcon Kind="Refresh" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Name="MenuItemInfo" Click="MenuItemInfo_Click">
-                        <MenuItem.Header>
-                            <TextBlock Text="Info" />
-                        </MenuItem.Header>
-                        <MenuItem.Icon>
-                            <materialDesign:PackIcon Kind="InformationCircleOutline" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                </ContextMenu>
-            </TreeView.ContextMenu>
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Path=Children}">
-                    <StackPanel Orientation="Horizontal" Margin="-5,0,0,0">
+                  ItemsSource="{Binding OdaModel.Nodes}" HorizontalContentAlignment="Stretch">
+            <TreeView.ItemTemplate >
+                <HierarchicalDataTemplate ItemsSource="{Binding Path=Children}" >
+                    <Grid Margin="-5,0,0,0" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.ContextMenu>
+                            <ContextMenu Visibility="{Binding Path=IsItemAvailable, Converter={StaticResource BoolToVis}}">
+                                <MenuItem Name="MenuItemRefresh" Command="{Binding RefreshCommand}">
+                                    <MenuItem.Header>
+                                        <TextBlock Text="Refresh"/>
+                                    </MenuItem.Header>
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="Refresh" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Name="MenuItemInfo" Command="{Binding InfoCommand}">
+                                    <MenuItem.Header>
+                                        <TextBlock Text="Info" />
+                                    </MenuItem.Header>
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="InformationCircleOutline" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Grid.ContextMenu>
                         <Image Source="{Binding Path = Icon}"                         
+                               Margin="0,0,5,0" 
                                Width="16"
-                               Margin="0,0,5,0" />
+                               Grid.Column="0"
+                               HorizontalAlignment="Left"/>
                         <TextBlock Text="{Binding }"
+                                   Grid.Column="1"
                                    FontSize="14" Style="{StaticResource MaterialDesignHeadline5TextBlock}">
                             <TextBlock.ToolTip>
                                 <StackPanel>
@@ -252,9 +259,16 @@
                                 </StackPanel>
                             </TextBlock.ToolTip>
                         </TextBlock>
-                    </StackPanel>
+                    </Grid>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+            <materialDesign:Snackbar 
+                        DockPanel.Dock="Bottom"
+                        x:Name="MessageContainer"
+                        MessageQueue="{materialDesign:MessageQueue}">
+            </materialDesign:Snackbar>
+        </StackPanel>
     </DockPanel>
 </UserControl>

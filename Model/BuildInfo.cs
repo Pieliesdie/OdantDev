@@ -4,7 +4,7 @@ using System.IO;
 
 namespace OdantDev.Model
 {
-    public partial class OdaAddinModel
+    public partial class VisualStudioIntegration
     {
         public class BuildInfo : IDisposable
         {
