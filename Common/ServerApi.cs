@@ -10,6 +10,10 @@ namespace OdantDev
 {
     internal static class ServerApi
     {
+        public delegate void OnUpdate_CALLBACK(int Type, IntPtr Params);
+        [DllImport("odaClient.dll", EntryPoint = "ODAItem_set_on_update", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void _SetOnUpdate(IntPtr item, OnUpdate_CALLBACK func);
+
         [DllImport("odaClient.dll", EntryPoint = "ODAItem_get_type", CallingConvention = CallingConvention.Cdecl)]
         public static extern int _GetType(IntPtr item);
         [DllImport("odaClient.dll", EntryPoint = "ODAVariantsList_get_item", CallingConvention = CallingConvention.Cdecl)]

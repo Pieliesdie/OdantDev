@@ -238,7 +238,7 @@
                                Width="16"
                                Grid.Column="0"
                                HorizontalAlignment="Left"/>
-                        <TextBlock Text="{Binding }"
+                        <TextBlock Text="{Binding Path = Name}"
                                    Grid.Column="1"
                                    FontSize="14" Style="{StaticResource MaterialDesignHeadline5TextBlock}">
                             <TextBlock.ToolTip>

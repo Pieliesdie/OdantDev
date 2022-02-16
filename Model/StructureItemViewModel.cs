@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -18,6 +20,7 @@ namespace OdantDev.Model
         private IEnumerable<StructureItemViewModel<T>> children;
         private T item;
         private RelayCommand refreshCommand;
+        public string Name => $"{Item?.ToString() ?? Category}";
         public RelayCommand RefreshCommand
         {
             get
@@ -26,9 +29,8 @@ namespace OdantDev.Model
                     (refreshCommand = new RelayCommand(obj =>
                     {
                         if (Item == null) { return; }
-                        Item.Reset();
-                        Item.FireOnChange();
                         this.Children = GetChildren(this.Item, _logger);
+                        NotifyPropertyChanged("Name");
                         NotifyPropertyChanged("Item");
                         NotifyPropertyChanged("Icon");
                         _logger?.Info($"{this} has been refreshed");
@@ -67,16 +69,10 @@ namespace OdantDev.Model
         public StructureItemViewModel(T item, ILogger logger = null)
         {
             Item = item;
-            item.RemoteItem.OnUpdate += RemoteItem_OnUpdate;
             _logger = logger;
             ItemType = item.ItemType;
             Category = item.ItemType.ToString();
             Children = GetChildren(item, logger);
-        }
-
-        private void RemoteItem_OnUpdate(int Type, string Params)
-        {
-            
         }
 
         public IEnumerable<StructureItemViewModel<T>> GetChildren(T item, ILogger logger = null)
@@ -98,17 +94,21 @@ namespace OdantDev.Model
             }
             return children;
         }
-
         public IEnumerable<StructureItem> getChildren(T structureItem, ItemType item_type, Deep deep)
         {
             string str1 = item_type == ItemType.Base? "D[@t='ORGANIZATION' or @t='BASE']" : "*";
             string str2 = deep == Deep.Near ? "/" : "//";
             return this.FindConfigItems(structureItem, $".{str2}{str1}");
         }
+        /*private void OnUpdate(int t, IntPtr intPtr)
+        {
+            var message = Marshal.PtrToStringUni(intPtr);
+        }*/
         public IEnumerable<StructureItem> FindConfigItems(T structureItem, string xq)
         {
             if (structureItem.RemoteItem == null) { yield break; }
             IntPtr intPtr = (IntPtr)typeof(ODAItem).GetField("_ptr", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(structureItem.RemoteItem);
+            //ServerApi._SetOnUpdate(intPtr, OnUpdate);
             IntPtr configItemsIntPtr = ServerApi._FindConfigItems(intPtr, xq);
             int listLength = ServerApi._GetLength(configItemsIntPtr);
             var ODAItems = Enumerable.Range(0, listLength).AsParallel().AsUnordered().Select(x => ServerApi.CreateByType(ServerApi._GetItem(configItemsIntPtr, x)));
@@ -116,7 +116,11 @@ namespace OdantDev.Model
             {
                 yield return ItemFactory.getStorageItem(item);
             }
-            ServerApi._Release(configItemsIntPtr);
+            try
+            {
+                ServerApi._Release(configItemsIntPtr);
+            }
+            catch { }
         }
         public override string ToString()
         {
