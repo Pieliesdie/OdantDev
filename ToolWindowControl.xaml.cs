@@ -153,10 +153,6 @@ namespace OdantDev
         private void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
             MessageContainer.MessageQueue.Enqueue("test!");
-            var settings = new AddinSettings(Path.Combine(OdaFolder.CreateSubdirectory("AddIn").FullName,"AddinSettings.xml"));
-            settings.OdaLibraries.AddRange(ConnectionModel.odaClientLibraries);
-            settings.ServerLibraries.AddRange(ConnectionModel.odaServerLibraries);
-            settings.DevExpressLibraries.AddRange(OdaFolder.GetFiles().ToList().Where(x => x.Name.Contains("DevExpress") && x.Name.Contains("v18.1")).Select(x=> x.Name));
             settings.Save();
 
         }
