@@ -153,7 +153,6 @@ namespace OdantDev
         private void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
             MessageContainer.MessageQueue.Enqueue("test!");
-            settings.Save();
 
         }
 

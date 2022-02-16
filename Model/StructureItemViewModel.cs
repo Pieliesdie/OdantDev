@@ -1,8 +1,11 @@
 ﻿using oda;
 using OdantDev.Commands;
+using odaServer;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -24,6 +27,7 @@ namespace OdantDev.Model
                     {
                         if (Item == null) { return; }
                         Item.Reset();
+                        Item.FireOnChange();
                         this.Children = GetChildren(this.Item, _logger);
                         NotifyPropertyChanged("Item");
                         NotifyPropertyChanged("Icon");
@@ -63,17 +67,24 @@ namespace OdantDev.Model
         public StructureItemViewModel(T item, ILogger logger = null)
         {
             Item = item;
+            item.RemoteItem.OnUpdate += RemoteItem_OnUpdate;
             _logger = logger;
             ItemType = item.ItemType;
             Category = item.ItemType.ToString();
             Children = GetChildren(item, logger);
         }
-        public static IEnumerable<StructureItemViewModel<T>> GetChildren(T item, ILogger logger = null)
+
+        private void RemoteItem_OnUpdate(int Type, string Params)
         {
-            var items = item.getChilds(ItemType.All, Deep.Near).AsParallel().OfType<T>();
-            IEnumerable<StructureItemViewModel<T>> children = items
+            
+        }
+
+        public IEnumerable<StructureItemViewModel<T>> GetChildren(T item, ILogger logger = null)
+        {
+            var items = getChildren(item, ItemType.All, Deep.Near).OfType<T>();
+            var children = items
                 .Where(x => x.ItemType != ItemType.Module)
-                .Select(child => new StructureItemViewModel<T>(child,logger));
+                .Select(child => new StructureItemViewModel<T>(child, logger));
             var modules = items
                 .Where(x => x.ItemType == ItemType.Module);
             if (modules.Any())
@@ -82,10 +93,30 @@ namespace OdantDev.Model
                     new StructureItemViewModel<T>()
                     {
                         Category = "Модули",
-                        Children = modules.Select(child => new StructureItemViewModel<T>(child,logger))
-                    });
+                        Children = modules.Select(child => new StructureItemViewModel<T>(child, logger))
+                    }).AsParallel();
             }
             return children;
+        }
+
+        public IEnumerable<StructureItem> getChildren(T structureItem, ItemType item_type, Deep deep)
+        {
+            string str1 = item_type == ItemType.Base? "D[@t='ORGANIZATION' or @t='BASE']" : "*";
+            string str2 = deep == Deep.Near ? "/" : "//";
+            return this.FindConfigItems(structureItem, $".{str2}{str1}");
+        }
+        public IEnumerable<StructureItem> FindConfigItems(T structureItem, string xq)
+        {
+            if (structureItem.RemoteItem == null) { yield break; }
+            IntPtr intPtr = (IntPtr)typeof(ODAItem).GetField("_ptr", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(structureItem.RemoteItem);
+            IntPtr configItemsIntPtr = ServerApi._FindConfigItems(intPtr, xq);
+            int listLength = ServerApi._GetLength(configItemsIntPtr);
+            var ODAItems = Enumerable.Range(0, listLength).AsParallel().AsUnordered().Select(x => ServerApi.CreateByType(ServerApi._GetItem(configItemsIntPtr, x)));
+            foreach(var item in ODAItems)
+            {
+                yield return ItemFactory.getStorageItem(item);
+            }
+            ServerApi._Release(configItemsIntPtr);
         }
         public override string ToString()
         {

@@ -14,6 +14,18 @@ namespace OdantDev
 {
     public static class Extension
     {
+        public static IEnumerable<T> Use<T>(this T obj) where T : IDisposable
+        {
+            try
+            {
+                yield return obj;
+            }
+            finally
+            {
+                if (obj != null)
+                    obj.Dispose();
+            }
+        }
         public static bool Not(this bool boolean) => !boolean;
 
         public static bool CopyToDir(this FileSystemInfo fileSystemInfo, DirectoryInfo destinationDir)

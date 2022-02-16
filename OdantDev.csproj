@@ -52,6 +52,7 @@
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Common\Bitness.cs" />
     <Compile Include="Common\Extension.cs" />
+    <Compile Include="Common\ServerApi.cs" />
     <Compile Include="Model\BuildInfo.cs" />
     <Compile Include="Model\ILogger.cs" />
     <Compile Include="Model\ModuleDir.cs" />
