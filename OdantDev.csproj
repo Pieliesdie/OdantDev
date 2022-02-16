@@ -53,7 +53,9 @@
     <Compile Include="Common\Bitness.cs" />
     <Compile Include="Common\Extension.cs" />
     <Compile Include="Model\BuildInfo.cs" />
+    <Compile Include="Model\ILogger.cs" />
     <Compile Include="Model\ModuleDir.cs" />
+    <Compile Include="Model\PopupController.cs" />
     <Compile Include="Model\VisualStudioIntegration.cs" />
     <Compile Include="Model\ConnectionModel.cs" />
     <Compile Include="Model\StructureItemViewModel.cs" />
@@ -127,6 +129,7 @@
     <Content Include="Resources\Icon.png">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Content Include="Templates\AddinSettings.xml" />
     <Content Include="Templates\AssemblyInfo.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>

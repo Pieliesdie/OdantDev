@@ -25,22 +25,37 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <DockPanel>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Top"
-                        Margin="0,0,10,0">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    DockPanel.Dock="Top" 
+                    Margin="0,0,10,0">
             <CheckBox IsChecked="{x:Null}" Content="Dark theme" ToolTip="Change color theme" x:Name="ThemeCheckBox" Unchecked="CheckBox_Checked" Checked="CheckBox_Checked"/>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" DockPanel.Dock="Top"
-                        Margin="5,0,0,0">
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Center" 
+                    DockPanel.Dock="Top" 
+                    Margin="5,0,0,0">
             <materialDesign:PackIcon Kind="Database"
                                          Width="20"
                                          Height="20" />
             <TextBlock Text="ODANT" Margin="5,5,10,0" FontSize="12"/>
         </StackPanel>
-        <StackPanel Orientation="Vertical"
+        <StackPanel Grid.Row="2"
+                    Orientation="Vertical"
                     DockPanel.Dock="Top"
                     Visibility="Visible"
-                    x:Name="spConnect"                   
+                    x:Name="spConnect"   
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center">
             <Button Content="Connect"
@@ -63,8 +78,8 @@
                 </TextBlock>
             </StackPanel>
         </StackPanel>
-
-        <StackPanel DockPanel.Dock="Top"
+        <StackPanel Grid.Row="3"
+                    DockPanel.Dock="Top"
                     Visibility="Collapsed"
                     x:Name="CommonButtons"
                     materialDesign:ThemeAssist.Theme="Inherit">
@@ -188,8 +203,8 @@
             </WrapPanel>
         </StackPanel>
         <!--<WindowsFormsHost x:Name="winHost"></WindowsFormsHost>-->
-
-        <TreeView x:Name="OdaTree"
+        <TreeView Grid.Row="4"
+                  x:Name="OdaTree" 
                   ItemsSource="{Binding OdaModel.Nodes}" HorizontalContentAlignment="Stretch">
             <TreeView.ItemTemplate >
                 <HierarchicalDataTemplate ItemsSource="{Binding Path=Children}" >
@@ -263,12 +278,14 @@
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
-        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+        <StackPanel Grid.Row="5"
+                    Background="AliceBlue"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center">
             <materialDesign:Snackbar 
-                        DockPanel.Dock="Bottom"
-                        x:Name="MessageContainer"
-                        MessageQueue="{materialDesign:MessageQueue}">
+                 x:Name="MessageContainer"         
+                MessageQueue="{materialDesign:MessageQueue}">
             </materialDesign:Snackbar>
         </StackPanel>
-    </DockPanel>
+    </Grid>
 </UserControl>

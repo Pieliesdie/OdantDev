@@ -7,6 +7,7 @@ using OdantDev.Model;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -20,6 +21,7 @@ namespace OdantDev
     {
         private ConnectionModel odaModel;
         private DirectoryInfo OdaFolder;
+        private ILogger logger;
         private DTE2 DTE2 { get; }
         private VisualStudioIntegration odaAddinModel;
         private bool isDarkTheme;
@@ -53,6 +55,7 @@ namespace OdantDev
             InitializeMaterialDesign();
             InitializeComponent();
             InitializeOdaComponents();
+            logger = new PopupController(this.MessageContainer);
             VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
             ThemeCheckBox.IsChecked = IsVisualStudioDark();
         }
@@ -110,7 +113,7 @@ namespace OdantDev
         }
         private (bool Success, string Error) LoadModel()
         {
-            OdaModel = new ConnectionModel(Common.Connection);
+            OdaModel = new ConnectionModel(Common.Connection,logger);
             var GetDataResult = OdaModel.Load();
             if (GetDataResult.Success)
             {
@@ -150,6 +153,12 @@ namespace OdantDev
         private void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
             MessageContainer.MessageQueue.Enqueue("test!");
+            var settings = new AddinSettings(Path.Combine(OdaFolder.CreateSubdirectory("AddIn").FullName,"AddinSettings.xml"));
+            settings.OdaLibraries.AddRange(ConnectionModel.odaClientLibraries);
+            settings.ServerLibraries.AddRange(ConnectionModel.odaServerLibraries);
+            settings.DevExpressLibraries.AddRange(OdaFolder.GetFiles().ToList().Where(x => x.Name.Contains("DevExpress") && x.Name.Contains("v18.1")).Select(x=> x.Name));
+            settings.Save();
+
         }
 
         private void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
@@ -171,15 +180,5 @@ namespace OdantDev
             }
         }
         #endregion
-
-        private void MenuItemRefresh_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void MenuItemInfo_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

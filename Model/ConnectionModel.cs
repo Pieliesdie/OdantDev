@@ -13,7 +13,7 @@ namespace OdantDev
     {
         public static readonly string[] odaClientLibraries = new string[] { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
         public static readonly string[] odaServerLibraries = new string[] { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
-
+        private readonly ILogger logger;
         private IEnumerable<StructureItemViewModel<StructureItem>> nodes;
         private IEnumerable<DomainDeveloper> developers;
 
@@ -33,9 +33,10 @@ namespace OdantDev
 
         public Connection Connection { get; }
 
-        public ConnectionModel(Connection connection)
+        public ConnectionModel(Connection connection, ILogger logger = null)
         {
             this.Connection = connection;
+            this.logger = logger;
         }
 
         public static Bitness Platform => IntPtr.Size == 4 ? Bitness.x86 : Bitness.x64;
@@ -45,7 +46,7 @@ namespace OdantDev
             {
                 if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
                 Connection.CoreMode = CoreMode.AddIn;
-                this.Nodes = Connection.Hosts.AsParallel().Cast<Host>().Select(host => new StructureItemViewModel<StructureItem>(host));
+                this.Nodes = Connection.Hosts.AsParallel().Cast<Host>().Select(host => new StructureItemViewModel<StructureItem>(host,logger));
                 this.Developers = Connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>();
                 return (true, null);
             }
