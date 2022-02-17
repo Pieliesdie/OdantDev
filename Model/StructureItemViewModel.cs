@@ -16,6 +16,7 @@ namespace OdantDev.Model
 {
     public class StructureItemViewModel<T> : INotifyPropertyChanged where T : StructureItem
     {
+        static readonly object _lock = new object();
         private ILogger _logger;
         private IEnumerable<StructureItemViewModel<T>> children;
         private T item;
@@ -29,7 +30,12 @@ namespace OdantDev.Model
                     (refreshCommand = new RelayCommand(obj =>
                     {
                         if (Item == null) { return; }
+                        Item.Reset();
                         this.Children = GetChildren(this.Item, _logger);
+                        lock (_lock)
+                        {
+                            ImageIndex = Item.ImageIndex;
+                        }
                         NotifyPropertyChanged("Name");
                         NotifyPropertyChanged("Item");
                         NotifyPropertyChanged("Icon");
@@ -38,6 +44,8 @@ namespace OdantDev.Model
             }
         }
         private RelayCommand infoCommand;
+        private int imageIndex;
+
         public bool IsItemAvailable => Item != null;
         public bool HasChildren => Children.Any();
         public RelayCommand InfoCommand
@@ -62,65 +70,58 @@ namespace OdantDev.Model
         }
         public virtual T Item { get => item; private set { item = value; NotifyPropertyChanged("Item"); } }
         public virtual string Category { get; set; }
-        public virtual ImageSource Icon => Extension.ConvertToBitmapImage(Images.GetImage(Item?.ImageIndex ?? Images.GetImageIndex(Icons.Module)));
+        public virtual int ImageIndex { get => imageIndex; set { imageIndex = value; NotifyPropertyChanged("ImageIndex"); } }
+        public virtual ImageSource Icon => Extension.ConvertToBitmapImage(Images.GetImage(ImageIndex));
         public virtual IEnumerable<StructureItemViewModel<T>> Children { get => children; set { children = value; NotifyPropertyChanged("Children"); } }
         public ItemType ItemType { get; private set; }
         public StructureItemViewModel() { }
         public StructureItemViewModel(T item, ILogger logger = null)
         {
-            Item = item;
+            this.item = item;
             _logger = logger;
-            ItemType = item.ItemType;
-            Category = item.ItemType.ToString();
-            Children = GetChildren(item, logger);
+
+            ItemType = Item.ItemType;
+            Category = ItemType.ToString();
+            children = GetChildren(item, logger);
+            lock (_lock)
+            {
+                ImageIndex = Item.ImageIndex;
+            }
         }
 
         public IEnumerable<StructureItemViewModel<T>> GetChildren(T item, ILogger logger = null)
         {
-            var items = getChildren(item, ItemType.All, Deep.Near).OfType<T>();
+            var items = item.getChilds(ItemType.All, Deep.Near).OfType<T>().AsParallel().AsUnordered();
             var children = items
-                .Where(x => x.ItemType != ItemType.Module)
+                .Where(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution)
                 .Select(child => new StructureItemViewModel<T>(child, logger));
-            var modules = items
-                .Where(x => x.ItemType == ItemType.Module);
+
+            if (item.ItemType == ItemType.Host || item.ItemType == ItemType.Class) { return children; };
+            var modules = items.Where(x => x.ItemType == ItemType.Module);
+            var workplaces = items.Where(x => x.ItemType == ItemType.Solution);
             if (modules.Any())
             {
                 children = children.Append(
                     new StructureItemViewModel<T>()
                     {
-                        Category = "Модули",
-                        Children = modules.Select(child => new StructureItemViewModel<T>(child, logger))
+                        Category = "Modules",
+                        ImageIndex = Images.GetImageIndex(Icons.MagentaFolder),
+                        children = items.Where(x => x.ItemType == ItemType.Module)
+                        .Select(child => new StructureItemViewModel<T>(child, logger))
+                    }).AsParallel();
+            }
+            if (workplaces.Any())
+            {
+                children = children.Append(
+                    new StructureItemViewModel<T>()
+                    {
+                        Category = "Workplaces",
+                        ImageIndex = Images.GetImageIndex(Icons.UserRole),
+                        children = items.Where(x => x.ItemType == ItemType.Solution)
+                        .Select(child => new StructureItemViewModel<T>(child, logger))
                     }).AsParallel();
             }
             return children;
-        }
-        public IEnumerable<StructureItem> getChildren(T structureItem, ItemType item_type, Deep deep)
-        {
-            string str1 = item_type == ItemType.Base? "D[@t='ORGANIZATION' or @t='BASE']" : "*";
-            string str2 = deep == Deep.Near ? "/" : "//";
-            return this.FindConfigItems(structureItem, $".{str2}{str1}");
-        }
-        /*private void OnUpdate(int t, IntPtr intPtr)
-        {
-            var message = Marshal.PtrToStringUni(intPtr);
-        }*/
-        public IEnumerable<StructureItem> FindConfigItems(T structureItem, string xq)
-        {
-            if (structureItem.RemoteItem == null) { yield break; }
-            IntPtr intPtr = (IntPtr)typeof(ODAItem).GetField("_ptr", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(structureItem.RemoteItem);
-            //ServerApi._SetOnUpdate(intPtr, OnUpdate);
-            IntPtr configItemsIntPtr = ServerApi._FindConfigItems(intPtr, xq);
-            int listLength = ServerApi._GetLength(configItemsIntPtr);
-            var ODAItems = Enumerable.Range(0, listLength).AsParallel().AsUnordered().Select(x => ServerApi.CreateByType(ServerApi._GetItem(configItemsIntPtr, x)));
-            foreach(var item in ODAItems)
-            {
-                yield return ItemFactory.getStorageItem(item);
-            }
-            try
-            {
-                ServerApi._Release(configItemsIntPtr);
-            }
-            catch { }
         }
         public override string ToString()
         {

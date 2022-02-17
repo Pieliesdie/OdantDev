@@ -1,7 +1,9 @@
-﻿using odaServer;
+﻿using oda;
+using odaServer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,48 +29,80 @@ namespace OdantDev
 
         [DllImport("odaClient.dll", EntryPoint = "ODAVariantsList_get_length", CallingConvention = CallingConvention.Cdecl)]
         public static extern int _GetLength(IntPtr list);
+        public static IEnumerable<StructureItem> getChildren(StructureItem structureItem, ItemType item_type, Deep deep)
+        {
+            string str1 = deep == Deep.Near ? "/" : "//";
+            string str2 = item_type switch
+            {
+                ItemType.Module => "D[@t = 'MODULE']",
+                ItemType.Base => "D[@t='ORGANIZATION' or @t='BASE']",
+                _ => "*"
+            };
+            return FindConfigItems(structureItem, $".{str1}{str2}");
+        }
+        public static IEnumerable<StructureItem> FindConfigItems(StructureItem structureItem, string xq)
+        {
+            if (structureItem.RemoteItem == null) { yield break; ; }
+            IntPtr intPtr = structureItem.RemoteItem.GetIntPtr();
+            IntPtr configItemsIntPtr = _FindConfigItems(intPtr, xq);
+            int listLength = _GetLength(configItemsIntPtr);
+            var ODAItems = Enumerable.Range(0, listLength).AsParallel().AsUnordered().Select(x => CreateByType(_GetItem(configItemsIntPtr, x))).ToList();
+            try
+            {
+                _Release(configItemsIntPtr);
+            }
+            catch { }
+            foreach(var item in ODAItems)
+            {
+                yield return ItemFactory.getStorageItem(item);
+            }
+            //return ODAItems.AsParallel().AsUnordered().Select(x => ItemFactory.getStorageItem(x));
+        }
         public static ODAItem GetItem(IntPtr _ptr, int index) => CreateByType(ServerApi._GetItem(_ptr, index));
-
         public static ODAItem CreateByType(IntPtr item_ptr)
         {
             if (item_ptr == IntPtr.Zero)
-                return (ODAItem)null;
-            ODAItem odaItem = (ODAItem)null;
-            switch (ServerApi._GetType(item_ptr))
+                return null;
+            ODAItem odaItem = null;
+            switch (_GetType(item_ptr))
             {
                 case 2:
-                    odaItem = (ODAItem)new ODAHost(item_ptr);
+                    odaItem = new ODAHost(item_ptr);
                     break;
                 case 3:
                 case 14:
-                    odaItem = (ODAItem)new ODADomain(item_ptr);
+                    odaItem = new ODADomain(item_ptr);
                     break;
                 case 4:
-                    odaItem = (ODAItem)new ODAClass(item_ptr);
+                    odaItem = new ODAClass(item_ptr);
                     break;
                 case 5:
-                    odaItem = (ODAItem)new ODAFolder(item_ptr);
+                    odaItem = new ODAFolder(item_ptr);
                     break;
                 case 6:
-                    odaItem = (ODAItem)new ODAIndex(item_ptr);
+                    odaItem = new ODAIndex(item_ptr);
                     break;
                 case 7:
-                    odaItem = (ODAItem)new ODAObject(item_ptr);
+                    odaItem = new ODAObject(item_ptr);
                     break;
                 case 8:
-                    odaItem = (ODAItem)new ODAPack(item_ptr);
+                    odaItem = new ODAPack(item_ptr);
                     break;
                 case 9:
-                    odaItem = (ODAItem)new ODAAsyncResult(item_ptr);
+                    odaItem = new ODAAsyncResult(item_ptr);
                     break;
                 case 12:
-                    odaItem = (ODAItem)new ODARole(item_ptr);
+                    odaItem = new ODARole(item_ptr);
                     break;
                 case 13:
-                    odaItem = (ODAItem)new ODAUser(item_ptr);
+                    odaItem = new ODAUser(item_ptr);
                     break;
             }
             return odaItem;
+        }
+        public static IntPtr GetIntPtr(this ODAItem ODAItem)
+        {
+            return (IntPtr)typeof(ODAItem).GetField("_ptr", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(ODAItem);
         }
     }
 }

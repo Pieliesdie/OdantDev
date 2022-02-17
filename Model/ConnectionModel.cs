@@ -3,6 +3,7 @@ using OdantDev.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -44,10 +45,20 @@ namespace OdantDev
         {
             try
             {
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();            
+
                 if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
                 Connection.CoreMode = CoreMode.AddIn;
-                this.Nodes = Connection.Hosts.AsParallel().Cast<Host>().Select(host => new StructureItemViewModel<StructureItem>(host,logger));
+                this.Nodes = Connection.Hosts.OfType<Host>().AsParallel().Select(host => new StructureItemViewModel<StructureItem>(host,logger)).ToList();
                 this.Developers = Connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>();
+
+                stopWatch.Stop();
+                TimeSpan ts = stopWatch.Elapsed;
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                    ts.Hours, ts.Minutes, ts.Seconds,
+                    ts.Milliseconds / 10);
+                logger?.Info($"Load time: {elapsedTime}");
                 return (true, null);
             }
             catch (Exception ex)

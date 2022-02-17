@@ -205,9 +205,9 @@
         <!--<WindowsFormsHost x:Name="winHost"></WindowsFormsHost>-->
         <TreeView Grid.Row="4"
                   x:Name="OdaTree" 
-                  ItemsSource="{Binding OdaModel.Nodes}" HorizontalContentAlignment="Stretch">
-            <TreeView.ItemTemplate >
-                <HierarchicalDataTemplate ItemsSource="{Binding Path=Children}" >
+                  ItemsSource="{Binding OdaModel.Nodes, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" HorizontalContentAlignment="Stretch">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}">
                     <Grid Margin="-5,0,0,0" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -233,12 +233,12 @@
                                 </MenuItem>
                             </ContextMenu>
                         </Grid.ContextMenu>
-                        <Image Source="{Binding Path = Icon}"                         
+                        <Image Source="{Binding Path=Icon, UpdateSourceTrigger=PropertyChanged}"                         
                                Margin="0,0,5,0" 
                                Width="16"
                                Grid.Column="0"
                                HorizontalAlignment="Left"/>
-                        <TextBlock Text="{Binding Path = Name}"
+                        <TextBlock Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"
                                    Grid.Column="1"
                                    FontSize="14" Style="{StaticResource MaterialDesignHeadline5TextBlock}">
                             <TextBlock.ToolTip>
@@ -259,18 +259,18 @@
                                         <TextBlock Text="Id: "/>
                                         <TextBlock Text="{Binding Item.Id}"/>
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
+                                    <!--<StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Base Id: "/>
                                         <TextBlock Text="{Binding Item.Base.Id}"/>
-                                    </StackPanel>
+                                    </StackPanel>-->
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Rights: "/>
                                         <TextBlock Text="{Binding Item.AccessLevel}"/>
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
+                                    <!--<StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Has Module: "/>
                                         <TextBlock Text="{Binding Item.HasModule, FallbackValue=False}"/>
-                                    </StackPanel>
+                                    </StackPanel>-->
                                 </StackPanel>
                             </TextBlock.ToolTip>
                         </TextBlock>
