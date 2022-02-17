@@ -66,11 +66,11 @@ namespace OdantDev.Model
         public StructureItemViewModel() { }
         public StructureItemViewModel(T item, ILogger logger = null)
         {
-            this.item = item;
             _logger = logger;
+            Item = item;
             ItemType = Item.ItemType;
             Category = ItemType.ToString();
-            children = GetChildren(item, logger);
+            Children = GetChildren(item, logger);
             Update_CALLBACK = Updated;
             ServerApi._SetOnUpdate(item.RemoteItem.GetIntPtr(), Update_CALLBACK);
             lock (_lock)
@@ -90,7 +90,7 @@ namespace OdantDev.Model
             var workplaces = items.OfType<DomainSolution>();
             if (modules.Any())
             {
-                children = children.Append(
+                children = children.Prepend(
                     new StructureItemViewModel<T>()
                     {
                         Category = "Modules",
@@ -101,7 +101,7 @@ namespace OdantDev.Model
             }
             if (workplaces.Any())
             {
-                children = children.Append(
+                children = children.Prepend(
                     new StructureItemViewModel<T>()
                     {
                         Category = "Workplaces",

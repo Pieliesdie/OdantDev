@@ -46,11 +46,27 @@ namespace OdantDev
             try
             {
                 Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();            
+                stopWatch.Start();
 
                 if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
-                Connection.CoreMode = CoreMode.AddIn;
-                this.Nodes = Connection.Hosts.OfType<Host>().AsParallel().Select(host => new StructureItemViewModel<StructureItem>(host,logger)).ToList();
+                Connection.CoreMode = CoreMode.Work;
+                /* var localHosts = Connection.Hosts.AsParallel().OfType<Host>().AsUnordered().Where(x => x.IsLocal).Select(host => new StructureItemViewModel<StructureItem>(host, logger));
+                 var localHostsNode = new StructureItemViewModel<StructureItem>()
+                 {
+                     Category = "Local Hosts",
+                     ImageIndex = Images.GetImageIndex(Icons.Host),
+                     Children = localHosts
+                 };
+                 var remoteHosts = Connection.Hosts.AsParallel().OfType<Host>().AsUnordered().Where(x => x.IsLocal.Not()).Select(host => new StructureItemViewModel<StructureItem>(host, logger));
+                 var remoteHostsNode = new StructureItemViewModel<StructureItem>()
+                 {
+                     Category = "Remote Hosts",
+                     ImageIndex = Images.GetImageIndex(Icons.Host),
+                     Children = remoteHosts
+                 };
+                 this.Nodes = new List<StructureItemViewModel<StructureItem>>() { localHostsNode, remoteHostsNode };*/
+
+                this.Nodes = Connection.Hosts.AsParallel().OfType<Host>().AsUnordered().Select(host => new StructureItemViewModel<StructureItem>(host, logger));
                 this.Developers = Connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>();
 
                 stopWatch.Stop();
@@ -74,7 +90,7 @@ namespace OdantDev
                 this.Connection.Reset();
                 return this.Load();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return (false, ex.Message);
             }
@@ -84,7 +100,7 @@ namespace OdantDev
             try
             {
                 ServerAssemblies = Extension.LoadServerLibraries(OdaFolder.FullName, Platform, odaServerLibraries);
-                ClientAssemblies = Extension.LoadClientLibraries(OdaFolder.FullName, odaClientLibraries);             
+                ClientAssemblies = Extension.LoadClientLibraries(OdaFolder.FullName, odaClientLibraries);
                 return (true, null);
             }
             catch (Exception ex)
