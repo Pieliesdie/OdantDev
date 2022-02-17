@@ -16,12 +16,25 @@ namespace OdantDev.Model
 {
     public class StructureItemViewModel<T> : INotifyPropertyChanged where T : StructureItem
     {
-        static readonly object _lock = new object();
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+        }
+        public delegate void Update(int Type, string Params);
+        public event Update OnUpdate;
+
+        private static readonly object _lock = new object();
+        private ServerApi.OnUpdate_CALLBACK Update_CALLBACK;
         private ILogger _logger;
         private IEnumerable<StructureItemViewModel<T>> children;
         private T item;
         private RelayCommand refreshCommand;
-        public string Name => $"{Item?.ToString() ?? Category}";
+        private RelayCommand infoCommand;
+        private int imageIndex;
+
+        public string Name => $"{Item?.Label ?? Item?.Name ?? Category}";
         public RelayCommand RefreshCommand
         {
             get
@@ -29,45 +42,21 @@ namespace OdantDev.Model
                 return refreshCommand ??
                     (refreshCommand = new RelayCommand(obj =>
                     {
-                        if (Item == null) { return; }
-                        Item.Reset();
-                        this.Children = GetChildren(this.Item, _logger);
-                        lock (_lock)
-                        {
-                            ImageIndex = Item.ImageIndex;
-                        }
-                        NotifyPropertyChanged("Name");
-                        NotifyPropertyChanged("Item");
-                        NotifyPropertyChanged("Icon");
+                        Refresh();
                         _logger?.Info($"{this} has been refreshed");
                     }));
             }
         }
-        private RelayCommand infoCommand;
-        private int imageIndex;
-
+        public RelayCommand InfoCommand => infoCommand ??
+            (infoCommand = new RelayCommand(obj =>
+            {
+                if (Item == null) { return; }
+                Clipboard.Clear();
+                Clipboard.SetText(Item.FullId);
+                _logger?.Info($"FullId copied to clipboard!");
+            }));
         public bool IsItemAvailable => Item != null;
         public bool HasChildren => Children.Any();
-        public RelayCommand InfoCommand
-        {
-            get
-            {
-                return infoCommand ??
-                    (infoCommand = new RelayCommand(obj =>
-                    {
-                        if (Item == null) { return; }
-                        Clipboard.Clear();
-                        Clipboard.SetText(Item.FullId);
-                        _logger?.Info($"FullId copied to clipboard!");
-                    }));
-            }
-        }
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void NotifyPropertyChanged(string name)
-        {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(name));
-        }
         public virtual T Item { get => item; private set { item = value; NotifyPropertyChanged("Item"); } }
         public virtual string Category { get; set; }
         public virtual int ImageIndex { get => imageIndex; set { imageIndex = value; NotifyPropertyChanged("ImageIndex"); } }
@@ -79,16 +68,16 @@ namespace OdantDev.Model
         {
             this.item = item;
             _logger = logger;
-
             ItemType = Item.ItemType;
             Category = ItemType.ToString();
             children = GetChildren(item, logger);
+            Update_CALLBACK = Updated;
+            ServerApi._SetOnUpdate(item.RemoteItem.GetIntPtr(), Update_CALLBACK);
             lock (_lock)
             {
                 ImageIndex = Item.ImageIndex;
             }
         }
-
         public IEnumerable<StructureItemViewModel<T>> GetChildren(T item, ILogger logger = null)
         {
             var items = item.getChilds(ItemType.All, Deep.Near).OfType<T>().AsParallel().AsUnordered();
@@ -97,8 +86,8 @@ namespace OdantDev.Model
                 .Select(child => new StructureItemViewModel<T>(child, logger));
 
             if (item.ItemType == ItemType.Host || item.ItemType == ItemType.Class) { return children; };
-            var modules = items.Where(x => x.ItemType == ItemType.Module);
-            var workplaces = items.Where(x => x.ItemType == ItemType.Solution);
+            var modules = items.OfType<DomainModule>();
+            var workplaces = items.OfType<DomainSolution>();
             if (modules.Any())
             {
                 children = children.Append(
@@ -106,8 +95,8 @@ namespace OdantDev.Model
                     {
                         Category = "Modules",
                         ImageIndex = Images.GetImageIndex(Icons.MagentaFolder),
-                        children = items.Where(x => x.ItemType == ItemType.Module)
-                        .Select(child => new StructureItemViewModel<T>(child, logger))
+                        children = modules
+                        .Select(child => new StructureItemViewModel<T>(child as T, logger))
                     }).AsParallel();
             }
             if (workplaces.Any())
@@ -117,15 +106,33 @@ namespace OdantDev.Model
                     {
                         Category = "Workplaces",
                         ImageIndex = Images.GetImageIndex(Icons.UserRole),
-                        children = items.Where(x => x.ItemType == ItemType.Solution)
-                        .Select(child => new StructureItemViewModel<T>(child, logger))
+                        children = workplaces
+                        .Select(child => new StructureItemViewModel<T>(child as T, logger))
                     }).AsParallel();
             }
             return children;
         }
+        private void Updated(int type, IntPtr Params)
+        {
+            RefreshCommand.Execute(this);
+            OnUpdate?.Invoke(type, Params == IntPtr.Zero? String.Empty : Marshal.PtrToStringUni(Params));
+        }
+        public void Refresh()
+        {
+            if (Item == null) { return; }
+            Item.Reset();
+            this.Children = GetChildren(this.Item, _logger);
+            lock (_lock)
+            {
+                ImageIndex = Item.ImageIndex;
+            }
+            NotifyPropertyChanged("Name");
+            NotifyPropertyChanged("Item");
+            NotifyPropertyChanged("Icon");
+        }
         public override string ToString()
         {
-            return $"{Item?.ToString() ?? Category}";
+            return Name;
         }
     }
 }

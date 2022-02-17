@@ -154,13 +154,12 @@ namespace OdantDev
 
         private void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageContainer.MessageQueue.Enqueue("test!");
-
+            MessageContainer.MessageQueue.Enqueue("Not implemented :(");
         }
 
         private void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
         {
-
+            MessageContainer.MessageQueue.Enqueue("Not implemented :(");
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]

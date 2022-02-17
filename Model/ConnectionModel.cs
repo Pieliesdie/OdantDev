@@ -63,7 +63,7 @@ namespace OdantDev
             }
             catch (Exception ex)
             {
-                return (false, ex.Message);
+                return (false, ex.Message ?? ex.ToString());
             }
         }
         public (bool Success, string Error) Refresh()
@@ -71,6 +71,7 @@ namespace OdantDev
             try
             {
                 this.Connection.ResetUser();
+                this.Connection.Reset();
                 return this.Load();
             }
             catch(Exception ex)

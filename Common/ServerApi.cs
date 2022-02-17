@@ -29,7 +29,7 @@ namespace OdantDev
 
         [DllImport("odaClient.dll", EntryPoint = "ODAVariantsList_get_length", CallingConvention = CallingConvention.Cdecl)]
         public static extern int _GetLength(IntPtr list);
-        public static IEnumerable<StructureItem> getChildren(StructureItem structureItem, ItemType item_type, Deep deep)
+        public static List<StructureItem> getChildren(this StructureItem structureItem, ItemType item_type, Deep deep)
         {
             string str1 = deep == Deep.Near ? "/" : "//";
             string str2 = item_type switch
@@ -40,23 +40,23 @@ namespace OdantDev
             };
             return FindConfigItems(structureItem, $".{str1}{str2}");
         }
-        public static IEnumerable<StructureItem> FindConfigItems(StructureItem structureItem, string xq)
+        public static List<StructureItem> FindConfigItems(this StructureItem structureItem, string xq)
         {
-            if (structureItem.RemoteItem == null) { yield break; ; }
+            if (structureItem.RemoteItem == null) { return null; }
             IntPtr intPtr = structureItem.RemoteItem.GetIntPtr();
             IntPtr configItemsIntPtr = _FindConfigItems(intPtr, xq);
             int listLength = _GetLength(configItemsIntPtr);
-            var ODAItems = Enumerable.Range(0, listLength).AsParallel().AsUnordered().Select(x => CreateByType(_GetItem(configItemsIntPtr, x))).ToList();
+            var ODAItems = Enumerable.Range(0, listLength)
+                .AsParallel()
+                .AsUnordered()
+                .Select(x => CreateByType(_GetItem(configItemsIntPtr, x)))
+                .ToList();
             try
             {
                 _Release(configItemsIntPtr);
             }
             catch { }
-            foreach(var item in ODAItems)
-            {
-                yield return ItemFactory.getStorageItem(item);
-            }
-            //return ODAItems.AsParallel().AsUnordered().Select(x => ItemFactory.getStorageItem(x));
+            return ODAItems.AsParallel().AsUnordered().Select(x => ItemFactory.getStorageItem(x)).ToList();
         }
         public static ODAItem GetItem(IntPtr _ptr, int index) => CreateByType(ServerApi._GetItem(_ptr, index));
         public static ODAItem CreateByType(IntPtr item_ptr)
