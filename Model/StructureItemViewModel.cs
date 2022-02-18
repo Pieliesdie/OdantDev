@@ -85,7 +85,12 @@ namespace OdantDev.Model
                 .Where(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution)
                 .Select(child => new StructureItemViewModel<T>(child, logger));
 
-            if (item.ItemType == ItemType.Host || item.ItemType == ItemType.Class) { return children; };
+            if (item.ItemType == ItemType.Host || item.ItemType == ItemType.Class)
+            {
+                foreach (var viewItem in children)
+                    yield return viewItem;
+                yield break;
+            };
             var modules = items.OfType<DomainModule>();
             var workplaces = items.OfType<DomainSolution>();
             if (modules.Any())
@@ -110,11 +115,17 @@ namespace OdantDev.Model
                         .Select(child => new StructureItemViewModel<T>(child as T, logger))
                     }).AsParallel();
             }
-            return children;
+            foreach(var viewItem in children)
+            {
+                yield return viewItem;
+            }
         }
         private void Updated(int type, IntPtr Params)
         {
-            RefreshCommand.Execute(this);
+            if (type < 6)
+            {
+                RefreshCommand.Execute(this);
+            }
             OnUpdate?.Invoke(type, Params == IntPtr.Zero? String.Empty : Marshal.PtrToStringUni(Params));
         }
         public void Refresh()

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace OdantDev
 {
@@ -49,23 +50,7 @@ namespace OdantDev
                 stopWatch.Start();
 
                 if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
-                Connection.CoreMode = CoreMode.Work;
-                /* var localHosts = Connection.Hosts.AsParallel().OfType<Host>().AsUnordered().Where(x => x.IsLocal).Select(host => new StructureItemViewModel<StructureItem>(host, logger));
-                 var localHostsNode = new StructureItemViewModel<StructureItem>()
-                 {
-                     Category = "Local Hosts",
-                     ImageIndex = Images.GetImageIndex(Icons.Host),
-                     Children = localHosts
-                 };
-                 var remoteHosts = Connection.Hosts.AsParallel().OfType<Host>().AsUnordered().Where(x => x.IsLocal.Not()).Select(host => new StructureItemViewModel<StructureItem>(host, logger));
-                 var remoteHostsNode = new StructureItemViewModel<StructureItem>()
-                 {
-                     Category = "Remote Hosts",
-                     ImageIndex = Images.GetImageIndex(Icons.Host),
-                     Children = remoteHosts
-                 };
-                 this.Nodes = new List<StructureItemViewModel<StructureItem>>() { localHostsNode, remoteHostsNode };*/
-
+                Connection.CoreMode = CoreMode.AddIn;
                 this.Nodes = Connection.Hosts.AsParallel().OfType<Host>().AsUnordered().Select(host => new StructureItemViewModel<StructureItem>(host, logger));
                 this.Developers = Connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>();
 
