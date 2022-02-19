@@ -16,8 +16,8 @@ namespace OdantDev
         public static readonly string[] odaClientLibraries = new string[] { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
         public static readonly string[] odaServerLibraries = new string[] { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
         private readonly ILogger logger;
-        private IEnumerable<StructureItemViewModel<StructureItem>> nodes;
-        private IEnumerable<DomainDeveloper> developers;
+        private List<StructureItemViewModel<StructureItem>> hosts;
+        private List<DomainDeveloper> developers;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -26,8 +26,8 @@ namespace OdantDev
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
-        public IEnumerable<StructureItemViewModel<StructureItem>> Nodes { get => nodes; set { nodes = value; NotifyPropertyChanged("Nodes"); } }
-        public IEnumerable<DomainDeveloper> Developers { get => developers; set { developers = value; NotifyPropertyChanged("Developers"); } }
+        public List<StructureItemViewModel<StructureItem>> Hosts { get => hosts; set { hosts = value; NotifyPropertyChanged("Hosts"); } }
+        public List<DomainDeveloper> Developers { get => developers; set { developers = value; NotifyPropertyChanged("Developers"); } }
 
         public static List<IntPtr> ServerAssemblies { get; set; }
 
@@ -51,8 +51,8 @@ namespace OdantDev
 
                 if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
                 Connection.CoreMode = CoreMode.AddIn;
-                this.Nodes = Connection.Hosts.AsParallel().OfType<Host>().AsUnordered().Select(host => new StructureItemViewModel<StructureItem>(host, logger: logger)).ToList();
-                this.Developers = Connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>();
+                this.Hosts = Connection.Hosts.AsParallel().OfType<Host>().AsUnordered().Select(host => new StructureItemViewModel<StructureItem>(host, logger: logger)).ToList();
+                this.Developers = Connection.LocalHost?.Develope?.Domains?.Cast<DomainDeveloper>().ToList();
 
                 stopWatch.Stop();
                 TimeSpan ts = stopWatch.Elapsed;

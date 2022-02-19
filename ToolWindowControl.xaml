@@ -45,7 +45,7 @@
                     Orientation="Horizontal" 
                     HorizontalAlignment="Center" 
                     DockPanel.Dock="Top" 
-                    Margin="5,0,0,0">
+                    Margin="5,0,0,5">
             <materialDesign:PackIcon Kind="Database"
                                          Width="20"
                                          Height="20" />
@@ -83,24 +83,6 @@
                     Visibility="Collapsed"
                     x:Name="CommonButtons"
                     materialDesign:ThemeAssist.Theme="Inherit">
-            <StackPanel>
-                <ComboBox Style="{StaticResource MaterialDesignFilledComboBox}"
-                          x:Name="DeveloperCb"
-                          IsEditable="False"
-                          materialDesign:HintAssist.Hint="Developer domain"
-                          materialDesign:HintAssist.HelperText="Please select developer domain on localhost"
-                          materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
-                          ItemsSource="{Binding OdaModel.Developers}"
-                          materialDesign:TextFieldAssist.HasClearButton="True"
-                          ToolTip="Please select developer domain on localhost"
-                          Margin="5,0,5,20">
-                    <ComboBox.SelectedItem>
-                        <Binding Path="Name"
-                                 UpdateSourceTrigger="PropertyChanged">
-                        </Binding>
-                    </ComboBox.SelectedItem>
-                </ComboBox>
-            </StackPanel>
             <WrapPanel Orientation="Horizontal">
                 <Button Width="90"
                         HorizontalContentAlignment="Center"
@@ -203,51 +185,76 @@
             </WrapPanel>
         </StackPanel>
         <!--<WindowsFormsHost x:Name="winHost"></WindowsFormsHost>-->
-        <TreeView Grid.Row="4"
-                  x:Name="OdaTree"            
-                  ItemsSource="{Binding OdaModel.Nodes,UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}" HorizontalContentAlignment="Stretch">
-            <TreeView.Resources>
-                <Style TargetType="TreeViewItem" BasedOn="{StaticResource MaterialDesignTreeViewItem}">
-                    <Setter
-                        Property="materialDesign:TreeViewAssist.ExpanderSize"
-                        Value="18" />
-                </Style>
-            </TreeView.Resources>
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}">
-                    <Grid Margin="-5,0,0,0" >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.ContextMenu>
-                            <ContextMenu Visibility="{Binding Path=IsItemAvailable, Converter={StaticResource BoolToVis}}">
-                                <MenuItem Name="MenuItemRefresh" Command="{Binding RefreshCommand}">
-                                    <MenuItem.Header>
-                                        <TextBlock Text="Refresh"/>
-                                    </MenuItem.Header>
-                                    <MenuItem.Icon>
-                                        <materialDesign:PackIcon Kind="Refresh" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Name="MenuItemInfo" Command="{Binding InfoCommand}">
-                                    <MenuItem.Header>
-                                        <TextBlock Text="Info" />
-                                    </MenuItem.Header>
-                                    <MenuItem.Icon>
-                                        <materialDesign:PackIcon Kind="InformationCircleOutline" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                            </ContextMenu>
-                        </Grid.ContextMenu>
-                        <Image Source="{Binding Path=Icon, UpdateSourceTrigger=PropertyChanged}"                         
-                               Margin="0,0,5,0" 
-                               Width="16"
-                               Grid.Column="0"
-                               HorizontalAlignment="Left"/>
-                        <TextBlock Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"
-                                   Grid.Column="1"
-                                   FontSize="14" Style="{StaticResource MaterialDesignHeadline5TextBlock}">
+        <TabControl Grid.Row="4"
+                    x:Name="MainTabControl"
+                    Visibility="Collapsed"
+                    Style="{StaticResource MaterialDesignNavigatilRailTabControl}"
+                    BorderThickness="0"
+                    BorderBrush="Transparent"
+                    TabStripPlacement="Left"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth0"
+                    materialDesign:ColorZoneAssist.Mode="Standard"
+                    SnapsToDevicePixels="True"
+                    materialDesign:NavigationRailAssist.ShowSelectionBackground="True">
+            <TabItem Name="TreeTab">
+                <TabItem.Header>
+                    <StackPanel
+                        Height="auto"
+                        Width="auto">
+                        <materialDesign:PackIcon
+                            Margin="5"
+                            Kind="DesktopClassic"
+                            Width="24"
+                            Height="24"
+                            HorizontalAlignment="Center" />
+                        <TextBlock
+                            Text="Hosts"
+                            HorizontalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
+                <TreeView
+                    x:Name="OdaTree"            
+                    ItemsSource="{Binding OdaModel.Hosts,UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}" HorizontalContentAlignment="Stretch">
+                    <TreeView.Resources>
+                        <Style TargetType="TreeViewItem" BasedOn="{StaticResource MaterialDesignTreeViewItem}">
+                            <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18" />
+                        </Style>
+                    </TreeView.Resources>
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}">
+                            <Grid Margin="-5,0,0,0" >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.ContextMenu>
+                                    <ContextMenu Visibility="{Binding Path=IsItemAvailable, Converter={StaticResource BoolToVis}}">
+                                        <MenuItem Name="MenuItemRefresh" Command="{Binding RefreshCommand}">
+                                            <MenuItem.Header>
+                                                <TextBlock Text="Refresh"/>
+                                            </MenuItem.Header>
+                                            <MenuItem.Icon>
+                                                <materialDesign:PackIcon Kind="Refresh" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Name="MenuItemInfo" Command="{Binding InfoCommand}">
+                                            <MenuItem.Header>
+                                                <TextBlock Text="Info" />
+                                            </MenuItem.Header>
+                                            <MenuItem.Icon>
+                                                <materialDesign:PackIcon Kind="InformationCircleOutline" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </Grid.ContextMenu>
+                                <Image Source="{Binding Path=Icon, UpdateSourceTrigger=PropertyChanged}"                                
+                                       Margin="0,0,5,0" 
+                                       Width="16"
+                                       Grid.Column="0"
+                                       HorizontalAlignment="Left"/>
+                                <TextBlock Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"
+                                           Grid.Column="1"
+                                           FontSize="14" Style="{StaticResource MaterialDesignHeadline5TextBlock}">
                             <!--Too many lags with this-->
                             <!--<TextBlock.ToolTip>
                                 <StackPanel>
@@ -281,11 +288,60 @@
                                     </StackPanel>
                                 </StackPanel>
                             </TextBlock.ToolTip>-->
-                        </TextBlock>
-                    </Grid>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
+                                </TextBlock>
+                            </Grid>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </TabItem>
+            <TabItem Name="RecentlyTab">
+                <TabItem.Header>
+                    <StackPanel
+                        Height="auto"
+                        Width="auto">
+                        <materialDesign:PackIcon
+                            Margin="5"
+                            Kind="ClockOutline"
+                            Width="24"
+                            Height="24"
+                            HorizontalAlignment="Center" />
+                        <TextBlock
+                            Text="Recently"
+                            HorizontalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
+            </TabItem>
+            <TabItem x:Name="SettingsTab">
+                <TabItem.Header>
+                    <StackPanel
+                        Height="auto"
+                        Width="auto">
+                        <materialDesign:PackIcon
+                            Margin="5"
+                            Kind="Settings"
+                            Width="24"
+                            Height="24"
+                            HorizontalAlignment="Center" />
+                        <TextBlock
+                            Text="Settings"
+                            HorizontalAlignment="Center" />
+                    </StackPanel>
+                </TabItem.Header>
+                <StackPanel>
+                    <ComboBox Style="{StaticResource MaterialDesignFilledComboBox}"
+                          x:Name="DeveloperCb"
+                          IsEditable="False"
+                          materialDesign:HintAssist.Hint="Developer domain"
+                          materialDesign:HintAssist.HelperText="Please select developer domain on localhost"
+                          materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
+                          ItemsSource="{Binding OdaModel.Developers}"
+                          materialDesign:TextFieldAssist.HasClearButton="True"
+                          ToolTip="Please select developer domain on localhost"
+                          Margin="5,0,5,20">
+                    </ComboBox>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
         <StackPanel Grid.Row="5"
                     Background="AliceBlue"
                     Orientation="Horizontal"

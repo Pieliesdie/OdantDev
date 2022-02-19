@@ -19,6 +19,7 @@ namespace OdantDev.Model
         public List<string> LastProjectIds { get; set; }
         public bool IsSimpleTheme { get; set; }
         public bool IsAutoDetectOdaPath { get; set; }
+        public bool IsLazyTreeLoad { get; set; }
         public string OdaFolder { get { return IsAutoDetectOdaPath ? Extension.LastOdaFolder.FullName : odaFolder; } set => odaFolder = value; }
 
         public AddinSettings() { }

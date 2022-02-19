@@ -126,6 +126,7 @@ namespace OdantDev
                 CommonButtons.Visibility = Visibility.Visible;
                 ErrorSp.Visibility = Visibility.Collapsed;
                 OdaTree.Visibility = Visibility.Visible;
+                MainTabControl.Visibility = Visibility.Visible;
                 this.DataContext = this;
                 return (true, null);
             }
@@ -140,6 +141,7 @@ namespace OdantDev
             spConnect.Visibility = Visibility.Visible;
             CommonButtons.Visibility = Visibility.Collapsed;
             OdaTree.Visibility = Visibility.Collapsed;
+            MainTabControl.Visibility = Visibility.Collapsed;
             ErrorTb.Text = message;
         }
         #endregion
@@ -158,7 +160,6 @@ namespace OdantDev
         private void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
             MessageContainer.MessageQueue.Enqueue("Not implemented :(");
-            addinSettings.Save();
         }
 
         private void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
