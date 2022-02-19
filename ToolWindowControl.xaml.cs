@@ -21,6 +21,7 @@ namespace OdantDev
     /// </summary>
     public partial class ToolWindow1Control : UserControl, INotifyPropertyChanged
     {
+        private AddinSettings addinSettings; 
         private ConnectionModel odaModel;
         private DirectoryInfo OdaFolder;
         private ILogger logger;
@@ -54,9 +55,11 @@ namespace OdantDev
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             this.DTE2 = dTE2;
+            var AddinSettingsFolder = Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ODA", "AddinSettings"));
+            addinSettings = new AddinSettings(AddinSettingsFolder);
             InitializeMaterialDesign();
-            InitializeComponent();
             InitializeOdaComponents();
+            InitializeComponent();
             logger = new PopupController(this.MessageContainer);
             VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
             ThemeCheckBox.IsChecked = IsVisualStudioDark();
@@ -82,7 +85,7 @@ namespace OdantDev
 
         private void InitializeOdaComponents()
         {
-            OdaFolder = Extension.OdaFolder;
+            OdaFolder = new DirectoryInfo(addinSettings.OdaFolder);
             var LoadOdaLibrariesResult = ConnectionModel.LoadOdaLibraries(OdaFolder);
             if (LoadOdaLibrariesResult.Success.Not())
             {
@@ -155,6 +158,7 @@ namespace OdantDev
         private void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
             MessageContainer.MessageQueue.Enqueue("Not implemented :(");
+            addinSettings.Save();
         }
 
         private void DownloadModuleButton_Click(object sender, RoutedEventArgs e)

@@ -327,10 +327,7 @@
 		<string>odaXML.dll</string>
 		<string>odaCore.dll</string>
 	</OdaLibraries>
-	<ServerLibraries>
-		<string>odaClient.dll</string>
-		<string>fastxmlparser.dll</string>
-		<string>ucrtbase.dll</string>
-	</ServerLibraries>
+	<IsAutoDetectOdaPath>true</IsAutoDetectOdaPath>
+	<IsSimpleTheme>false</IsSimpleTheme>
 	<LastProjectIds />
 </AddinSettings>

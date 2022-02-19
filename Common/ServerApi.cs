@@ -31,7 +31,7 @@ namespace OdantDev
         public static extern int _GetLength(IntPtr list);
         public static async Task<IEnumerable<T>> getChildsAsync<T>(this StructureItem item, ItemType itemType, Deep deep)
         {
-            return await Task.Run(() => item.getChilds(itemType, deep).OfType<T>().AsParallel().AsUnordered());
+            return await Task.Run(() => item.getChilds(itemType, deep).OfType<T>());
         }
         public static List<StructureItem> getChildren(this StructureItem structureItem, ItemType item_type, Deep deep)
         {

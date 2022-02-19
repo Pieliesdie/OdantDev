@@ -206,6 +206,13 @@
         <TreeView Grid.Row="4"
                   x:Name="OdaTree"            
                   ItemsSource="{Binding OdaModel.Nodes,UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}" HorizontalContentAlignment="Stretch">
+            <TreeView.Resources>
+                <Style TargetType="TreeViewItem" BasedOn="{StaticResource MaterialDesignTreeViewItem}">
+                    <Setter
+                        Property="materialDesign:TreeViewAssist.ExpanderSize"
+                        Value="18" />
+                </Style>
+            </TreeView.Resources>
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}">
                     <Grid Margin="-5,0,0,0" >

@@ -113,9 +113,9 @@ namespace OdantDev
             return libPaths.Select(libPath => Assembly.LoadFrom(Path.Combine(path, libPath))).ToList();
         }
 
-        public static DirectoryInfo OdaFolder => OdaPath().Directory;
+        public static DirectoryInfo LastOdaFolder => LastOdaPath().Directory;
 
-        public static FileInfo OdaPath()
+        public static FileInfo LastOdaPath()
         {
             string[] strArray = new string[2] { "oda", "odant" };
             foreach (string name1 in strArray)

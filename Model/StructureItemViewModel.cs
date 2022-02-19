@@ -27,13 +27,13 @@ namespace OdantDev.Model
 
         private static readonly object _lock = new object();
         private ServerApi.OnUpdate_CALLBACK Update_CALLBACK;
-        private ILogger _logger;
+        private ILogger logger;
         private IEnumerable<StructureItemViewModel<T>> children;
         private T item;
+        private T parent;
         private RelayCommand refreshCommand;
         private RelayCommand infoCommand;
         private int imageIndex;
-
         public string Name => $"{Item?.Label ?? Item?.Name ?? Category}";
         public RelayCommand RefreshCommand
         {
@@ -43,7 +43,7 @@ namespace OdantDev.Model
                     (refreshCommand = new RelayCommand(obj =>
                     {
                         Refresh();
-                        _logger?.Info($"{this} has been refreshed");
+                        logger?.Info($"{this} has been refreshed");
                     }));
             }
         }
@@ -53,21 +53,23 @@ namespace OdantDev.Model
                 if (Item == null) { return; }
                 Clipboard.Clear();
                 Clipboard.SetText(Item.FullId);
-                _logger?.Info($"FullId copied to clipboard!");
+                logger?.Info($"FullId copied to clipboard!");
             }));
         public bool IsItemAvailable => Item != null;
         public bool HasChildren => Children.Any();
         public virtual T Item { get => item; private set { item = value; NotifyPropertyChanged("Item"); } }
+        public virtual T Parent { get => parent; private set { parent = value; NotifyPropertyChanged("Parent"); } }
         public virtual string Category { get; set; }
         public virtual int ImageIndex { get => imageIndex; set { imageIndex = value; NotifyPropertyChanged("ImageIndex"); } }
         public virtual ImageSource Icon => Extension.ConvertToBitmapImage(Images.GetImage(ImageIndex));
         public virtual IEnumerable<StructureItemViewModel<T>> Children { get => children; set { children = value; NotifyPropertyChanged("Children"); } }
         public ItemType ItemType { get; private set; }
         public StructureItemViewModel() { }
-        public StructureItemViewModel(T item, ILogger logger = null)
+        public StructureItemViewModel(T item, T parent = null, ILogger logger = null)
         {
-            _logger = logger;
+            this.logger = logger;
             Item = item;
+            Parent = parent;
             ItemType = Item.ItemType;
             Category = ItemType.ToString();
             Children = GetChildren(item, logger);
@@ -83,27 +85,22 @@ namespace OdantDev.Model
             var items = item.getChilds(ItemType.All, Deep.Near).OfType<T>().AsParallel().AsUnordered();
             var children = items
                 .Where(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution)
-                .Select(child => new StructureItemViewModel<T>(child, logger));
+                .Select(child => new StructureItemViewModel<T>(child, item, logger));
 
-            if (item.ItemType == ItemType.Host || item.ItemType == ItemType.Class)
+            switch (item.ItemType)
             {
-                foreach (var viewItem in children)
-                    yield return viewItem;
-                yield break;
+                case ItemType.Class:
+                case ItemType.Module:
+                case ItemType.Solution:
+                case ItemType.Host:
+                    {
+                        foreach (var viewItem in children)
+                            yield return viewItem;
+                        yield break;
+                    }
             };
             var modules = items.OfType<DomainModule>();
             var workplaces = items.OfType<DomainSolution>();
-            if (modules.Any())
-            {
-                children = children.Prepend(
-                    new StructureItemViewModel<T>()
-                    {
-                        Category = "Modules",
-                        ImageIndex = Images.GetImageIndex(Icons.MagentaFolder),
-                        children = modules
-                        .Select(child => new StructureItemViewModel<T>(child as T, logger))
-                    }).AsParallel();
-            }
             if (workplaces.Any())
             {
                 children = children.Prepend(
@@ -111,11 +108,20 @@ namespace OdantDev.Model
                     {
                         Category = "Workplaces",
                         ImageIndex = Images.GetImageIndex(Icons.UserRole),
-                        children = workplaces
-                        .Select(child => new StructureItemViewModel<T>(child as T, logger))
+                        children = workplaces.Select(child => new StructureItemViewModel<T>(child as T, item, logger))
                     }).AsParallel();
             }
-            foreach(var viewItem in children)
+            if (modules.Any())
+            {
+                children = children.Prepend(
+                    new StructureItemViewModel<T>()
+                    {
+                        Category = "Modules",
+                        ImageIndex = Images.GetImageIndex(Icons.MagentaFolder),
+                        children = modules.Select(child => new StructureItemViewModel<T>(child as T, item, logger))
+                    }).AsParallel();
+            }
+            foreach (var viewItem in children)
             {
                 yield return viewItem;
             }
@@ -126,13 +132,14 @@ namespace OdantDev.Model
             {
                 RefreshCommand.Execute(this);
             }
-            OnUpdate?.Invoke(type, Params == IntPtr.Zero? String.Empty : Marshal.PtrToStringUni(Params));
+            OnUpdate?.Invoke(type, Params == IntPtr.Zero ? String.Empty : Marshal.PtrToStringUni(Params));
         }
         public void Refresh()
         {
             if (Item == null) { return; }
+            (Item as Class)?.ReloadClassFromServer();
             Item.Reset();
-            this.Children = GetChildren(this.Item, _logger);
+            this.Children = GetChildren(this.Item, logger);
             lock (_lock)
             {
                 ImageIndex = Item.ImageIndex;
