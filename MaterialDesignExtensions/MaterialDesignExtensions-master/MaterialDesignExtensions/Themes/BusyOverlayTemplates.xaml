@@ -15,10 +15,22 @@
         <Setter Property="ContentTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
-                                 Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
-                                 IsIndeterminate="{Binding Path=IsBusy, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
-                                 Width="48" Height="48" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" >
+                        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"                               
+                                     Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
+                                     IsIndeterminate="{Binding Path=IsBusy, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
+                                     Width="{Binding Path=ProgressSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
+                                     Height="{Binding Path=ProgressSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}" 
+                                    HorizontalAlignment="Center" VerticalAlignment="Center" >
+                            <ProgressBar.LayoutTransform>
+                                <ScaleTransform CenterX="0.5" CenterY="0.5" ScaleX="2" ScaleY="2" />
+                            </ProgressBar.LayoutTransform>
+                        </ProgressBar>
+                        <TextBlock Margin="0,15,0,0" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                   FontSize="{Binding Path=FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
+                                   Text="{Binding Path=Text, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"/>
+                    </StackPanel>
                 </DataTemplate>
             </Setter.Value>
         </Setter>

@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using MaterialDesignExtensions.Controls;
+using System.Threading.Tasks;
 
 namespace OdantDev
 {
@@ -22,6 +23,7 @@ namespace OdantDev
     /// </summary>
     public partial class ToolWindow1Control : UserControl, INotifyPropertyChanged
     {
+        private bool isOdaLibraryesloaded;
         private ConnectionModel odaModel;
         private DirectoryInfo OdaFolder;
         private ILogger logger;
@@ -29,6 +31,8 @@ namespace OdantDev
         private VisualStudioIntegration odaAddinModel;
         private bool isDarkTheme;
         private AddinSettings addinSettings;
+        private bool isBusy;
+
         public bool IsDarkTheme
         {
             get => isDarkTheme;
@@ -40,6 +44,7 @@ namespace OdantDev
                 isDarkTheme = value;
             }
         }
+        public bool IsBusy { get => isBusy; set { isBusy = value; NotifyPropertyChanged("IsBusy"); } }
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(string name)
         {
@@ -60,10 +65,11 @@ namespace OdantDev
             AddinSettings = new AddinSettings(AddinSettingsFolder);
             InitializeMaterialDesign();
             InitializeComponent();
-            InitializeOdaComponents();
+            //isOdaLibraryesloaded = InitializeOdaComponents();
             logger = new PopupController(this.MessageContainer);
             VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
             ThemeCheckBox.IsChecked = IsVisualStudioDark();
+            this.DataContext = this;
         }
         private void VSColorTheme_ThemeChanged(Microsoft.VisualStudio.PlatformUI.ThemeChangedEventArgs e)
         {
@@ -85,21 +91,26 @@ namespace OdantDev
             var ext = new OpenDirectoryControl();
         }
 
-        private void InitializeOdaComponents()
+        private bool InitializeOdaComponents()
         {
+            if (isOdaLibraryesloaded)
+            {
+                return true;
+            }
             if (Directory.Exists(AddinSettings.OdaFolder).Not())
             {
                 ShowException($"Can't find oda folder {AddinSettings.OdaFolder}.\nRun application with admin rights before");
                 ConnectButton.Visibility = Visibility.Collapsed;
-                return;
+                return false;
             }
             OdaFolder = new DirectoryInfo(AddinSettings.OdaFolder);
             var LoadOdaLibrariesResult = ConnectionModel.LoadOdaLibraries(OdaFolder);
             if (LoadOdaLibrariesResult.Success.Not())
             {
                 ShowException(LoadOdaLibrariesResult.Error);
-                return;
+                return false;
             }
+            return true;
         }
 
         private bool IsVisualStudioDark()
@@ -111,7 +122,12 @@ namespace OdantDev
         #region Connect to oda and get data
         private async void Connect(object sender, RoutedEventArgs e)
         {
-            var UpdateModelResult = LoadModel();
+            if (InitializeOdaComponents().Not())
+            {
+                return;
+            }
+            IsBusy = true;
+            var UpdateModelResult = await LoadModelAsync();
             if (UpdateModelResult.Success.Not())
             {
                 ShowException(UpdateModelResult.Error);
@@ -123,11 +139,13 @@ namespace OdantDev
             {
                 OdantDevPackage.Env_DTE.Solution.Create(OdaFolder.CreateSubdirectory("AddIn").FullName, "ODANT");
             }
+            IsBusy = false;
         }
-        private (bool Success, string Error) LoadModel()
+        private async Task<(bool Success, string Error)> LoadModelAsync()
         {
+            IsBusy = true;
             OdaModel = new ConnectionModel(Common.Connection, logger);
-            var GetDataResult = OdaModel.Load();
+            var GetDataResult = await OdaModel.LoadAsync();
             if (GetDataResult.Success)
             {
                 spConnect.Visibility = Visibility.Collapsed;
@@ -135,11 +153,12 @@ namespace OdantDev
                 ErrorSp.Visibility = Visibility.Collapsed;
                 OdaTree.Visibility = Visibility.Visible;
                 MainTabControl.Visibility = Visibility.Visible;
-                this.DataContext = this;
+                IsBusy = false;
                 return (true, null);
             }
             else
             {
+                IsBusy = false;
                 return (false, GetDataResult.Error);
             }
         }
@@ -155,9 +174,9 @@ namespace OdantDev
         #endregion
 
         #region main button logic
-        private void RefreshTreeButton_Click(object sender, RoutedEventArgs e)
+        private async void RefreshTreeButton_Click(object sender, RoutedEventArgs e)
         {
-            var UpdateModelResult = OdaModel.Refresh();
+            var UpdateModelResult = await OdaModel.RefreshAsync();
             if (UpdateModelResult.Success.Not())
             {
                 ShowException(UpdateModelResult.Error);
@@ -167,12 +186,12 @@ namespace OdantDev
 
         private async void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageContainer.MessageQueue.Enqueue("Not implemented :(");
+            logger.Info("Not implemented :(");
         }
 
         private void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageContainer.MessageQueue.Enqueue("Not implemented :(");
+            logger.Info("Not implemented :(");
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]

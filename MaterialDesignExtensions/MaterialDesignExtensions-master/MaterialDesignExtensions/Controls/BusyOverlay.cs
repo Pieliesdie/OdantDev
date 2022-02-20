@@ -34,7 +34,20 @@ namespace MaterialDesignExtensions.Controls
                 SetValue(IsBusyProperty, value);
             }
         }
+        public static readonly DependencyProperty TextProperty = DependencyProperty.Register(
+           nameof(Text), typeof(string), typeof(BusyOverlay), new PropertyMetadata(string.Empty));
+        public string Text
+        {
+            get
+            {
+                return (string)GetValue(TextProperty);
+            }
 
+            set
+            {
+                SetValue(TextProperty, value);
+            }
+        }
         /// <summary>
         /// The progress in percentage of the operation causing the busy state.
         /// </summary>
@@ -56,7 +69,24 @@ namespace MaterialDesignExtensions.Controls
                 SetValue(ProgressProperty, value);
             }
         }
+        public static readonly DependencyProperty ProgressSizeProperty = DependencyProperty.Register(
+         nameof(ProgressSize), typeof(int), typeof(BusyOverlay), new PropertyMetadata(48));
 
+        /// <summary>
+        /// The progress in percentage of the operation causing the busy state.
+        /// </summary>
+        public int ProgressSize
+        {
+            get
+            {
+                return (int)GetValue(ProgressSizeProperty);
+            }
+
+            set
+            {
+                SetValue(ProgressSizeProperty, value);
+            }
+        }
         /// <summary>
         /// Creates a new <see cref="BusyOverlay" />.
         /// </summary>

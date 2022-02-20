@@ -42,17 +42,23 @@ namespace OdantDev
         }
 
         public static Bitness Platform => IntPtr.Size == 4 ? Bitness.x86 : Bitness.x64;
-        public (bool Success, string Error) Load()
+        public async Task<(bool Success, string Error)> LoadAsync()
         {
+            Stopwatch stopWatch = null;
             try
             {
-                Stopwatch stopWatch = new Stopwatch();
+                stopWatch = new Stopwatch();
                 stopWatch.Start();
 
                 if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
                 Connection.CoreMode = CoreMode.AddIn;
-                this.Developers = Connection.LocalHost?.Develope?.Domains?.OfType<DomainDeveloper>();
                 this.Hosts = Connection.Hosts.AsParallel().OfType<Host>().AsUnordered().Select(host => new StructureItemViewModel<StructureItem>(host, logger: logger)).ToList();
+                var retryCount = 5;
+                while (retryCount-- > 0 && Connection.LocalHost?.Develope?.Domains == null)// Я не знаю почему оно null если обратится сразу
+                {
+                    await Task.Delay(1000);
+                }
+                this.Developers = Connection.LocalHost?.Develope?.Domains?.OfType<DomainDeveloper>();
                 stopWatch.Stop();
                 TimeSpan ts = stopWatch.Elapsed;
                 string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
@@ -65,14 +71,18 @@ namespace OdantDev
             {
                 return (false, ex.Message ?? ex.ToString());
             }
+            finally
+            {
+                stopWatch?.Stop();
+            }
         }
-        public (bool Success, string Error) Refresh()
+        public async Task<(bool Success, string Error)> RefreshAsync()
         {
             try
             {
                 this.Connection.ResetUser();
                 this.Connection.Reset();
-                return this.Load();
+                return await this.LoadAsync();
             }
             catch (Exception ex)
             {
