@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:odantdev="clr-namespace:OdantDev"
+             xmlns:odantdev="clr-namespace:OdantDev" xmlns:mde="https://spiegelp.github.io/MaterialDesignExtensions/winfx/xaml"
+             d:DataContext="{d:DesignInstance Type=odantdev:ToolWindow1Control}"
              mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="300"
@@ -17,11 +18,14 @@
         <ResourceDictionary>
             <BooleanToVisibilityConverter x:Key="BoolToVis" />
             <ResourceDictionary.MergedDictionaries>
-                <materialDesign:BundledTheme  BaseTheme="Dark"                                       
+                <materialDesign:BundledTheme BaseTheme="Dark"                                       
                                              PrimaryColor="DeepPurple"
-                                             SecondaryColor="Blue"
+                                             SecondaryColor="Purple"
                                              ColorAdjustment="{materialDesign:ColorAdjustment}"/>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/Generic.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/MaterialDesignLightTheme.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/MaterialDesignDarkTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -62,7 +66,7 @@
                     Click="Connect"
                     Width="120"
                     Height="31"
-                    Name="button1"
+                    Name="ConnectButton"
                     Margin="10,100,10,10" />
             <StackPanel Orientation="Horizontal"
                         x:Name="ErrorSp"
@@ -71,7 +75,7 @@
                                          Height="25"
                                          Width="25" />
                 <TextBlock TextWrapping="Wrap"
-                           MaxWidth="200"
+                           MaxWidth="350"
                            Padding="0,0,0,0"
                            x:Name="ErrorTb">
                     Error
@@ -186,6 +190,7 @@
         </StackPanel>
         <!--<WindowsFormsHost x:Name="winHost"></WindowsFormsHost>-->
         <TabControl Grid.Row="4"
+                    SelectionChanged="MainTabControl_SelectionChanged"
                     x:Name="MainTabControl"
                     Visibility="Collapsed"
                     Style="{StaticResource MaterialDesignNavigatilRailTabControl}"
@@ -327,19 +332,117 @@
                             HorizontalAlignment="Center" />
                     </StackPanel>
                 </TabItem.Header>
-                <StackPanel>
-                    <ComboBox Style="{StaticResource MaterialDesignFilledComboBox}"
-                          x:Name="DeveloperCb"
-                          IsEditable="False"
-                          materialDesign:HintAssist.Hint="Developer domain"
-                          materialDesign:HintAssist.HelperText="Please select developer domain on localhost"
-                          materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
-                          ItemsSource="{Binding OdaModel.Developers}"
-                          materialDesign:TextFieldAssist.HasClearButton="True"
-                          ToolTip="Please select developer domain on localhost"
-                          Margin="5,0,5,20">
-                    </ComboBox>
-                </StackPanel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="5,0,5,0" >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0">
+                            <ComboBox Style="{StaticResource MaterialDesignFilledComboBox}"
+                                      materialDesign:HintAssist.IsFloating="True"
+                                      x:Name="DeveloperCb"
+                                      IsEditable="False"                                  
+                                      materialDesign:HintAssist.Hint="Developer domain"
+                                      materialDesign:HintAssist.HelperText="Please select developer domain on localhost"
+                                      materialDesign:HintAssist.HelperTextFontSize="11"
+                                      materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
+                                      ItemsSource="{Binding OdaModel.Developers, Mode=OneWay}"
+                                      materialDesign:TextFieldAssist.HasClearButton="True"
+                                      ToolTip="Please select developer domain on localhost"
+                                      Margin="0,0,0,20"                           
+                                      FontSize="16">
+                            </ComboBox>
+                        </StackPanel>
+                        <GroupBox Name="UISettingsGroupBox" Grid.Row="1" Header="UI Settings" FontSize="14" BorderThickness="0.8">
+                            <Grid Margin="5">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                </Grid.RowDefinitions>
+                                <CheckBox Grid.Row="0"
+                                      IsChecked="{Binding AddinSettings.IsSimpleTheme, Mode=TwoWay}" 
+                                      Margin="5"
+                                      FontSize="16"
+                                      materialDesign:CheckBoxAssist.CheckBoxSize="22"
+                                      VerticalContentAlignment="Top"
+                                      ToolTip="Disabling material theme on hosts"
+                                      x:Name="IsSimpleThemeCheckBox">
+                                    <TextBlock VerticalAlignment="Center">Simple hosts tree</TextBlock>
+                                </CheckBox>
+                                <CheckBox Grid.Row="1"
+                                      IsChecked="{Binding AddinSettings.IsAutoDetectOdaPath, Mode=TwoWay}" 
+                                      FontSize="16"
+                                      Margin="5"
+                                      materialDesign:CheckBoxAssist.CheckBoxSize="22"
+                                      VerticalContentAlignment="Top"
+                                      ToolTip="Set oda folder automatically"
+                                      x:Name="IsAutoDetectOdaPathCheckBox">
+                                    <TextBlock VerticalAlignment="Center">Auto detect oda folder</TextBlock>
+                                </CheckBox>
+                                <CheckBox Grid.Row="2" 
+                                      IsChecked="{Binding AddinSettings.IsLazyTreeLoad, Mode=TwoWay}" 
+                                      FontSize="16"
+                                      Margin="5"
+                                      materialDesign:CheckBoxAssist.CheckBoxSize="22"
+                                      VerticalContentAlignment="Top"
+                                      ToolTip="Set childrens only on expand"
+                                      x:Name="IsLazyTreeLoadCheckBox">
+                                    <TextBlock VerticalAlignment="Center">Lazy tree load</TextBlock>
+                                </CheckBox>
+                                <materialDesign:DialogHost Grid.Row="4"
+                                                           DialogTheme="Inherit"                                                        
+                                                           IsEnabled="{Binding AddinSettings.IsAutoDetectOdaPath, Converter={StaticResource InvertBooleanConverter}}">
+                                    <materialDesign:DialogHost.DialogContent>
+                                        <mde:OpenDirectoryControl Grid.Row="3"                                                               
+                                                                  CurrentDirectory="{Binding AddinSettings.OdaFolder, Mode=TwoWay}"
+                                                                  ShowHiddenFilesAndDirectories="False"
+                                                                  ShowSystemFilesAndDirectories="False"
+                                                                  CreateNewDirectoryEnabled="True"
+                                                                  DirectorySelectedCommand="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                                  CancelCommand="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                                        </mde:OpenDirectoryControl>
+                                    </materialDesign:DialogHost.DialogContent>
+                                    <GroupBox
+                                        Margin="0,5,0,0"
+                                        Header="Oda Folder"
+                                        Style="{DynamicResource MaterialDesignGroupBox}"
+                                        materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                                        BorderThickness="0.3"
+                                        BorderBrush="{DynamicResource PrimaryHueMidBrush}"                               
+                                        ClipToBounds="True">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="{Binding AddinSettings.OdaFolder, Mode=OneWay}"/>
+                                            <Button Height="25"
+                                                Width="25"    
+                                                Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                                                Style="{StaticResource MaterialDesignIconButton}"
+                                                Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                                VerticalAlignment="Bottom"
+                                                HorizontalAlignment="Right"
+                                                Grid.Row="0">
+                                                <materialDesign:PackIcon Kind="DotsVertical"/>
+                                            </Button>
+                                        </Grid>
+                                    </GroupBox>
+                                </materialDesign:DialogHost>
+                            </Grid>
+                        </GroupBox>
+                        <Button Grid.Row="2"
+                            Margin="0,20,0,0" 
+                            Name="SaveSettingsButton"
+                            Click="SaveSettingsButton_Click"
+                            Content="Save"/>
+                    </Grid>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
         <StackPanel Grid.Row="5"

@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using MaterialDesignExtensions.Controls;
 
 namespace OdantDev
 {
@@ -21,13 +22,13 @@ namespace OdantDev
     /// </summary>
     public partial class ToolWindow1Control : UserControl, INotifyPropertyChanged
     {
-        private AddinSettings addinSettings; 
         private ConnectionModel odaModel;
         private DirectoryInfo OdaFolder;
         private ILogger logger;
         private DTE2 DTE2 { get; }
         private VisualStudioIntegration odaAddinModel;
         private bool isDarkTheme;
+        private AddinSettings addinSettings;
         public bool IsDarkTheme
         {
             get => isDarkTheme;
@@ -39,13 +40,13 @@ namespace OdantDev
                 isDarkTheme = value;
             }
         }
-
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(string name)
         {
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
+        public AddinSettings AddinSettings { get => addinSettings; set { addinSettings = value; NotifyPropertyChanged("AddinSettings"); } }
         public ConnectionModel OdaModel { get => odaModel; set { odaModel = value; NotifyPropertyChanged("OdaModel"); } }
 
         /// <summary>
@@ -56,10 +57,10 @@ namespace OdantDev
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             this.DTE2 = dTE2;
             var AddinSettingsFolder = Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ODA", "AddinSettings"));
-            addinSettings = new AddinSettings(AddinSettingsFolder);
+            AddinSettings = new AddinSettings(AddinSettingsFolder);
             InitializeMaterialDesign();
-            InitializeOdaComponents();
             InitializeComponent();
+            InitializeOdaComponents();
             logger = new PopupController(this.MessageContainer);
             VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
             ThemeCheckBox.IsChecked = IsVisualStudioDark();
@@ -81,11 +82,18 @@ namespace OdantDev
             // are searched relative to Eclipse's path, so they're not found.
             var card = new Card();
             var hue = new Hue("Dummy", Colors.Black, Colors.White);
+            var ext = new OpenDirectoryControl();
         }
 
         private void InitializeOdaComponents()
         {
-            OdaFolder = new DirectoryInfo(addinSettings.OdaFolder);
+            if (Directory.Exists(AddinSettings.OdaFolder).Not())
+            {
+                ShowException($"Can't find oda folder {AddinSettings.OdaFolder}.\nRun application with admin rights before");
+                ConnectButton.Visibility = Visibility.Collapsed;
+                return;
+            }
+            OdaFolder = new DirectoryInfo(AddinSettings.OdaFolder);
             var LoadOdaLibrariesResult = ConnectionModel.LoadOdaLibraries(OdaFolder);
             if (LoadOdaLibrariesResult.Success.Not())
             {
@@ -118,7 +126,7 @@ namespace OdantDev
         }
         private (bool Success, string Error) LoadModel()
         {
-            OdaModel = new ConnectionModel(Common.Connection,logger);
+            OdaModel = new ConnectionModel(Common.Connection, logger);
             var GetDataResult = OdaModel.Load();
             if (GetDataResult.Success)
             {
@@ -157,7 +165,7 @@ namespace OdantDev
             }
         }
 
-        private void CreateModuleButton_Click(object sender, RoutedEventArgs e)
+        private async void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
             MessageContainer.MessageQueue.Enqueue("Not implemented :(");
         }
@@ -178,6 +186,29 @@ namespace OdantDev
             if (sender is CheckBox checkBox)
             {
                 IsDarkTheme = checkBox.IsChecked ?? false;
+            }
+        }
+
+        private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.Source is TabControl tabControl)
+            {
+                if (tabControl.SelectedIndex == 0)
+                    CommonButtons.Visibility = Visibility.Visible;
+                else
+                    CommonButtons.Visibility = Visibility.Collapsed;
+            }
+        }
+        private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                AddinSettings.Save();
+                logger.Info($"Saved in {AddinSettings.AddinSettingsPath}");
+            }
+            catch (Exception ex)
+            {
+                logger.Info(ex.Message);
             }
         }
         #endregion
