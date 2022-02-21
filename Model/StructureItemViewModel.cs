@@ -79,7 +79,7 @@ namespace OdantDev.Model
                 if (value != isExpanded)
                 {
                     isExpanded = value;
-                    if (value)
+                    if (value && isLazyLoading)
                     {
                         isLazyLoading = false;
                         NotifyPropertyChanged("Children");
