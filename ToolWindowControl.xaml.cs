@@ -261,19 +261,13 @@ namespace OdantDev
             {
                 if (checkBox.IsChecked == true)
                 {
-                    var temp = TreesGrid.RowDefinitions[0].Height;
-                    TreesGrid.RowDefinitions[0].Height = TreesGrid.RowDefinitions[1].Height;
-                    TreesGrid.RowDefinitions[1].Height = temp;
-                    SimpleOdaTree.DataContext = this;
-                    OdaTree.DataContext = null;
+                    var style = TryFindResource("simpleTree");
+                    OdaTree.ItemContainerStyle = style as Style;
                 }
                 else
                 {
-                    var temp = TreesGrid.RowDefinitions[1].Height;
-                    TreesGrid.RowDefinitions[1].Height = TreesGrid.RowDefinitions[0].Height;
-                    TreesGrid.RowDefinitions[0].Height = temp;
-                    SimpleOdaTree.DataContext = null;
-                    OdaTree.DataContext = this;
+                    var style = TryFindResource("defaultTree");
+                    OdaTree.ItemContainerStyle = style as Style;
                 }
             }
         }

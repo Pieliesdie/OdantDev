@@ -19,6 +19,14 @@
         <ResourceDictionary>
             <odantdev:BooleanToCollapsedVisibility x:Key="BooleanToCollapsedVisibility" />
             <odantdev:InverseBooleanToCollapsedVisibility x:Key="InverseBooleanToCollapsedVisibility" />
+            <Style x:Key="defaultTree" x:Name="defaultTree" TargetType="TreeViewItem" BasedOn="{StaticResource MaterialDesignTreeViewItem}">
+                <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18"/>
+                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+            </Style>
+            <Style x:Key="simpleTree" x:Name="simpleTree" TargetType="TreeViewItem">
+                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"></Setter>
+                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+            </Style>
             <ResourceDictionary.MergedDictionaries>
                 <materialDesign:BundledTheme BaseTheme="Dark"                                       
                                              PrimaryColor="DeepPurple"
@@ -239,12 +247,7 @@
                             HorizontalAlignment="Center" />
                         </StackPanel>
                     </TabItem.Header>
-                    <Grid Name="TreesGrid">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="auto"/>
-                        </Grid.RowDefinitions>
-                        <TreeView x:Name="OdaTree" Grid.Row="0"
+                    <TreeView x:Name="OdaTree" Grid.Row="0"
                                   Visibility="{Binding AddinSettings.IsSimpleTheme, Converter={StaticResource InverseBooleanToCollapsedVisibility}}"
                                   ItemsSource="{Binding OdaModel.Hosts,UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}" HorizontalContentAlignment="Stretch">
                         <TreeView.Resources>
@@ -328,56 +331,6 @@
                             </HierarchicalDataTemplate>
                         </TreeView.ItemTemplate>
                     </TreeView>
-                        <TreeView x:Name="SimpleOdaTree" Grid.Row="1"
-                                  Visibility="{Binding AddinSettings.IsSimpleTheme, Converter={StaticResource BooleanToCollapsedVisibility}}"
-                                  ItemsSource="{Binding OdaModel.Hosts,UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}"
-                                  HorizontalContentAlignment="Stretch">
-                            <TreeView.Resources>
-                                <Style TargetType="TreeViewItem">
-                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                                </Style>
-                            </TreeView.Resources>
-                            <TreeView.ItemTemplate>
-                                <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}">
-                                    <Grid Margin="-5,0,0,0" >
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.ContextMenu>
-                                            <ContextMenu Visibility="{Binding Path=IsItemAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                <MenuItem Name="MenuItemRefresh" Command="{Binding RefreshCommand}">
-                                                    <MenuItem.Header>
-                                                        <TextBlock Text="Refresh"/>
-                                                    </MenuItem.Header>
-                                                    <MenuItem.Icon>
-                                                        <materialDesign:PackIcon Kind="Refresh" />
-                                                    </MenuItem.Icon>
-                                                </MenuItem>
-                                                <MenuItem Name="MenuItemInfo" Command="{Binding InfoCommand}">
-                                                    <MenuItem.Header>
-                                                        <TextBlock Text="Info" />
-                                                    </MenuItem.Header>
-                                                    <MenuItem.Icon>
-                                                        <materialDesign:PackIcon Kind="InformationCircleOutline" />
-                                                    </MenuItem.Icon>
-                                                </MenuItem>
-                                            </ContextMenu>
-                                        </Grid.ContextMenu>
-                                        <Image Source="{Binding Path=Icon, UpdateSourceTrigger=PropertyChanged}"                                               
-                                               Margin="0,0,5,0" 
-                                               Width="16"
-                                               Grid.Column="0"
-                                               HorizontalAlignment="Left"/>
-                                        <TextBlock Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"
-                                                   Grid.Column="1"
-                                                   FontSize="14" Foreground="{DynamicResource MaterialDesignBody}">
-                                        </TextBlock>
-                                    </Grid>
-                                </HierarchicalDataTemplate>
-                            </TreeView.ItemTemplate>
-                        </TreeView>
-                    </Grid>
                 </TabItem>
                 <TabItem Name="RecentlyTab">
                     <TabItem.Header>
