@@ -395,6 +395,9 @@
                             HorizontalAlignment="Center" />
                         </StackPanel>
                     </TabItem.Header>
+                    <ListBox ItemsSource="{Binding AddinSettings.LastProjectIds}">
+                        
+                    </ListBox>
                 </TabItem>
                 <TabItem x:Name="SettingsTab">
                     <TabItem.Header>

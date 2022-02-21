@@ -16,6 +16,8 @@ using System.Windows.Media;
 using MaterialDesignExtensions.Controls;
 using System.Threading.Tasks;
 using File = System.IO.File;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace OdantDev
 {
@@ -212,9 +214,14 @@ namespace OdantDev
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
         private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
         {
-            await odaAddinModel.OpenModuleAsync((OdaTree.SelectedItem as StructureItemViewModel<StructureItem>).Item);
-            AddinSettings.LastProjectIds.Add((OdaTree.SelectedItem as StructureItemViewModel<StructureItem>).Item.FullId);
-            AddinSettings.Save();
+            var selectedItem = (OdaTree.SelectedItem as StructureItemViewModel<StructureItem>).Item;
+            await odaAddinModel.OpenModuleAsync(selectedItem);
+            if (AddinSettings.LastProjectIds.Contains(selectedItem.FullId).Not())
+            {
+                AddinSettings.LastProjectIds.Add(selectedItem.FullId);
+                AddinSettings.LastProjectIds = new ObservableCollection<string>(AddinSettings.LastProjectIds.Reverse().Take(15) ?? new List<string>());
+                AddinSettings.Save();
+            }
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
