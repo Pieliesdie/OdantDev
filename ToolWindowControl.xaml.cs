@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using File = System.IO.File;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace OdantDev
 {
@@ -35,7 +36,8 @@ namespace OdantDev
         private bool isDarkTheme;
         private AddinSettings addinSettings;
         private bool isBusy;
-
+        private string status;
+        public string Status { get => status; set { status = value; NotifyPropertyChanged("Status"); } }
         public bool IsDarkTheme
         {
             get => isDarkTheme;
@@ -144,6 +146,7 @@ namespace OdantDev
                 return;
             }
             IsBusy = true;
+            Status = "Geting data from server...";
             var UpdateModelResult = await LoadModelAsync();
             if (UpdateModelResult.Success.Not())
             {
@@ -257,7 +260,7 @@ namespace OdantDev
 
         private void IsSimpleThemeCheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            if(sender is CheckBox checkBox)
+            if (sender is CheckBox checkBox)
             {
                 if (checkBox.IsChecked == true)
                 {

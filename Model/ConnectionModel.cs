@@ -51,10 +51,15 @@ namespace OdantDev
             {
                 stopWatch = new Stopwatch();
                 stopWatch.Start();
-
+                await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
                 Connection.CoreMode = CoreMode.AddIn;
-                this.Hosts = Connection.Hosts.AsParallel().OfType<Host>().AsUnordered().Select(host => new StructureItemViewModel<StructureItem>(host, AddinSettings.IsLazyTreeLoad, logger: logger)).ToList();
+                await Task.Run(() => 
+                this.Hosts = Connection.Hosts.AsParallel()
+                .OfType<Host>()
+                .AsUnordered()
+                .Select(host => new StructureItemViewModel<StructureItem>(host, AddinSettings.IsLazyTreeLoad, logger: logger))
+                .ToList());
                 var retryCount = 5;
                 while (retryCount-- > 0 && Connection.LocalHost?.Develope?.Domains == null)// Я не знаю почему оно null если обратится сразу
                 {

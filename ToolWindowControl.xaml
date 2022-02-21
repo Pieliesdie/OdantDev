@@ -46,7 +46,7 @@
         <mde:BusyOverlay IsBusy="{Binding IsBusy}" 
                          Visibility="{Binding IsBusy,Converter={StaticResource BooleanToVisibilityConverter}}"
                          Grid.Row="0" 
-                         Text="Getting data from server..."
+                         Text="{Binding Status}"
                          FontSize="18" 
                          ProgressSize="50"
                          Style="{StaticResource MaterialBusyOverlayCircular}">
