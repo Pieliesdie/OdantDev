@@ -22,7 +22,7 @@ namespace OdantDev.Model
 
             public void Dispose()
             {
-                RemoteDir.Dispose();
+                //RemoteDir?.Dispose();
             }
         }
     }

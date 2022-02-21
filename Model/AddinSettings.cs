@@ -59,6 +59,7 @@ namespace OdantDev.Model
             IsAutoDetectOdaPath = settings.IsAutoDetectOdaPath;
             OdaFolder = settings.OdaFolder;
             IsSimpleTheme = settings.IsSimpleTheme;
+            IsLazyTreeLoad = settings.IsLazyTreeLoad;
             _path = Path.Combine(folder.FullName, FileName);
         }
 

@@ -289,7 +289,7 @@
 
     <DataTemplate x:Key="fileSystemInfoPackIconTemplate">
         <md:PackIcon Kind="{Binding}" Height="64" Width="64" HorizontalAlignment="Center" VerticalAlignment="Center"
-                     Foreground="{DynamicResource PrimaryHueMidForegroundBrush}" />
+                     Foreground="{DynamicResource MaterialDesignBody}" />
     </DataTemplate>
 
     <DataTemplate x:Key="fileSystemInfoImageTemplate">
@@ -905,7 +905,7 @@
             <Ellipse Fill="{Binding Converter={StaticResource fileSystemInfoPackIconColorConverter}}" Height="40" Width="40"
                      HorizontalAlignment="Center" VerticalAlignment="Center" />
             <md:PackIcon Kind="{Binding}" Height="24" Width="24" HorizontalAlignment="Center" VerticalAlignment="Center"
-                         Foreground="{DynamicResource MaterialDesignBackground}" />
+                         Foreground="{DynamicResource MaterialDesignBody}" />
         </Grid>
     </DataTemplate>
 

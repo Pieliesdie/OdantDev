@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using VSLangProj;
 using File = System.IO.File;
@@ -25,13 +26,16 @@ namespace OdantDev.Model
         private IServiceProvider serviceProvider { get; }
         private Dictionary<Guid, BuildInfo> LoadedModules { get; } = new Dictionary<Guid, BuildInfo>();
         private DirectoryInfo AddinFolder { get; }
-        private DirectoryInfo OdaFolder { get; }
+        private AddinSettings AddinSettings { get; }
+        private DirectoryInfo OdaFolder => new DirectoryInfo(AddinSettings.OdaFolder);
+        private ILogger logger { get; }
         #endregion
-        public VisualStudioIntegration(DirectoryInfo odaFolder, DTE2 DTE)
+        public VisualStudioIntegration(AddinSettings addinSettings, DTE2 DTE, ILogger logger = null)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            OdaFolder = odaFolder;
-            AddinFolder = odaFolder.CreateSubdirectory("AddIn");
+            this.logger = logger;
+            this.AddinSettings = addinSettings;
+            AddinFolder = OdaFolder.CreateSubdirectory("AddIn");
             envDTE = DTE
                 ?? throw new NullReferenceException("Can't get EnvDTE from visual studio");
             serviceProvider = new ServiceProvider((Microsoft.VisualStudio.OLE.Interop.IServiceProvider)envDTE)
@@ -239,6 +243,7 @@ namespace OdantDev.Model
         public async Task<bool> OpenModuleAsync(StructureItem item)
         {
             Project project = null;
+            VSErrors.Clear();
             try
             {
                 _ = item ?? throw new NullReferenceException("Item was null");
@@ -249,16 +254,21 @@ namespace OdantDev.Model
                 {
                     envDTE.Solution.Create(AddinFolder.FullName, item.Host.Name);
                 }
-
                 project = envDTE.Solution.AddFromFile(csProj.FullName);
                 InitProject(project, item);
+                UpdateAssemblyReferences(project, AddinSettings.OdaLibraries);
+                UpdateAssemblyReferences(project, AddinSettings.DevExpressLibraries);
                 Common.DebugINI.Write("DEBUG", item.FullId, true);
                 IncreaseVersion(project);
+                project.Save();
                 LoadedModules.Add(GetProjectGuid(project), new BuildInfo(project.UniqueName, module.remoteDir, module.localDir));
             }
             catch (Exception ex)
             {
-                project?.Delete();
+                if (project != null)
+                {
+                    envDTE.Solution.Remove(project);
+                }
                 envDTE.ShowError($"Error while load project from item {item.Name}: {ex.Message}");
                 return false;
             }
@@ -279,6 +289,7 @@ namespace OdantDev.Model
             if (project == null) { throw new NullReferenceException(nameof(project)); }
             ThreadHelper.ThrowIfNotOnUIThread();
             project.Name = $"{sourceItem.Name}-{sourceItem.Id}";
+
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartAction").Value = prjStartAction.prjStartActionProgram;
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartProgram").Value = Path.Combine(OdaFolder.FullName, "oda.wrapper32.exe");
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartArguments").Value = "debug";
@@ -301,6 +312,37 @@ namespace OdantDev.Model
             SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyTrademark", $"www.infostandart.com");
             if (assemblyInfo.IsOpen.Not()) { assemblyInfo.Open(); }
             assemblyInfo.Save();
+        }
+        private bool UpdateAssemblyReferences(Project project, IEnumerable<string> references)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            var VSProj = project.Object as VSProject;
+            List<string> deletedDlls = new List<string>();
+            foreach (Reference reference in VSProj.References)
+            {
+                var assemblyName = new AssemblyName(GetFullName(reference));
+                if (references.Contains($"{assemblyName.Name}.dll"))
+                {
+                    reference.Remove();
+                    deletedDlls.Add($"{assemblyName.Name}.dll");
+                }
+            }
+            foreach (var dll in references)
+            {
+                if(deletedDlls.Contains(dll).Not()) { continue; }
+                var reference = VSProj.References.Add(Path.Combine(OdaFolder.FullName,dll));
+                reference.CopyLocal = false;
+                logger?.Info($"{dll} updated");
+            }
+            return false;
+        }
+        public static string GetFullName(Reference reference)
+        {
+            return string.Format(@"{0}, Version={1}.{2}.{3}.{4}, Culture={5}, PublicKeyToken={6}",
+                reference.Name,
+                reference.MajorVersion, reference.MinorVersion, reference.BuildNumber, reference.RevisionNumber,
+                reference.Culture.Or("neutral"),
+                reference.PublicKeyToken.Or("null"));
         }
         #endregion
     }

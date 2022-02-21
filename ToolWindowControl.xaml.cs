@@ -15,6 +15,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using MaterialDesignExtensions.Controls;
 using System.Threading.Tasks;
+using File = System.IO.File;
 
 namespace OdantDev
 {
@@ -65,7 +66,6 @@ namespace OdantDev
             AddinSettings = new AddinSettings(AddinSettingsFolder);
             InitializeMaterialDesign();
             InitializeComponent();
-            //isOdaLibraryesloaded = InitializeOdaComponents();
             logger = new PopupController(this.MessageContainer);
             VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
             ThemeCheckBox.IsChecked = IsVisualStudioDark();
@@ -97,12 +97,6 @@ namespace OdantDev
             {
                 return true;
             }
-            if (Directory.Exists(AddinSettings.OdaFolder).Not())
-            {
-                ShowException($"Can't find oda folder {AddinSettings.OdaFolder}.\nRun application with admin rights before");
-                ConnectButton.Visibility = Visibility.Collapsed;
-                return false;
-            }
             OdaFolder = new DirectoryInfo(AddinSettings.OdaFolder);
             var LoadOdaLibrariesResult = ConnectionModel.LoadOdaLibraries(OdaFolder);
             if (LoadOdaLibrariesResult.Success.Not())
@@ -112,7 +106,10 @@ namespace OdantDev
             }
             return true;
         }
-
+        private bool checkDllsInFolder(string folder)
+        {
+            return ConnectionModel.odaClientLibraries.ToList().TrueForAll(x => File.Exists(Path.Combine(folder, x)));
+        }
         private bool IsVisualStudioDark()
         {
             var defaultBackground = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowBackgroundColorKey);
@@ -122,7 +119,25 @@ namespace OdantDev
         #region Connect to oda and get data
         private async void Connect(object sender, RoutedEventArgs e)
         {
-            if (InitializeOdaComponents().Not())
+            if (AddinSettings.IsAutoDetectOdaPath.Not())
+            {
+                if (Directory.Exists(AddinSettings.OdaFolder).Not())
+                {
+                    logger.Info($"Can't find selected oda folder {AddinSettings.OdaFolder}\nSettings was reset");
+                    AddinSettings.IsAutoDetectOdaPath = true;
+                }
+                else if (checkDllsInFolder(AddinSettings.OdaFolder).Not())
+                {
+                    logger.Info($"Can't find oda DLLs in {AddinSettings.OdaFolder}\nSettings was reset");
+                    AddinSettings.IsAutoDetectOdaPath = true;
+                }
+            }
+            if (checkDllsInFolder(AddinSettings.OdaFolder).Not())
+            {
+                logger.Info($"Can't find oda DLLs in {AddinSettings.OdaFolder}\nRun app with admin rights before start addin or repair default oda folder");
+                return;
+            }
+            if (isOdaLibraryesloaded = InitializeOdaComponents().Not())
             {
                 return;
             }
@@ -133,7 +148,7 @@ namespace OdantDev
                 ShowException(UpdateModelResult.Error);
                 return;
             }
-            odaAddinModel = new VisualStudioIntegration(OdaFolder, DTE2);
+            odaAddinModel = new VisualStudioIntegration(AddinSettings, DTE2, logger);
             await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             if (OdantDevPackage.Env_DTE.Solution.IsOpen.Not())
             {
@@ -144,7 +159,7 @@ namespace OdantDev
         private async Task<(bool Success, string Error)> LoadModelAsync()
         {
             IsBusy = true;
-            OdaModel = new ConnectionModel(Common.Connection, logger);
+            OdaModel = new ConnectionModel(Common.Connection, AddinSettings, logger);
             var GetDataResult = await OdaModel.LoadAsync();
             if (GetDataResult.Success)
             {
@@ -198,6 +213,8 @@ namespace OdantDev
         private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
         {
             await odaAddinModel.OpenModuleAsync((OdaTree.SelectedItem as StructureItemViewModel<StructureItem>).Item);
+            AddinSettings.LastProjectIds.Add((OdaTree.SelectedItem as StructureItemViewModel<StructureItem>).Item.FullId);
+            AddinSettings.Save();
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
@@ -228,6 +245,29 @@ namespace OdantDev
             catch (Exception ex)
             {
                 logger.Info(ex.Message);
+            }
+        }
+
+        private void IsSimpleThemeCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if(sender is CheckBox checkBox)
+            {
+                if (checkBox.IsChecked == true)
+                {
+                    var temp = TreesGrid.RowDefinitions[0].Height;
+                    TreesGrid.RowDefinitions[0].Height = TreesGrid.RowDefinitions[1].Height;
+                    TreesGrid.RowDefinitions[1].Height = temp;
+                    SimpleOdaTree.DataContext = this;
+                    OdaTree.DataContext = null;
+                }
+                else
+                {
+                    var temp = TreesGrid.RowDefinitions[1].Height;
+                    TreesGrid.RowDefinitions[1].Height = TreesGrid.RowDefinitions[0].Height;
+                    TreesGrid.RowDefinitions[0].Height = temp;
+                    SimpleOdaTree.DataContext = null;
+                    OdaTree.DataContext = this;
+                }
             }
         }
         #endregion

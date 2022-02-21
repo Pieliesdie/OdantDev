@@ -49,6 +49,7 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BindingHelpers\BooleanToCollapsedVisibility.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Common\Bitness.cs" />
     <Compile Include="Common\Extension.cs" />

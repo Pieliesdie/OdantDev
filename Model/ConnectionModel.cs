@@ -34,10 +34,12 @@ namespace OdantDev
         public static List<Assembly> ClientAssemblies { get; set; }
 
         public Connection Connection { get; }
+        public AddinSettings AddinSettings { get; }
 
-        public ConnectionModel(Connection connection, ILogger logger = null)
+        public ConnectionModel(Connection connection, AddinSettings addinSettings, ILogger logger = null)
         {
             this.Connection = connection;
+            this.AddinSettings = addinSettings;
             this.logger = logger;
         }
 
@@ -52,7 +54,7 @@ namespace OdantDev
 
                 if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
                 Connection.CoreMode = CoreMode.AddIn;
-                this.Hosts = Connection.Hosts.AsParallel().OfType<Host>().AsUnordered().Select(host => new StructureItemViewModel<StructureItem>(host, logger: logger)).ToList();
+                this.Hosts = Connection.Hosts.AsParallel().OfType<Host>().AsUnordered().Select(host => new StructureItemViewModel<StructureItem>(host, AddinSettings.IsLazyTreeLoad, logger: logger)).ToList();
                 var retryCount = 5;
                 while (retryCount-- > 0 && Connection.LocalHost?.Develope?.Domains == null)// Я не знаю почему оно null если обратится сразу
                 {

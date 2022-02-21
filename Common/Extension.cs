@@ -14,6 +14,10 @@ namespace OdantDev
 {
     public static class Extension
     {
+        public static string Or(this string text, string alternative)
+        {
+            return string.IsNullOrWhiteSpace(text) ? alternative : text;
+        }
         public static IEnumerable<T> Use<T>(this T obj) where T : IDisposable
         {
             try
