@@ -75,7 +75,7 @@
                     Orientation="Horizontal" 
                     HorizontalAlignment="Center" 
                     DockPanel.Dock="Top" 
-                    Margin="5,5,0,5">
+                    Margin="5,5,0,10">
                 <materialDesign:PackIcon Kind="Database"
                                          Width="20"
                                          Height="20" />
@@ -227,9 +227,8 @@
                     BorderThickness="0"
                     BorderBrush="Transparent"
                     TabStripPlacement="Left"
-                    materialDesign:ShadowAssist.ShadowDepth="Depth0"
-                    materialDesign:ColorZoneAssist.Mode="Standard"
-                    SnapsToDevicePixels="True"
+                    materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                    materialDesign:ColorZoneAssist.Mode="Standard"                  
                     materialDesign:NavigationRailAssist.ShowSelectionBackground="True">
                 <TabItem Name="TreeTab" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalAlignment="Stretch">
                     <TabItem.Header>
@@ -248,6 +247,12 @@
                         </StackPanel>
                     </TabItem.Header>
                     <TreeView x:Name="OdaTree" Grid.Row="0"
+                              ScrollViewer.IsDeferredScrollingEnabled="True" 
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              VirtualizingPanel.ScrollUnit="Item"
+                              VirtualizingPanel.CacheLengthUnit="Page"
+                              VirtualizingPanel.IsVirtualizingWhenGrouping="True"
                                   Visibility="{Binding AddinSettings.IsSimpleTheme, Converter={StaticResource InverseBooleanToCollapsedVisibility}}"
                                   ItemsSource="{Binding OdaModel.Hosts,UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}" HorizontalContentAlignment="Stretch">
                         <TreeView.Resources>
@@ -348,52 +353,112 @@
                             HorizontalAlignment="Center" />
                         </StackPanel>
                     </TabItem.Header>
-                    <ListBox ItemsSource="{Binding AddinSettings.LastProjectIds}">
-                        
-                    </ListBox>
+                    <ItemsControl ItemsSource="{Binding AddinSettings.LastProjects}" Margin="5,0,5,0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <materialDesign:Card Background="{DynamicResource PrimaryHueDarkBrush}"
+                                                     Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
+                                                     materialDesign:ShadowAssist.ShadowDepth="Depth5"
+                                                     Width="160"
+                                                     Height="115"
+                                                     Margin="5">
+                                    <materialDesign:Card.Style>
+                                        <Style TargetType="{x:Type materialDesign:Card}">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter  Property="Opacity" Value=".8"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </materialDesign:Card.Style>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock
+                                            Margin="16 10 0 -5"
+                                            Grid.Row="0"
+                                            Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                            Text="{Binding Name}"/>
+                                        <TextBlock
+                                            HorizontalAlignment="Left"
+                                            Margin="16 10 0 -5"
+                                            Grid.Row="1"
+                                            Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                            Text="{Binding DomainName}"/>
+                                        <Separator Grid.Row="2" Style="{StaticResource MaterialDesignLightSeparator}"/>
+                                        <TextBlock Grid.Row="3" Margin="16 0 16 8"
+                                                   VerticalAlignment="Center" 
+                                                   HorizontalAlignment="Left"
+                                                   FontSize="12"
+                                                   Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                                   Text="{Binding OpenTime, StringFormat={}{0:dd MMM/ yyyy}}" />
+                                        <TextBlock Grid.Row="4" Margin="16 0 16 8"
+                                                   VerticalAlignment="Center" 
+                                                   HorizontalAlignment="Left"
+                                                   FontSize="12"
+                                                   Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                                   Text="{Binding OpenTime, StringFormat={}{0:hh:mm:ss}}" />
+                                    </Grid>
+                                </materialDesign:Card>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
                 </TabItem>
                 <TabItem x:Name="SettingsTab">
                     <TabItem.Header>
-                        <StackPanel
-                        Height="auto"
-                        Width="auto">
+                        <StackPanel Height="auto" Width="auto">
                             <materialDesign:PackIcon
-                            Margin="5"
-                            Kind="Settings"
-                            Width="24"
-                            Height="24"
-                            HorizontalAlignment="Center" />
-                            <TextBlock
-                            Text="Settings"
-                            HorizontalAlignment="Center" />
+                                Margin="5"
+                                Kind="Settings"
+                                Width="24" Height="24"
+                                HorizontalAlignment="Center" />
+                            <TextBlock Text="Settings" HorizontalAlignment="Center" />
                         </StackPanel>
                     </TabItem.Header>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <Grid Margin="5,-10,5,0" >
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0">
                                 <ComboBox Style="{StaticResource MaterialDesignFilledComboBox}"
-                                      materialDesign:HintAssist.IsFloating="True"
-                                      x:Name="DeveloperCb"
-                                      IsEditable="False"                                  
-                                      materialDesign:HintAssist.Hint="Developer domain"
-                                      materialDesign:HintAssist.HelperText="Please select developer domain on localhost"
-                                      materialDesign:HintAssist.HelperTextFontSize="11"
-                                      materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
-                                      ItemsSource="{Binding OdaModel.Developers, Mode=OneWay}"
-                                      materialDesign:TextFieldAssist.HasClearButton="True"
-                                      ToolTip="Please select developer domain on localhost"
-                                      Margin="0,0,0,20"                           
-                                      FontSize="16">
+                                          materialDesign:HintAssist.IsFloating="True"
+                                          x:Name="DeveloperCb"
+                                          IsEditable="False"                                  
+                                          materialDesign:HintAssist.Hint="Developer domain"
+                                          materialDesign:HintAssist.HelperText="Please select developer domain on localhost"
+                                          materialDesign:HintAssist.HelperTextFontSize="11"
+                                          materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
+                                          ItemsSource="{Binding OdaModel.Developers, Mode=OneWay}"
+                                          materialDesign:TextFieldAssist.HasClearButton="True"
+                                          SelectionChanged="DeveloperCb_SelectionChanged"
+                                          ToolTip="Please select developer domain on localhost"
+                                          Margin="0,0,0,20"                           
+                                          FontSize="16">
                                 </ComboBox>
                             </StackPanel>
-                            <GroupBox Name="UISettingsGroupBox"                                   
+                            <CheckBox Grid.Row="1"
+                                              Margin="0,5,0,10"
+                                              FontSize="16"
+                                              materialDesign:CheckBoxAssist.CheckBoxSize="22"
+                                              IsChecked="{Binding OdaModel.AutoLogin}" Content="Auto login to oda server"/>
+                            <GroupBox Name="UISettingsGroupBox" Header="UI Settings" 
+                                      SnapsToDevicePixels="True"                            
                                       materialDesign:ColorZoneAssist.Mode="PrimaryDark"
-                                      Grid.Row="1" Header="UI Settings" FontSize="14" BorderThickness="0.8">
+                                      Grid.Row="2" FontSize="14" BorderThickness="0.8">
                                 <Grid Margin="5">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="auto"/>
@@ -495,12 +560,12 @@
                                     </materialDesign:DialogHost>
                                 </Grid>
                             </GroupBox>
-                            <Button Grid.Row="2"
-                                    Style="{StaticResource MaterialDesignRaisedDarkButton}"
-                                    Margin="0,20,0,0" 
-                                    Name="SaveSettingsButton"
-                                    Click="SaveSettingsButton_Click"
-                                    Content="Save"/>
+                            <Button Grid.Row="3"
+                                            Style="{StaticResource MaterialDesignRaisedDarkButton}"
+                                            Margin="0,20,0,0" 
+                                            Name="SaveSettingsButton"
+                                            Click="SaveSettingsButton_Click"
+                                            Content="Save"/>
                         </Grid>
                     </ScrollViewer>
                 </TabItem>

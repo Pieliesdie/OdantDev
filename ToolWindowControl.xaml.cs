@@ -163,7 +163,6 @@ namespace OdantDev
         }
         private async Task<(bool Success, string Error)> LoadModelAsync()
         {
-            IsBusy = true;
             OdaModel = new ConnectionModel(Common.Connection, AddinSettings, logger);
             var GetDataResult = await OdaModel.LoadAsync();
             if (GetDataResult.Success)
@@ -173,12 +172,11 @@ namespace OdantDev
                 ErrorSp.Visibility = Visibility.Collapsed;
                 OdaTree.Visibility = Visibility.Visible;
                 MainTabControl.Visibility = Visibility.Visible;
-                IsBusy = false;
+                DeveloperCb.SelectedItem = OdaModel.Developers?.Where(x => x.FullId == AddinSettings.SelectedDevelopeDomain).FirstOrDefault();
                 return (true, null);
             }
             else
             {
-                IsBusy = false;
                 return (false, GetDataResult.Error);
             }
         }
@@ -196,14 +194,15 @@ namespace OdantDev
         #region main button logic
         private async void RefreshTreeButton_Click(object sender, RoutedEventArgs e)
         {
+            IsBusy = true;
             var UpdateModelResult = await OdaModel.RefreshAsync();
+            IsBusy = false;
             if (UpdateModelResult.Success.Not())
             {
                 ShowException(UpdateModelResult.Error);
                 return;
             }
         }
-
         private async void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
             logger.Info("Not implemented :(");
@@ -219,12 +218,13 @@ namespace OdantDev
         {
             var selectedItem = (OdaTree.SelectedItem as StructureItemViewModel<StructureItem>).Item;
             await odaAddinModel.OpenModuleAsync(selectedItem);
-            if (AddinSettings.LastProjectIds.Contains(selectedItem.FullId).Not())
-            {
-                AddinSettings.LastProjectIds.Add(selectedItem.FullId);
-                AddinSettings.LastProjectIds = new ObservableCollection<string>(AddinSettings.LastProjectIds.Reverse().Take(15) ?? new List<string>());
-                AddinSettings.Save();
-            }
+            AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(
+                AddinSettings.LastProjects.Except(AddinSettings.LastProjects.Where(x => x.FullId == selectedItem.FullId)));
+            AddinSettings.LastProjects.Add(new AddinSettings.Project(selectedItem.Name, selectedItem.Description, selectedItem.FullId, selectedItem.Host.Name, DateTime.Now));
+            AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(AddinSettings.LastProjects.Reverse().Take(15)
+                ?? new List<AddinSettings.Project>());
+            AddinSettings.Save();
+
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
@@ -272,6 +272,13 @@ namespace OdantDev
                     var style = TryFindResource("defaultTree");
                     OdaTree.ItemContainerStyle = style as Style;
                 }
+            }
+        }
+        private void DeveloperCb_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox)
+            {
+                AddinSettings.SelectedDevelopeDomain = (comboBox.SelectedValue as DomainDeveloper)?.FullId;
             }
         }
         #endregion

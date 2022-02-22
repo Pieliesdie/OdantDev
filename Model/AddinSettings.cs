@@ -12,6 +12,24 @@ namespace OdantDev.Model
 {
     public class AddinSettings : INotifyPropertyChanged
     {
+        public struct Project
+        {
+            public Project(string name, string description, string fullId, string domainName, DateTime openTime)
+            {
+                Name = name;
+                Description = description;
+                FullId = fullId;
+                HostName = domainName;
+                OpenTime = openTime;
+            }
+
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public string FullId { get; set; }
+            public string HostName { get; set; }
+            public DateTime OpenTime { get; set; }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(string name)
         {
@@ -23,10 +41,11 @@ namespace OdantDev.Model
         private XmlSerializer serializer = new XmlSerializer(typeof(AddinSettings));
         public ObservableCollection<string> DevExpressLibraries { get => devExpressLibraries; set { devExpressLibraries = value; NotifyPropertyChanged("DevExpressLibraries"); } }
         public ObservableCollection<string> OdaLibraries { get => odaLibraries; set { odaLibraries = value; NotifyPropertyChanged("OdaLibraries"); } }
-        public ObservableCollection<string> LastProjectIds { get => lastProjectIds; set { lastProjectIds = value; NotifyPropertyChanged("LastProjectIds"); } }
+        public ObservableCollection<Project> LastProjects { get => lastProjects; set { lastProjects = value; NotifyPropertyChanged("LastProjects"); } }
         public bool IsSimpleTheme { get => isSimpleTheme; set { isSimpleTheme = value; NotifyPropertyChanged("IsSimpleTheme"); } }
         public bool IsAutoDetectOdaPath { get => isAutoDetectOdaPath; set { isAutoDetectOdaPath = value; NotifyPropertyChanged("IsAutoDetectOdaPath"); NotifyPropertyChanged("OdaFolder"); } }
         public bool IsLazyTreeLoad { get => isLazyTreeLoad; set { isLazyTreeLoad = value; NotifyPropertyChanged("IsLazyTreeLoad"); } }
+        public string SelectedDevelopeDomain { get => selectedDevelopeDomain; set { selectedDevelopeDomain = value; NotifyPropertyChanged("SelectedDevelopeDomain"); } }
         public string OdaFolder
         {
             get { return IsAutoDetectOdaPath ? Extension.LastOdaFolder.FullName : odaFolder; }
@@ -39,27 +58,37 @@ namespace OdantDev.Model
         private bool isLazyTreeLoad;
         private bool isAutoDetectOdaPath;
         private bool isSimpleTheme;
-        private ObservableCollection<string> lastProjectIds;
+        private ObservableCollection<Project> lastProjects;
         private ObservableCollection<string> odaLibraries;
         private ObservableCollection<string> devExpressLibraries;
+        private string selectedDevelopeDomain;
 
         public AddinSettings(DirectoryInfo folder)
         {
-            var path = Path.Combine(folder.FullName, FileName);
-            if (File.Exists(path).Not())
+            AddinSettings settings = null;
+            try
             {
-                path = templatePath;
+                var path = Path.Combine(folder.FullName, FileName);
+                if (File.Exists(path).Not())
+                {
+                    path = templatePath;
+                }
+                using FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
+                settings = (serializer.Deserialize(fs) as AddinSettings);
             }
-
-            using FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
-            var settings = (serializer.Deserialize(fs) as AddinSettings);
+            catch (Exception ex)
+            {
+                using FileStream fs = new FileStream(templatePath, FileMode.Open, FileAccess.Read);
+                settings = (serializer.Deserialize(fs) as AddinSettings);
+            }
             DevExpressLibraries = settings.DevExpressLibraries;
             OdaLibraries = settings.OdaLibraries;
-            LastProjectIds = settings.LastProjectIds;
+            LastProjects = settings.LastProjects;
             IsAutoDetectOdaPath = settings.IsAutoDetectOdaPath;
             OdaFolder = settings.OdaFolder;
             IsSimpleTheme = settings.IsSimpleTheme;
             IsLazyTreeLoad = settings.IsLazyTreeLoad;
+            SelectedDevelopeDomain = settings.SelectedDevelopeDomain;
             _path = Path.Combine(folder.FullName, FileName);
         }
 

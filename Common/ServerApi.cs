@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace OdantDev
 {
-    internal static class ServerApi
+    public static class ServerApi
     {
         public delegate void OnUpdate_CALLBACK(int Type, IntPtr Params);
         [DllImport("odaClient.dll", EntryPoint = "ODAItem_set_on_update", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]

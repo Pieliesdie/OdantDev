@@ -26,7 +26,7 @@ namespace OdantDev.Model
         public event Update OnUpdate;
 
         private static readonly object _lock = new object();
-        private ServerApi.OnUpdate_CALLBACK Update_CALLBACK;
+        public ServerApi.OnUpdate_CALLBACK Update_CALLBACK;
         private ILogger logger;
         private IEnumerable<StructureItemViewModel<T>> children;
         private T item;
@@ -99,10 +99,22 @@ namespace OdantDev.Model
             Category = ItemType.ToString();
             Children = GetChildren(item, lazyLoad, logger);
             Update_CALLBACK = Updated;
+            GC.SuppressFinalize(Update_CALLBACK);
             ServerApi._SetOnUpdate(item.RemoteItem.GetIntPtr(), Update_CALLBACK);
             lock (_lock)
             {
                 ImageIndex = Item.ImageIndex;
+            }
+        }
+        ~StructureItemViewModel()
+        {
+            if (item?.RemoteItem != null)
+            {
+                ServerApi._SetOnUpdate(item.RemoteItem.GetIntPtr(), null);
+            }
+            if (Update_CALLBACK != null)
+            {
+                GC.ReRegisterForFinalize(Update_CALLBACK);
             }
         }
         public IEnumerable<StructureItemViewModel<T>> GetChildren(T item, bool lazyLoad, ILogger logger = null)

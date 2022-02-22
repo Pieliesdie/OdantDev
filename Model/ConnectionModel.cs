@@ -18,6 +18,7 @@ namespace OdantDev
         private readonly ILogger logger;
         private IEnumerable<StructureItemViewModel<StructureItem>> hosts;
         private IEnumerable<DomainDeveloper> developers;
+        private bool autoLogin;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -32,7 +33,7 @@ namespace OdantDev
         public static List<IntPtr> ServerAssemblies { get; set; }
 
         public static List<Assembly> ClientAssemblies { get; set; }
-
+        public bool AutoLogin { get => autoLogin; set { autoLogin = value; Connection.AutoLogin = value; NotifyPropertyChanged("AutoLogin"); } }
         public Connection Connection { get; }
         public AddinSettings AddinSettings { get; }
 
@@ -52,9 +53,11 @@ namespace OdantDev
                 stopWatch = new Stopwatch();
                 stopWatch.Start();
                 await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                if (Connection.Login().Not()) { return (false, "Can't connect to oda"); }
-                Connection.CoreMode = CoreMode.AddIn;
-                await Task.Run(() => 
+                Connection.CoreMode = CoreMode.Debug;
+                var connected = await Task.Run(() => Connection.Login());
+                if (connected.Not()) { return (false, "Can't connect to oda"); }
+                this.AutoLogin = Connection.AutoLogin;
+                await Task.Run(() =>
                 this.Hosts = Connection.Hosts.AsParallel()
                 .OfType<Host>()
                 .AsUnordered()
