@@ -7,5 +7,4 @@
 #### TODO List:
 <ol>
   <li>Create logic for download and create  buttons</li>
-  <li>update oda dlls paths on open project</li>
 </ol> 
