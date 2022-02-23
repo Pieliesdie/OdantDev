@@ -152,8 +152,8 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="MaterialDesignExtensions\MaterialDesignExtensions-master\MaterialDesignExtensions\MaterialDesignExtensions.csproj">
-      <Project>{48770079-421f-4312-96a0-e86ee4a3e3b5}</Project>
+    <ProjectReference Include="MaterialDesignExtensions\MaterialDesignExtensions.csproj">
+      <Project>{2dc67c48-ed97-4529-8fdc-44573392230b}</Project>
       <Name>MaterialDesignExtensions</Name>
     </ProjectReference>
   </ItemGroup>

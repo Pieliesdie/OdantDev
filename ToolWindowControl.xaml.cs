@@ -217,16 +217,18 @@ namespace OdantDev
         private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedItem = (OdaTree.SelectedItem as StructureItemViewModel<StructureItem>).Item;
-            await odaAddinModel.OpenModuleAsync(selectedItem);
+            OpenModule(selectedItem);
+        }
+        private async void OpenModule(StructureItem item)
+        {
+            await odaAddinModel.OpenModuleAsync(item);
             AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(
-                AddinSettings.LastProjects.Except(AddinSettings.LastProjects.Where(x => x.FullId == selectedItem.FullId)));
-            AddinSettings.LastProjects.Add(new AddinSettings.Project(selectedItem.Name, selectedItem.Description, selectedItem.FullId, selectedItem.Host.Name, DateTime.Now));
+                AddinSettings.LastProjects.Except(AddinSettings.LastProjects.Where(x => x.FullId == item.FullId)));
+            AddinSettings.LastProjects.Add(new AddinSettings.Project(item.Name, item.Description, item.FullId, item.Host.Name, DateTime.Now));
             AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(AddinSettings.LastProjects.Reverse().Take(15)
                 ?? new List<AddinSettings.Project>());
             AddinSettings.Save();
-
         }
-
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
             if (sender is CheckBox checkBox)
@@ -281,6 +283,48 @@ namespace OdantDev
                 AddinSettings.SelectedDevelopeDomain = (comboBox.SelectedValue as DomainDeveloper)?.FullId;
             }
         }
+
+        private void DeleteRecentlyProject_Click(object sender, RoutedEventArgs e)
+        {
+            if((sender as Button)?.Tag is AddinSettings.Project project)
+            {
+                AddinSettings.LastProjects.Remove(project);
+                if (AddinSettings.Save().Not())
+                {
+                    logger.Info("Error while saving settings");
+                }
+            }
+        }
+        private void ProjectCard_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button)?.Tag is AddinSettings.Project project)
+            {
+                if (string.IsNullOrWhiteSpace(project.FullId)) { return; }
+                var selectedItem = OdaModel?.Connection?.FindItem(project.FullId) as StructureItem;
+                if (selectedItem == null) { return; }
+                OpenModule(selectedItem);
+            }
+        }
         #endregion
+
+        private void DialogAddDevExLibraryButton_Click(object sender, RoutedEventArgs e)
+        {
+            AddinSettings.DevExpressLibraries.Add(DialogAddDevExLibrary.Text);
+        }
+
+        private void DeleteDevExpButton_Click(object sender, RoutedEventArgs e)
+        {
+           AddinSettings.DevExpressLibraries = new ObservableCollection<string>(AddinSettings.DevExpressLibraries.Except(DevExpressLibrariesList.SelectedItems.OfType<string>()));
+        }
+
+        private void DeleteOdaLibraryButton_Click(object sender, RoutedEventArgs e)
+        {
+            AddinSettings.OdaLibraries = new ObservableCollection<string>(AddinSettings.OdaLibraries.Except(OdaLibrariesList.SelectedItems.OfType<string>()));
+        }
+
+        private void DialogAddOdaLibraryClick(object sender, RoutedEventArgs e)
+        {
+            AddinSettings?.OdaLibraries.Add(DialogAddOdaLibrary.Text);
+        }
     }
 }

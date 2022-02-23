@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OdantDev.Commands;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -92,11 +93,19 @@ namespace OdantDev.Model
             _path = Path.Combine(folder.FullName, FileName);
         }
 
-        public void Save()
+        public bool Save()
         {
-            File.Delete(_path);
-            using FileStream fs = new FileStream(_path, FileMode.OpenOrCreate);
-            serializer.Serialize(fs, this);
+            try
+            {
+                File.Delete(_path);
+                using FileStream fs = new FileStream(_path, FileMode.OpenOrCreate);
+                serializer.Serialize(fs, this);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
