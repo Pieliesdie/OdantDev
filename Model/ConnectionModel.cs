@@ -50,9 +50,9 @@ namespace OdantDev
             Stopwatch stopWatch = null;
             try
             {
+                await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 stopWatch = new Stopwatch();
                 stopWatch.Start();
-                await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 Connection.CoreMode = CoreMode.Debug;
                 var connected = await Task.Run(() => Connection.Login());
                 if (connected.Not()) { return (false, "Can't connect to oda"); }

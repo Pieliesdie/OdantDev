@@ -117,7 +117,7 @@ namespace OdantDev
             return libPaths.Select(libPath => Assembly.LoadFrom(Path.Combine(path, libPath))).ToList();
         }
 
-        public static DirectoryInfo LastOdaFolder => LastOdaPath().Directory;
+        public static DirectoryInfo LastOdaFolder = LastOdaPath().Directory;
 
         public static FileInfo LastOdaPath()
         {

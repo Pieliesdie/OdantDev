@@ -205,12 +205,52 @@ namespace OdantDev
         }
         private async void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
-            logger.Info("Not implemented :(");
+            if (((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is Class cls))
+            {
+                try
+                {
+                    var moduleFolder = cls.Dir.OpenOrCreateFolder("modules");
+                    moduleFolder.RemoteFolder.SaveFile(@"Templates\ProjectTemplate\AssemblyInfo.cs", @"AssemblyInfo.cs");
+                    /*moduleFolder.SaveFile(@"Templates\ProjectTemplate\AssemblyInfo.cs");
+                    moduleFolder.SaveFile(@"Templates\ProjectTemplate\Init.cs");
+                    moduleFolder.SaveFile(@"Templates\ProjectTemplate\TemplateProject.csproj");
+                    moduleFolder.Save();*/
+                }
+                catch (Exception ex)
+                {
+                    logger?.Info(ex.ToString());
+                }
+            }
         }
 
         private void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
         {
-            logger.Info("Not implemented :(");
+            if (((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is Class cls))
+            {
+                if (DeveloperCb.SelectedItem is DomainDeveloper domainDeveloper)
+                {
+                    try
+                    {
+                        var createdDomain = domainDeveloper.CreateDomain(cls.Domain.Name, "MODULE");
+                        createdDomain.Save();
+                        var createdClass = createdDomain.CreateClass(cls.Name);
+                        createdClass.Type = cls.Type;
+                        createdClass.Save();
+                        cls.Dir.CopyTo(createdClass.Dir);
+                        createdClass.Dir.Save();
+                        createdClass.ReloadClassFromServer();
+                        logger?.Info($"New module created {createdClass.FullId}");
+                    }
+                    catch (Exception ex)
+                    {
+                        logger?.Info(ex.ToString());
+                    }
+                }
+                else
+                {
+                    logger?.Info("Please selecet developer domain on settings tab");
+                }
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
@@ -286,7 +326,7 @@ namespace OdantDev
 
         private void DeleteRecentlyProject_Click(object sender, RoutedEventArgs e)
         {
-            if((sender as Button)?.Tag is AddinSettings.Project project)
+            if ((sender as Button)?.Tag is AddinSettings.Project project)
             {
                 AddinSettings.LastProjects.Remove(project);
                 if (AddinSettings.Save().Not())

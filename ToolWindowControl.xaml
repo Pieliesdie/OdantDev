@@ -139,15 +139,22 @@
                             <TextBlock VerticalAlignment="Center">Refresh</TextBlock>
                         </StackPanel>
                     </Button>
-                    <Button Width="90"
-                        Height="25"
-                        Name="CreateModuleButton"
-                        FontSize="12"
-                        Click="CreateModuleButton_Click"
-                        Margin="3"
-                        IsEnabled="True"
-                        ToolTip="Create new module in selected item"
-                        Style="{StaticResource MaterialDesignFlatMidBgButton}">
+                    <Button Width="90" Height="25"     
+                            Name="CreateModuleButton"
+                            FontSize="12"
+                            Click="CreateModuleButton_Click"
+                            Margin="3"
+                            ToolTip="Create new module in selected item"
+                            Style="{StaticResource MaterialDesignFlatMidBgButton}">
+                        <Button.IsEnabled>
+                            <MultiBinding Converter="{StaticResource BooleanAllConverter}">
+                                <Binding ElementName="OdaTree"
+                                         Path="SelectedItem.Item.HasModule"
+                                         TargetNullValue="false"
+                                         FallbackValue="false"
+                                         Converter="{StaticResource InvertBooleanConverter}"/>
+                            </MultiBinding>
+                        </Button.IsEnabled>
                         <StackPanel Orientation="Horizontal"
                                 VerticalAlignment="Center">
                             <materialDesign:PackIcon Kind="FolderPlusOutline"
@@ -173,7 +180,7 @@
                                      TargetNullValue="false"
                                      FallbackValue="false" />
                                 <Binding ElementName="OdaTree"
-                                     Path="SelectedItem.Item.IsLocal"
+                                     Path="SelectedItem.Item.Host.IsLocal"
                                      TargetNullValue="false"
                                      FallbackValue="false"
                                      Converter="{StaticResource InvertBooleanConverter}"/>

@@ -63,6 +63,8 @@
     <Compile Include="Model\StructureItemViewModel.cs" />
     <Compile Include="BindingHelpers\NotEmptyRule.cs" />
     <Compile Include="Model\AddinSettings.cs" />
+    <AdditionalFiles Include="Templates\ProjectTemplate\AssemblyInfo.cs" />
+    <AdditionalFiles Include="Templates\ProjectTemplate\Init.cs" />
     <Compile Include="VSCommon\VSErrors.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VSCommon\OdantDevPackage.cs" />
@@ -73,6 +75,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <AdditionalFiles Include="Templates\ProjectTemplate\TemplateProject.csproj" />
     <None Include="VSCommon\source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>

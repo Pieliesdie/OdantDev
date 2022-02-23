@@ -293,6 +293,7 @@ namespace OdantDev.Model
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartAction").Value = prjStartAction.prjStartActionProgram;
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartProgram").Value = Path.Combine(OdaFolder.FullName, "oda.wrapper32.exe");
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartArguments").Value = "debug";
+            project.Properties.Item("AssemblyName").Value = project.Name;
             var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().Where(x => x.Name == "AssemblyInfo.cs").FirstOrDefault();
             var assemblyFile = (@$"{new FileInfo(project.FullName).Directory}\AssemblyInfo.cs");
             if (assemblyInfo == null || File.Exists(assemblyFile).Not())
