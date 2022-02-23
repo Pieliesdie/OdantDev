@@ -58,7 +58,8 @@ namespace OdantDev
                 if (connected.Not()) { return (false, "Can't connect to oda"); }
                 this.AutoLogin = Connection.AutoLogin;
                 await Task.Run(() =>
-                this.Hosts = Connection.Hosts.AsParallel()
+                this.Hosts = Connection.Hosts
+                .AsParallel()
                 .OfType<Host>()
                 .AsUnordered()
                 .Select(host => new StructureItemViewModel<StructureItem>(host, AddinSettings.IsLazyTreeLoad, logger: logger))

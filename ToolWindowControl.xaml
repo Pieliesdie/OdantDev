@@ -1,39 +1,42 @@
-﻿<UserControl x:Class="OdantDev.ToolWindow1Control"
+﻿<UserControl Name="MyToolWindow"
+             x:Class="OdantDev.ToolWindow1Control"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:odantdev="clr-namespace:OdantDev" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:mde="https://spiegelp.github.io/MaterialDesignExtensions/winfx/xaml"
+             xmlns:odantdev="clr-namespace:OdantDev"
+             xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
              d:DataContext="{d:DesignInstance Type=odantdev:ToolWindow1Control}"
-             mc:Ignorable="d"
              d:DesignHeight="300"
              d:DesignWidth="300"
-             Name="MyToolWindow"
              Background="{DynamicResource MaterialDesignPaper}"
              FontFamily="{DynamicResource MaterialDesignFont}"
-             TextElement.Foreground="{DynamicResource MaterialDesignBody}">
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
             <odantdev:BooleanToCollapsedVisibility x:Key="BooleanToCollapsedVisibility" />
             <odantdev:InverseBooleanToCollapsedVisibility x:Key="InverseBooleanToCollapsedVisibility" />
-            <Style x:Key="defaultTree" x:Name="defaultTree" TargetType="TreeViewItem" BasedOn="{StaticResource MaterialDesignTreeViewItem}">
-                <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18"/>
+            <Style x:Key="defaultTree" x:Name="defaultTree"
+                   BasedOn="{StaticResource MaterialDesignTreeViewItem}"
+                   TargetType="TreeViewItem">
+                <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18" />
                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
             </Style>
-            <Style x:Key="simpleTree" x:Name="simpleTree" TargetType="TreeViewItem">
-                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"></Setter>
+            <Style x:Key="simpleTree" x:Name="simpleTree"
+                   TargetType="TreeViewItem">
+                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
             </Style>
             <ResourceDictionary.MergedDictionaries>
-                <materialDesign:BundledTheme BaseTheme="Dark"                                       
+                <materialDesign:BundledTheme BaseTheme="Dark"
+                                             ColorAdjustment="{materialDesign:ColorAdjustment}"
                                              PrimaryColor="DeepPurple"
-                                             SecondaryColor="Purple"
-                                             ColorAdjustment="{materialDesign:ColorAdjustment}"/>
+                                             SecondaryColor="Purple" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/Generic.xaml"  />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/Generic.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/MaterialDesignLightTheme.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/MaterialDesignDarkTheme.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
@@ -44,245 +47,234 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <mde:BusyOverlay IsBusy="{Binding IsBusy}" 
-                         Visibility="{Binding IsBusy,Converter={StaticResource BooleanToVisibilityConverter}}"
-                         Grid.Row="0" 
-                         Text="{Binding Status}"
-                         FontSize="18" 
+        <mde:BusyOverlay Grid.Row="0"
+                         FontSize="18"
+                         IsBusy="{Binding IsBusy}"
                          ProgressSize="50"
-                         Style="{StaticResource MaterialBusyOverlayCircular}">
-        </mde:BusyOverlay>
+                         Style="{StaticResource MaterialBusyOverlayCircular}"
+                         Text="{Binding Status}"
+                         Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <Grid x:Name="MainGrid" Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0"
-                    Grid.Column="0"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    DockPanel.Dock="Top" 
-                    Margin="0,0,10,0">
+            <StackPanel Grid.Row="0" Grid.Column="0"
+                        Margin="0,0,10,0"
+                        HorizontalAlignment="Right"
+                        DockPanel.Dock="Top"
+                        Orientation="Horizontal" />
+            <StackPanel Grid.Row="1" Grid.Column="0"
+                        Margin="5,5,0,10"
+                        HorizontalAlignment="Center"
+                        DockPanel.Dock="Top"
+                        Orientation="Horizontal">
+                <materialDesign:PackIcon Width="20"
+                                         Height="20"
+                                         Kind="Database" />
+                <TextBlock Margin="5,5,10,0"
+                           FontSize="12"
+                           Text="ODANT" />
             </StackPanel>
-            <StackPanel Grid.Row="1"
-                    Grid.Column="0"
-                    Orientation="Horizontal" 
-                    HorizontalAlignment="Center" 
-                    DockPanel.Dock="Top" 
-                    Margin="5,5,0,10">
-                <materialDesign:PackIcon Kind="Database"
-                                         Width="20"
-                                         Height="20" />
-                <TextBlock Text="ODANT" Margin="5,5,10,0" FontSize="12"/>
-            </StackPanel>
-            <StackPanel Grid.Row="2"
-                    Grid.Column="0"
-                    Orientation="Vertical"
-                    DockPanel.Dock="Top"
-                    Visibility="Visible"
-                    x:Name="spConnect"   
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
-                <Button Content="Connect"
-                    Click="Connect"
-                    Width="120"
-                    Height="31"
-                    Name="ConnectButton"
-                    Margin="10,100,10,10" 
-                    Style="{StaticResource MaterialDesignFlatMidBgButton}"/>
-                <StackPanel Orientation="Horizontal"
-                        x:Name="ErrorSp"
-                        Visibility="Hidden">
-                    <materialDesign:PackIcon Kind="ExclamationThick"
-                                         Height="25"
-                                         Width="25" />
-                    <TextBlock TextWrapping="Wrap"
-                           MaxWidth="350"
-                           Padding="0,0,0,0"
-                           x:Name="ErrorTb">
-                    Error
+            <StackPanel x:Name="spConnect" Grid.Row="2" Grid.Column="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        DockPanel.Dock="Top"
+                        Orientation="Vertical"
+                        Visibility="Visible">
+                <Button Name="ConnectButton"
+                        Width="120"
+                        Height="31"
+                        Margin="10,100,10,10"
+                        Click="Connect"
+                        Content="Connect"
+                        Style="{StaticResource MaterialDesignFlatMidBgButton}" />
+                <StackPanel x:Name="ErrorSp"
+                            Orientation="Horizontal"
+                            Visibility="Hidden">
+                    <materialDesign:PackIcon Width="25"
+                                             Height="25"
+                                             Kind="ExclamationThick" />
+                    <TextBlock x:Name="ErrorTb"
+                               MaxWidth="350"
+                               Padding="0,0,0,0"
+                               TextWrapping="Wrap">
+                        Error
                     </TextBlock>
                 </StackPanel>
             </StackPanel>
-            <StackPanel Grid.Row="3"
-                    Grid.Column="0"
-                    DockPanel.Dock="Top"
-                    Visibility="Collapsed"
-                    x:Name="CommonButtons"
-                    materialDesign:ThemeAssist.Theme="Inherit">
+            <StackPanel x:Name="CommonButtons" Grid.Row="3" Grid.Column="0"
+                        materialDesign:ThemeAssist.Theme="Inherit"
+                        DockPanel.Dock="Top"
+                        Visibility="Collapsed">
                 <WrapPanel Orientation="Horizontal">
-                    <Button Width="90"
-                        HorizontalContentAlignment="Center"
-                        Height="25"
-                        Name="RefreshTreeButton"
-                        FontSize="12"
-                        Click="RefreshTreeButton_Click"
-                        Margin="3"
-                        ToolTip="Create tree again"
-                        Style="{StaticResource MaterialDesignFlatMidBgButton}">
-                        <StackPanel Orientation="Horizontal"
-                                VerticalAlignment="Center"
-                                HorizontalAlignment="Center">
-                            <materialDesign:PackIcon Kind="Autorenew"
-                                                 Margin="-5,0,5,0"
-                                                 Height="18"
-                                                 Width="18" />
+                    <Button Name="RefreshTreeButton"
+                            Width="90"
+                            Height="25"
+                            Margin="3"
+                            HorizontalContentAlignment="Center"
+                            Click="RefreshTreeButton_Click"
+                            FontSize="12"
+                            Style="{StaticResource MaterialDesignFlatMidBgButton}"
+                            ToolTip="Create tree again">
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+                            <materialDesign:PackIcon Width="18"
+                                                     Height="18"
+                                                     Margin="-5,0,5,0"
+                                                     Kind="Autorenew" />
                             <TextBlock VerticalAlignment="Center">Refresh</TextBlock>
                         </StackPanel>
                     </Button>
-                    <Button Width="90" Height="25"     
-                            Name="CreateModuleButton"
-                            FontSize="12"
-                            Click="CreateModuleButton_Click"
+                    <Button Name="CreateModuleButton"
+                            Width="90"
+                            Height="25"
                             Margin="3"
-                            ToolTip="Create new module in selected item"
-                            Style="{StaticResource MaterialDesignFlatMidBgButton}">
+                            Click="CreateModuleButton_Click"
+                            FontSize="12"
+                            Style="{StaticResource MaterialDesignFlatMidBgButton}"
+                            ToolTip="Create new module in selected item">
                         <Button.IsEnabled>
                             <MultiBinding Converter="{StaticResource BooleanAllConverter}">
-                                <Binding ElementName="OdaTree"
-                                         Path="SelectedItem.Item.HasModule"
-                                         TargetNullValue="false"
+                                <Binding Converter="{StaticResource InvertBooleanConverter}"
+                                         ElementName="OdaTree"
                                          FallbackValue="false"
-                                         Converter="{StaticResource InvertBooleanConverter}"/>
+                                         Path="SelectedItem.Item.HasModule"
+                                         TargetNullValue="false" />
                             </MultiBinding>
                         </Button.IsEnabled>
-                        <StackPanel Orientation="Horizontal"
-                                VerticalAlignment="Center">
-                            <materialDesign:PackIcon Kind="FolderPlusOutline"
-                                                 Margin="-5,0,5,0"
-                                                 Height="18"
-                                                 Width="18" />
+                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                            <materialDesign:PackIcon Width="18"
+                                                     Height="18"
+                                                     Margin="-5,0,5,0"
+                                                     Kind="FolderPlusOutline" />
                             <TextBlock VerticalAlignment="Center">Create</TextBlock>
                         </StackPanel>
                     </Button>
-                    <Button Width="105"
-                        Height="25"
-                        Name="DownloadModuleButton"
-                        FontSize="12"
-                        Click="DownloadModuleButton_Click"
-                        Margin="3"
-                        ToolTip="Download module to selected local developer domain"
-                        ToolTipService.ShowOnDisabled="True"
-                        Style="{StaticResource MaterialDesignFlatMidBgButton}">
+                    <Button Name="DownloadModuleButton"
+                            Width="105"
+                            Height="25"
+                            Margin="3"
+                            Click="DownloadModuleButton_Click"
+                            FontSize="12"
+                            Style="{StaticResource MaterialDesignFlatMidBgButton}"
+                            ToolTip="Download module to selected local developer domain"
+                            ToolTipService.ShowOnDisabled="True">
                         <Button.IsEnabled>
                             <MultiBinding Converter="{StaticResource BooleanAllConverter}">
                                 <Binding ElementName="OdaTree"
-                                     Path="SelectedItem.Item.HasModule"
-                                     TargetNullValue="false"
-                                     FallbackValue="false" />
-                                <Binding ElementName="OdaTree"
-                                     Path="SelectedItem.Item.Host.IsLocal"
-                                     TargetNullValue="false"
-                                     FallbackValue="false"
-                                     Converter="{StaticResource InvertBooleanConverter}"/>
+                                         FallbackValue="false"
+                                         Path="SelectedItem.Item.HasModule"
+                                         TargetNullValue="false" />
+                                <Binding Converter="{StaticResource InvertBooleanConverter}"
+                                         ElementName="OdaTree"
+                                         FallbackValue="false"
+                                         Path="SelectedItem.Item.Host.IsLocal"
+                                         TargetNullValue="false" />
                             </MultiBinding>
                         </Button.IsEnabled>
-                        <StackPanel Orientation="Horizontal"
-                                VerticalAlignment="Center">
-                            <materialDesign:PackIcon Kind="DownloadOutline"
-                                                 Margin="-5,0,5,0"
-                                                 Height="18"
-                                                 Width="18" />
+                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                            <materialDesign:PackIcon Width="18"
+                                                     Height="18"
+                                                     Margin="-5,0,5,0"
+                                                     Kind="DownloadOutline" />
                             <TextBlock VerticalAlignment="Center">Download</TextBlock>
                         </StackPanel>
                     </Button>
-                    <Button Width="80"
-                        Height="25"
-                        Name="OpenModuleButton"
-                        FontSize="12"
-                        Click="OpenModuleButton_Click"
-                        Margin="3"
-                        ToolTip="Open local module"
-                        ToolTipService.ShowOnDisabled="True"
-                        Style="{StaticResource MaterialDesignFlatMidBgButton}">
+                    <Button Name="OpenModuleButton"
+                            Width="80"
+                            Height="25"
+                            Margin="3"
+                            Click="OpenModuleButton_Click"
+                            FontSize="12"
+                            Style="{StaticResource MaterialDesignFlatMidBgButton}"
+                            ToolTip="Open local module"
+                            ToolTipService.ShowOnDisabled="True">
                         <Button.IsEnabled>
                             <MultiBinding Converter="{StaticResource BooleanAllConverter}">
                                 <Binding ElementName="OdaTree"
-                                     Path="SelectedItem.Item.HasModule"
-                                     TargetNullValue="false"
-                                     FallbackValue="false" />
+                                         FallbackValue="false"
+                                         Path="SelectedItem.Item.HasModule"
+                                         TargetNullValue="false" />
                                 <Binding ElementName="OdaTree"
-                                     Path="SelectedItem.Item.Host.IsLocal"
-                                     TargetNullValue="false"
-                                     FallbackValue="false" />
+                                         FallbackValue="false"
+                                         Path="SelectedItem.Item.Host.IsLocal"
+                                         TargetNullValue="false" />
                             </MultiBinding>
                         </Button.IsEnabled>
-                        <StackPanel Orientation="Horizontal"
-                                VerticalAlignment="Center">
-                            <materialDesign:PackIcon Kind="FolderOpenOutline"
-                                                 Margin="-5,0,5,0"
-                                                 Height="18"
-                                                 Width="18" />
+                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                            <materialDesign:PackIcon Width="18"
+                                                     Height="18"
+                                                     Margin="-5,0,5,0"
+                                                     Kind="FolderOpenOutline" />
                             <TextBlock VerticalAlignment="Center">Open</TextBlock>
                         </StackPanel>
                     </Button>
                 </WrapPanel>
             </StackPanel>
             <!--<WindowsFormsHost x:Name="winHost"></WindowsFormsHost>-->
-            <TabControl Grid.Row="4"
-                    Grid.Column="0"
-                    SelectionChanged="MainTabControl_SelectionChanged"
-                    x:Name="MainTabControl"
-                    Visibility="Collapsed"
-                    Style="{StaticResource MaterialDesignNavigatilRailTabControl}"
-                    BorderThickness="0"
-                    BorderBrush="Transparent"
-                    TabStripPlacement="Left"
-                    materialDesign:ShadowAssist.ShadowDepth="Depth3"
-                    materialDesign:ColorZoneAssist.Mode="Standard"                  
-                    materialDesign:NavigationRailAssist.ShowSelectionBackground="True">
-                <TabItem Name="TreeTab" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalAlignment="Stretch">
+            <TabControl x:Name="MainTabControl" Grid.Row="4" Grid.Column="0"
+                        materialDesign:ColorZoneAssist.Mode="Standard"
+                        materialDesign:NavigationRailAssist.ShowSelectionBackground="True"
+                        materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                        BorderBrush="Transparent"
+                        BorderThickness="0"
+                        SelectionChanged="MainTabControl_SelectionChanged"
+                        Style="{StaticResource MaterialDesignNavigatilRailTabControl}"
+                        TabStripPlacement="Left"
+                        Visibility="Collapsed">
+                <TabItem Name="TreeTab"
+                         HorizontalAlignment="Stretch"
+                         HorizontalContentAlignment="Stretch"
+                         VerticalContentAlignment="Stretch">
                     <TabItem.Header>
-                        <StackPanel
-                        Height="auto"
-                        Width="auto">
-                            <materialDesign:PackIcon
-                            Margin="5"
-                            Kind="DesktopClassic"
-                            Width="24"
-                            Height="24"
-                            HorizontalAlignment="Center" />
-                            <TextBlock
-                            Text="Hosts"
-                            HorizontalAlignment="Center" />
+                        <StackPanel Width="auto" Height="auto">
+                            <materialDesign:PackIcon Width="24"
+                                                     Height="24"
+                                                     Margin="5"
+                                                     HorizontalAlignment="Center"
+                                                     Kind="DesktopClassic" />
+                            <TextBlock HorizontalAlignment="Center" Text="Hosts" />
                         </StackPanel>
                     </TabItem.Header>
                     <TreeView x:Name="OdaTree" Grid.Row="0"
-                              ScrollViewer.IsDeferredScrollingEnabled="True" 
-                              VirtualizingPanel.IsVirtualizing="True"
-                              VirtualizingPanel.VirtualizationMode="Recycling"
-                              VirtualizingPanel.ScrollUnit="Item"
+                              HorizontalContentAlignment="Stretch"
+                              ItemsSource="{Binding OdaModel.Hosts, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}"
+                              ScrollViewer.IsDeferredScrollingEnabled="True"
                               VirtualizingPanel.CacheLengthUnit="Page"
+                              VirtualizingPanel.IsVirtualizing="True"
                               VirtualizingPanel.IsVirtualizingWhenGrouping="True"
-                                  Visibility="{Binding AddinSettings.IsSimpleTheme, Converter={StaticResource InverseBooleanToCollapsedVisibility}}"
-                                  ItemsSource="{Binding OdaModel.Hosts,UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}" HorizontalContentAlignment="Stretch">
+                              VirtualizingPanel.ScrollUnit="Item"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              Visibility="{Binding AddinSettings.IsSimpleTheme, Converter={StaticResource InverseBooleanToCollapsedVisibility}}">
                         <TreeView.Resources>
-                            <Style TargetType="TreeViewItem" BasedOn="{StaticResource MaterialDesignTreeViewItem}">
-                                <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18"/>
+                            <Style BasedOn="{StaticResource MaterialDesignTreeViewItem}" TargetType="TreeViewItem">
+                                <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18" />
                                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                             </Style>
                         </TreeView.Resources>
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}">
-                                <Grid Margin="-5,0,0,0" >
+                                <Grid Margin="-5,0,0,0">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <Grid.ContextMenu>
                                         <ContextMenu Visibility="{Binding Path=IsItemAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <MenuItem Name="MenuItemRefresh" Command="{Binding RefreshCommand}">
                                                 <MenuItem.Header>
-                                                    <TextBlock Text="Refresh"/>
+                                                    <TextBlock Text="Refresh" />
                                                 </MenuItem.Header>
                                                 <MenuItem.Icon>
                                                     <materialDesign:PackIcon Kind="Refresh" />
@@ -298,18 +290,18 @@
                                             </MenuItem>
                                         </ContextMenu>
                                     </Grid.ContextMenu>
-                                    <Image Source="{Binding Path=Icon, UpdateSourceTrigger=PropertyChanged}"                                
-                                       Margin="0,0,5,0" 
-                                       Width="16"
-                                       Grid.Column="0"
-                                       HorizontalAlignment="Left"/>
-                                    <TextBlock Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}"
-                                           Grid.Column="1"
-                                           FontSize="14"
-                                           materialDesign:ColorZoneAssist.Foreground="{DynamicResource MaterialDesignBody}"
-                                           Style="{StaticResource MaterialDesignHeadline5TextBlock}">
-                            <!--Too many lags with this-->
-                            <!--<TextBlock.ToolTip>
+                                    <Image Grid.Column="0"
+                                           Width="16"
+                                           Margin="0,0,5,0"
+                                           HorizontalAlignment="Left"
+                                           Source="{Binding Path=Icon, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Grid.Column="1"
+                                               materialDesign:ColorZoneAssist.Foreground="{DynamicResource MaterialDesignBody}"
+                                               FontSize="14"
+                                               Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                               Text="{Binding Path=Name, UpdateSourceTrigger=PropertyChanged}">
+                                        <!--  Too many lags with this  -->
+                                        <!--<TextBlock.ToolTip>
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Type: "/>
@@ -349,127 +341,126 @@
                 </TabItem>
                 <TabItem Name="RecentlyTab">
                     <TabItem.Header>
-                        <StackPanel
-                        Height="auto"
-                        Width="auto">
-                            <materialDesign:PackIcon
-                            Margin="5"
-                            Kind="ClockOutline"
-                            Width="24"
-                            Height="24"
-                            HorizontalAlignment="Center" />
-                            <TextBlock
-                            Text="Recently"
-                            HorizontalAlignment="Center" />
+                        <StackPanel Width="auto" Height="auto">
+                            <materialDesign:PackIcon Width="24"
+                                                     Height="24"
+                                                     Margin="5"
+                                                     HorizontalAlignment="Center"
+                                                     Kind="ClockOutline" />
+                            <TextBlock HorizontalAlignment="Center" Text="Recently" />
                         </StackPanel>
                     </TabItem.Header>
                     <materialDesign:DialogHost>
-                        <ItemsControl Name="RecentlyProjectsItemsControl" ItemsSource="{Binding AddinSettings.LastProjects}" Margin="5,0,5,0">
+                        <ItemsControl Name="RecentlyProjectsItemsControl"
+                                      Margin="5,0,5,0"
+                                      ItemsSource="{Binding AddinSettings.LastProjects}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Button Name="ProjectCard"
-                                            Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
-                                            Background="{DynamicResource PrimaryHueMidBrush}"
-                                            Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
-                                            materialDesign:ShadowAssist.ShadowDepth="Depth4"
                                             Width="170"
                                             Height="90"
-                                            Margin="5">
+                                            Margin="5"
+                                            materialDesign:ShadowAssist.ShadowDepth="Depth4"
+                                            Background="{DynamicResource PrimaryHueMidBrush}"
+                                            Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                            Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}">
                                         <Button.CommandParameter>
                                             <StackPanel Margin="16">
-                                                <TextBlock  Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                                                            TextWrapping="Wrap"
-                                                            TextAlignment="Center"
-                                                            Width="150"
-                                                            Margin="16">
+                                                <TextBlock Width="150"
+                                                           Margin="16"
+                                                           Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                                           TextAlignment="Center"
+                                                           TextWrapping="Wrap">
                                                     Do you want to open this project?
                                                 </TextBlock>
                                                 <DockPanel>
-                                                    <Button Margin="5"
-                                                            IsDefault="True"
-                                                            Width="65"
-                                                            Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                            HorizontalAlignment="Center"
-                                                            DockPanel.Dock="Left"
-                                                            Content="Yes" 
-                                                            Tag="{Binding}"
-                                                            Click="ProjectCard_Click"/>
-                                                    <Button IsCancel="True"
+                                                    <Button Width="65"
                                                             Margin="5"
+                                                            HorizontalAlignment="Center"
+                                                            Click="ProjectCard_Click"
                                                             Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                            Width="65"
+                                                            Content="Yes"
+                                                            DockPanel.Dock="Left"
+                                                            IsDefault="True"
+                                                            Tag="{Binding}" />
+                                                    <Button Width="65"
+                                                            Margin="5"
                                                             HorizontalAlignment="Right"
+                                                            Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                            Content="No"
                                                             DockPanel.Dock="Right"
-                                                            Content="No" />
+                                                            IsCancel="True" />
                                                 </DockPanel>
                                             </StackPanel>
                                         </Button.CommandParameter>
                                         <Button.Style>
-                                            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                                            <Style BasedOn="{StaticResource MaterialDesignRaisedButton}" TargetType="{x:Type Button}">
                                                 <Style.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Opacity" Value="1"/>
+                                                        <Setter Property="Opacity" Value="1" />
 
                                                     </Trigger>
                                                     <Trigger Property="IsMouseOver" Value="False">
-                                                        <Setter Property="Opacity" Value=".7"/>
+                                                        <Setter Property="Opacity" Value=".7" />
                                                     </Trigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Button.Style>
                                         <Grid>
                                             <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
                                             <StackPanel Grid.Row="0" Orientation="Horizontal">
-                                                <materialDesign:PackIcon 
-                                                Margin="0 10 0 0"
-                                                Height="25" Width="25"
-                                                Kind="LayersPlus"/>
-                                                <StackPanel Width="85" Margin="15 0 0 0">
-                                                    <TextBlock
-                                                    Margin="0 10 0 -5"
-                                                    Width="90"
-                                                    TextTrimming="WordEllipsis"
-                                                    Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                                    Text="{Binding Name}"/>
-                                                    <TextBlock
-                                                    HorizontalAlignment="Left"
-                                                    Margin="0 5 0 -7"
-                                                    TextTrimming="WordEllipsis"
-                                                    Width="90"
-                                                    Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                                    Text="{Binding HostName}"/>
+                                                <materialDesign:PackIcon Width="25"
+                                                                         Height="25"
+                                                                         Margin="0,10,0,0"
+                                                                         Kind="LayersPlus" />
+                                                <StackPanel Width="85" Margin="15,0,0,0">
+                                                    <TextBlock Width="90"
+                                                               Margin="0,10,0,-5"
+                                                               Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                                               Text="{Binding Name}"
+                                                               TextTrimming="WordEllipsis" />
+                                                    <TextBlock Width="90"
+                                                               Margin="0,5,0,-7"
+                                                               HorizontalAlignment="Left"
+                                                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                               Text="{Binding HostName}"
+                                                               TextTrimming="WordEllipsis" />
                                                 </StackPanel>
-                                                <Button Width="15" Height="15" Margin="0 3 0 0" 
-                                                    VerticalAlignment="Top"
-                                                    HorizontalAlignment="Right"
-                                                    Name="DeleteRecentlyProject"
-                                                    Click="DeleteRecentlyProject_Click"
-                                                    Tag="{Binding}"
-                                                    Style="{StaticResource MaterialDesignIconForegroundButton}"
-                                                    Foreground="#b71c1c">
-                                                    <materialDesign:PackIcon Height="15" Width="15" Kind="CloseOutline"/>
+                                                <Button Name="DeleteRecentlyProject"
+                                                        Width="15"
+                                                        Height="15"
+                                                        Margin="0,3,0,0"
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Top"
+                                                        Click="DeleteRecentlyProject_Click"
+                                                        Foreground="#b71c1c"
+                                                        Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                                        Tag="{Binding}">
+                                                    <materialDesign:PackIcon Width="15"
+                                                                             Height="15"
+                                                                             Kind="CloseOutline" />
                                                 </Button>
                                             </StackPanel>
-                                            <Separator Grid.Row="2" Style="{StaticResource MaterialDesignLightSeparator}"/>
+                                            <Separator Grid.Row="2" Style="{StaticResource MaterialDesignLightSeparator}" />
                                             <StackPanel Grid.Row="3" Orientation="Horizontal">
-                                                <TextBlock Margin="0 0 0 8"
-                                                   VerticalAlignment="Center" 
-                                                   HorizontalAlignment="Left"
-                                                   FontSize="12"
-                                                   Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
-                                                   Text="{Binding OpenTime, StringFormat={}{0:dd MMM. yyyy}}" />
-                                                <TextBlock  Margin="16 0 0 8"
-                                                   VerticalAlignment="Center" 
-                                                   HorizontalAlignment="Left"
-                                                   FontSize="12"
-                                                   Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
-                                                   Text="{Binding OpenTime, StringFormat={}{0:HH:mm:ss}}" />
+                                                <TextBlock Margin="0,0,0,8"
+                                                           HorizontalAlignment="Left"
+                                                           VerticalAlignment="Center"
+                                                           FontSize="12"
+                                                           Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                                           Text="{Binding OpenTime, StringFormat={}{0:dd MMM. yyyy}}" />
+                                                <TextBlock Margin="16,0,0,8"
+                                                           HorizontalAlignment="Left"
+                                                           VerticalAlignment="Center"
+                                                           FontSize="12"
+                                                           Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                                           Text="{Binding OpenTime, StringFormat={}{0:HH:mm:ss}}" />
                                             </StackPanel>
 
                                         </Grid>
@@ -478,7 +469,7 @@
                             </ItemsControl.ItemTemplate>
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <WrapPanel/>
+                                    <WrapPanel />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                         </ItemsControl>
@@ -486,215 +477,225 @@
                 </TabItem>
                 <TabItem x:Name="SettingsTab">
                     <TabItem.Header>
-                        <StackPanel Height="auto" Width="auto">
-                            <materialDesign:PackIcon
-                                Margin="5"
-                                Kind="Settings"
-                                Width="24" Height="24"
-                                HorizontalAlignment="Center" />
-                            <TextBlock Text="Settings" HorizontalAlignment="Center" />
+                        <StackPanel Width="auto" Height="auto">
+                            <materialDesign:PackIcon Width="24"
+                                                     Height="24"
+                                                     Margin="5"
+                                                     HorizontalAlignment="Center"
+                                                     Kind="Settings" />
+                            <TextBlock HorizontalAlignment="Center" Text="Settings" />
                         </StackPanel>
                     </TabItem.Header>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <Grid Margin="5,-10,5,0">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="150"/>
-                                <RowDefinition Height="150"/>
-                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="150" />
+                                <RowDefinition Height="150" />
+                                <RowDefinition Height="auto" />
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0">
-                                <ComboBox Style="{StaticResource MaterialDesignFilledComboBox}"
-                                          materialDesign:HintAssist.IsFloating="True"
-                                          x:Name="DeveloperCb"
-                                          IsEditable="False"                                  
-                                          materialDesign:HintAssist.Hint="Developer domain"
+                                <ComboBox x:Name="DeveloperCb"
+                                          Margin="0,0,0,20"
                                           materialDesign:HintAssist.HelperText="Please select developer domain on localhost"
                                           materialDesign:HintAssist.HelperTextFontSize="11"
-                                          materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
-                                          ItemsSource="{Binding OdaModel.Developers, Mode=OneWay}"
+                                          materialDesign:HintAssist.Hint="Developer domain"
+                                          materialDesign:HintAssist.IsFloating="True"
                                           materialDesign:TextFieldAssist.HasClearButton="True"
+                                          materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
+                                          FontSize="16"
+                                          IsEditable="False"
+                                          ItemsSource="{Binding OdaModel.Developers, Mode=OneWay}"
                                           SelectionChanged="DeveloperCb_SelectionChanged"
-                                          ToolTip="Please select developer domain on localhost"
-                                          Margin="0,0,0,20"                           
-                                          FontSize="16">
-                                </ComboBox>
+                                          Style="{StaticResource MaterialDesignFilledComboBox}"
+                                          ToolTip="Please select developer domain on localhost" />
                             </StackPanel>
                             <CheckBox Grid.Row="1"
                                       Margin="0,5,0,10"
-                                      FontSize="16"
                                       materialDesign:CheckBoxAssist.CheckBoxSize="22"
-                                      IsChecked="{Binding OdaModel.AutoLogin}" Content="Auto login to oda server"/>
-                            <GroupBox Grid.Row="2" Name="UISettingsGroupBox" Header="UI Settings" 
-                                      materialDesign:ShadowAssist.ShadowDepth="Depth3"
-                                      SnapsToDevicePixels="True"                            
+                                      Content="Auto login to oda server"
+                                      FontSize="16"
+                                      IsChecked="{Binding OdaModel.AutoLogin}" />
+                            <GroupBox Name="UISettingsGroupBox" Grid.Row="2"
                                       materialDesign:ColorZoneAssist.Mode="PrimaryMid"
-                                       FontSize="14" BorderThickness="0.8">
+                                      materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                                      BorderThickness="0.8"
+                                      FontSize="14"
+                                      Header="UI Settings"
+                                      SnapsToDevicePixels="True">
                                 <Grid Margin="5">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
                                     </Grid.RowDefinitions>
-                                    <CheckBox Grid.Row="0"
+                                    <CheckBox x:Name="ThemeCheckBox" Grid.Row="0"
                                               Margin="5"
-                                              FontSize="16"
                                               materialDesign:CheckBoxAssist.CheckBoxSize="22"
-                                              IsChecked="{x:Null}" Content="Dark theme" 
-                                              ToolTip="Change color theme" 
-                                              x:Name="ThemeCheckBox"
-                                              Unchecked="CheckBox_Checked"
-                                              Checked="CheckBox_Checked"/>
-                                    <CheckBox Grid.Row="1"
-                                              IsChecked="{Binding AddinSettings.IsSimpleTheme, Mode=TwoWay}" 
-                                              Checked="IsSimpleThemeCheckBox_Checked"
-                                              Unchecked="IsSimpleThemeCheckBox_Checked"
+                                              Checked="CheckBox_Checked"
+                                              Content="Dark theme"
+                                              FontSize="16"
+                                              IsChecked="{x:Null}"
+                                              ToolTip="Change color theme"
+                                              Unchecked="CheckBox_Checked" />
+                                    <CheckBox x:Name="IsSimpleThemeCheckBox" Grid.Row="1"
                                               Margin="5"
-                                              FontSize="16"
-                                              materialDesign:CheckBoxAssist.CheckBoxSize="22"
                                               VerticalContentAlignment="Top"
+                                              materialDesign:CheckBoxAssist.CheckBoxSize="22"
+                                              Checked="IsSimpleThemeCheckBox_Checked"
+                                              FontSize="16"
+                                              IsChecked="{Binding AddinSettings.IsSimpleTheme, Mode=TwoWay}"
                                               ToolTip="Disabling material theme on hosts"
-                                              x:Name="IsSimpleThemeCheckBox">
+                                              Unchecked="IsSimpleThemeCheckBox_Checked">
                                         <TextBlock VerticalAlignment="Center">Simple hosts tree</TextBlock>
                                     </CheckBox>
-                                    <CheckBox Grid.Row="2"
-                                      IsChecked="{Binding AddinSettings.IsAutoDetectOdaPath, Mode=TwoWay}" 
-                                      FontSize="16"
-                                      Margin="5"
-                                      materialDesign:CheckBoxAssist.CheckBoxSize="22"
-                                      VerticalContentAlignment="Top"
-                                      ToolTip="Set oda folder automatically"
-                                      x:Name="IsAutoDetectOdaPathCheckBox">
+                                    <CheckBox x:Name="IsAutoDetectOdaPathCheckBox" Grid.Row="2"
+                                              Margin="5"
+                                              VerticalContentAlignment="Top"
+                                              materialDesign:CheckBoxAssist.CheckBoxSize="22"
+                                              FontSize="16"
+                                              IsChecked="{Binding AddinSettings.IsAutoDetectOdaPath, Mode=TwoWay}"
+                                              ToolTip="Set oda folder automatically">
                                         <TextBlock VerticalAlignment="Center">Auto detect oda folder</TextBlock>
                                     </CheckBox>
-                                    <CheckBox Grid.Row="3" 
-                                      IsChecked="{Binding AddinSettings.IsLazyTreeLoad, Mode=TwoWay}" 
-                                      FontSize="16"
-                                      Margin="5"
-                                      materialDesign:CheckBoxAssist.CheckBoxSize="22"
-                                      VerticalContentAlignment="Top"
-                                      ToolTip="Set childrens only on expand"
-                                      x:Name="IsLazyTreeLoadCheckBox">
+                                    <CheckBox x:Name="IsLazyTreeLoadCheckBox" Grid.Row="3"
+                                              Margin="5"
+                                              VerticalContentAlignment="Top"
+                                              materialDesign:CheckBoxAssist.CheckBoxSize="22"
+                                              FontSize="16"
+                                              IsChecked="{Binding AddinSettings.IsLazyTreeLoad, Mode=TwoWay}"
+                                              ToolTip="Set childrens only on expand">
                                         <TextBlock VerticalAlignment="Center">Lazy tree load</TextBlock>
                                     </CheckBox>
                                     <materialDesign:DialogHost Grid.Row="4"
                                                                Panel.ZIndex="100"
-                                                           DialogTheme="Inherit"                                                        
-                                                           IsEnabled="{Binding AddinSettings.IsAutoDetectOdaPath, Converter={StaticResource InvertBooleanConverter}}">
+                                                               DialogTheme="Inherit"
+                                                               IsEnabled="{Binding AddinSettings.IsAutoDetectOdaPath, Converter={StaticResource InvertBooleanConverter}}">
                                         <materialDesign:DialogHost.DialogContent>
-                                            <mde:OpenDirectoryControl Grid.Row="3"                                                                
-                                                                  Background="{DynamicResource MaterialDesignPaper}"                                                                  
-                                                                  CurrentDirectory="{Binding AddinSettings.OdaFolder, Mode=TwoWay}"
-                                                                  ShowHiddenFilesAndDirectories="False"
-                                                                  ShowSystemFilesAndDirectories="False"
-                                                                  CreateNewDirectoryEnabled="True"                                                                 
-                                                                  DirectorySelectedCommand="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                  CancelCommand="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
-                                            </mde:OpenDirectoryControl>
+                                            <mde:OpenDirectoryControl Grid.Row="3"
+                                                                      Background="{DynamicResource MaterialDesignPaper}"
+                                                                      CancelCommand="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                                      CreateNewDirectoryEnabled="True"
+                                                                      CurrentDirectory="{Binding AddinSettings.OdaFolder, Mode=TwoWay}"
+                                                                      DirectorySelectedCommand="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                                      ShowHiddenFilesAndDirectories="False"
+                                                                      ShowSystemFilesAndDirectories="False" />
                                         </materialDesign:DialogHost.DialogContent>
-                                        <GroupBox
-                                            Margin="0,5,0,0"
-                                            materialDesign:ColorZoneAssist.Mode="PrimaryMid"
-                                            Header="Oda Folder"
-                                            Style="{DynamicResource MaterialDesignGroupBox}"
-                                            materialDesign:ShadowAssist.ShadowDepth="Depth3"
-                                            BorderThickness="0.3"
-                                            BorderBrush="{DynamicResource PrimaryHueMidBrush}"                                            
-                                            ClipToBounds="True">
+                                        <GroupBox Margin="0,5,0,0"
+                                                  materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+                                                  materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                                                  BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                                                  BorderThickness="0.3"
+                                                  ClipToBounds="True"
+                                                  Header="Oda Folder"
+                                                  Style="{DynamicResource MaterialDesignGroupBox}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="auto"/>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="auto" />
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Margin="5,0,0,0"
-                                                           Grid.Column="0"
+                                                <TextBlock Grid.Column="0"
+                                                           Margin="5,0,0,0"
+                                                           HorizontalAlignment="Left"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding AddinSettings.OdaFolder, Mode=OneWay}"
                                                            TextTrimming="CharacterEllipsis"
-                                                           TextWrapping="NoWrap"
-                                                           HorizontalAlignment="Left" 
-                                                           VerticalAlignment="Center" 
-                                                           Text="{Binding AddinSettings.OdaFolder, Mode=OneWay}"/>
-                                                <Button Height="25"
-                                                        Width="25"    
-                                                        Grid.Column="1"
-                                                        Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
-                                                        Style="{StaticResource MaterialDesignIconButton}"
-                                                        Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                                           TextWrapping="NoWrap" />
+                                                <Button Grid.Column="1"
+                                                        Width="25"
+                                                        Height="25"
+                                                        HorizontalAlignment="Right"
                                                         VerticalAlignment="Bottom"
-                                                        HorizontalAlignment="Right">
-                                                    <materialDesign:PackIcon Kind="DotsVertical"/>
+                                                        Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                                                        Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                                        Style="{StaticResource MaterialDesignIconButton}">
+                                                    <materialDesign:PackIcon Kind="DotsVertical" />
                                                 </Button>
                                             </Grid>
                                         </GroupBox>
                                     </materialDesign:DialogHost>
                                 </Grid>
                             </GroupBox>
-                            <materialDesign:DialogHost Grid.Row="3" Margin="0 10 0 0">
+                            <materialDesign:DialogHost Grid.Row="3" Margin="0,10,0,0">
                                 <materialDesign:DialogHost.DialogContent>
                                     <StackPanel Margin="16">
-                                        <TextBlock Text="Add a new library."/>
-                                        <TextBox Margin="0 8 0 0" HorizontalAlignment="Stretch"/>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                            <Button IsDefault="True" Margin="0 8 8 0" Content="Accept" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"/>
-                                            <Button IsCancel="True"  Margin="0 8 8 0" Content="Cancel" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"/>
+                                        <TextBlock Text="Add a new library." />
+                                        <TextBox Margin="0,8,0,0" HorizontalAlignment="Stretch" />
+                                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                                            <Button Margin="0,8,8,0"
+                                                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                    Content="Accept"
+                                                    IsDefault="True" />
+                                            <Button Margin="0,8,8,0"
+                                                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                    Content="Cancel"
+                                                    IsCancel="True" />
                                         </StackPanel>
                                     </StackPanel>
                                 </materialDesign:DialogHost.DialogContent>
-                                <Border BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" ClipToBounds="True">
+                                <Border BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                                        BorderThickness="1"
+                                        ClipToBounds="True">
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="auto" />
                                             <RowDefinition Height="*" />
                                         </Grid.RowDefinitions>
-                                        <ListBox Name="DevExpressLibrariesList" Grid.Row="1" SelectionMode="Extended" ItemsSource="{Binding AddinSettings.DevExpressLibraries}"/>
-                                        <materialDesign:ColorZone Mode="PrimaryMid" Grid.Row="0" Effect="{DynamicResource MaterialDesignShadowDepth3}">
-                                            <TextBlock Margin="10" FontSize="14" Text="Devexpress libraries for search" />
+                                        <ListBox Name="DevExpressLibrariesList" Grid.Row="1"
+                                                 ItemsSource="{Binding AddinSettings.DevExpressLibraries}"
+                                                 SelectionMode="Extended" />
+                                        <materialDesign:ColorZone Grid.Row="0"
+                                                                  Effect="{DynamicResource MaterialDesignShadowDepth3}"
+                                                                  Mode="PrimaryMid">
+                                            <TextBlock Margin="10"
+                                                       FontSize="14"
+                                                       Text="Devexpress libraries for search" />
                                         </materialDesign:ColorZone>
-                                        <materialDesign:PopupBox    
-                                            Style="{StaticResource MaterialDesignMultiFloatingActionAccentPopupBox}"
-                                            Grid.Row="0"          
-                                            Height="35" Width="35"
-                                            PlacementMode="LeftAndAlignMiddles"
-                                            UnfurlOrientation="Horizontal"
-                                            ToolTip="Manage items"
-                                            Margin="0 0 10 -5"
-                                            HorizontalAlignment="Right"
-                                            VerticalAlignment="Bottom">
+                                        <materialDesign:PopupBox Grid.Row="0"
+                                                                 Width="35"
+                                                                 Height="35"
+                                                                 Margin="0,0,10,-5"
+                                                                 HorizontalAlignment="Right"
+                                                                 VerticalAlignment="Bottom"
+                                                                 PlacementMode="LeftAndAlignMiddles"
+                                                                 Style="{StaticResource MaterialDesignMultiFloatingActionAccentPopupBox}"
+                                                                 ToolTip="Manage items"
+                                                                 UnfurlOrientation="Horizontal">
                                             <StackPanel Orientation="Horizontal">
-                                                <Button ToolTip="Add an item" 
-                                                        Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}">
-                                                    <materialDesign:PackIcon Kind="Plus"></materialDesign:PackIcon>
+                                                <Button Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}" ToolTip="Add an item">
+                                                    <materialDesign:PackIcon Kind="Plus" />
                                                     <Button.CommandParameter>
                                                         <StackPanel Margin="16">
                                                             <TextBox Name="DialogAddDevExLibrary"
+                                                                     VerticalAlignment="Center"
                                                                      materialDesign:HintAssist.Hint="DLL name"
-                                                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                                                     VerticalAlignment="Center" />
+                                                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
                                                             <DockPanel Margin="0">
-                                                                <Button Margin="0 10 5 0"
-                                                                        IsDefault="True"
-                                                                        Width="65"
-                                                                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                                <Button Width="65"
+                                                                        Margin="0,10,5,0"
                                                                         HorizontalAlignment="Center"
-                                                                        DockPanel.Dock="Left"
-                                                                        Content="Add"
-                                                                        Click="DialogAddDevExLibraryButton_Click"/>
-                                                                <Button IsCancel="True"
-                                                                        Margin="5 10 0 0"
+                                                                        Click="DialogAddDevExLibraryButton_Click"
                                                                         Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                        Width="75"
+                                                                        Content="Add"
+                                                                        DockPanel.Dock="Left"
+                                                                        IsDefault="True" />
+                                                                <Button Width="75"
+                                                                        Margin="5,10,0,0"
                                                                         HorizontalAlignment="Right"
+                                                                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                                        Content="Cancel"
                                                                         DockPanel.Dock="Right"
-                                                                        Content="Cancel" />
+                                                                        IsCancel="True" />
                                                             </DockPanel>
                                                         </StackPanel>
                                                     </Button.CommandParameter>
                                                 </Button>
-                                                <Button ToolTip="Remove selected item" Click="DeleteDevExpButton_Click">
+                                                <Button Click="DeleteDevExpButton_Click" ToolTip="Remove selected item">
                                                     <materialDesign:PackIcon Kind="Delete" />
                                                 </Button>
                                             </StackPanel>
@@ -702,67 +703,81 @@
                                     </Grid>
                                 </Border>
                             </materialDesign:DialogHost>
-                            <materialDesign:DialogHost Grid.Row="4" Margin="0 10 0 0">
+                            <materialDesign:DialogHost Grid.Row="4" Margin="0,10,0,0">
                                 <materialDesign:DialogHost.DialogContent>
                                     <StackPanel Margin="16">
-                                        <TextBlock Text="Add a new library."/>
-                                        <TextBox Margin="0 8 0 0" HorizontalAlignment="Stretch"/>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                            <Button IsDefault="True" Margin="0 8 8 0" Content="Accept" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"/>
-                                            <Button IsCancel="True"  Margin="0 8 8 0" Content="Cancel" Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"/>
+                                        <TextBlock Text="Add a new library." />
+                                        <TextBox Margin="0,8,0,0" HorizontalAlignment="Stretch" />
+                                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                                            <Button Margin="0,8,8,0"
+                                                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                    Content="Accept"
+                                                    IsDefault="True" />
+                                            <Button Margin="0,8,8,0"
+                                                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                    Content="Cancel"
+                                                    IsCancel="True" />
                                         </StackPanel>
                                     </StackPanel>
                                 </materialDesign:DialogHost.DialogContent>
-                                <Border BorderThickness="1" BorderBrush="{DynamicResource PrimaryHueMidBrush}" ClipToBounds="True">
+                                <Border BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                                        BorderThickness="1"
+                                        ClipToBounds="True">
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="40" />
                                             <RowDefinition Height="*" />
                                         </Grid.RowDefinitions>
-                                        <ListBox Grid.Row="1" Name="OdaLibrariesList" SelectionMode="Extended" ItemsSource="{Binding AddinSettings.OdaLibraries}"/>
-                                        <materialDesign:ColorZone Mode="PrimaryMid" Grid.Row="0" Effect="{DynamicResource MaterialDesignShadowDepth3}">
-                                            <TextBlock Margin="10" FontSize="14" Text="Odant libraries for search" />
+                                        <ListBox Name="OdaLibrariesList" Grid.Row="1"
+                                                 ItemsSource="{Binding AddinSettings.OdaLibraries}"
+                                                 SelectionMode="Extended" />
+                                        <materialDesign:ColorZone Grid.Row="0"
+                                                                  Effect="{DynamicResource MaterialDesignShadowDepth3}"
+                                                                  Mode="PrimaryMid">
+                                            <TextBlock Margin="10"
+                                                       FontSize="14"
+                                                       Text="Odant libraries for search" />
                                         </materialDesign:ColorZone>
-                                        <materialDesign:PopupBox    
-                                            Style="{StaticResource MaterialDesignMultiFloatingActionAccentPopupBox}"
-                                            Grid.Row="0"          
-                                            Height="35" Width="35"
-                                            PlacementMode="LeftAndAlignMiddles"
-                                            UnfurlOrientation="Horizontal"
-                                            ToolTip="Manage items"
-                                            Margin="0 0 10 -5"
-                                            HorizontalAlignment="Right"
-                                            VerticalAlignment="Bottom">
+                                        <materialDesign:PopupBox Grid.Row="0"
+                                                                 Width="35"
+                                                                 Height="35"
+                                                                 Margin="0,0,10,-5"
+                                                                 HorizontalAlignment="Right"
+                                                                 VerticalAlignment="Bottom"
+                                                                 PlacementMode="LeftAndAlignMiddles"
+                                                                 Style="{StaticResource MaterialDesignMultiFloatingActionAccentPopupBox}"
+                                                                 ToolTip="Manage items"
+                                                                 UnfurlOrientation="Horizontal">
                                             <StackPanel Orientation="Horizontal">
-                                                <Button ToolTip="Add an item" Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}">
+                                                <Button Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}" ToolTip="Add an item">
                                                     <Button.CommandParameter>
                                                         <StackPanel Margin="16">
                                                             <TextBox Name="DialogAddOdaLibrary"
+                                                                     VerticalAlignment="Center"
                                                                      materialDesign:HintAssist.Hint="DLL name"
-                                                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                                                     VerticalAlignment="Center" />
+                                                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
                                                             <DockPanel Margin="0">
-                                                                <Button Margin="0 10 5 0"
-                                                                        IsDefault="True"
-                                                                        Width="65"
-                                                                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                                <Button Width="65"
+                                                                        Margin="0,10,5,0"
                                                                         HorizontalAlignment="Center"
-                                                                        DockPanel.Dock="Left"
-                                                                        Content="Add"
-                                                                        Click="DialogAddOdaLibraryClick"/>
-                                                                <Button IsCancel="True"
-                                                                        Margin="5 10 0 0"
+                                                                        Click="DialogAddOdaLibraryClick"
                                                                         Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                        Width="75"
+                                                                        Content="Add"
+                                                                        DockPanel.Dock="Left"
+                                                                        IsDefault="True" />
+                                                                <Button Width="75"
+                                                                        Margin="5,10,0,0"
                                                                         HorizontalAlignment="Right"
+                                                                        Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                                        Content="Cancel"
                                                                         DockPanel.Dock="Right"
-                                                                        Content="Cancel" />
+                                                                        IsCancel="True" />
                                                             </DockPanel>
                                                         </StackPanel>
                                                     </Button.CommandParameter>
-                                                    <materialDesign:PackIcon Kind="Plus"></materialDesign:PackIcon>
+                                                    <materialDesign:PackIcon Kind="Plus" />
                                                 </Button>
-                                                <Button ToolTip="Remove selected item" Click="DeleteOdaLibraryButton_Click">
+                                                <Button Click="DeleteOdaLibraryButton_Click" ToolTip="Remove selected item">
                                                     <materialDesign:PackIcon Kind="Delete" />
                                                 </Button>
                                             </StackPanel>
@@ -770,27 +785,23 @@
                                     </Grid>
                                 </Border>
                             </materialDesign:DialogHost>
-                            <Button Grid.Row="5"
+                            <Button Name="SaveSettingsButton" Grid.Row="5"
+                                    Margin="0,20,0,0"
                                     materialDesign:ColorZoneAssist.Mode="PrimaryMid"
-                                    Margin="0,20,0,0" 
-                                    Name="SaveSettingsButton"
                                     Click="SaveSettingsButton_Click"
-                                    Content="Save"/>
+                                    Content="Save" />
                         </Grid>
                     </ScrollViewer>
                 </TabItem>
             </TabControl>
-            <StackPanel Grid.Row="5"  
-                    Grid.Column="0"
-                    Orientation="Horizontal"                     
-                    HorizontalAlignment="Center">
-                <materialDesign:Snackbar 
-                    HorizontalAlignment="Stretch"
-                    Width="{Binding ElementName=MainGrid, Path=ActualWidth, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                    x:Name="MessageContainer"    
-                    ActionButtonPlacement="Inline"
-                    MessageQueue="{materialDesign:MessageQueue}">
-                </materialDesign:Snackbar>
+            <StackPanel Grid.Row="5" Grid.Column="0"
+                        HorizontalAlignment="Center"
+                        Orientation="Horizontal">
+                <materialDesign:Snackbar x:Name="MessageContainer"
+                                         Width="{Binding ElementName=MainGrid, Path=ActualWidth, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalAlignment="Stretch"
+                                         ActionButtonPlacement="Inline"
+                                         MessageQueue="{materialDesign:MessageQueue}" />
             </StackPanel>
         </Grid>
     </Grid>
