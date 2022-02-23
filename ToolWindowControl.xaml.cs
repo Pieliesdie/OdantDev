@@ -191,7 +191,7 @@ namespace OdantDev
         }
         #endregion
 
-        #region main button logic
+        #region ui button logic
         private async void RefreshTreeButton_Click(object sender, RoutedEventArgs e)
         {
             IsBusy = true;
@@ -305,8 +305,6 @@ namespace OdantDev
                 OpenModule(selectedItem);
             }
         }
-        #endregion
-
         private void DialogAddDevExLibraryButton_Click(object sender, RoutedEventArgs e)
         {
             AddinSettings.DevExpressLibraries.Add(DialogAddDevExLibrary.Text);
@@ -314,7 +312,7 @@ namespace OdantDev
 
         private void DeleteDevExpButton_Click(object sender, RoutedEventArgs e)
         {
-           AddinSettings.DevExpressLibraries = new ObservableCollection<string>(AddinSettings.DevExpressLibraries.Except(DevExpressLibrariesList.SelectedItems.OfType<string>()));
+            AddinSettings.DevExpressLibraries = new ObservableCollection<string>(AddinSettings.DevExpressLibraries.Except(DevExpressLibrariesList.SelectedItems.OfType<string>()));
         }
 
         private void DeleteOdaLibraryButton_Click(object sender, RoutedEventArgs e)
@@ -326,5 +324,6 @@ namespace OdantDev
         {
             AddinSettings?.OdaLibraries.Add(DialogAddOdaLibrary.Text);
         }
+        #endregion
     }
 }
