@@ -220,9 +220,9 @@ namespace OdantDev
                         moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "TemplateProject.csproj"), @"TemplateProject.csproj", true);
                         moduleFolder.Save();
                         cls.ReloadClassFromServer();
-                        logger?.Info("Module created");
                     });
                     await uploadTask;
+                    logger?.Info("Module created");
                     if (uploadTask.IsFaulted)
                     {
                         logger?.Info(uploadTask.Exception?.ToString());
@@ -251,7 +251,7 @@ namespace OdantDev
                         cls.Dir.CopyTo(createdClass.Dir);
                         createdClass.Dir.Save();
                         createdClass.ReloadClassFromServer();
-                        logger?.Info($"New module created {createdClass.FullId}");
+                        logger?.Info($"New module downloaded to {createdClass.FullId}");
                     }
                     catch (Exception ex)
                     {

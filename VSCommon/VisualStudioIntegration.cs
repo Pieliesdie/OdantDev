@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using VSLangProj;
 using File = System.IO.File;
+using Task = System.Threading.Tasks.Task;
 
 namespace OdantDev.Model
 {
