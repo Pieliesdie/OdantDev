@@ -63,6 +63,10 @@
     <Compile Include="Model\StructureItemViewModel.cs" />
     <Compile Include="BindingHelpers\NotEmptyRule.cs" />
     <Compile Include="Model\AddinSettings.cs" />
+    <None Include="OdaLibs\odaCore.dll" />
+    <None Include="OdaLibs\odaLib.dll" />
+    <None Include="OdaLibs\odaShare.dll" />
+    <None Include="OdaLibs\odaXML.dll" />
     <Content Include="Templates\ProjectTemplate\AssemblyInfo.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
