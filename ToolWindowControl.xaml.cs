@@ -351,9 +351,17 @@ namespace OdantDev
         {
             if ((sender as Button)?.Tag is AddinSettings.Project project)
             {
-                if (string.IsNullOrWhiteSpace(project.FullId)) { return; }
+                if (string.IsNullOrWhiteSpace(project.FullId)) 
+                {
+                    logger?.Info("Can't find project's ID");
+                    return; 
+                }
                 var selectedItem = OdaModel?.Connection?.FindItem(project.FullId) as StructureItem;
-                if (selectedItem == null) { return; }
+                if (selectedItem == null)
+                {
+                    logger?.Info("Can't find this project");
+                    return;
+                }
                 OpenModule(selectedItem);
             }
         }
