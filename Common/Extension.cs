@@ -14,6 +14,7 @@ namespace OdantDev
 {
     public static class Extension
     {
+        public static DirectoryInfo VSIXPath = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory;
         public static string Or(this string text, string alternative)
         {
             return string.IsNullOrWhiteSpace(text) ? alternative : text;

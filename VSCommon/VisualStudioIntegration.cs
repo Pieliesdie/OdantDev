@@ -162,7 +162,7 @@ namespace OdantDev.Model
             }
             catch (Exception ex)
             {
-                project.ShowError($"Error in Method: {System.Reflection.MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
+                project.ShowError($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
             }
             return true;
         }
@@ -207,7 +207,7 @@ namespace OdantDev.Model
             }
             catch (Exception ex)
             {
-                project.ShowError($"Error in Method: {System.Reflection.MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
+                project.ShowError($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
                 return false;
             }
         }
@@ -302,7 +302,7 @@ namespace OdantDev.Model
                 {
                     File.Delete(assemblyFile);
                 }
-                assemblyInfo = project.ProjectItems.AddFromFileCopy(@"Templates\AssemblyInfo.cs");
+                assemblyInfo = project.ProjectItems.AddFromFileCopy(Path.Combine(Extension.VSIXPath.FullName, @"Templates\AssemblyInfo.cs"));
             }
             var attributes = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>().ToDictionary(x => x.Name);
             SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyTitle", $"{sourceItem.Name}-{sourceItem.Id}");

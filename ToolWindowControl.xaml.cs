@@ -214,7 +214,7 @@ namespace OdantDev
                     var uploadTask = Task.Run(() =>
                     {
                         var moduleFolder = cls.Dir.OpenOrCreateFolder("modules");
-                        var templateFolder = new DirectoryInfo(@"Templates\ProjectTemplate");
+                        var templateFolder = new DirectoryInfo(Path.Combine(Extension.VSIXPath.FullName, @"Templates\ProjectTemplate"));
                         moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "AssemblyInfo.cs"), @"AssemblyInfo.cs", true);
                         moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "Init.cs"), @"Init.cs", true);
                         moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "TemplateProject.csproj"), @"TemplateProject.csproj", true);

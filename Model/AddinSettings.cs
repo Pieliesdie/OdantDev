@@ -38,7 +38,7 @@ namespace OdantDev.Model
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
         private string FileName = "AddinSettings.xml";
-        private string templatePath = @"Templates\AddinSettings.xml";
+        private string templatePath = Path.Combine(Extension.VSIXPath.FullName, @"Templates\AddinSettings.xml");
         private XmlSerializer serializer = new XmlSerializer(typeof(AddinSettings));
         public ObservableCollection<string> DevExpressLibraries { get => devExpressLibraries; set { devExpressLibraries = value; NotifyPropertyChanged("DevExpressLibraries"); } }
         public ObservableCollection<string> OdaLibraries { get => odaLibraries; set { odaLibraries = value; NotifyPropertyChanged("OdaLibraries"); } }
