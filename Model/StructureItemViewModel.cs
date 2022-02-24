@@ -63,11 +63,11 @@ namespace OdantDev.Model
         public virtual string Category { get; set; }
         public virtual int ImageIndex { get => imageIndex; set { imageIndex = value; NotifyPropertyChanged("ImageIndex"); } }
         public virtual ImageSource Icon => Extension.ConvertToBitmapImage(Images.GetImage(ImageIndex));
-
         private bool isLazyLoading;
+        private List<StructureItemViewModel<T>> dummyList => new List<StructureItemViewModel<T>>() { new StructureItemViewModel<T>() };
         public virtual IEnumerable<StructureItemViewModel<T>> Children
         {
-            get => isLazyLoading ? new List<StructureItemViewModel<T>>() { new StructureItemViewModel<T>() } : children;
+            get => isLazyLoading ? dummyList : children;
             set { children = value; NotifyPropertyChanged("Children"); }
         }
         public ItemType ItemType { get; private set; }

@@ -123,6 +123,8 @@ namespace OdantDev
         #region Connect to oda and get data
         private async void Connect(object sender, RoutedEventArgs e)
         {
+            IsBusy = true;
+            Status = "Checking DLLs in oda folder";
             if (AddinSettings.IsAutoDetectOdaPath.Not())
             {
                 if (Directory.Exists(AddinSettings.OdaFolder).Not())
@@ -141,11 +143,11 @@ namespace OdantDev
                 logger.Info($"Can't find oda DLLs in {AddinSettings.OdaFolder}\nRun app with admin rights before start addin or repair default oda folder");
                 return;
             }
+            Status = "Loading Oda's DLLs";
             if (isOdaLibraryesloaded = InitializeOdaComponents().Not())
             {
                 return;
             }
-            IsBusy = true;
             Status = "Geting data from server...";
             var UpdateModelResult = await LoadModelAsync();
             if (UpdateModelResult.Success.Not())
@@ -209,12 +211,22 @@ namespace OdantDev
             {
                 try
                 {
-                    var moduleFolder = cls.Dir.OpenOrCreateFolder("modules");
-                    moduleFolder.RemoteFolder.SaveFile(@"Templates\ProjectTemplate\AssemblyInfo.cs", @"AssemblyInfo.cs");
-                    /*moduleFolder.SaveFile(@"Templates\ProjectTemplate\AssemblyInfo.cs");
-                    moduleFolder.SaveFile(@"Templates\ProjectTemplate\Init.cs");
-                    moduleFolder.SaveFile(@"Templates\ProjectTemplate\TemplateProject.csproj");
-                    moduleFolder.Save();*/
+                    var uploadTask = Task.Run(() =>
+                    {
+                        var moduleFolder = cls.Dir.OpenOrCreateFolder("modules");
+                        var templateFolder = new DirectoryInfo(@"Templates\ProjectTemplate");
+                        moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "AssemblyInfo.cs"), @"AssemblyInfo.cs", true);
+                        moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "Init.cs"), @"Init.cs", true);
+                        moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "TemplateProject.csproj"), @"TemplateProject.csproj", true);
+                        moduleFolder.Save();
+                        cls.ReloadClassFromServer();
+                        logger?.Info("Module created");
+                    });
+                    await uploadTask;
+                    if (uploadTask.IsFaulted)
+                    {
+                        logger?.Info(uploadTask.Exception?.ToString());
+                    }
                 }
                 catch (Exception ex)
                 {

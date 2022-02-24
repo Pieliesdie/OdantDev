@@ -58,13 +58,19 @@
     <Compile Include="Model\ILogger.cs" />
     <Compile Include="Model\ModuleDir.cs" />
     <Compile Include="Model\PopupController.cs" />
-    <Compile Include="Model\VisualStudioIntegration.cs" />
+    <Compile Include="VSCommon\VisualStudioIntegration.cs" />
     <Compile Include="Model\ConnectionModel.cs" />
     <Compile Include="Model\StructureItemViewModel.cs" />
     <Compile Include="BindingHelpers\NotEmptyRule.cs" />
     <Compile Include="Model\AddinSettings.cs" />
-    <AdditionalFiles Include="Templates\ProjectTemplate\AssemblyInfo.cs" />
-    <AdditionalFiles Include="Templates\ProjectTemplate\Init.cs" />
+    <Content Include="Templates\ProjectTemplate\AssemblyInfo.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Templates\ProjectTemplate\Init.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Compile Include="VSCommon\VSErrors.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VSCommon\OdantDevPackage.cs" />
@@ -75,7 +81,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <AdditionalFiles Include="Templates\ProjectTemplate\TemplateProject.csproj" />
+    <Content Include="Templates\ProjectTemplate\TemplateProject.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="VSCommon\source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -142,6 +151,7 @@
     </Content>
     <Content Include="Templates\AddinSettings.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="Templates\AssemblyInfo.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
