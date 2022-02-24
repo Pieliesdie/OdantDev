@@ -95,21 +95,21 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="odaCore">
-      <HintPath>..\..\ODANT_18DEV\odaCore.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="odaCore, Version=2.1.8063.19639, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>OdaLibs\odaCore.dll</HintPath>
     </Reference>
-    <Reference Include="odaLib">
-      <HintPath>..\..\ODANT_18DEV\odaLib.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="odaLib, Version=2.1.8063.19641, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>OdaLibs\odaLib.dll</HintPath>
     </Reference>
-    <Reference Include="odaShare">
-      <HintPath>..\..\ODANT_18DEV\odaShare.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="odaShare, Version=2.1.8063.19637, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>OdaLibs\odaShare.dll</HintPath>
     </Reference>
-    <Reference Include="odaXML">
-      <HintPath>..\..\ODANT_18DEV\odaXML.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="odaXML, Version=2.1.8063.19638, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>OdaLibs\odaXML.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
