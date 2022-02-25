@@ -79,6 +79,7 @@ namespace OdantDev
                     ts.Hours, ts.Minutes, ts.Seconds,
                     ts.Milliseconds / 10);
                 logger?.Info($"Load time: {elapsedTime}");
+                Common.DebugINI.Clear();
                 return (true, null);
             }
             catch (Exception ex)

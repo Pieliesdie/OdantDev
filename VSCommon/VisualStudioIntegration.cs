@@ -123,7 +123,9 @@ namespace OdantDev.Model
                     ?? throw new NullReferenceException(@$"Missing AssemblyVersion in {currentDirectory}\AssemblyInfo.cs"));
                 var versionPath = @$"{version.Major}.{version.Minor}\{version.Build}\{version.Revision}";
 
-                var outputDir = new FileInfo(project.FullName).Directory.Parent.CreateSubdirectory("bin").Clear();
+                var outDirParent = new FileInfo(project.FullName).Directory.Parent;
+                outDirParent.CreateSubdirectory("bin").Delete(true);
+                var outputDir = outDirParent.CreateSubdirectory("bin");
                 var outputBinDir = outputDir.CreateSubdirectory(versionPath);
                 var moduleDir = new ModuleDir(project);
                 var clientBinDir = OdaFolder.CreateSubdirectory(Path.Combine("bin", versionPath, moduleDir.Name));
