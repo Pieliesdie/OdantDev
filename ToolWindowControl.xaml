@@ -351,7 +351,7 @@
                         </StackPanel>
                     </TabItem.Header>
                     <materialDesign:DialogHost>
-                        <ScrollViewer>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <ItemsControl Name="RecentlyProjectsItemsControl"
                                       Margin="5,0,5,0"
                                       ItemsSource="{Binding AddinSettings.LastProjects}">
