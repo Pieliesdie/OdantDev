@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TemplateProject
+namespace oda
 {
-    public class Init : MainInit
+    public sealed class Init : MainInit
     {
         [MethodType(MethodType.Event)]
         [DisplayName("SampleEvent")]
@@ -22,19 +22,13 @@ namespace TemplateProject
             return true; // your code here
         }
 
-        [Browsable(true)]
-        [Modifieres(MethodArea.Public)]
+        [Modifieres(MethodArea.Protected)]
         [DisplayName("SampleButton")]
-        [ShortName("SampleButton")]
-        [Description("SampleButton")]
-        [AccessLevel(AccessLevel.RWC)]
-        [Icon(Icons.Save)]
-        [Active(false)]
-        [UseList(true)]
-        [ViewMode(ViewModes.ToolButton)]
-        [ExcludeViewContext(ItemType.Object)]
-        [Category("Main")]
-        [SortIndex(-500)]
+        [RunContext(ItemType.Object)]
+        [Active(true)]
+        [ViewMode(ViewModes.ServiceButton)]
+        [ViewContext(ItemType.Object | ItemType.Class)]
+        [Icon(Icons.Run)]
         public void SampleButton()
         {
             return; // your code here

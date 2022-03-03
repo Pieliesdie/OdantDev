@@ -7,7 +7,7 @@
     <ProjectGuid>{62989BA9-64A6-4EE0-9865-833F37C5AB42}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TemplateProject</RootNamespace>
+    <RootNamespace>oda</RootNamespace>
     <AssemblyName>TemplateProject</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -32,16 +32,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="odaCore">
-      <HintPath>F:\ODANT_18DEV\odaCore.dll</HintPath>
+      <HintPath>odaCore.dll</HintPath>
     </Reference>
     <Reference Include="odaLib">
-      <HintPath>F:\ODANT_18DEV\odaLib.dll</HintPath>
+      <HintPath>odaLib.dll</HintPath>
     </Reference>
     <Reference Include="odaShare">
-      <HintPath>F:\ODANT_18DEV\odaShare.dll</HintPath>
+      <HintPath>odaShare.dll</HintPath>
     </Reference>
     <Reference Include="odaXML">
-      <HintPath>F:\ODANT_18DEV\odaXML.dll</HintPath>
+      <HintPath>odaXML.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
