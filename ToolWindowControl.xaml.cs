@@ -19,6 +19,8 @@ using File = System.IO.File;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.ExceptionServices;
+using System.Security;
 
 namespace OdantDev
 {
@@ -79,6 +81,8 @@ namespace OdantDev
         {
             ThemeCheckBox.IsChecked = IsVisualStudioDark();
         }
+
+        [HandleProcessCorruptedStateExceptions]
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             this.ShowException((e.ExceptionObject as Exception).Message);

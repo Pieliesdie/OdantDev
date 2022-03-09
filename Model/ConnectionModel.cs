@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 
 namespace OdantDev
@@ -45,6 +46,8 @@ namespace OdantDev
         }
 
         public static Bitness Platform => IntPtr.Size == 4 ? Bitness.x86 : Bitness.x64;
+
+        [HandleProcessCorruptedStateExceptions]
         public async Task<(bool Success, string Error)> LoadAsync()
         {
             Stopwatch stopWatch = null;
