@@ -1,5 +1,6 @@
 ﻿using EnvDTE;
 using EnvDTE80;
+using Microsoft;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -217,17 +218,15 @@ namespace OdantDev.Model
         private Guid GetProjectGuid(Project project)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            return new Guid(project.UniqueName);
-            /*var solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
+            var solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
             IVsHierarchy hierarchy;
-
             solution.GetProjectOfUniqueName(project.FullName, out hierarchy);
             if (hierarchy == null) { return Guid.Empty; }
             hierarchy.GetGuidProperty(
                         VSConstants.VSITEMID_ROOT,
                         (int)__VSHPROPID.VSHPROPID_ProjectIDGuid,
                         out var projectGuid);
-            return projectGuid;*/
+            return projectGuid;
         }
         private void SetAttributeToProjectItem(IDictionary<string, CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
         {
@@ -298,7 +297,7 @@ namespace OdantDev.Model
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartProgram").Value = Path.Combine(OdaFolder.FullName, "oda.wrapper32.exe");
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartArguments").Value = "debug";
             project.Properties.Item("AssemblyName").Value = project.Name;
-            var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().Where(x => x.Name == "AssemblyInfo.cs").FirstOrDefault();
+            var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs");
             var assemblyFile = (@$"{new FileInfo(project.FullName).Directory}\AssemblyInfo.cs");
             if (assemblyInfo == null || File.Exists(assemblyFile).Not())
             {
