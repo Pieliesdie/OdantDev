@@ -277,7 +277,7 @@ namespace OdantDev
             AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(
                 AddinSettings.LastProjects.Except(AddinSettings.LastProjects.Where(x => x.FullId == item.FullId)));
             AddinSettings.LastProjects.Add(new AddinSettings.Project(item.Name, item.Description, item.FullId, item.Host.Name, DateTime.Now));
-            AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(AddinSettings.LastProjects.Reverse().Take(15)
+            AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(AddinSettings.LastProjects.OrderByDescending(x => x.OpenTime).Take(15)
                 ?? new List<AddinSettings.Project>());
             AddinSettings.Save();
         }
@@ -351,10 +351,10 @@ namespace OdantDev
         {
             if ((sender as Button)?.Tag is AddinSettings.Project project)
             {
-                if (string.IsNullOrWhiteSpace(project.FullId)) 
+                if (string.IsNullOrWhiteSpace(project.FullId))
                 {
                     logger?.Info("Can't find project's ID");
-                    return; 
+                    return;
                 }
                 var selectedItem = OdaModel?.Connection?.FindItem(project.FullId) as StructureItem;
                 if (selectedItem == null)
