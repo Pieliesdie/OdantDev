@@ -84,7 +84,7 @@ namespace OdantDev.Model
             }
             DevExpressLibraries = settings.DevExpressLibraries;
             OdaLibraries = settings.OdaLibraries;
-            LastProjects = settings.LastProjects;
+            LastProjects = new ObservableCollection<Project>(settings.LastProjects.OrderByDescending(x => x.OpenTime));
             IsAutoDetectOdaPath = settings.IsAutoDetectOdaPath;
             OdaFolder = settings.OdaFolder;
             IsSimpleTheme = settings.IsSimpleTheme;

@@ -15,21 +15,23 @@
         <Setter Property="ContentTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" >
-                        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"                               
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ProgressBar Width="{Binding Path=ProgressSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
+                                     Height="{Binding Path=ProgressSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
                                      Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
                                      IsIndeterminate="{Binding Path=IsBusy, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
-                                     Width="{Binding Path=ProgressSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
-                                     Height="{Binding Path=ProgressSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}" 
-                                    HorizontalAlignment="Center" VerticalAlignment="Center" >
+                                     Style="{StaticResource MaterialDesignCircularProgressBar}">
                             <ProgressBar.LayoutTransform>
                                 <ScaleTransform CenterX="0.5" CenterY="0.5" ScaleX="2" ScaleY="2" />
                             </ProgressBar.LayoutTransform>
                         </ProgressBar>
-                        <TextBlock Margin="0,15,0,0" 
-                                   HorizontalAlignment="Center" VerticalAlignment="Center" 
+                        <TextBlock Margin="0,15,0,0"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
                                    FontSize="{Binding Path=FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
-                                   Text="{Binding Path=Text, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"/>
+                                   Text="{Binding Path=Text, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}" />
                     </StackPanel>
                 </DataTemplate>
             </Setter.Value>
@@ -37,19 +39,28 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:BusyOverlay}">
-                    <Grid x:Name="BaseGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                        <Border Background="{TemplateBinding Background}" Opacity="0.9"
-                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-                        <ContentControl Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
-                                        ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
-                                        ContentStringFormat="{TemplateBinding ContentStringFormat}" />
+                    <Grid x:Name="BaseGrid"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch">
+                        <Border HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{TemplateBinding Background}"
+                                Opacity="0.9" />
+                        <ContentControl Content="{TemplateBinding Content}"
+                                        ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                                        ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsBusy" Value="True">
                             <Trigger.EnterActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BaseGrid" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3">
+                                        <DoubleAnimation Storyboard.TargetName="BaseGrid"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         From="0"
+                                                         To="1"
+                                                         Duration="0:0:0.3">
                                             <DoubleAnimation.EasingFunction>
                                                 <SineEase EasingMode="EaseInOut" />
                                             </DoubleAnimation.EasingFunction>
@@ -60,7 +71,11 @@
                             <Trigger.ExitActions>
                                 <BeginStoryboard>
                                     <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="BaseGrid" Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.3">
+                                        <DoubleAnimation Storyboard.TargetName="BaseGrid"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         From="1"
+                                                         To="0"
+                                                         Duration="0:0:0.3">
                                             <DoubleAnimation.EasingFunction>
                                                 <SineEase EasingMode="EaseInOut" />
                                             </DoubleAnimation.EasingFunction>
@@ -86,7 +101,7 @@
                 <Trigger.EnterActions>
                     <BeginStoryboard>
                         <Storyboard>
-                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" BeginTime="0:0:0.0">
+                            <ObjectAnimationUsingKeyFrames BeginTime="0:0:0.0" Storyboard.TargetProperty="Visibility">
                                 <DiscreteObjectKeyFrame KeyTime="0:0:0.0" Value="{x:Static Visibility.Visible}" />
                             </ObjectAnimationUsingKeyFrames>
                         </Storyboard>
@@ -95,7 +110,7 @@
                 <Trigger.ExitActions>
                     <BeginStoryboard>
                         <Storyboard>
-                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" BeginTime="0:0:0.0">
+                            <ObjectAnimationUsingKeyFrames BeginTime="0:0:0.0" Storyboard.TargetProperty="Visibility">
                                 <DiscreteObjectKeyFrame KeyTime="0:0:0.3" Value="{x:Static Visibility.Collapsed}" />
                             </ObjectAnimationUsingKeyFrames>
                         </Storyboard>
@@ -105,59 +120,76 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="MaterialBusyOverlayCircularProgress" TargetType="{x:Type controls:BusyOverlay}" BasedOn="{StaticResource MaterialBusyOverlayCircular}">
+    <Style x:Key="MaterialBusyOverlayCircularProgress"
+           BasedOn="{StaticResource MaterialBusyOverlayCircular}"
+           TargetType="{x:Type controls:BusyOverlay}">
         <Setter Property="ContentTemplate">
             <Setter.Value>
                 <DataTemplate>
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                        <ProgressBar Width="128"
+                                     Height="128"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
                                      Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
                                      IsIndeterminate="False"
-                                     Value="{Binding Path=Progress, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
-                                     Width="128" Height="128" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        <TextBlock Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
+                                     Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                     Value="{Binding Path=Progress, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}" />
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
                                    FontSize="32"
-                                   Text="{Binding Path=Progress, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}, StringFormat={}{0}%}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                   Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
+                                   Text="{Binding Path=Progress, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}, StringFormat={}{0}%}" />
                     </Grid>
                 </DataTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <Style x:Key="MaterialBusyOverlayLinear" TargetType="{x:Type controls:BusyOverlay}" BasedOn="{StaticResource MaterialBusyOverlayCircular}">
+    <Style x:Key="MaterialBusyOverlayLinear"
+           BasedOn="{StaticResource MaterialBusyOverlayCircular}"
+           TargetType="{x:Type controls:BusyOverlay}">
         <Setter Property="ContentTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}"
+                    <ProgressBar Height="8"
+                                 HorizontalAlignment="Stretch"
+                                 VerticalAlignment="Center"
                                  Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
                                  IsIndeterminate="True"
-                                 Height="8" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                                 Style="{StaticResource MaterialDesignLinearProgressBar}" />
                 </DataTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <Style x:Key="MaterialBusyOverlayLinearProgress" TargetType="{x:Type controls:BusyOverlay}" BasedOn="{StaticResource MaterialBusyOverlayCircular}">
+    <Style x:Key="MaterialBusyOverlayLinearProgress"
+           BasedOn="{StaticResource MaterialBusyOverlayCircular}"
+           TargetType="{x:Type controls:BusyOverlay}">
         <Setter Property="ContentTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-                        <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}"
+                    <StackPanel HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Orientation="Vertical">
+                        <ProgressBar Height="8"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Center"
                                      Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
                                      IsIndeterminate="False"
-                                     Value="{Binding Path=Progress, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
-                                     Height="8" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-                        <TextBlock Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
+                                     Style="{StaticResource MaterialDesignLinearProgressBar}"
+                                     Value="{Binding Path=Progress, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}" />
+                        <TextBlock Margin="0,16,0,0"
+                                   HorizontalAlignment="Center"
                                    FontSize="32"
-                                   Text="{Binding Path=Progress, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}, StringFormat={}{0}%}"
-                                   Margin="0,16,0,0" HorizontalAlignment="Center" />
+                                   Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}}"
+                                   Text="{Binding Path=Progress, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:BusyOverlay}}, StringFormat={}{0}%}" />
                     </StackPanel>
                 </DataTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type controls:BusyOverlay}" BasedOn="{StaticResource MaterialBusyOverlayCircular}" />
+    <Style BasedOn="{StaticResource MaterialBusyOverlayCircular}" TargetType="{x:Type controls:BusyOverlay}" />
 
 </ResourceDictionary>

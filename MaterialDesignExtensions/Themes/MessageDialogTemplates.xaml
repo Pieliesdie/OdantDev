@@ -4,7 +4,9 @@
                     xmlns:converters="clr-namespace:MaterialDesignExtensions.Converters"
                     xmlns:localization="clr-namespace:MaterialDesignExtensions.Localization">
 
-    <converters:NullToVisibilityConverter x:Key="notNullToVisibileConverter" NullValue="Collapsed" NotNullValue="Visible" />
+    <converters:NullToVisibilityConverter x:Key="notNullToVisibileConverter"
+                                          NotNullValue="Visible"
+                                          NullValue="Collapsed" />
     <converters:NotNullBooleanConverter x:Key="notNullBooleanConverter" />
     <converters:UpperCaseConverter x:Key="upperCaseConverter" />
 
@@ -15,15 +17,23 @@
         <Setter Property="OkButtonLabel" Value="{Binding Source={x:Static localization:Strings.Ok}, Converter={StaticResource upperCaseConverter}}" />
     </Style>
 
-    <Style TargetType="controls:AlertDialog" BasedOn="{StaticResource dialogBaseStyle}">
+    <Style BasedOn="{StaticResource dialogBaseStyle}" TargetType="controls:AlertDialog">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="controls:AlertDialog">
-                    <Border Background="{TemplateBinding Background}"
-                            Padding="0,24,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                            MinWidth="{TemplateBinding MinWidth}" MaxWidth="{TemplateBinding MaxWidth}">
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                            <TextBlock Text="{TemplateBinding Title}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}"
+                    <Border MinWidth="{TemplateBinding MinWidth}"
+                            MaxWidth="{TemplateBinding MaxWidth}"
+                            Padding="0,24,0,0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Background="{TemplateBinding Background}">
+                        <StackPanel HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Orientation="Vertical">
+                            <TextBlock FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource MaterialDesignBody}"
+                                       Text="{TemplateBinding Title}"
                                        Visibility="{Binding Path=Title, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
@@ -38,13 +48,21 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-                            <TextBlock Text="{TemplateBinding Message}" FontSize="16" Foreground="{DynamicResource MaterialDesignBodyLight}"
-                                       Margin="24,0,24,0"
+                            <TextBlock Margin="24,0,24,0"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                       Text="{TemplateBinding Message}"
                                        Visibility="{Binding Path=Message, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}" />
-                            <ContentControl Content="{TemplateBinding CustomContent}" ContentTemplate="{TemplateBinding CustomContentTemplate}"
-                                            Visibility="{Binding Path=CustomContent, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}"
-                                            Margin="24,0,24,0" HorizontalAlignment="Stretch" />
-                            <Button x:Name="okButton" Style="{StaticResource MaterialDesignFlatButton}" Content="{TemplateBinding OkButtonLabel}" Margin="8,36,8,8" HorizontalAlignment="Right" />
+                            <ContentControl Margin="24,0,24,0"
+                                            HorizontalAlignment="Stretch"
+                                            Content="{TemplateBinding CustomContent}"
+                                            ContentTemplate="{TemplateBinding CustomContentTemplate}"
+                                            Visibility="{Binding Path=CustomContent, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <Button x:Name="okButton"
+                                    Margin="8,36,8,8"
+                                    HorizontalAlignment="Right"
+                                    Content="{TemplateBinding OkButtonLabel}"
+                                    Style="{StaticResource MaterialDesignFlatButton}" />
                         </StackPanel>
                     </Border>
                 </ControlTemplate>
@@ -52,17 +70,25 @@
         </Setter>
     </Style>
 
-    <Style TargetType="controls:ConfirmationDialog" BasedOn="{StaticResource dialogBaseStyle}">
+    <Style BasedOn="{StaticResource dialogBaseStyle}" TargetType="controls:ConfirmationDialog">
         <Setter Property="CancelButtonLabel" Value="{Binding Source={x:Static localization:Strings.Cancel}, Converter={StaticResource upperCaseConverter}}" />
         <Setter Property="StackedButtons" Value="False" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="controls:ConfirmationDialog">
-                    <Border Background="{TemplateBinding Background}"
-                            Padding="0,24,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                            MinWidth="{TemplateBinding MinWidth}" MaxWidth="{TemplateBinding MaxWidth}">
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                            <TextBlock Text="{TemplateBinding Title}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}"
+                    <Border MinWidth="{TemplateBinding MinWidth}"
+                            MaxWidth="{TemplateBinding MaxWidth}"
+                            Padding="0,24,0,0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Background="{TemplateBinding Background}">
+                        <StackPanel HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Orientation="Vertical">
+                            <TextBlock FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource MaterialDesignBody}"
+                                       Text="{TemplateBinding Title}"
                                        Visibility="{Binding Path=Title, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
@@ -77,12 +103,16 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-                            <TextBlock Text="{TemplateBinding Message}" FontSize="16" Foreground="{DynamicResource MaterialDesignBodyLight}"
-                                       Margin="24,0,24,0"
+                            <TextBlock Margin="24,0,24,0"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                       Text="{TemplateBinding Message}"
                                        Visibility="{Binding Path=Message, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}" />
-                            <ContentControl Content="{TemplateBinding CustomContent}" ContentTemplate="{TemplateBinding CustomContentTemplate}"
-                                            Visibility="{Binding Path=CustomContent, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}"
-                                            Margin="24,0,24,0" HorizontalAlignment="Stretch" />
+                            <ContentControl Margin="24,0,24,0"
+                                            HorizontalAlignment="Stretch"
+                                            Content="{TemplateBinding CustomContent}"
+                                            ContentTemplate="{TemplateBinding CustomContentTemplate}"
+                                            Visibility="{Binding Path=CustomContent, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}" />
                             <Grid HorizontalAlignment="Right">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -94,7 +124,7 @@
                                 </Grid.RowDefinitions>
                                 <Button x:Name="cancelButton" Content="{TemplateBinding CancelButtonLabel}">
                                     <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+                                        <Style BasedOn="{StaticResource MaterialDesignFlatButton}" TargetType="Button">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Path=StackedButtons, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
                                                     <Setter Property="Grid.Column" Value="0" />
@@ -112,7 +142,7 @@
                                 </Button>
                                 <Button x:Name="okButton" Content="{TemplateBinding OkButtonLabel}">
                                     <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+                                        <Style BasedOn="{StaticResource MaterialDesignFlatButton}" TargetType="Button">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Path=StackedButtons, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
                                                     <Setter Property="Grid.Column" Value="1" />
@@ -136,17 +166,25 @@
         </Setter>
     </Style>
 
-    <Style TargetType="controls:InputDialog" BasedOn="{StaticResource dialogBaseStyle}">
+    <Style BasedOn="{StaticResource dialogBaseStyle}" TargetType="controls:InputDialog">
         <Setter Property="CancelButtonLabel" Value="{Binding Source={x:Static localization:Strings.Cancel}, Converter={StaticResource upperCaseConverter}}" />
         <Setter Property="StackedButtons" Value="False" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="controls:InputDialog">
-                    <Border Background="{TemplateBinding Background}"
-                            Padding="0,24,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                            MinWidth="{TemplateBinding MinWidth}" MaxWidth="{TemplateBinding MaxWidth}">
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                            <TextBlock Text="{TemplateBinding Title}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}"
+                    <Border MinWidth="{TemplateBinding MinWidth}"
+                            MaxWidth="{TemplateBinding MaxWidth}"
+                            Padding="0,24,0,0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Background="{TemplateBinding Background}">
+                        <StackPanel HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Orientation="Vertical">
+                            <TextBlock FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource MaterialDesignBody}"
+                                       Text="{TemplateBinding Title}"
                                        Visibility="{Binding Path=Title, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
@@ -161,12 +199,16 @@
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-                            <TextBlock Text="{TemplateBinding Message}" FontSize="16" Foreground="{DynamicResource MaterialDesignBodyLight}"
-                                       Margin="24,0,24,0"
+                            <TextBlock Margin="24,0,24,0"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                       Text="{TemplateBinding Message}"
                                        Visibility="{Binding Path=Message, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}" />
-                            <ContentControl Content="{TemplateBinding CustomContent}" ContentTemplate="{TemplateBinding CustomContentTemplate}"
-                                            Visibility="{Binding Path=CustomContent, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}"
-                                            Margin="24,0,24,0" HorizontalAlignment="Stretch" />
+                            <ContentControl Margin="24,0,24,0"
+                                            HorizontalAlignment="Stretch"
+                                            Content="{TemplateBinding CustomContent}"
+                                            ContentTemplate="{TemplateBinding CustomContentTemplate}"
+                                            Visibility="{Binding Path=CustomContent, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}" />
                             <Grid HorizontalAlignment="Right">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -178,7 +220,7 @@
                                 </Grid.RowDefinitions>
                                 <Button x:Name="cancelButton" Content="{TemplateBinding CancelButtonLabel}">
                                     <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+                                        <Style BasedOn="{StaticResource MaterialDesignFlatButton}" TargetType="Button">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Path=StackedButtons, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
                                                     <Setter Property="Grid.Column" Value="0" />
@@ -196,7 +238,7 @@
                                 </Button>
                                 <Button x:Name="okButton" Content="{TemplateBinding OkButtonLabel}">
                                     <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+                                        <Style BasedOn="{StaticResource MaterialDesignFlatButton}" TargetType="Button">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Path=StackedButtons, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
                                                     <Setter Property="Grid.Column" Value="1" />
@@ -219,5 +261,5 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
 </ResourceDictionary>

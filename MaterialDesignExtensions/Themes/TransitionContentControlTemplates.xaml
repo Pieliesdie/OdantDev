@@ -12,56 +12,83 @@
                 <ControlTemplate TargetType="{x:Type controls:TransitionContentControl}">
                     <ControlTemplate.Resources>
                         <Storyboard x:Key="FadeInStoryboard">
-                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.300">
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                             From="0"
+                                             To="1"
+                                             Duration="0:0:0.300">
                                 <DoubleAnimation.EasingFunction>
                                     <SineEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
                         </Storyboard>
                         <Storyboard x:Key="GrowStoryboard">
-                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" From="0" To="1" Duration="0:0:0.300">
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                             From="0"
+                                             To="1"
+                                             Duration="0:0:0.300">
                                 <DoubleAnimation.EasingFunction>
                                     <SineEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
-                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="0" To="1" Duration="0:0:0.300">
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                             From="0"
+                                             To="1"
+                                             Duration="0:0:0.300">
                                 <DoubleAnimation.EasingFunction>
                                     <SineEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
                         </Storyboard>
                         <Storyboard x:Key="FadeInAndGrowStoryboard">
-                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.300">
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                             From="0"
+                                             To="1"
+                                             Duration="0:0:0.300">
                                 <DoubleAnimation.EasingFunction>
                                     <SineEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
-                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" From="0" To="1" Duration="0:0:0.300">
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                                             From="0"
+                                             To="1"
+                                             Duration="0:0:0.300">
                                 <DoubleAnimation.EasingFunction>
                                     <SineEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
-                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="0" To="1" Duration="0:0:0.300">
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                                             From="0"
+                                             To="1"
+                                             Duration="0:0:0.300">
                                 <DoubleAnimation.EasingFunction>
                                     <SineEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
                         </Storyboard>
                     </ControlTemplate.Resources>
-                    <Grid Background="{TemplateBinding Background}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
-                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="{TemplateBinding Margin}">
-                        <ContentControl x:Name="ContentControl1" Panel.ZIndex="1" RenderTransformOrigin="0.5,0.5"
+                    <Grid Margin="{TemplateBinding Margin}"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Background="{TemplateBinding Background}"
+                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+                        <ContentControl x:Name="ContentControl1"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        Panel.ZIndex="1"
                                         Background="Transparent"
-                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                        RenderTransformOrigin="0.5,0.5">
                             <ContentControl.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform />
                                 </TransformGroup>
                             </ContentControl.RenderTransform>
                         </ContentControl>
-                        <ContentControl x:Name="ContentControl2" Panel.ZIndex="0" RenderTransformOrigin="0.5,0.5"
+                        <ContentControl x:Name="ContentControl2"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        Panel.ZIndex="0"
                                         Background="Transparent"
-                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                        RenderTransformOrigin="0.5,0.5">
                             <ContentControl.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform />
@@ -73,5 +100,5 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
 </ResourceDictionary>

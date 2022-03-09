@@ -66,8 +66,8 @@ namespace OdantDev.Model
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             var guid = GetProjectGuid(Project);
-            LoadedModules[GetProjectGuid(Project)].Dispose();
-            LoadedModules.Remove(GetProjectGuid(Project));
+            LoadedModules[guid].Dispose();
+            LoadedModules.Remove(guid);
         }
         private void BuildEvents_OnBuildProjConfigBegin(string Project, string ProjectConfig, string Platform, string SolutionConfig)
         {
@@ -217,7 +217,8 @@ namespace OdantDev.Model
         private Guid GetProjectGuid(Project project)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            var solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
+            return new Guid(project.UniqueName);
+            /*var solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
             IVsHierarchy hierarchy;
 
             solution.GetProjectOfUniqueName(project.FullName, out hierarchy);
@@ -226,7 +227,7 @@ namespace OdantDev.Model
                         VSConstants.VSITEMID_ROOT,
                         (int)__VSHPROPID.VSHPROPID_ProjectIDGuid,
                         out var projectGuid);
-            return projectGuid;
+            return projectGuid;*/
         }
         private void SetAttributeToProjectItem(IDictionary<string, CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
         {
