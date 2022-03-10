@@ -288,6 +288,28 @@
                                                     <materialDesign:PackIcon Kind="InformationCircleOutline" />
                                                 </MenuItem.Icon>
                                             </MenuItem>
+                                            <MenuItem Name="CreateItemInfo"
+                                               Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                                >
+                                                <MenuItem.CommandParameter>
+                                                    <StackPanel Margin="16">
+                                                        <ProgressBar Margin="16"
+                                                                     HorizontalAlignment="Center"                                                               
+                                                                    Value="0" />
+                                                        <Button HorizontalAlignment="Center"
+                                                                Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                             
+                                                                Content="CANCEL"
+                                                                IsCancel="True" />
+                                                    </StackPanel>
+                                                </MenuItem.CommandParameter>
+                                                <MenuItem.Header>
+                                                    <TextBlock Text="Create new item" />
+                                                </MenuItem.Header>
+                                                <MenuItem.Icon>
+                                                    <materialDesign:PackIcon Kind="CreateNewFolderOutline" />
+                                                </MenuItem.Icon>
+                                            </MenuItem>
                                         </ContextMenu>
                                     </Grid.ContextMenu>
                                     <Image Grid.Column="0"
@@ -353,127 +375,127 @@
                     <materialDesign:DialogHost>
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <ItemsControl Name="RecentlyProjectsItemsControl"
-                                      Margin="5,0,5,0"
-                                      ItemsSource="{Binding AddinSettings.LastProjects}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Name="ProjectCard"
-                                            Width="170"
-                                            Height="90"
-                                            Margin="5"
-                                            materialDesign:ShadowAssist.ShadowDepth="Depth4"
-                                            Background="{DynamicResource PrimaryHueMidBrush}"
-                                            Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
-                                            Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}">
-                                        <Button.CommandParameter>
-                                            <StackPanel Margin="16">
-                                                <TextBlock Width="150"
-                                                           Margin="16"
-                                                           Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                                                           TextAlignment="Center"
-                                                           TextWrapping="Wrap">
-                                                    Do you want to open this project?
-                                                </TextBlock>
-                                                <DockPanel>
-                                                    <Button Width="65"
-                                                            Margin="5"
-                                                            HorizontalAlignment="Center"
-                                                            Click="ProjectCard_Click"
-                                                            Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                            Content="Yes"
-                                                            DockPanel.Dock="Left"
-                                                            IsDefault="True"
-                                                            Tag="{Binding}" />
-                                                    <Button Width="65"
-                                                            Margin="5"
-                                                            HorizontalAlignment="Right"
-                                                            Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                            Content="No"
-                                                            DockPanel.Dock="Right"
-                                                            IsCancel="True" />
-                                                </DockPanel>
-                                            </StackPanel>
-                                        </Button.CommandParameter>
-                                        <Button.Style>
-                                            <Style BasedOn="{StaticResource MaterialDesignRaisedButton}" TargetType="{x:Type Button}">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Opacity" Value="1" />
-
-                                                    </Trigger>
-                                                    <Trigger Property="IsMouseOver" Value="False">
-                                                        <Setter Property="Opacity" Value=".7" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-                                            <StackPanel Grid.Row="0" Orientation="Horizontal">
-                                                <materialDesign:PackIcon Width="25"
-                                                                         Height="25"
-                                                                         Margin="0,10,0,0"
-                                                                         Kind="LayersPlus" />
-                                                <StackPanel Width="85" Margin="15,0,0,0">
-                                                    <TextBlock Width="90"
-                                                               Margin="0,10,0,-5"
-                                                               Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                                               Text="{Binding Name}"
-                                                               TextTrimming="WordEllipsis" />
-                                                    <TextBlock Width="90"
-                                                               Margin="0,5,0,-7"
-                                                               HorizontalAlignment="Left"
-                                                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                                               Text="{Binding HostName}"
-                                                               TextTrimming="WordEllipsis" />
+                                          Margin="5,0,5,0"
+                                          ItemsSource="{Binding AddinSettings.LastProjects}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Name="ProjectCard"
+                                                Width="170"
+                                                Height="90"
+                                                Margin="5"
+                                                materialDesign:ShadowAssist.ShadowDepth="Depth4"
+                                                Background="{DynamicResource PrimaryHueMidBrush}"
+                                                Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
+                                                Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}">
+                                            <Button.CommandParameter>
+                                                <StackPanel Margin="16">
+                                                    <TextBlock Width="150"
+                                                               Margin="16"
+                                                               Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                                               TextAlignment="Center"
+                                                               TextWrapping="Wrap">
+                                                        Do you want to open this project?
+                                                    </TextBlock>
+                                                    <DockPanel>
+                                                        <Button Width="65"
+                                                                Margin="5"
+                                                                HorizontalAlignment="Center"
+                                                                Click="ProjectCard_Click"
+                                                                Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                                Content="Yes"
+                                                                DockPanel.Dock="Left"
+                                                                IsDefault="True"
+                                                                Tag="{Binding}" />
+                                                        <Button Width="65"
+                                                                Margin="5"
+                                                                HorizontalAlignment="Right"
+                                                                Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                                Content="No"
+                                                                DockPanel.Dock="Right"
+                                                                IsCancel="True" />
+                                                    </DockPanel>
                                                 </StackPanel>
-                                                <Button Name="DeleteRecentlyProject"
-                                                        Width="15"
-                                                        Height="15"
-                                                        Margin="0,3,0,0"
-                                                        HorizontalAlignment="Right"
-                                                        VerticalAlignment="Top"
-                                                        Click="DeleteRecentlyProject_Click"
-                                                        Foreground="#b71c1c"
-                                                        Style="{StaticResource MaterialDesignIconForegroundButton}"
-                                                        Tag="{Binding}">
-                                                    <materialDesign:PackIcon Width="15"
-                                                                             Height="15"
-                                                                             Kind="CloseOutline" />
-                                                </Button>
-                                            </StackPanel>
-                                            <Separator Grid.Row="2" Style="{StaticResource MaterialDesignLightSeparator}" />
-                                            <StackPanel Grid.Row="3" Orientation="Horizontal">
-                                                <TextBlock Margin="0,0,0,8"
-                                                           HorizontalAlignment="Left"
-                                                           VerticalAlignment="Center"
-                                                           FontSize="12"
-                                                           Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
-                                                           Text="{Binding OpenTime, StringFormat={}{0:dd MMM. yyyy}}" />
-                                                <TextBlock Margin="16,0,0,8"
-                                                           HorizontalAlignment="Left"
-                                                           VerticalAlignment="Center"
-                                                           FontSize="12"
-                                                           Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
-                                                           Text="{Binding OpenTime, StringFormat={}{0:HH:mm:ss}}" />
-                                            </StackPanel>
+                                            </Button.CommandParameter>
+                                            <Button.Style>
+                                                <Style BasedOn="{StaticResource MaterialDesignRaisedButton}" TargetType="{x:Type Button}">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Opacity" Value="1" />
 
-                                        </Grid>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="False">
+                                                            <Setter Property="Opacity" Value=".7" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Width="25"
+                                                                             Height="25"
+                                                                             Margin="0,10,0,0"
+                                                                             Kind="LayersPlus" />
+                                                    <StackPanel Width="85" Margin="15,0,0,0">
+                                                        <TextBlock Width="90"
+                                                                   Margin="0,10,0,-5"
+                                                                   Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                                                   Text="{Binding Name}"
+                                                                   TextTrimming="WordEllipsis" />
+                                                        <TextBlock Width="90"
+                                                                   Margin="0,5,0,-7"
+                                                                   HorizontalAlignment="Left"
+                                                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                                   Text="{Binding HostName}"
+                                                                   TextTrimming="WordEllipsis" />
+                                                    </StackPanel>
+                                                    <Button Name="DeleteRecentlyProject"
+                                                            Width="15"
+                                                            Height="15"
+                                                            Margin="0,3,0,0"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Top"
+                                                            Click="DeleteRecentlyProject_Click"
+                                                            Foreground="#b71c1c"
+                                                            Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                                            Tag="{Binding}">
+                                                        <materialDesign:PackIcon Width="15"
+                                                                                 Height="15"
+                                                                                 Kind="CloseOutline" />
+                                                    </Button>
+                                                </StackPanel>
+                                                <Separator Grid.Row="2" Style="{StaticResource MaterialDesignLightSeparator}" />
+                                                <StackPanel Grid.Row="3" Orientation="Horizontal">
+                                                    <TextBlock Margin="0,0,0,8"
+                                                               HorizontalAlignment="Left"
+                                                               VerticalAlignment="Center"
+                                                               FontSize="12"
+                                                               Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                                               Text="{Binding OpenTime, StringFormat={}{0:dd MMM. yyyy}}" />
+                                                    <TextBlock Margin="16,0,0,8"
+                                                               HorizontalAlignment="Left"
+                                                               VerticalAlignment="Center"
+                                                               FontSize="12"
+                                                               Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                                                               Text="{Binding OpenTime, StringFormat={}{0:HH:mm:ss}}" />
+                                                </StackPanel>
+
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
                         </ScrollViewer>
                     </materialDesign:DialogHost>
                 </TabItem>

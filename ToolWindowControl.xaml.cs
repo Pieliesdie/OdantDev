@@ -224,6 +224,7 @@ namespace OdantDev
                         moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "TemplateProject.csproj"), @"TemplateProject.csproj", true);
                         moduleFolder.Save();
                         cls.ReloadClassFromServer();
+                        cls.RemoteClass.Rebuild();
                     });
                     await uploadTask;
                     logger?.Info("Module created");
@@ -389,5 +390,10 @@ namespace OdantDev
             AddinSettings?.OdaLibraries.Add(DialogAddOdaLibrary.Text);
         }
         #endregion
+
+        private void CreateItemInfo_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

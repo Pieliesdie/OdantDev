@@ -47,6 +47,8 @@ namespace OdantDev.Model
         public bool IsAutoDetectOdaPath { get => isAutoDetectOdaPath; set { isAutoDetectOdaPath = value; NotifyPropertyChanged("IsAutoDetectOdaPath"); NotifyPropertyChanged("OdaFolder"); } }
         public bool IsLazyTreeLoad { get => isLazyTreeLoad; set { isLazyTreeLoad = value; NotifyPropertyChanged("IsLazyTreeLoad"); } }
         public string SelectedDevelopeDomain { get => selectedDevelopeDomain; set { selectedDevelopeDomain = value; NotifyPropertyChanged("SelectedDevelopeDomain"); } }
+        public ObservableCollection<string> LastOdaFolders { get => lastOdaFolders; set { lastOdaFolders = value; NotifyPropertyChanged("LastOdaFolders"); } }
+
         public string OdaFolder
         {
             get { return IsAutoDetectOdaPath ? Extension.LastOdaFolder.FullName : odaFolder; }
@@ -63,6 +65,7 @@ namespace OdantDev.Model
         private ObservableCollection<string> odaLibraries;
         private ObservableCollection<string> devExpressLibraries;
         private string selectedDevelopeDomain;
+        private ObservableCollection<string> lastOdaFolders;
 
         public AddinSettings(DirectoryInfo folder)
         {
@@ -77,11 +80,12 @@ namespace OdantDev.Model
                 using FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
                 settings = (serializer.Deserialize(fs) as AddinSettings);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 using FileStream fs = new FileStream(templatePath, FileMode.Open, FileAccess.Read);
                 settings = (serializer.Deserialize(fs) as AddinSettings);
             }
+            lastOdaFolders = settings.LastOdaFolders;
             DevExpressLibraries = settings.DevExpressLibraries;
             OdaLibraries = settings.OdaLibraries;
             LastProjects = new ObservableCollection<Project>(settings.LastProjects.OrderByDescending(x => x.OpenTime));

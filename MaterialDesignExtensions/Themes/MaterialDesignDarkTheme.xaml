@@ -14,28 +14,28 @@
         <ResourceDictionary>
             <SolidColorBrush x:Key="MaterialDesignNavigationItemIcon"
                              po:Freeze="True"
-                             Color="#8AFFFFFF" /> 
+                             Color="#8AFFFFFF" />
             <!--  54% white  -->
             <SolidColorBrush x:Key="MaterialDesignNavigationItemText"
                              po:Freeze="True"
-                             Color="#DEFFFFFF" /> 
+                             Color="#DEFFFFFF" />
             <!--  87% white  -->
             <SolidColorBrush x:Key="MaterialDesignNavigationItemSubheader"
                              po:Freeze="True"
-                             Color="#8AFFFFFF" /> 
+                             Color="#8AFFFFFF" />
             <!--  54% white  -->
 
             <SolidColorBrush x:Key="MaterialDesignStepperInactiveStep"
                              po:Freeze="True"
-                             Color="#61FFFFFF" /> 
+                             Color="#61FFFFFF" />
             <!--  38% white  -->
             <SolidColorBrush x:Key="MaterialDesignStepperActiveStep"
                              po:Freeze="True"
-                             Color="#DDFFFFFF" /> 
+                             Color="#DDFFFFFF" />
             <!--  87% white  -->
             <SolidColorBrush x:Key="MaterialDesignStepperSeparator"
                              po:Freeze="True"
-                             Color="#1FFFFFFF" /> 
+                             Color="#1FFFFFFF" />
             <!--  12% white  -->
         </ResourceDictionary>
     </ResourceDictionary.MergedDictionaries>
