@@ -26,7 +26,7 @@ namespace OdantDev.Model
         private ProjectsEvents ProjectsEvents { get; }
         private DTE2 envDTE { get; }
         private IServiceProvider serviceProvider { get; }
-        private Dictionary<Guid, BuildInfo> LoadedModules { get; } = new Dictionary<Guid, BuildInfo>();
+        private Dictionary<string, BuildInfo> LoadedModules { get; } = new Dictionary<string, BuildInfo>();
         private DirectoryInfo AddinFolder { get; }
         private AddinSettings AddinSettings { get; }
         private DirectoryInfo OdaFolder => new DirectoryInfo(AddinSettings.OdaFolder);
@@ -215,18 +215,21 @@ namespace OdantDev.Model
                 return false;
             }
         }
-        private Guid GetProjectGuid(Project project)
+        private string GetProjectGuid(Project project)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            var solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
+            //same guid in different projects :(
+            /* var solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
             IVsHierarchy hierarchy;
             solution.GetProjectOfUniqueName(project.FullName, out hierarchy);
-            if (hierarchy == null) { return Guid.Empty; }
+            if (hierarchy == null) { return String.Empty; }
             hierarchy.GetGuidProperty(
                         VSConstants.VSITEMID_ROOT,
                         (int)__VSHPROPID.VSHPROPID_ProjectIDGuid,
                         out var projectGuid);
-            return projectGuid;
+            return projectGuid.ToString();*/
+            return project.UniqueName;
+
         }
         private void SetAttributeToProjectItem(IDictionary<string, CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
         {
