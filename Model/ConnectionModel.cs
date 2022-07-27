@@ -63,9 +63,10 @@ namespace OdantDev
                 await Task.Run(() =>
                 {
                     this.Hosts = Connection.Hosts
+                    .Sorted
                     .AsParallel()
+                    .AsOrdered()
                     .OfType<Host>()
-                    .AsUnordered()
                     .Select(host => new StructureItemViewModel<StructureItem>(host, AddinSettings.IsLazyTreeLoad, logger: logger))
                     .ToList();
                 });

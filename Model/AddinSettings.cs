@@ -80,7 +80,7 @@ namespace OdantDev.Model
                 using FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
                 settings = (serializer.Deserialize(fs) as AddinSettings);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 using FileStream fs = new FileStream(templatePath, FileMode.Open, FileAccess.Read);
                 settings = (serializer.Deserialize(fs) as AddinSettings);

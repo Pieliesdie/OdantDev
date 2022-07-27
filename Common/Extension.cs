@@ -122,7 +122,7 @@ namespace OdantDev
 
         public static FileInfo LastOdaPath()
         {
-            string[] strArray = new string[2] { "oda", "odant" };
+            string[] strArray = new string[3] { "oda", "odant", "Applications\\ODA.exe" };
             foreach (string name1 in strArray)
             {
                 try
