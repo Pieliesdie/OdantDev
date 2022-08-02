@@ -1,9 +1,6 @@
 ﻿using EnvDTE;
 using EnvDTE80;
-using Microsoft;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using oda;
 using System;
 using System.Collections.Generic;
@@ -29,7 +26,7 @@ namespace OdantDev.Model
         private Dictionary<string, BuildInfo> LoadedModules { get; } = new Dictionary<string, BuildInfo>();
         private DirectoryInfo AddinFolder { get; }
         private AddinSettings AddinSettings { get; }
-        private DirectoryInfo OdaFolder => new DirectoryInfo(AddinSettings.OdaFolder);
+        private DirectoryInfo OdaFolder => new DirectoryInfo(AddinSettings.SelectedOdaFolder.Path);
         private ILogger logger { get; }
         #endregion
         public VisualStudioIntegration(AddinSettings addinSettings, DTE2 DTE, ILogger logger = null)
@@ -47,8 +44,9 @@ namespace OdantDev.Model
                 envDTE.Solution.Close();
             }
             SolutionEvents = (DTE.Events as Events2).SolutionEvents;
-            SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;
-            SolutionEvents.Opened += SolutionEvents_Opened;
+            SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;            
+            SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
+            //SolutionEvents.Opened += SolutionEvents_Opened;
 
             ProjectsEvents = (DTE.Events as Events2).ProjectsEvents;
 
@@ -58,11 +56,20 @@ namespace OdantDev.Model
             BuildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
             BuildEvents.OnBuildProjConfigBegin += BuildEvents_OnBuildProjConfigBegin;
         }
+
         #region Visual studio events
-        private void SolutionEvents_Opened()
+        // Если закрыть Solution и потом открыть модуль он попадает в коллекцию, после этого открывается Solution и событие очищает коллекцию модулей
+        // добавил эвент SolutionEvents_AfterClosing, думаю в таком случае будет правильнее там очищать
+        //private void SolutionEvents_Opened()
+        //{            
+        //    LoadedModules.Clear();
+        //}
+
+        private void SolutionEvents_AfterClosing()
         {
             LoadedModules.Clear();
         }
+
         private void SolutionEvents_ProjectRemoved(Project Project)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -70,10 +77,12 @@ namespace OdantDev.Model
             LoadedModules[guid].Dispose();
             LoadedModules.Remove(guid);
         }
+
         private void BuildEvents_OnBuildProjConfigBegin(string Project, string ProjectConfig, string Platform, string SolutionConfig)
         {
 
         }
+
         private void BuildEvents_OnBuildProjConfigDone(string Project, string ProjectConfig, string Platform, string SolutionConfig, bool Success)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -84,6 +93,7 @@ namespace OdantDev.Model
                 envDTE.ExecuteCommand("Build.Cancel");
             }
         }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
         public async void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
         {
@@ -95,6 +105,7 @@ namespace OdantDev.Model
                 CopyToOdaBin(project);
             }
         }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
         public async void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
         {
@@ -109,8 +120,11 @@ namespace OdantDev.Model
                 }
             }
         }
+
         #endregion
+
         #region Common Methods for Project item
+
         public bool CopyToOdaBin(Project project)
         {
             try
@@ -170,6 +184,7 @@ namespace OdantDev.Model
             }
             return true;
         }
+
         private bool CopyModuleDirToServer(BuildInfo buildInfo)
         {
             try
@@ -184,6 +199,7 @@ namespace OdantDev.Model
                 return false;
             }
         }
+
         public bool IncreaseVersion(Project project)
         {
             try
@@ -215,6 +231,7 @@ namespace OdantDev.Model
                 return false;
             }
         }
+
         private string GetProjectGuid(Project project)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -231,6 +248,7 @@ namespace OdantDev.Model
             return project.UniqueName;
 
         }
+
         private void SetAttributeToProjectItem(IDictionary<string, CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -244,8 +262,11 @@ namespace OdantDev.Model
                 attribute.Value = $"\"{value}\"";
             }
         }
+
         #endregion
+
         #region Download and init  logic for Module
+
         public async Task<bool> OpenModuleAsync(StructureItem item)
         {
             Project project = null;
@@ -258,12 +279,13 @@ namespace OdantDev.Model
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 if (envDTE.Solution.IsOpen.Not())
                 {
-                    envDTE.Solution.Create(AddinFolder.FullName, item.Host.Name);
+                    envDTE.Solution.Create(TempFiles.TempPath.ToUpper(), item.Host.Name);
                 }
+               
                 project = envDTE.Solution.AddFromFile(csProj.FullName);
                 InitProject(project, item);
                 UpdateAssemblyReferences(project, AddinSettings.OdaLibraries);
-                UpdateAssemblyReferences(project, AddinSettings.DevExpressLibraries);
+                UpdateAssemblyReferences(project, AddinSettings.UpdateReferenceLibraries);
                 Common.DebugINI.Write("DEBUG", item.FullId, true);
                 IncreaseVersion(project);
                 project.Save();
@@ -280,7 +302,9 @@ namespace OdantDev.Model
             }
             return true;
         }
+
         public Task<(FileInfo csProj, Dir moduleDir, DirectoryInfo localDir)> DownloadModuleAsync(StructureItem item) => Task.Run(() => DownloadModule(item));
+        
         public (FileInfo csProj, Dir remoteDir, DirectoryInfo localDir) DownloadModule(StructureItem item)
         {
             var localDir = item.Dir.ServerToFolder();
@@ -290,6 +314,7 @@ namespace OdantDev.Model
                 ?.OrderByDescending(x => x.LastWriteTime)
                 .FirstOrDefault(), item.Dir, localDir);
         }
+        
         private void InitProject(Project project, StructureItem sourceItem)
         {
             if (project == null) { throw new NullReferenceException(nameof(project)); }
@@ -300,6 +325,7 @@ namespace OdantDev.Model
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartProgram").Value = Path.Combine(OdaFolder.FullName, "oda.wrapper32.exe");
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartArguments").Value = "debug";
             project.Properties.Item("AssemblyName").Value = project.Name;
+            project.Properties.Item("ReferencePath").Value = OdaFolder.FullName;
             var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs");
             var assemblyFile = (@$"{new FileInfo(project.FullName).Directory}\AssemblyInfo.cs");
             if (assemblyInfo == null || File.Exists(assemblyFile).Not())
@@ -320,6 +346,7 @@ namespace OdantDev.Model
             if (assemblyInfo.IsOpen.Not()) { assemblyInfo.Open(); }
             assemblyInfo.Save();
         }
+        
         private bool UpdateAssemblyReferences(Project project, IEnumerable<string> references)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -343,6 +370,7 @@ namespace OdantDev.Model
             }
             return false;
         }
+
         public static string GetFullName(Reference reference)
         {
             return string.Format(@"{0}, Version={1}.{2}.{3}.{4}, Culture={5}, PublicKeyToken={6}",
@@ -351,6 +379,7 @@ namespace OdantDev.Model
                 reference.Culture.Or("neutral"),
                 reference.PublicKeyToken.Or("null"));
         }
+
         #endregion
     }
 }

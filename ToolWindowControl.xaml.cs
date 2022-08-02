@@ -39,6 +39,7 @@ namespace OdantDev
         private AddinSettings addinSettings;
         private bool isBusy;
         private string status;
+
         public string Status { get => status; set { status = value; NotifyPropertyChanged("Status"); } }
         public bool IsDarkTheme
         {
@@ -53,6 +54,7 @@ namespace OdantDev
         }
         public bool IsBusy { get => isBusy; set { isBusy = value; NotifyPropertyChanged("IsBusy"); } }
         public event PropertyChangedEventHandler PropertyChanged;
+       
         private void NotifyPropertyChanged(string name)
         {
             if (PropertyChanged != null)
@@ -69,7 +71,7 @@ namespace OdantDev
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             this.DTE2 = dTE2;
             var AddinSettingsFolder = Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ODA", "AddinSettings"));
-            AddinSettings = new AddinSettings(AddinSettingsFolder);
+            AddinSettings = AddinSettings.Create(AddinSettingsFolder);
             InitializeMaterialDesign();
             InitializeComponent();
             logger = new PopupController(this.MessageContainer);
@@ -104,8 +106,9 @@ namespace OdantDev
             if (isOdaLibraryesloaded)
             {
                 return true;
-            }
-            OdaFolder = new DirectoryInfo(AddinSettings.OdaFolder);
+            }            
+
+            OdaFolder = new DirectoryInfo(AddinSettings.SelectedOdaFolder.Path);
             var LoadOdaLibrariesResult = ConnectionModel.LoadOdaLibraries(OdaFolder);
             if (LoadOdaLibrariesResult.Success.Not())
             {
@@ -124,32 +127,38 @@ namespace OdantDev
             var isDarkTheme = (384 - defaultBackground.R - defaultBackground.G - defaultBackground.B) > 0 ? true : false;
             return isDarkTheme;
         }
+
         #region Connect to oda and get data
         private async void Connect(object sender, RoutedEventArgs e)
         {
+            AddinSettings.Save();
+
             IsBusy = true;
             Status = "Checking DLLs in oda folder";
-            if (AddinSettings.IsAutoDetectOdaPath.Not())
+            string odaPath = AddinSettings.SelectedOdaFolder.Path;
+
+            if (Directory.Exists(odaPath).Not())
             {
-                if (Directory.Exists(AddinSettings.OdaFolder).Not())
-                {
-                    logger.Info($"Can't find selected oda folder {AddinSettings.OdaFolder}\nSettings was reset");
-                    AddinSettings.IsAutoDetectOdaPath = true;
-                }
-                else if (checkDllsInFolder(AddinSettings.OdaFolder).Not())
-                {
-                    logger.Info($"Can't find oda DLLs in {AddinSettings.OdaFolder}\nSettings was reset");
-                    AddinSettings.IsAutoDetectOdaPath = true;
-                }
-            }
-            if (checkDllsInFolder(AddinSettings.OdaFolder).Not())
-            {
-                logger.Info($"Can't find oda DLLs in {AddinSettings.OdaFolder}\nRun app with admin rights before start addin or repair default oda folder");
+                logger.Info($"Can't find selected oda folder {AddinSettings.SelectedOdaFolder}\nSettings was reset");
+                ShowException($"Can't find selected oda folder {AddinSettings.SelectedOdaFolder}");
+                IsBusy = false;
                 return;
             }
+              
+            if (checkDllsInFolder(odaPath).Not())
+            {
+                string msg = $"Can't find oda DLLs in {AddinSettings.SelectedOdaFolder}\nRun app with admin rights before start addin or repair default oda folder";
+                logger.Info(msg);
+                ShowException(msg);
+                IsBusy = false;
+                return;
+            }
+
             Status = "Loading Oda's DLLs";
             if (isOdaLibraryesloaded = InitializeOdaComponents().Not())
             {
+                ShowException($"Can't initialize oda libraries");
+                IsBusy = false;
                 return;
             }
             Status = "Geting data from server...";
@@ -157,14 +166,16 @@ namespace OdantDev
             if (UpdateModelResult.Success.Not())
             {
                 ShowException(UpdateModelResult.Error);
+                IsBusy = false;
                 return;
             }
             odaAddinModel = new VisualStudioIntegration(AddinSettings, DTE2, logger);
-            await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            if (OdantDevPackage.Env_DTE.Solution.IsOpen.Not())
-            {
-                OdantDevPackage.Env_DTE.Solution.Create(OdaFolder.CreateSubdirectory("AddIn").FullName, "ODANT");
-            }
+            // Решение создатся при загрузке проекта
+            //await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            //if (OdantDevPackage.Env_DTE.Solution.IsOpen.Not())
+            //{
+            //    OdantDevPackage.Env_DTE.Solution.Create(OdaFolder.CreateSubdirectory("AddIn").FullName, "ODANT");
+            //}
             IsBusy = false;
         }
         private async Task<(bool Success, string Error)> LoadModelAsync()
@@ -174,6 +185,7 @@ namespace OdantDev
             if (GetDataResult.Success)
             {
                 spConnect.Visibility = Visibility.Collapsed;
+                FoldersComboBox.IsEnabled = false;
                 CommonButtons.Visibility = Visibility.Visible;
                 ErrorSp.Visibility = Visibility.Collapsed;
                 OdaTree.Visibility = Visibility.Visible;
@@ -186,10 +198,12 @@ namespace OdantDev
                 return (false, GetDataResult.Error);
             }
         }
+
         private void ShowException(string message)
         {
             ErrorSp.Visibility = Visibility.Visible;
-            spConnect.Visibility = Visibility.Visible;
+            spConnect.IsEnabled = true;
+            FoldersComboBox.Visibility = Visibility.Visible;
             CommonButtons.Visibility = Visibility.Collapsed;
             OdaTree.Visibility = Visibility.Collapsed;
             MainTabControl.Visibility = Visibility.Collapsed;
@@ -201,6 +215,7 @@ namespace OdantDev
         private async void RefreshTreeButton_Click(object sender, RoutedEventArgs e)
         {
             IsBusy = true;
+            Status = "Geting data from server...";
             var UpdateModelResult = await OdaModel.RefreshAsync();
             IsBusy = false;
             if (UpdateModelResult.Success.Not())
@@ -222,15 +237,21 @@ namespace OdantDev
                         moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "AssemblyInfo.cs"), @"AssemblyInfo.cs", true);
                         moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "Init.cs"), @"Init.cs", true);
                         moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "TemplateProject.csproj"), @"TemplateProject.csproj", true);
+                        moduleFolder.ServerToFolder();
                         moduleFolder.Save();
-                        cls.ReloadClassFromServer();
-                        cls.RemoteClass.Rebuild();
+                        //cls.ReloadClassFromServer();
+                        //cls.RemoteClass.Rebuild();
                     });
                     await uploadTask;
+
                     logger?.Info("Module created");
                     if (uploadTask.IsFaulted)
                     {
                         logger?.Info(uploadTask.Exception?.ToString());
+                    }
+                    else
+                    {
+                        OpenModule(cls);
                     }
                 }
                 catch (Exception ex)
@@ -304,6 +325,12 @@ namespace OdantDev
                     CommonButtons.Visibility = Visibility.Collapsed;
             }
         }
+
+        private void RepairToolboxButton_Click(object sender, RoutedEventArgs e)
+        {
+            OdantDevPackage.ToolboxReseter.ResetToolboxQueue();
+        }
+
         private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -370,24 +397,31 @@ namespace OdantDev
                 OpenModule(selectedItem);
             }
         }
-        private void DialogAddDevExLibraryButton_Click(object sender, RoutedEventArgs e)
+        private void DialogAddLibraryButton_Click(object sender, RoutedEventArgs e)
         {
-            AddinSettings.DevExpressLibraries.Add(DialogAddDevExLibrary.Text);
+            AddinSettings.UpdateReferenceLibraries.Add(DialogAddLibrary.Text);
         }
 
-        private void DeleteDevExpButton_Click(object sender, RoutedEventArgs e)
+        private void DeleteLibraryButton_Click(object sender, RoutedEventArgs e)
         {
-            AddinSettings.DevExpressLibraries = new ObservableCollection<string>(AddinSettings.DevExpressLibraries.Except(DevExpressLibrariesList.SelectedItems.OfType<string>()));
+            AddinSettings.UpdateReferenceLibraries = new ObservableCollection<string>(AddinSettings.UpdateReferenceLibraries.Except(LibrariesList.SelectedItems.OfType<string>()));
         }
 
-        private void DeleteOdaLibraryButton_Click(object sender, RoutedEventArgs e)
+        private void DeleteOdaFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            AddinSettings.OdaLibraries = new ObservableCollection<string>(AddinSettings.OdaLibraries.Except(OdaLibrariesList.SelectedItems.OfType<string>()));
+            if (OdaFoldersList.SelectedItems.Count == 0)
+                return;
+            AddinSettings.OdaFolders = new ObservableCollection<PathInfo>(AddinSettings.OdaFolders.Except(OdaFoldersList.SelectedItems.OfType<PathInfo>()));  
         }
 
         private void DialogAddOdaLibraryClick(object sender, RoutedEventArgs e)
         {
-            AddinSettings?.OdaLibraries.Add(DialogAddOdaLibrary.Text);
+            if (checkDllsInFolder(DialogAddOdaLibrary.Text).Not())
+            {
+                logger?.Info($"No oda libraries in {DialogAddOdaLibrary.Text}");
+                return;
+            }
+            AddinSettings.OdaFolders.Add(new PathInfo(DialogAddOdaLibraryName.Text, DialogAddOdaLibrary.Text));
         }
         #endregion
 

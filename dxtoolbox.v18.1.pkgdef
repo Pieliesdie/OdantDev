@@ -1,0 +1,469 @@
+[$RootKey$\ToolboxControlsInstaller]
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.Xpf.Core.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1: Common Controls"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.Xpf.Core.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+"WPFControls"="1"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.Xpf.Core.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.Xpf.Bars.BarContainerControl"="DX.18.1: Navigation & Layout"
+"DevExpress.Xpf.Bars.BarManager"="DX.18.1: Navigation & Layout"
+"DevExpress.Xpf.Bars.MenuBarControl"="DX.18.1: Navigation & Layout"
+"DevExpress.Xpf.Bars.ToolBarControl"="DX.18.1: Navigation & Layout"
+"DevExpress.Xpf.Bars.MainMenuControl"="DX.18.1: Navigation & Layout"
+"DevExpress.Xpf.Bars.StatusBarControl"="DX.18.1: Navigation & Layout"
+"DevExpress.Xpf.Core.UniformStackPanel"="DX.18.1: Navigation & Layout"
+"DevExpress.Xpf.Editors.SparklineEdit"="DX.18.1: Data & Analytics"
+"DevExpress.Xpf.Core.DXTabControl"="DX.18.1: Navigation & Layout"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.DataAccess.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.DataAccess.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.DataAccess.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.DataAccess.Excel.ExcelDataSource"="DX.18.1: Data & Analytics"
+"DevExpress.DataAccess.Sql.SqlDataSource"="DX.18.1: Data & Analytics"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.DataAccess.v18.1.UI, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.DataAccess.v18.1.UI.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.DataAccess.v18.1.UI, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.DataAccess.UI.FilterEditorControl"="DX.18.1: Data & Analytics"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.Snap.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.Snap.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.Snap.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.Snap.SnapControl"="DX.18.1: Reporting"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.Xpo.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.Xpo.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.Xpo.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.Xpo.XPInstantFeedbackSource"="DX.18.1: ORM Components"
+"DevExpress.Xpo.XPCollection"="DX.18.1: ORM Components"
+"DevExpress.Xpo.Session"="DX.18.1: ORM Components"
+"DevExpress.Xpo.UnitOfWork"="DX.18.1: ORM Components"
+"DevExpress.Xpo.XPPageSelector"="DX.18.1: ORM Components"
+"DevExpress.Xpo.XPServerCollectionSource"="DX.18.1: ORM Components"
+"DevExpress.Xpo.ExplicitUnitOfWork"="DX.18.1: ORM Components"
+"DevExpress.Xpo.XPView"="DX.18.1: ORM Components"
+"DevExpress.Xpo.XPDataView"="DX.18.1: ORM Components"
+"DevExpress.Xpo.XpoDataSource"="DX.18.1: ORM Components"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraBars.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraBars.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraBars.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraBars.Navigation.AccordionControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Alerter.AlertControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.BarManager"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.PopupControlContainer"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.StandaloneBarDockControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.PopupMenu"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Navigation.TileBar"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Docking2010.DocumentManager"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Docking2010.WindowsUIButtonPanel"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.FormAssistant"="DX.18.1: Components"
+"DevExpress.XtraBars.Navigation.NavigationFrame"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Navigation.NavigationPane"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Navigation.TabPane"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.BarAndDockingController"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Ribbon.RecentItemControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Docking.DockManager"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Ribbon.BackstageViewControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Ribbon.ApplicationMenu"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.DefaultBarAndDockingController"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Ribbon.GalleryDropDown"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Ribbon.RibbonControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Ribbon.GalleryControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Ribbon.RibbonStatusBar"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraTabbedMdi.XtraTabbedMdiManager"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Navigation.TileBarDropDownContainer"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Navigation.OfficeNavigationBar"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.Navigation.TileNavPane"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraBars.ToastNotifications.ToastNotificationsManager"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraToolbox.ToolboxControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraEditors.PopupGalleryEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraBars.Ribbon.RadialMenu"="DX.18.1: Navigation & Layout"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraCharts.v18.1.UI, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraCharts.v18.1.UI.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraCharts.v18.1.UI, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraCharts.ChartControl"="DX.18.1: Data & Analytics"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraDiagram.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraDiagram.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraDiagram.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraDiagram.DiagramControl"="DX.18.1: Data & Analytics"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraDialogs.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraDialogs.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraDialogs.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraEditors.XtraOpenFileDialog"="DX.18.1: Components"
+"DevExpress.XtraEditors.XtraSaveFileDialog"="DX.18.1: Components"
+"DevExpress.XtraEditors.XtraFolderBrowserDialog"="DX.18.1: Components"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraEditors.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraEditors.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraEditors.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraEditors.BarCodeControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.TextEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.ButtonEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.SimpleButton"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.CheckButton"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.DropDownButton"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.Camera.CameraControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.CheckEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.ListBoxControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.ComboBoxEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.MRUEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.SearchControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.DXErrorProvider.DXErrorProvider"="DX.18.1: Components"
+"DevExpress.XtraEditors.DXErrorProvider.DXValidationProvider"="DX.18.1: Components"
+"DevExpress.XtraEditors.Controls.CalendarControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.CheckedListBoxControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.ImageComboBoxEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.LookUpEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.DateEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.PopupContainerEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.RadioGroup"="DX.18.1: Common Controls"
+"DevExpress.XtraTab.XtraTabControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraEditors.FilterControl"="DX.18.1: Data & Analytics"
+"DevExpress.XtraEditors.HyperLinkEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.LabelControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.HyperlinkLabelControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.ImageListBoxControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.MemoEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.DataNavigator"="DX.18.1: Data & Analytics"
+"DevExpress.XtraEditors.ControlNavigator"="DX.18.1: Data & Analytics"
+"DevExpress.XtraEditors.PictureEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.BreadCrumbEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.CalcEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.CheckedComboBoxEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.ColorEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.ColorPickEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.ChartRangeControlClientBase"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.DateTimeChartRangeControlClient"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.NumericChartRangeControlClient"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.RatingControl"="DX.18.1: Common Controls"
+"DevExpress.XtraSplashScreen.SplashScreenManager"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraEditors.TileControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraEditors.TimeEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.TimeSpanEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.TokenEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.FontEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.ImageEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.MemoExEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.PopupContainerControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.ProgressBarControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.MarqueeProgressBarControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.RangeControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.TrackBarControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.RangeTrackBarControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.Repository.PersistentRepository"="DX.18.1: Components"
+"DevExpress.XtraEditors.Controls.ImageSlider"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.SparklineEdit"="DX.18.1: Data & Analytics"
+"DevExpress.XtraEditors.SpinEdit"="DX.18.1: Common Controls"
+"DevExpress.XtraWaitForm.ProgressPanel"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.StyleController"="DX.18.1: Components"
+"DevExpress.XtraEditors.ToggleSwitch"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.ZoomTrackBarControl"="DX.18.1: Common Controls"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.Utils.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.Utils.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.Utils.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.Utils.VisualEffects.AdornerUIManager"="DX.18.1: Components"
+"DevExpress.XtraEditors.XtraUserControl"="DX.18.1: Navigation & Layout"
+"DevExpress.Utils.FlyoutPanel"="DX.18.1: Common Controls"
+"DevExpress.Utils.Animation.TransitionManager"="DX.18.1: Components"
+"DevExpress.Utils.Behaviors.BehaviorManager"="DX.18.1: Components"
+"DevExpress.Utils.Filtering.FilteringUIContext"="DX.18.1: Components"
+"DevExpress.XtraEditors.XtraScrollableControl"="DX.18.1: Navigation & Layout"
+"DevExpress.Utils.DPIAwareImageCollection"="DX.18.1: Components"
+"DevExpress.XtraEditors.PanelControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraEditors.GroupControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraEditors.SplitContainerControl"="DX.18.1: Navigation & Layout"
+"DevExpress.Utils.ImageCollection"="DX.18.1: Components"
+"DevExpress.Utils.SharedImageCollection"="DX.18.1: Components"
+"DevExpress.LookAndFeel.DefaultLookAndFeel"="DX.18.1: Components"
+"DevExpress.Utils.MVVM.MVVMContext"="DX.18.1: Components"
+"DevExpress.XtraEditors.SeparatorControl"="DX.18.1: Common Controls"
+"DevExpress.XtraEditors.SidePanel"="DX.18.1: Navigation & Layout"
+"DevExpress.Utils.SvgImageCollection"="DX.18.1: Components"
+"DevExpress.Utils.Taskbar.TaskbarAssistant"="DX.18.1: Components"
+"DevExpress.Utils.WorkspaceManager"="DX.18.1: Components"
+"DevExpress.Utils.ToolTipController"="DX.18.1: Components"
+"DevExpress.XtraEditors.HScrollBar"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraEditors.VScrollBar"="DX.18.1: Navigation & Layout"
+"DevExpress.Utils.DefaultToolTipController"="DX.18.1: Components"
+"DevExpress.XtraEditors.SplitterControl"="DX.18.1: Navigation & Layout"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraGauges.v18.1.Win, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraGauges.v18.1.Win.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraGauges.v18.1.Win, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraGauges.Win.GaugeControl"="DX.18.1: Data & Analytics"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraGrid.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraGrid.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraGrid.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraGrid.Views.Grid.EditFormUserControl"="DX.18.1: Data & Analytics"
+"DevExpress.XtraGrid.GridControl"="DX.18.1: Data & Analytics"
+"DevExpress.XtraGrid.GridSplitContainer"="DX.18.1: Data & Analytics"
+"DevExpress.XtraEditors.GridLookUpEdit"="DX.18.1: Data & Analytics"
+"DevExpress.XtraEditors.SearchLookUpEdit"="DX.18.1: Data & Analytics"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.Data.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.Data.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.Data.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.Data.VirtualServerModeSource"="DX.18.1: Data & Analytics"
+"DevExpress.Data.Linq.EntityInstantFeedbackSource"="DX.18.1: Data & Analytics"
+"DevExpress.Data.Linq.EntityServerModeSource"="DX.18.1: Data & Analytics"
+"DevExpress.Data.Linq.LinqInstantFeedbackSource"="DX.18.1: Data & Analytics"
+"DevExpress.Data.Linq.LinqServerModeSource"="DX.18.1: Data & Analytics"
+"DevExpress.Data.ODataLinq.ODataInstantFeedbackSource"="DX.18.1: Data & Analytics"
+"DevExpress.Data.ODataLinq.ODataServerModeSource"="DX.18.1: Data & Analytics"
+"DevExpress.Data.PLinq.PLinqInstantFeedbackSource"="DX.18.1: Data & Analytics"
+"DevExpress.Data.PLinq.PLinqServerModeSource"="DX.18.1: Data & Analytics"
+"DevExpress.Data.WcfLinq.WcfInstantFeedbackSource"="DX.18.1: Data & Analytics"
+"DevExpress.Data.WcfLinq.WcfServerModeSource"="DX.18.1: Data & Analytics"
+"DevExpress.Data.RealTimeSource"="DX.18.1: Data & Analytics"
+"DevExpress.Data.UnboundSource"="DX.18.1: Data & Analytics"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraLayout.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraLayout.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraLayout.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraLayout.LayoutControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraDataLayout.DataLayoutControl"="DX.18.1: Navigation & Layout"
+"DevExpress.XtraLayout.Converter.LayoutConverter"="DX.18.1: Navigation & Layout"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraMap.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraMap.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraMap.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraMap.MapControl"="DX.18.1: Data & Analytics"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraNavBar.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraNavBar.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraNavBar.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraNavBar.NavBarControl"="DX.18.1: Navigation & Layout"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraPdfViewer.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraPdfViewer.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraPdfViewer.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraPdfViewer.PdfViewer"="DX.18.1: Common Controls"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraPivotGrid.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraPivotGrid.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraPivotGrid.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraPivotGrid.PivotGridControl"="DX.18.1: Data & Analytics"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraPrinting.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraPrinting.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraPrinting.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraPrinting.Preview.DocumentViewer"="DX.18.1: Reporting"
+"DevExpress.XtraReports.UserDesigner.Native.StandardReportDesigner"="DX.18.1: Reporting"
+"DevExpress.XtraReports.UserDesigner.Native.RibbonReportDesigner"="DX.18.1: Reporting"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraReports.v18.1.Extensions, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraReports.v18.1.Extensions.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraReports.v18.1.Extensions, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraReports.ReportGeneration.ReportGenerator"="DX.18.1: Components"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraReports.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraReports.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraReports.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraReports.UI.XRChart"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRPanel"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRLabel"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRCharacterComb"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRBarCode"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRLine"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRCrossBandBox"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRCrossBandLine"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRCheckBox"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRGauge"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRPivotGrid"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRPageBreak"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRPageInfo"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRPictureBox"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRShape"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRSparkline"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRSubreport"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRTableOfContents"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRZipCode"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRRichText"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.XRTable"="DX.18.1: Report Controls"
+"DevExpress.XtraReports.UI.PrintableComponentContainer"="DX.18.1: Report Controls"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraRichEdit.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraRichEdit.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraRichEdit.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraRichEdit.RichEditControl"="DX.18.1: Rich Text Editor"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraScheduler.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraScheduler.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraScheduler.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraScheduler.SchedulerDataStorage"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.SchedulerControl"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.AppointmentLabelEdit"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.AppointmentResourceEdit"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.ResourcesCheckedListBoxControl"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.ResourcesPopupCheckedListBoxControl"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.AppointmentResourcesEdit"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.AppointmentStatusEdit"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.DailyRecurrenceControl"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.DateNavigator"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.DurationEdit"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.MonthEdit"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.MonthlyRecurrenceControl"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.ResourcesComboBoxControl"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.TimeZoneEdit"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.WeekDaysCheckEdit"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.WeekDaysEdit"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.WeeklyRecurrenceControl"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.WeekOfMonthEdit"="DX.18.1: Scheduling"
+"DevExpress.XtraScheduler.UI.YearlyRecurrenceControl"="DX.18.1: Scheduling"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraScheduler.v18.1.Extensions, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraScheduler.v18.1.Extensions.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraScheduler.v18.1.Extensions, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraScheduler.UI.ResourcesTree"="DX.18.1: Scheduling"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraScheduler.v18.1.Reporting, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraScheduler.v18.1.Reporting.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraScheduler.v18.1.Reporting, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraScheduler.Reporting.SchedulerControlPrintAdapter"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.SchedulerStoragePrintAdapter"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.HorizontalResourceHeaders"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.VerticalResourceHeaders"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.HorizontalDateHeaders"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.DayOfWeekHeaders"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.TimelineScaleHeaders"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.CalendarControl"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.ReportDayView"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.DayViewTimeCells"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.DayViewTimeRuler"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.ReportWeekView"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.ReportMonthView"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.ReportTimelineView"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.TimelineCells"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.HorizontalWeek"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.FullWeek"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.TimeIntervalInfo"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.ResourceInfo"="DX.18.1: Scheduler Reporting"
+"DevExpress.XtraScheduler.Reporting.FormatTimeIntervalInfo"="DX.18.1: Scheduler Reporting"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraSpellChecker.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraSpellChecker.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraSpellChecker.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraSpellChecker.SharedDictionaryStorage"="DX.18.1: Components"
+"DevExpress.XtraSpellChecker.SpellChecker"="DX.18.1: Components"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraSpreadsheet.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraSpreadsheet.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraSpreadsheet.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraSpreadsheet.SpreadsheetFormulaBar"="DX.18.1: Spreadsheet"
+"DevExpress.XtraSpreadsheet.SpreadsheetControl"="DX.18.1: Spreadsheet"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraTreeList.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraTreeList.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraTreeList.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraTreeList.TreeList"="DX.18.1: Data & Analytics"
+"DevExpress.XtraEditors.TreeListLookUpEdit"="DX.18.1: Data & Analytics"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraVerticalGrid.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraVerticalGrid.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraVerticalGrid.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraVerticalGrid.VGridControl"="DX.18.1: Data & Analytics"
+"DevExpress.XtraVerticalGrid.PropertyGridControl"="DX.18.1: Data & Analytics"
+"DevExpress.XtraVerticalGrid.PropertyDescriptionControl"="DX.18.1: Data & Analytics"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraWizard.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a]
+@="DX.18.1"
+"CodeBase"="C:\Program Files (x86)\DevExpress 18.1\Components\Bin\Framework\DevExpress.XtraWizard.v18.1.dll"
+"TargetFramework"=".NETFramework,Version=v4.0"
+
+[$RootKey$\ToolboxControlsInstaller\DevExpress.XtraWizard.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a\ItemCategories]
+"DevExpress.XtraWizard.WizardControl"="DX.18.1: Navigation & Layout"

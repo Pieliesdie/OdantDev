@@ -10,7 +10,7 @@ namespace OdantDev
     public static class VSErrors
     {
         private static ErrorListProvider ErrorListProvider { get; set; }
-        public static async void ShowError(this DTE2 dte, string text)
+        public static async Task ShowError(this DTE2 dte, string text)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             ErrorListProvider = ErrorListProvider ?? new ErrorListProvider(new ServiceProvider((Microsoft.VisualStudio.OLE.Interop.IServiceProvider)dte));
@@ -24,7 +24,7 @@ namespace OdantDev
             ErrorListProvider.Tasks.Add(newError);
             ErrorListProvider.Show();
         }
-        public static async void ShowError(this Project context, string text)
+        public static async Task ShowError(this Project context, string text)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             ErrorListProvider = ErrorListProvider ?? new ErrorListProvider(new ServiceProvider((Microsoft.VisualStudio.OLE.Interop.IServiceProvider)context.DTE));

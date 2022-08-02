@@ -54,9 +54,16 @@
     <Compile Include="Common\Bitness.cs" />
     <Compile Include="Common\Extension.cs" />
     <Compile Include="Common\ServerApi.cs" />
+    <Compile Include="DevExpress\DTEWindow.cs" />
+    <Compile Include="DevExpress\HelperMain.cs" />
+    <Compile Include="DevExpress\MenuBarHelper.cs" />
+    <Compile Include="DevExpress\ResetToolboxProcessor.cs" />
+    <Compile Include="DevExpress\ToolboxReseter.cs" />
+    <Compile Include="DevExpress\ToolboxReseterSettings.cs" />
     <Compile Include="Model\BuildInfo.cs" />
     <Compile Include="Model\ILogger.cs" />
     <Compile Include="Model\ModuleDir.cs" />
+    <Compile Include="Model\PathInfo.cs" />
     <Compile Include="Model\PopupController.cs" />
     <Compile Include="VSCommon\VisualStudioIntegration.cs" />
     <Compile Include="Model\ConnectionModel.cs" />
@@ -67,6 +74,10 @@
     <None Include="OdaLibs\odaLib.dll" />
     <None Include="OdaLibs\odaShare.dll" />
     <None Include="OdaLibs\odaXML.dll" />
+    <Content Include="dxtoolbox.v18.1.pkgdef">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Templates\ProjectTemplate\AssemblyInfo.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>

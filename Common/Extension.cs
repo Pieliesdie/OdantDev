@@ -19,6 +19,20 @@ namespace OdantDev
         {
             return string.IsNullOrWhiteSpace(text) ? alternative : text;
         }
+        public static bool Remove<T>(this IList<T> list, Predicate<T> predicate)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (predicate(list[i]))
+                {
+                    list.RemoveAt(i);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static IEnumerable<T> Use<T>(this T obj) where T : IDisposable
         {
             try
@@ -122,7 +136,7 @@ namespace OdantDev
 
         public static FileInfo LastOdaPath()
         {
-            string[] strArray = new string[3] { "oda", "odant", "Applications\\ODA.exe" };
+            string[] strArray = new string[] { "oda", "odant", "Applications\\ODA.exe" };
             foreach (string name1 in strArray)
             {
                 try

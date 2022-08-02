@@ -1,13 +1,10 @@
 ﻿using oda;
 using OdantDev.Commands;
-using odaServer;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -61,7 +58,17 @@ namespace OdantDev.Model
         public virtual T Item { get => item; private set { item = value; NotifyPropertyChanged("Item"); } }
         public virtual T Parent { get => parent; private set { parent = value; NotifyPropertyChanged("Parent"); } }
         public virtual string Category { get; set; }
-        public virtual int ImageIndex { get => imageIndex; set { imageIndex = value; NotifyPropertyChanged("ImageIndex"); } }
+
+        public virtual int ImageIndex
+        {
+            get => imageIndex;
+            set
+            {
+                imageIndex = value;
+                NotifyPropertyChanged("ImageIndex");
+            }
+        }
+
         public virtual ImageSource Icon => Extension.ConvertToBitmapImage(Images.GetImage(ImageIndex));
         private bool isLazyLoading;
         private List<StructureItemViewModel<T>> dummyList => new List<StructureItemViewModel<T>>() { new StructureItemViewModel<T>() };
@@ -97,7 +104,7 @@ namespace OdantDev.Model
             Parent = parent;
             ItemType = Item.ItemType;
             Category = ItemType.ToString();
-            Children = GetChildren(item, lazyLoad, logger);
+            InitChildrenAsync(item, lazyLoad, logger);
             Update_CALLBACK = Updated;
             GC.SuppressFinalize(Update_CALLBACK);
             ServerApi._SetOnUpdate(item.RemoteItem.GetIntPtr(), Update_CALLBACK);
@@ -106,6 +113,21 @@ namespace OdantDev.Model
                 ImageIndex = Item.ImageIndex;
             }
         }
+
+        public async Task InitChildrenAsync(T item, bool lazyLoad, ILogger logger = null)
+        {
+            var task = Task.Run(() => GetChildren(item, lazyLoad, logger));
+            if(task == await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(5))))
+            {
+                Children = await task;
+            }
+            else
+            {
+                logger?.Info($"Timeout when getting children for {item}");
+                Children = null;
+            }
+        } 
+
         ~StructureItemViewModel()
         {
             if (item?.RemoteItem != null)

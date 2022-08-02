@@ -58,30 +58,18 @@ namespace OdantDev
                 stopWatch.Start();
                 Connection.CoreMode = CoreMode.Debug;
                 var connected = await Task.Run(() => Connection.Login());
-                if (connected.Not()) { return (false, "Can't connect to oda"); }
-                this.AutoLogin = Connection.AutoLogin;
-                await Task.Run(() =>
-                {
-                    this.Hosts = Connection.Hosts
-                    .Sorted
-                    .AsParallel()
-                    .AsOrdered()
-                    .OfType<Host>()
-                    .Select(host => new StructureItemViewModel<StructureItem>(host, AddinSettings.IsLazyTreeLoad, logger: logger))
-                    .ToList();
-                });
+                if (connected.Not())
+                    return (false, "Can't connect to oda");
 
-                var retryCount = 5;
-                while (retryCount-- > 0 && Connection.LocalHost?.Develope?.Domains == null)// Я не знаю почему оно null если обратится сразу
-                {
-                    await Task.Delay(1000);
-                }
-                this.Developers = Connection.LocalHost?.Develope?.Domains?.OfType<DomainDeveloper>();
+                AutoLogin = Connection.AutoLogin;
+
+                Hosts = await HostsListAsync();
+
+                Developers = Connection.LocalHost?.Develope?.Domains?.OfType<DomainDeveloper>();
+
                 stopWatch.Stop();
                 TimeSpan ts = stopWatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                    ts.Hours, ts.Minutes, ts.Seconds,
-                    ts.Milliseconds / 10);
+                string elapsedTime = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}.{ts.Milliseconds / 10:00}";
                 logger?.Info($"Load time: {elapsedTime}");
                 Common.DebugINI.Clear();
                 return (true, null);
@@ -95,6 +83,26 @@ namespace OdantDev
                 stopWatch?.Stop();
             }
         }
+
+        private async Task<IEnumerable<StructureItemViewModel<StructureItem>>> HostsListAsync()
+        {
+            return await Task.Run(async () =>
+            {
+                var retryCount = 10;
+                while (retryCount-- > 0 && Connection.LocalHost?.OnLine == false)
+                {
+                    Connection.LocalHost?.Reset();
+                    await Task.Delay(1000);
+                }
+                return Connection
+                    .Hosts
+                    .Sorted
+                    .OfType<Host>()
+                    .Select(host => new StructureItemViewModel<StructureItem>(host, AddinSettings.IsLazyTreeLoad, logger: logger))
+                    .ToList();
+            });
+        }
+
         public async Task<(bool Success, string Error)> RefreshAsync()
         {
             try
