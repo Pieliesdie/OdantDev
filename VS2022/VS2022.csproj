@@ -116,14 +116,17 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\SharedFiles\dxtoolbox.v18.1.pkgdef">
+      <Link>dxtoolbox.v18.1.pkgdef</Link>
+    </Content>
     <Content Include="..\SharedFiles\Icon.png">
       <Link>Icon.png</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-	<VSCTCompile Include="..\SharedFiles\OdantDevPackage.vsct">
-  <Link>OdantDevPackage.vsct</Link>
-  <ResourceName>Menus.ctmenu</ResourceName>
-</VSCTCompile>
+    <VSCTCompile Include="..\SharedFiles\OdantDevPackage.vsct">
+      <Link>OdantDevPackage.vsct</Link>
+      <ResourceName>Menus.ctmenu</ResourceName>
+    </VSCTCompile>
   </ItemGroup>
   <Import Project="..\SharedOdantDev\SharedOdantDev.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

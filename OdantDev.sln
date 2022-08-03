@@ -13,6 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS2022", "VS2022\VS2022.csp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharedFiles", "SharedFiles", "{B1A1A13D-4A8A-4162-BAC8-6434F24EEC6B}"
 	ProjectSection(SolutionItems) = preProject
+		SharedFiles\dxtoolbox.v18.1.pkgdef = SharedFiles\dxtoolbox.v18.1.pkgdef
 		SharedFiles\Icon.png = SharedFiles\Icon.png
 		SharedFiles\OdantDevPackage.vsct = SharedFiles\OdantDevPackage.vsct
 	EndProjectSection

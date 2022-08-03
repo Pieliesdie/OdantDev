@@ -126,6 +126,9 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\SharedFiles\dxtoolbox.v18.1.pkgdef">
+      <Link>dxtoolbox.v18.1.pkgdef</Link>
+    </Content>
     <Content Include="..\SharedFiles\Icon.png">
       <Link>Icon.png</Link>
       <IncludeInVSIX>true</IncludeInVSIX>

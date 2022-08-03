@@ -46,9 +46,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\VSErrors.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)dxtoolbox.v18.1.pkgdef">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="$(MSBuildThisFileDirectory)Templates\AddinSettings.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
