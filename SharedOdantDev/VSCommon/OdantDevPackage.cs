@@ -52,13 +52,10 @@ namespace OdantDev
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             Env_DTE = await this.GetServiceAsync<DTE,DTE2>();
 
-            _DTE dTE = await this.GetServiceAsync(typeof(DTE)) as _DTE;
-            var version = (dTE == null) ? "Unknown" : dTE.Version;
-
             IVsShell shellService = await GetServiceAsync(typeof(SVsShell)) as IVsShell;
             ToolboxReseter = new ToolboxReseter(UserLocalDataPath);
-            ToolboxReseter.Start(Env_DTE, shellService);
-
+            ToolboxReseter.Start(Env_DTE as DTE, shellService);
+            
             await ToolWindowCommand.InitializeAsync(this);
         }
 

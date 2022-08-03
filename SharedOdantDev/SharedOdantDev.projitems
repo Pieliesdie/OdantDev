@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>bce37951-5744-4b02-ba49-25ee4c57ac5a</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>SharedOdanDev</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)ToolWindowControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BindingHelpers\BooleanToCollapsedVisibility.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BindingHelpers\NotEmptyRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\RelayCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Bitness.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Extension.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\ServerApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DevExpress\DTEWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DevExpress\HelperMain.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DevExpress\MenuBarHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ResetToolboxProcessor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ToolboxReseter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ToolboxReseterSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\AddinSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\BuildInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ConnectionModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ILogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ModuleDir.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\PathInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\PopupController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\StructureItemViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindowControl.xaml.cs">
+      <DependentUpon>ToolWindowControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)VSCommon\OdantDevPackage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VSCommon\ToolWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VSCommon\ToolWindowCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VSCommon\VisualStudioIntegration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VSCommon\VSErrors.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)dxtoolbox.v18.1.pkgdef">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)Templates\AddinSettings.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)Templates\AssemblyInfo.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)Templates\ProjectTemplate\AssemblyInfo.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)Templates\ProjectTemplate\Init.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)Templates\ProjectTemplate\TemplateProject.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)OdaLibs\odaCore.dll" />
+    <None Include="$(MSBuildThisFileDirectory)OdaLibs\odaLib.dll" />
+    <None Include="$(MSBuildThisFileDirectory)OdaLibs\odaShare.dll" />
+    <None Include="$(MSBuildThisFileDirectory)OdaLibs\odaXML.dll" />
+  </ItemGroup>
+</Project>

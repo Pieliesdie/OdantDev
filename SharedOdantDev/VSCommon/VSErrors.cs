@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Threading.Tasks;
+using Task = System.Threading.Tasks.Task;
 
 namespace OdantDev
 {

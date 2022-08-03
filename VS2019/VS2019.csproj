@@ -11,18 +11,18 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{FEF0688F-DB99-496B-8429-E5B64332D8D0}</ProjectGuid>
+    <ProjectGuid>{AC6B1C3B-13D4-46F6-95AC-04583649963D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OdantDev</RootNamespace>
-    <AssemblyName>OdantDev</AssemblyName>
+    <RootNamespace>VS2019</RootNamespace>
+    <AssemblyName>VS2019</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <LangVersion>8.0</LangVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <LangVersion>8.0</LangVersion>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
-    <IncludeDebugSymbolsInVSIXContainer>true</IncludeDebugSymbolsInVSIXContainer>
-    <IncludeDebugSymbolsInLocalVSIXDeployment>true</IncludeDebugSymbolsInLocalVSIXDeployment>
+    <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
+    <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
     <StartAction>Program</StartAction>
@@ -37,7 +37,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
+    <DeployExtension>True</DeployExtension>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -46,61 +46,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="BindingHelpers\BooleanToCollapsedVisibility.cs" />
-    <Compile Include="Commands\RelayCommand.cs" />
-    <Compile Include="Common\Bitness.cs" />
-    <Compile Include="Common\Extension.cs" />
-    <Compile Include="Common\ServerApi.cs" />
-    <Compile Include="DevExpress\DTEWindow.cs" />
-    <Compile Include="DevExpress\HelperMain.cs" />
-    <Compile Include="DevExpress\MenuBarHelper.cs" />
-    <Compile Include="DevExpress\ResetToolboxProcessor.cs" />
-    <Compile Include="DevExpress\ToolboxReseter.cs" />
-    <Compile Include="DevExpress\ToolboxReseterSettings.cs" />
-    <Compile Include="Model\BuildInfo.cs" />
-    <Compile Include="Model\ILogger.cs" />
-    <Compile Include="Model\ModuleDir.cs" />
-    <Compile Include="Model\PathInfo.cs" />
-    <Compile Include="Model\PopupController.cs" />
-    <Compile Include="VSCommon\VisualStudioIntegration.cs" />
-    <Compile Include="Model\ConnectionModel.cs" />
-    <Compile Include="Model\StructureItemViewModel.cs" />
-    <Compile Include="BindingHelpers\NotEmptyRule.cs" />
-    <Compile Include="Model\AddinSettings.cs" />
-    <None Include="OdaLibs\odaCore.dll" />
-    <None Include="OdaLibs\odaLib.dll" />
-    <None Include="OdaLibs\odaShare.dll" />
-    <None Include="OdaLibs\odaXML.dll" />
-    <Content Include="dxtoolbox.v18.1.pkgdef">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\ProjectTemplate\AssemblyInfo.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\ProjectTemplate\Init.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Compile Include="VSCommon\VSErrors.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VSCommon\OdantDevPackage.cs" />
-    <Compile Include="VSCommon\ToolWindow.cs" />
-    <Compile Include="VSCommon\ToolWindowCommand.cs" />
-    <Compile Include="ToolWindowControl.xaml.cs">
-      <DependentUpon>ToolWindowControl.xaml</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Templates\ProjectTemplate\TemplateProject.csproj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <None Include="VSCommon\source.extension.vsixmanifest">
+    <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
@@ -140,12 +88,8 @@
     <PackageReference Include="MaterialDesignThemes">
       <Version>4.3.0</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.1.32210.191" ExcludeAssets="runtime">
-      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.1.4054">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
+    <PackageReference Include="Microsoft.VisualStudio.Threading">
+      <Version>16.10.56</Version>
     </PackageReference>
     <PackageReference Include="System.Linq.Async">
       <Version>6.0.1</Version>
@@ -155,38 +99,39 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="ToolWindowControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\Icon.png">
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Templates\AddinSettings.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="Templates\AssemblyInfo.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <VSCTCompile Include="VSCommon\OdantDevPackage.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-  </ItemGroup>
-  <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="MaterialDesignExtensions\MaterialDesignExtensions.csproj">
+    <ProjectReference Include="..\MaterialDesignExtensions\MaterialDesignExtensions.csproj">
       <Project>{2dc67c48-ed97-4529-8fdc-44573392230b}</Project>
       <Name>MaterialDesignExtensions</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.10.31321.278" ExcludeAssets="runtime">
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="16.10.1055">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <VSCTCompile Include="..\SharedFiles\OdantDevPackage.vsct">
+      <Link>OdantDevPackage.vsct</Link>
+      <ResourceName>Menus.ctmenu</ResourceName>
+    </VSCTCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\SharedFiles\Icon.png">
+      <Link>Icon.png</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+  </ItemGroup>
+  <Import Project="..\SharedOdantDev\SharedOdantDev.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
