@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Security;
+using odaCore;
 
 namespace OdantDev
 {
@@ -117,7 +118,7 @@ namespace OdantDev
             }
             return true;
         }
-        private bool checkDllsInFolder(string folder)
+        private bool CheckDllsInFolder(string folder)
         {
             return ConnectionModel.odaClientLibraries.ToList().TrueForAll(x => File.Exists(Path.Combine(folder, x)));
         }
@@ -145,7 +146,7 @@ namespace OdantDev
                 return;
             }
               
-            if (checkDllsInFolder(odaPath).Not())
+            if (CheckDllsInFolder(odaPath).Not())
             {
                 string msg = $"Can't find oda DLLs in {AddinSettings.SelectedOdaFolder}\nRun app with admin rights before start addin or repair default oda folder";
                 logger.Info(msg);
@@ -244,13 +245,13 @@ namespace OdantDev
                     });
                     await uploadTask;
 
-                    logger?.Info("Module created");
                     if (uploadTask.IsFaulted)
                     {
                         logger?.Info(uploadTask.Exception?.ToString());
                     }
                     else
                     {
+                        logger?.Info("Module created");
                         OpenModule(cls);
                     }
                 }
@@ -416,7 +417,7 @@ namespace OdantDev
 
         private void DialogAddOdaLibraryClick(object sender, RoutedEventArgs e)
         {
-            if (checkDllsInFolder(DialogAddOdaLibrary.Text).Not())
+            if (CheckDllsInFolder(DialogAddOdaLibrary.Text).Not())
             {
                 logger?.Info($"No oda libraries in {DialogAddOdaLibrary.Text}");
                 return;
@@ -427,7 +428,7 @@ namespace OdantDev
 
         private void CreateItemInfo_Click(object sender, RoutedEventArgs e)
         {
-
+            
         }
     }
 }

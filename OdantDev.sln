@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32630.194
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MaterialDesignExtensions", "MaterialDesignExtensions\MaterialDesignExtensions.csproj", "{2DC67C48-ED97-4529-8FDC-44573392230B}"
 EndProject
@@ -11,19 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS2019", "VS2019\VS2019.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS2022", "VS2022\VS2022.csproj", "{FEF0688F-DB99-496B-8429-E5B64332D8D0}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharedFiles", "SharedFiles", "{B1A1A13D-4A8A-4162-BAC8-6434F24EEC6B}"
-	ProjectSection(SolutionItems) = preProject
-		SharedFiles\dxtoolbox.v18.1.pkgdef = SharedFiles\dxtoolbox.v18.1.pkgdef
-		SharedFiles\Icon.png = SharedFiles\Icon.png
-		SharedFiles\OdantDevPackage.vsct = SharedFiles\OdantDevPackage.vsct
-	EndProjectSection
-EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		SharedOdantDev\SharedOdantDev.projitems*{ac6b1c3b-13d4-46f6-95ac-04583649963d}*SharedItemsImports = 4
-		SharedOdantDev\SharedOdantDev.projitems*{bce37951-5744-4b02-ba49-25ee4c57ac5a}*SharedItemsImports = 13
-		SharedOdantDev\SharedOdantDev.projitems*{fef0688f-db99-496b-8429-e5b64332d8d0}*SharedItemsImports = 4
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86
@@ -61,5 +49,10 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11B420B8-8D5A-4A8C-BB7A-2307AF7B7952}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		SharedOdantDev\SharedOdantDev.projitems*{ac6b1c3b-13d4-46f6-95ac-04583649963d}*SharedItemsImports = 4
+		SharedOdantDev\SharedOdantDev.projitems*{bce37951-5744-4b02-ba49-25ee4c57ac5a}*SharedItemsImports = 13
+		SharedOdantDev\SharedOdantDev.projitems*{fef0688f-db99-496b-8429-e5b64332d8d0}*SharedItemsImports = 4
 	EndGlobalSection
 EndGlobal

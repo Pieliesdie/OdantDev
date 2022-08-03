@@ -355,7 +355,7 @@ namespace OdantDev.Model
             foreach (Reference reference in VSProj.References)
             {
                 var assemblyName = new AssemblyName(GetFullName(reference));
-                if (references.Contains($"{assemblyName.Name}.dll"))
+                if (references.Contains($"{assemblyName.Name}.dll") && File.Exists(reference.Path).Not())
                 {
                     reference.Remove();
                     deletedDlls.Add($"{assemblyName.Name}.dll");

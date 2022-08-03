@@ -18,7 +18,7 @@
     <AssemblyName>VS2019</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>latest</LangVersion>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
     <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
@@ -48,6 +48,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="..\SharedFiles\Templates\ProjectTemplate\TemplateProject.csproj">
+      <Link>Templates\ProjectTemplate\TemplateProject.csproj</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -131,6 +135,24 @@
     </Content>
     <Content Include="..\SharedFiles\Icon.png">
       <Link>Icon.png</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\SharedFiles\Templates\AddinSettings.xml">
+      <Link>Templates\AddinSettings.xml</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\SharedFiles\Templates\AssemblyInfo.cs">
+      <Link>Templates\AssemblyInfo.cs</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\SharedFiles\Templates\ProjectTemplate\AssemblyInfo.cs">
+      <Link>Templates\ProjectTemplate\AssemblyInfo.cs</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\SharedFiles\Templates\ProjectTemplate\Init.cs">
+      <Link>Templates\ProjectTemplate\Init.cs</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
   </ItemGroup>

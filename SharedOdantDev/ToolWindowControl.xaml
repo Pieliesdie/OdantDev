@@ -291,18 +291,7 @@
                                                     <materialDesign:PackIcon Kind="InformationCircleOutline" />
                                                 </MenuItem.Icon>
                                             </MenuItem>
-                                            <MenuItem Name="CreateItemInfo" Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}">
-                                                <MenuItem.CommandParameter>
-                                                    <StackPanel Margin="16">
-                                                        <ProgressBar Margin="16"
-                                                                     HorizontalAlignment="Center"
-                                                                     Value="0" />
-                                                        <Button HorizontalAlignment="Center"
-                                                                Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                Content="CANCEL"
-                                                                IsCancel="True" />
-                                                    </StackPanel>
-                                                </MenuItem.CommandParameter>
+                                            <MenuItem IsEnabled="False" Name="CreateItemInfo" Command="{Binding CreateItemCommand}">
                                                 <MenuItem.Header>
                                                     <TextBlock Text="Create new item" />
                                                 </MenuItem.Header>

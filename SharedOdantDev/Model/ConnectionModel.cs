@@ -66,7 +66,10 @@ namespace OdantDev
                 Hosts = await HostsListAsync();
 
                 Developers = Connection.LocalHost?.Develope?.Domains?.OfType<DomainDeveloper>();
-
+                if (Developers.Any() && Connection.LocalHost?.Develope is { } developDomain)
+                {
+                    Hosts = Hosts.Prepend(new StructureItemViewModel<StructureItem>(developDomain, AddinSettings.IsLazyTreeLoad, logger: logger));
+                }
                 stopWatch.Stop();
                 TimeSpan ts = stopWatch.Elapsed;
                 string elapsedTime = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}.{ts.Milliseconds / 10:00}";

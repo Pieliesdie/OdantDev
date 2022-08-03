@@ -1,4 +1,5 @@
 ﻿using oda;
+using odaCore;
 using OdantDev.Commands;
 using System;
 using System.Collections.Generic;
@@ -30,23 +31,26 @@ namespace OdantDev.Model
         private T parent;
         private RelayCommand refreshCommand;
         private RelayCommand infoCommand;
+        private RelayCommand createItemCommand;
         private int imageIndex;
         private bool isExpanded;
         public string Name => $"{Item?.Label ?? Item?.Name ?? Category}";
-        public RelayCommand RefreshCommand
-        {
-            get
+        public RelayCommand RefreshCommand => refreshCommand ??
+            (refreshCommand = new RelayCommand(obj =>
             {
-                return refreshCommand ??
-                    (refreshCommand = new RelayCommand(obj =>
-                    {
-                        Refresh();
-                        logger?.Info($"{this} has been refreshed");
-                    }));
-            }
-        }
+                Refresh();
+                logger?.Info($"{this} has been refreshed");
+            }));
         public RelayCommand InfoCommand => infoCommand ??
             (infoCommand = new RelayCommand(obj =>
+            {
+                if (Item == null) { return; }
+                Clipboard.Clear();
+                Clipboard.SetText(Item.FullId);
+                logger?.Info($"FullId copied to clipboard!");
+            }));
+        public RelayCommand CreateItemCommand => createItemCommand ??
+            (createItemCommand = new RelayCommand(obj =>
             {
                 if (Item == null) { return; }
                 Clipboard.Clear();
@@ -117,7 +121,7 @@ namespace OdantDev.Model
         public async Task InitChildrenAsync(T item, bool lazyLoad, ILogger logger = null)
         {
             var task = Task.Run(() => GetChildren(item, lazyLoad, logger));
-            if(task == await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(5))))
+            if (task == await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(5))))
             {
                 Children = await task;
             }
@@ -126,7 +130,7 @@ namespace OdantDev.Model
                 logger?.Info($"Timeout when getting children for {item}");
                 Children = null;
             }
-        } 
+        }
 
         ~StructureItemViewModel()
         {
@@ -141,7 +145,7 @@ namespace OdantDev.Model
         }
         public IEnumerable<StructureItemViewModel<T>> GetChildren(T item, bool lazyLoad, ILogger logger = null)
         {
-            var items = item.getChilds(ItemType.All, Deep.Near).OfType<T>().AsParallel().AsUnordered();
+            var items = item.getChilds(ItemType.All, Deep.Near).Sorted.OfType<T>().AsParallel().AsOrdered();
             var children = items
                 .Where(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution)
                 .Select(child => new StructureItemViewModel<T>(child, lazyLoad, item, logger));
@@ -168,7 +172,7 @@ namespace OdantDev.Model
                         Category = "Workplaces",
                         ImageIndex = Images.GetImageIndex(Icons.UserRole),
                         children = workplaces.Select(child => new StructureItemViewModel<T>(child as T, lazyLoad, item, logger))
-                    }).AsParallel();
+                    }).AsParallel().AsOrdered();
             }
             if (modules.Any())
             {
@@ -178,7 +182,7 @@ namespace OdantDev.Model
                         Category = "Modules",
                         ImageIndex = Images.GetImageIndex(Icons.MagentaFolder),
                         children = modules.Select(child => new StructureItemViewModel<T>(child as T, lazyLoad, item, logger))
-                    }).AsParallel();
+                    }).AsParallel().AsOrdered();
             }
             foreach (var viewItem in children)
             {
