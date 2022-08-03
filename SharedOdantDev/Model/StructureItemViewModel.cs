@@ -52,10 +52,7 @@ namespace OdantDev.Model
         public RelayCommand CreateItemCommand => createItemCommand ??
             (createItemCommand = new RelayCommand(obj =>
             {
-                if (Item == null) { return; }
-                Clipboard.Clear();
-                Clipboard.SetText(Item.FullId);
-                logger?.Info($"FullId copied to clipboard!");
+                logger?.Info($"Not implemented");
             }));
         public bool IsItemAvailable => Item != null;
         public bool HasChildren => Children.Any();
@@ -145,7 +142,7 @@ namespace OdantDev.Model
         }
         public IEnumerable<StructureItemViewModel<T>> GetChildren(T item, bool lazyLoad, ILogger logger = null)
         {
-            var items = item.getChilds(ItemType.All, Deep.Near).Sorted.OfType<T>().AsParallel().AsOrdered();
+            var items = item.getChilds(ItemType.All, Deep.Near).OfType<T>().AsParallel();
             var children = items
                 .Where(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution)
                 .Select(child => new StructureItemViewModel<T>(child, lazyLoad, item, logger));
@@ -172,7 +169,7 @@ namespace OdantDev.Model
                         Category = "Workplaces",
                         ImageIndex = Images.GetImageIndex(Icons.UserRole),
                         children = workplaces.Select(child => new StructureItemViewModel<T>(child as T, lazyLoad, item, logger))
-                    }).AsParallel().AsOrdered();
+                    }).AsParallel();
             }
             if (modules.Any())
             {
@@ -182,7 +179,7 @@ namespace OdantDev.Model
                         Category = "Modules",
                         ImageIndex = Images.GetImageIndex(Icons.MagentaFolder),
                         children = modules.Select(child => new StructureItemViewModel<T>(child as T, lazyLoad, item, logger))
-                    }).AsParallel().AsOrdered();
+                    }).AsParallel();
             }
             foreach (var viewItem in children)
             {

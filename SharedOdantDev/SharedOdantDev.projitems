@@ -20,6 +20,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)BindingHelpers\NotEmptyRule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Commands\RelayCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Bitness.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\DevHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\ServerApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\DTEWindow.cs" />

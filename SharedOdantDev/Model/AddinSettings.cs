@@ -28,9 +28,6 @@ namespace OdantDev.Model
         public AddinSettings() { }
 
         public event PropertyChangedEventHandler PropertyChanged;       
-                
-        [XmlIgnore]
-        public bool Changed { get; set; }
 
         [XmlIgnore]
         public ObservableCollection<string> OdaLibraries 
@@ -156,11 +153,6 @@ namespace OdantDev.Model
         {
             try
             {
-                if (!Changed)
-                    return true;
-
-                Changed = false;
-
                 File.Delete(path);
                 using FileStream fs = new FileStream(path, FileMode.OpenOrCreate);
                 Serializer.Serialize(fs, this);
@@ -174,8 +166,6 @@ namespace OdantDev.Model
 
         private void NotifyPropertyChanged(string name)
         {
-            Changed = true;
-
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 

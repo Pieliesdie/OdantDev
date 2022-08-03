@@ -22,6 +22,7 @@ using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Security;
 using odaCore;
+using SharedOdanDev.Common;
 
 namespace OdantDev
 {
@@ -55,7 +56,7 @@ namespace OdantDev
         }
         public bool IsBusy { get => isBusy; set { isBusy = value; NotifyPropertyChanged("IsBusy"); } }
         public event PropertyChangedEventHandler PropertyChanged;
-       
+
         private void NotifyPropertyChanged(string name)
         {
             if (PropertyChanged != null)
@@ -107,7 +108,7 @@ namespace OdantDev
             if (isOdaLibraryesloaded)
             {
                 return true;
-            }            
+            }
 
             OdaFolder = new DirectoryInfo(AddinSettings.SelectedOdaFolder.Path);
             var LoadOdaLibrariesResult = ConnectionModel.LoadOdaLibraries(OdaFolder);
@@ -132,20 +133,18 @@ namespace OdantDev
         #region Connect to oda and get data
         private async void Connect(object sender, RoutedEventArgs e)
         {
-            AddinSettings.Save();
-
             IsBusy = true;
             Status = "Checking DLLs in oda folder";
             string odaPath = AddinSettings.SelectedOdaFolder.Path;
 
             if (Directory.Exists(odaPath).Not())
             {
-                logger.Info($"Can't find selected oda folder {AddinSettings.SelectedOdaFolder}\nSettings was reset");
+                logger.Info($"Can't find selected oda folder {AddinSettings.SelectedOdaFolder}");
                 ShowException($"Can't find selected oda folder {AddinSettings.SelectedOdaFolder}");
                 IsBusy = false;
                 return;
             }
-              
+
             if (CheckDllsInFolder(odaPath).Not())
             {
                 string msg = $"Can't find oda DLLs in {AddinSettings.SelectedOdaFolder}\nRun app with admin rights before start addin or repair default oda folder";
@@ -306,7 +305,10 @@ namespace OdantDev
             AddinSettings.LastProjects.Add(new AddinSettings.Project(item.Name, item.Description, item.FullId, item.Host.Name, DateTime.Now));
             AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(AddinSettings.LastProjects.OrderByDescending(x => x.OpenTime).Take(15)
                 ?? new List<AddinSettings.Project>());
-            AddinSettings.Save();
+            if (AddinSettings.Save().Not())
+            {
+                logger.Info("Error while saving settings");
+            }
         }
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
@@ -334,15 +336,12 @@ namespace OdantDev
 
         private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            try
+            if (AddinSettings.Save().Not())
             {
-                AddinSettings.Save();
-                logger.Info($"Saved in {AddinSettings.AddinSettingsPath}");
+                logger.Info("Error while saving settings");
+                return;
             }
-            catch (Exception ex)
-            {
-                logger.Info(ex.Message);
-            }
+            logger.Info($"Saved in {AddinSettings.AddinSettingsPath}");
         }
 
         private void IsSimpleThemeCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -412,7 +411,7 @@ namespace OdantDev
         {
             if (OdaFoldersList.SelectedItems.Count == 0)
                 return;
-            AddinSettings.OdaFolders = new ObservableCollection<PathInfo>(AddinSettings.OdaFolders.Except(OdaFoldersList.SelectedItems.OfType<PathInfo>()));  
+            AddinSettings.OdaFolders = new ObservableCollection<PathInfo>(AddinSettings.OdaFolders.Except(OdaFoldersList.SelectedItems.OfType<PathInfo>()));
         }
 
         private void DialogAddOdaLibraryClick(object sender, RoutedEventArgs e)
@@ -424,11 +423,24 @@ namespace OdantDev
             }
             AddinSettings.OdaFolders.Add(new PathInfo(DialogAddOdaLibraryName.Text, DialogAddOdaLibrary.Text));
         }
+
+        private async void DownloadNet_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await DevHelpers.DownloadAndCopyFramework4_0And4_5Async(this.logger);
+            }
+            catch(Exception ex)
+            {
+                logger.Info(ex.Message);
+            }
+        }
         #endregion
 
         private void CreateItemInfo_Click(object sender, RoutedEventArgs e)
         {
-            
+
         }
+
     }
 }
