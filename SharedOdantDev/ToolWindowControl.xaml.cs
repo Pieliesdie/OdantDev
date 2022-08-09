@@ -59,8 +59,7 @@ namespace OdantDev
 
         private void NotifyPropertyChanged(string name)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
         public AddinSettings AddinSettings { get => addinSettings; set { addinSettings = value; NotifyPropertyChanged("AddinSettings"); } }
         public ConnectionModel OdaModel { get => odaModel; set { odaModel = value; NotifyPropertyChanged("OdaModel"); } }
