@@ -316,7 +316,7 @@
                         </TreeView.Resources>
                         <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}">
-                                <Grid Margin="-5,0,0,0">
+                                <Grid Margin="0,0,0,0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
@@ -339,7 +339,7 @@
                                                     <materialDesign:PackIcon Kind="InformationCircleOutline" />
                                                 </MenuItem.Icon>
                                             </MenuItem>
-                                            <MenuItem
+                                            <!--<MenuItem
                                                 Name="CreateItemInfo"
                                                 Command="{Binding CreateItemCommand}"
                                                 IsEnabled="False">
@@ -349,7 +349,7 @@
                                                 <MenuItem.Icon>
                                                     <materialDesign:PackIcon Kind="CreateNewFolderOutline" />
                                                 </MenuItem.Icon>
-                                            </MenuItem>
+                                            </MenuItem>-->
                                         </ContextMenu>
                                     </Grid.ContextMenu>
                                     <Image

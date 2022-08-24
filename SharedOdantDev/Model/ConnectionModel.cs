@@ -17,19 +17,18 @@ namespace OdantDev
         public static readonly string[] odaClientLibraries = new string[] { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
         public static readonly string[] odaServerLibraries = new string[] { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
         private readonly ILogger logger;
-        private IEnumerable<StructureItemViewModel<StructureItem>> hosts;
-        private IEnumerable<DomainDeveloper> developers;
+        private List<StructureItemViewModel<StructureItem>> hosts;
+        private List<DomainDeveloper> developers;
         private bool autoLogin;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(string name)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
-        public IEnumerable<StructureItemViewModel<StructureItem>> Hosts { get => hosts; set { hosts = value; NotifyPropertyChanged("Hosts"); } }
-        public IEnumerable<DomainDeveloper> Developers { get => developers; set { developers = value; NotifyPropertyChanged("Developers"); } }
+        public List<StructureItemViewModel<StructureItem>> Hosts { get => hosts; set { hosts = value; NotifyPropertyChanged("Hosts"); } }
+        public List<DomainDeveloper> Developers { get => developers; set { developers = value; NotifyPropertyChanged("Developers"); } }
 
         public static List<IntPtr> ServerAssemblies { get; set; }
 
@@ -65,10 +64,10 @@ namespace OdantDev
 
                 Hosts = await HostsListAsync();
 
-                Developers = Connection.LocalHost?.Develope?.Domains?.OfType<DomainDeveloper>();
+                Developers = Connection.LocalHost?.Develope?.Domains?.OfType<DomainDeveloper>().ToList();
                 if (Developers.Any() && Connection.LocalHost?.Develope is { } developDomain)
                 {
-                    Hosts = Hosts.Prepend(new StructureItemViewModel<StructureItem>(developDomain, AddinSettings.IsLazyTreeLoad, logger: logger));
+                    Hosts = Hosts.Prepend(new StructureItemViewModel<StructureItem>(developDomain, AddinSettings.IsLazyTreeLoad, logger: logger)).ToList();
                 }
                 stopWatch.Stop();
                 TimeSpan ts = stopWatch.Elapsed;
@@ -87,7 +86,7 @@ namespace OdantDev
             }
         }
 
-        private async Task<IEnumerable<StructureItemViewModel<StructureItem>>> HostsListAsync()
+        private async Task<List<StructureItemViewModel<StructureItem>>> HostsListAsync()
         {
             return await Task.Run(async () =>
             {

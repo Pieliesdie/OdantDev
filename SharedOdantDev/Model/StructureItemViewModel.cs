@@ -105,7 +105,7 @@ namespace OdantDev.Model
             Parent = parent;
             ItemType = Item.ItemType;
             Category = ItemType.ToString();
-            InitChildrenAsync(item, lazyLoad, logger);
+            _ = InitChildrenAsync(item, lazyLoad, logger);
             Update_CALLBACK = Updated;
             GC.SuppressFinalize(Update_CALLBACK);
             ServerApi._SetOnUpdate(item.RemoteItem.GetIntPtr(), Update_CALLBACK);
