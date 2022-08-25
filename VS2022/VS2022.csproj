@@ -52,6 +52,10 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="..\SharedFiles\Templates\ProjectTemplate\TemplateProject.csproj">
+      <Link>Templates\ProjectTemplate\TemplateProject.csproj</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -132,14 +136,40 @@
       <Link>Icon.png</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Content Include="..\SharedFiles\Templates\AddinSettings.xml">
+      <Link>Templates\AddinSettings.xml</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <VSCTCompile Include="..\SharedFiles\OdantDevPackage.vsct">
       <Link>OdantDevPackage.vsct</Link>
       <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\SharedFiles\Templates\AssemblyInfo.cs">
+      <Link>Templates\AssemblyInfo.cs</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\SharedFiles\Templates\ProjectTemplate\AssemblyInfo.cs">
+      <Link>Templates\ProjectTemplate\AssemblyInfo.cs</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\SharedFiles\Templates\ProjectTemplate\Init.cs">
+      <Link>Templates\ProjectTemplate\Init.cs</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+  </ItemGroup>
   <Import Project="..\SharedOdantDev\SharedOdantDev.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Target Name="RemoveDuplicateAnalyzers" BeforeTargets="CoreCompile">
+    <!-- Work around https://github.com/dotnet/wpf/issues/6792 -->
+    <ItemGroup>
+      <FilteredAnalyzer Include="@(Analyzer-&gt;Distinct())" />
+      <Analyzer Remove="@(Analyzer)" />
+      <Analyzer Include="@(FilteredAnalyzer)" />
+    </ItemGroup>
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

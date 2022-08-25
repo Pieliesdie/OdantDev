@@ -169,12 +169,6 @@ namespace OdantDev
                 return;
             }
             odaAddinModel = new VisualStudioIntegration(AddinSettings, DTE2, logger);
-            // Решение создатся при загрузке проекта
-            //await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            //if (OdantDevPackage.Env_DTE.Solution.IsOpen.Not())
-            //{
-            //    OdantDevPackage.Env_DTE.Solution.Create(OdaFolder.CreateSubdirectory("AddIn").FullName, "ODANT");
-            //}
             IsBusy = false;
         }
         private async Task<(bool Success, string Error)> LoadModelAsync()

@@ -5,186 +5,179 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 
-namespace OdantDev.Model
+namespace OdantDev.Model;
+public class AddinSettings : INotifyPropertyChanged
 {
-    public class AddinSettings : INotifyPropertyChanged
+    private const string FILE_NAME = "AddinSettings.xml";
+    private static readonly string TemplatePath = Path.Combine(Extension.VSIXPath.FullName, @"Templates\AddinSettings.xml");
+    private static readonly XmlSerializer Serializer = new(typeof(AddinSettings));
+    private ObservableCollection<PathInfo> odaFolders;
+    private bool isLazyTreeLoad;
+    private bool isSimpleTheme;
+    private ObservableCollection<Project> lastProjects;
+    private ObservableCollection<string> odaLibraries = new ObservableCollection<string> { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
+    private ObservableCollection<string> updateReferenceLibraries;
+    private string selectedDevelopeDomain;
+    private ObservableCollection<string> lastOdaFolders;
+    private PathInfo selectedOdaFolder;
+
+    public AddinSettings() { }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    [XmlIgnore]
+    public ObservableCollection<string> OdaLibraries
     {
-        private const string FILE_NAME = "AddinSettings.xml";
-        private static string TemplatePath = Path.Combine(Extension.VSIXPath.FullName, @"Templates\AddinSettings.xml");
-        private static XmlSerializer Serializer = new XmlSerializer(typeof(AddinSettings));
-
-        private string path;
-        private ObservableCollection<PathInfo> odaFolders;
-        private bool isLazyTreeLoad;
-        //private bool isAutoDetectOdaPath;
-        private bool isSimpleTheme;
-        private ObservableCollection<Project> lastProjects;
-        private ObservableCollection<string> odaLibraries = new ObservableCollection<string> { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
-        private ObservableCollection<string> updateReferenceLibraries;
-        private string selectedDevelopeDomain;
-        private ObservableCollection<string> lastOdaFolders;
-        private PathInfo selectedOdaFolder;
-
-        public AddinSettings() { }
-
-        public event PropertyChangedEventHandler PropertyChanged;       
-
-        [XmlIgnore]
-        public ObservableCollection<string> OdaLibraries 
-        { 
-            get => odaLibraries; 
-            set 
-            { 
-                odaLibraries = value; 
-                NotifyPropertyChanged("OdaLibraries"); 
-            }
-        }
-
-        //public bool IsAutoDetectOdaPath { get => isAutoDetectOdaPath; set { isAutoDetectOdaPath = value; NotifyPropertyChanged("IsAutoDetectOdaPath"); NotifyPropertyChanged("OdaFolder"); } }
-
-        public ObservableCollection<Project> LastProjects 
-        { 
-            get => lastProjects; 
-            set 
-            { 
-                lastProjects = new ObservableCollection<Project>(value.OrderByDescending(x => x.OpenTime));
-                NotifyPropertyChanged("LastProjects"); 
-            }
-        }
-
-        public ObservableCollection<string> UpdateReferenceLibraries
+        get => odaLibraries;
+        set
         {
-            get => updateReferenceLibraries;
-            set
+            odaLibraries = value;
+            NotifyPropertyChanged("OdaLibraries");
+        }
+    }
+
+    public ObservableCollection<Project> LastProjects
+    {
+        get => lastProjects;
+        set
+        {
+            lastProjects = new ObservableCollection<Project>(value.OrderByDescending(x => x.OpenTime));
+            NotifyPropertyChanged("LastProjects");
+        }
+    }
+
+    public ObservableCollection<string> UpdateReferenceLibraries
+    {
+        get => updateReferenceLibraries;
+        set
+        {
+            updateReferenceLibraries = value;
+            NotifyPropertyChanged("UpdateReferenceLibraries");
+        }
+    }
+
+    public bool IsSimpleTheme
+    {
+        get => isSimpleTheme;
+        set
+        {
+            isSimpleTheme = value;
+            NotifyPropertyChanged("IsSimpleTheme");
+        }
+    }
+
+    public bool IsLazyTreeLoad
+    {
+        get => isLazyTreeLoad;
+        set
+        {
+            isLazyTreeLoad = value;
+            NotifyPropertyChanged("IsLazyTreeLoad");
+        }
+    }
+
+    public string SelectedDevelopeDomain
+    {
+        get => selectedDevelopeDomain;
+        set
+        {
+            selectedDevelopeDomain = value;
+            NotifyPropertyChanged("SelectedDevelopeDomain");
+        }
+    }
+
+    public ObservableCollection<string> LastOdaFolders
+    {
+        get => lastOdaFolders;
+        set
+        {
+            lastOdaFolders = value;
+            NotifyPropertyChanged("LastOdaFolders");
+        }
+    }
+
+    public ObservableCollection<PathInfo> OdaFolders
+    {
+        get => odaFolders;
+        set
+        {
+            odaFolders = value;
+            NotifyPropertyChanged("OdaFolders");
+        }
+    }
+
+    public PathInfo SelectedOdaFolder
+    {
+        get => selectedOdaFolder;
+        set
+        {
+            selectedOdaFolder = value;
+            NotifyPropertyChanged("SelectedOdaFolder");
+        }
+    }
+
+    public string AddinSettingsPath { get; private set;}                  
+
+    public static AddinSettings Create(DirectoryInfo folder)
+    {
+        AddinSettings settings = null;
+        var path = Path.Combine(folder.FullName, FILE_NAME);
+
+        try
+        {
+            if (File.Exists(path).Not())
             {
-                updateReferenceLibraries = value;
-                NotifyPropertyChanged("UpdateReferenceLibraries");
+                path = TemplatePath;
             }
+            using FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
+            settings = Serializer.Deserialize(fs) as AddinSettings;
+            settings.OdaFolders.Remove(x => x.Name == "Last run");
         }
-
-        public bool IsSimpleTheme 
-        { 
-            get => isSimpleTheme; 
-            set 
-            { 
-                isSimpleTheme = value; 
-                NotifyPropertyChanged("IsSimpleTheme"); 
-            } 
-        }
-        
-        public bool IsLazyTreeLoad
+        catch
         {
-            get => isLazyTreeLoad;
-            set
-            {
-                isLazyTreeLoad = value;
-                NotifyPropertyChanged("IsLazyTreeLoad");
-            }
+            using FileStream fs = new FileStream(TemplatePath, FileMode.Open, FileAccess.Read);
+            settings = Serializer.Deserialize(fs) as AddinSettings;
         }
-        
-        public string SelectedDevelopeDomain 
-        { 
-            get => selectedDevelopeDomain; 
-            set 
-            { 
-                selectedDevelopeDomain = value; 
-                NotifyPropertyChanged("SelectedDevelopeDomain"); 
-            } 
-        }
-        
-        public ObservableCollection<string> LastOdaFolders 
-        { 
-            get => lastOdaFolders; 
-            set 
-            { 
-                lastOdaFolders = value; 
-                NotifyPropertyChanged("LastOdaFolders"); 
-            } 
-        }
+        settings.AddinSettingsPath = path;
+        settings.OdaFolders.Insert(0, new PathInfo("Last run", Extension.LastOdaFolder.FullName));
+        return settings;
+    }
 
-        public ObservableCollection<PathInfo> OdaFolders
+    public bool Save()
+    {
+        try
         {
-            get => odaFolders;
-            set
-            {                
-                odaFolders = value;
-                NotifyPropertyChanged("OdaFolders");
-            }
+            File.Delete(AddinSettingsPath);
+            using FileStream fs = new FileStream(AddinSettingsPath, FileMode.OpenOrCreate);
+            Serializer.Serialize(fs, this);
+            return true;
         }
-
-        public PathInfo SelectedOdaFolder 
+        catch
         {
-            get => selectedOdaFolder;
-            set 
-            { 
-                selectedOdaFolder = value; 
-                NotifyPropertyChanged("SelectedOdaFolder"); 
-            }
+            return false;
         }
+    }
 
-        public string AddinSettingsPath => path;                   
+    private void NotifyPropertyChanged(string name)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
 
-        public static AddinSettings Create(DirectoryInfo folder)
+    public struct Project
+    {
+        public Project(string name, string description, string fullId, string domainName, DateTime openTime)
         {
-            AddinSettings settings = null;
-            var path = Path.Combine(folder.FullName, FILE_NAME);
-
-            try
-            {
-                if (File.Exists(path).Not())
-                {
-                    path = TemplatePath;
-                }
-                using FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
-                settings = Serializer.Deserialize(fs) as AddinSettings;
-                settings.OdaFolders.Remove(x => x.Name == "Last run");
-            }
-            catch
-            {
-                using FileStream fs = new FileStream(TemplatePath, FileMode.Open, FileAccess.Read);
-                settings = Serializer.Deserialize(fs) as AddinSettings;
-            }
-            settings.path = path;
-            settings.OdaFolders.Insert(0, new PathInfo("Last run", Extension.LastOdaFolder.FullName));
-            return settings;
+            Name = name;
+            Description = description;
+            FullId = fullId;
+            HostName = domainName;
+            OpenTime = openTime;
         }
 
-        public bool Save()
-        {
-            try
-            {
-                File.Delete(path);
-                using FileStream fs = new FileStream(path, FileMode.OpenOrCreate);
-                Serializer.Serialize(fs, this);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private void NotifyPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
-
-        public struct Project
-        {
-            public Project(string name, string description, string fullId, string domainName, DateTime openTime)
-            {
-                Name = name;
-                Description = description;
-                FullId = fullId;
-                HostName = domainName;
-                OpenTime = openTime;
-            }
-
-            public string Name { get; set; }
-            public string Description { get; set; }
-            public string FullId { get; set; }
-            public string HostName { get; set; }
-            public DateTime OpenTime { get; set; }
-        }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string FullId { get; set; }
+        public string HostName { get; set; }
+        public DateTime OpenTime { get; set; }
     }
 }
