@@ -115,7 +115,7 @@ public class AddinSettings : INotifyPropertyChanged
             NotifyPropertyChanged("SelectedOdaFolder");
         }
     }
-
+    [XmlIgnore]
     public string AddinSettingsPath { get; private set;}                  
 
     public static AddinSettings Create(DirectoryInfo folder)
