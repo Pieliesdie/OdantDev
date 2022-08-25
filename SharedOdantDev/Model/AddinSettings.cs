@@ -20,10 +20,18 @@ public class AddinSettings : INotifyPropertyChanged
     private string selectedDevelopeDomain;
     private ObservableCollection<string> lastOdaFolders;
     private PathInfo selectedOdaFolder;
+    private bool forceUpdateReferences = true;
 
     public AddinSettings() { }
-
-    public event PropertyChangedEventHandler PropertyChanged;
+    public bool ForceUpdateReferences
+    {
+        get => forceUpdateReferences;
+        set
+        {
+            forceUpdateReferences = value;
+            NotifyPropertyChanged("ForceUpdateReferences");
+        }
+    }
 
     [XmlIgnore]
     public ObservableCollection<string> OdaLibraries
@@ -158,6 +166,7 @@ public class AddinSettings : INotifyPropertyChanged
         }
     }
 
+    public event PropertyChangedEventHandler PropertyChanged;
     private void NotifyPropertyChanged(string name)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

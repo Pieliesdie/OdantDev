@@ -351,11 +351,12 @@ namespace OdantDev.Model
         {
             ThreadHelper.ThrowIfNotOnUIThread();
             var VSProj = project.Object as VSProject;
-            List<string> deletedDlls = new List<string>();
+            List<string> deletedDlls = new();
             foreach (Reference reference in VSProj.References)
             {
                 var assemblyName = new AssemblyName(GetFullName(reference));
-                if (references.Contains($"{assemblyName.Name}.dll") && File.Exists(reference.Path).Not())
+                if (references.Contains($"{assemblyName.Name}.dll") 
+                    && (File.Exists(reference.Path).Not() || AddinSettings.ForceUpdateReferences))
                 {
                     reference.Remove();
                     deletedDlls.Add($"{assemblyName.Name}.dll");
