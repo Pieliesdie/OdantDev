@@ -24,17 +24,17 @@ namespace OdantDev.Model
         private DTE2 envDTE { get; }
         private IServiceProvider serviceProvider { get; }
         private Dictionary<string, BuildInfo> LoadedModules { get; } = new Dictionary<string, BuildInfo>();
-        private DirectoryInfo AddinFolder { get; }
+        //private DirectoryInfo AddinFolder { get; }
         private AddinSettings AddinSettings { get; }
         private DirectoryInfo OdaFolder => new DirectoryInfo(AddinSettings.SelectedOdaFolder.Path);
-        private ILogger logger { get; }
+        private ILogger Logger { get; }
         #endregion
         public VisualStudioIntegration(AddinSettings addinSettings, DTE2 DTE, ILogger logger = null)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            this.logger = logger;
+            this.Logger = logger;
             this.AddinSettings = addinSettings;
-            AddinFolder = OdaFolder.CreateSubdirectory("AddIn");
+            //AddinFolder = OdaFolder.CreateSubdirectory("AddIn");
             envDTE = DTE
                 ?? throw new NullReferenceException("Can't get EnvDTE from visual studio");
             serviceProvider = new ServiceProvider((Microsoft.VisualStudio.OLE.Interop.IServiceProvider)envDTE)
@@ -370,7 +370,7 @@ namespace OdantDev.Model
                 if(deletedDlls.Contains(dll).Not()) { continue; }
                 var reference = VSProj.References.Add(Path.Combine(OdaFolder.FullName,dll));
                 reference.CopyLocal = false;
-                logger?.Info($"{dll} updated");
+                Logger?.Info($"{dll} updated");
             }
             return false;
         }
