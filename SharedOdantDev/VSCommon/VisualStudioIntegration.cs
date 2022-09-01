@@ -336,13 +336,16 @@ namespace OdantDev.Model
                 }
                 assemblyInfo = project.ProjectItems.AddFromFileCopy(Path.Combine(Extension.VSIXPath.FullName, @"Templates\AssemblyInfo.cs"));
             }
-            var attributes = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>().ToDictionary(x => x.Name);
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyTitle", $"{sourceItem.Name}-{sourceItem.Id}");
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyDescription", sourceItem.Hint ?? string.Empty);
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyCopyright", $"ООО «Инфостандарт» © 2012 — {DateTime.Now.Year}");
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyDefaultAlias", $"{sourceItem.Name}");
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyCompany", $"Infostandart");
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyTrademark", $"www.infostandart.com");
+            var attributes = assemblyInfo.FileCodeModel?.CodeElements?.OfType<CodeAttribute2>()?.ToDictionary(x => x.Name);
+            if (attributes != null)
+            {
+                SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyTitle", $"{sourceItem.Name}-{sourceItem.Id}");
+                SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyDescription", sourceItem.Hint ?? string.Empty);
+                SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyCopyright", $"ООО «Инфостандарт» © 2012 — {DateTime.Now.Year}");
+                SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyDefaultAlias", $"{sourceItem.Name}");
+                SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyCompany", $"Infostandart");
+                SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyTrademark", $"www.infostandart.com");
+            }
             if (assemblyInfo.IsOpen.Not()) { assemblyInfo.Open(); }
             assemblyInfo.Save();
         }
