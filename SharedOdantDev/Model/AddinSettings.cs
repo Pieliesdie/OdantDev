@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -6,138 +7,65 @@ using System.Linq;
 using System.Xml.Serialization;
 
 namespace OdantDev.Model;
-public class AddinSettings : INotifyPropertyChanged
+
+public partial class AddinSettings : ObservableObject
 {
     private const string FILE_NAME = "AddinSettings.xml";
-    private static readonly string TemplatePath = Path.Combine(Extension.VSIXPath.FullName, @"Templates\AddinSettings.xml");
+    private static readonly string TemplatePath = Path.Combine(Extension.VSIXPath.FullName, "Templates", FILE_NAME);
     private static readonly XmlSerializer Serializer = new(typeof(AddinSettings));
-    private ObservableCollection<PathInfo> odaFolders;
-    private bool isLazyTreeLoad;
-    private bool isSimpleTheme;
-    private ObservableCollection<Project> lastProjects;
-    private ObservableCollection<string> odaLibraries = new ObservableCollection<string> { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
-    private ObservableCollection<string> updateReferenceLibraries;
-    private string selectedDevelopeDomain;
-    private ObservableCollection<string> lastOdaFolders;
-    private PathInfo selectedOdaFolder;
-    private bool forceUpdateReferences = true;
 
     public AddinSettings() { }
-    public bool ForceUpdateReferences
+
+    [ObservableProperty]
+    private ObservableCollection<Project> lastProjects;
+    partial void OnLastProjectsChanging(ObservableCollection<Project> value)
     {
-        get => forceUpdateReferences;
-        set
-        {
-            forceUpdateReferences = value;
-            NotifyPropertyChanged("ForceUpdateReferences");
-        }
+        value = new ObservableCollection<Project>(value.OrderByDescending(x => x.OpenTime).Take(15));
     }
+
+    [ObservableProperty]
+    private bool forceUpdateReferences = true;
 
     [XmlIgnore]
-    public ObservableCollection<string> OdaLibraries
-    {
-        get => odaLibraries;
-        set
-        {
-            odaLibraries = value;
-            NotifyPropertyChanged("OdaLibraries");
-        }
-    }
+    [ObservableProperty]
+    private ObservableCollection<string> odaLibraries = new ObservableCollection<string> { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
 
-    public ObservableCollection<Project> LastProjects
-    {
-        get => lastProjects;
-        set
-        {
-            lastProjects = new ObservableCollection<Project>(value.OrderByDescending(x => x.OpenTime));
-            NotifyPropertyChanged("LastProjects");
-        }
-    }
+    [ObservableProperty]
+    private ObservableCollection<string> updateReferenceLibraries;
 
-    public ObservableCollection<string> UpdateReferenceLibraries
-    {
-        get => updateReferenceLibraries;
-        set
-        {
-            updateReferenceLibraries = value;
-            NotifyPropertyChanged("UpdateReferenceLibraries");
-        }
-    }
+    [ObservableProperty]
+    private bool isSimpleTheme;
 
-    public bool IsSimpleTheme
-    {
-        get => isSimpleTheme;
-        set
-        {
-            isSimpleTheme = value;
-            NotifyPropertyChanged("IsSimpleTheme");
-        }
-    }
+    [ObservableProperty]
+    private bool isLazyTreeLoad;
 
-    public bool IsLazyTreeLoad
-    {
-        get => isLazyTreeLoad;
-        set
-        {
-            isLazyTreeLoad = value;
-            NotifyPropertyChanged("IsLazyTreeLoad");
-        }
-    }
+    [ObservableProperty]
+    private string selectedDevelopeDomain;
 
-    public string SelectedDevelopeDomain
-    {
-        get => selectedDevelopeDomain;
-        set
-        {
-            selectedDevelopeDomain = value;
-            NotifyPropertyChanged("SelectedDevelopeDomain");
-        }
-    }
+    [ObservableProperty]
+    private ObservableCollection<string> lastOdaFolders;
 
-    public ObservableCollection<string> LastOdaFolders
-    {
-        get => lastOdaFolders;
-        set
-        {
-            lastOdaFolders = value;
-            NotifyPropertyChanged("LastOdaFolders");
-        }
-    }
+    [ObservableProperty]
+    private ObservableCollection<PathInfo> odaFolders;
 
-    public ObservableCollection<PathInfo> OdaFolders
-    {
-        get => odaFolders;
-        set
-        {
-            odaFolders = value;
-            NotifyPropertyChanged("OdaFolders");
-        }
-    }
+    [ObservableProperty]
+    private PathInfo selectedOdaFolder;
 
-    public PathInfo SelectedOdaFolder
-    {
-        get => selectedOdaFolder;
-        set
-        {
-            selectedOdaFolder = value;
-            NotifyPropertyChanged("SelectedOdaFolder");
-        }
-    }
     [XmlIgnore]
-    public string AddinSettingsPath { get; private set;}                  
+    public string AddinSettingsPath { get; private set; }
 
     public static AddinSettings Create(DirectoryInfo folder)
     {
         AddinSettings settings = null;
         var path = Path.Combine(folder.FullName, FILE_NAME);
-
         try
         {
-            if (File.Exists(path).Not())
+            var loadPath = path;
+            if (File.Exists(loadPath).Not())
             {
-                path = TemplatePath;
+                loadPath = TemplatePath;
             }
-            using FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
+            using FileStream fs = new FileStream(loadPath, FileMode.Open, FileAccess.Read);
             settings = Serializer.Deserialize(fs) as AddinSettings;
             settings.OdaFolders.Remove(x => x.Name == "Last run");
         }
@@ -166,11 +94,6 @@ public class AddinSettings : INotifyPropertyChanged
         }
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
-    private void NotifyPropertyChanged(string name)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-    }
 
     public struct Project
     {

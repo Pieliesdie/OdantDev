@@ -1,6 +1,7 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Threading;
 using oda;
 using System;
 using System.Collections.Generic;
@@ -20,51 +21,35 @@ namespace OdantDev.Model
         #region Global Variables
         private BuildEvents BuildEvents { get; }
         private SolutionEvents SolutionEvents { get; }
-        private ProjectsEvents ProjectsEvents { get; }
-        private DTE2 envDTE { get; }
-        private IServiceProvider serviceProvider { get; }
+        private DTE2 EnvDTE { get; }
         private Dictionary<string, BuildInfo> LoadedModules { get; } = new Dictionary<string, BuildInfo>();
-        private DirectoryInfo AddinFolder { get; }
         private AddinSettings AddinSettings { get; }
         private DirectoryInfo OdaFolder => new DirectoryInfo(AddinSettings.SelectedOdaFolder.Path);
-        private ILogger logger { get; }
+        private ILogger Logger { get; }
         #endregion
         public VisualStudioIntegration(AddinSettings addinSettings, DTE2 DTE, ILogger logger = null)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            this.logger = logger;
+            this.Logger = logger;
             this.AddinSettings = addinSettings;
-            AddinFolder = OdaFolder.CreateSubdirectory("AddIn");
-            envDTE = DTE
-                ?? throw new NullReferenceException("Can't get EnvDTE from visual studio");
-            serviceProvider = new ServiceProvider((Microsoft.VisualStudio.OLE.Interop.IServiceProvider)envDTE)
-                ?? throw new NullReferenceException("Can't get ServiceProvider from vusial studio's EnvDTE");
-            if (envDTE.Solution.IsOpen)
+            EnvDTE = DTE ?? throw new NullReferenceException("Can't get EnvDTE from visual studio");
+            if (EnvDTE.Solution.IsOpen)
             {
-                envDTE.Solution.Close();
+                EnvDTE.Solution.Close();
             }
             SolutionEvents = (DTE.Events as Events2).SolutionEvents;
             SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;            
             SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
-            //SolutionEvents.Opened += SolutionEvents_Opened;
-
-            ProjectsEvents = (DTE.Events as Events2).ProjectsEvents;
 
             BuildEvents = (DTE.Events as Events2).BuildEvents;
             BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
             BuildEvents.OnBuildDone += BuildEvents_OnBuildDone;
             BuildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
-            BuildEvents.OnBuildProjConfigBegin += BuildEvents_OnBuildProjConfigBegin;
         }
 
         #region Visual studio events
         // Если закрыть Solution и потом открыть модуль он попадает в коллекцию, после этого открывается Solution и событие очищает коллекцию модулей
         // добавил эвент SolutionEvents_AfterClosing, думаю в таком случае будет правильнее там очищать
-        //private void SolutionEvents_Opened()
-        //{            
-        //    LoadedModules.Clear();
-        //}
-
         private void SolutionEvents_AfterClosing()
         {
             LoadedModules.Clear();
@@ -78,19 +63,14 @@ namespace OdantDev.Model
             LoadedModules.Remove(guid);
         }
 
-        private void BuildEvents_OnBuildProjConfigBegin(string Project, string ProjectConfig, string Platform, string SolutionConfig)
-        {
-
-        }
-
         private void BuildEvents_OnBuildProjConfigDone(string Project, string ProjectConfig, string Platform, string SolutionConfig, bool Success)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            Project project = envDTE.Solution.Item(Project);
+            Project project = EnvDTE.Solution.Item(Project);
             LoadedModules[GetProjectGuid(project)].isBuildSuccess = Success;
             if (Success.Not())
             {
-                envDTE.ExecuteCommand("Build.Cancel");
+                EnvDTE.ExecuteCommand("Build.Cancel");
             }
         }
 
@@ -100,7 +80,7 @@ namespace OdantDev.Model
             if ((Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll)) { return; }
             if (LoadedModules.Values.ToList().TrueForAll(x => x.isBuildSuccess).Not()) { return; }
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            foreach (Project project in envDTE.ActiveSolutionProjects as object[])
+            foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).Cast<Project>())
             {
                 CopyToOdaBin(project);
             }
@@ -112,11 +92,11 @@ namespace OdantDev.Model
             if (Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll) { return; }
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             VSErrors.Clear();
-            foreach (Project project in envDTE.ActiveSolutionProjects as object[])
+            foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).Cast<Project>())
             {
                 if (IncreaseVersion(project).Not())
                 {
-                    envDTE.ExecuteCommand("Build.Cancel");
+                    EnvDTE.ExecuteCommand("Build.Cancel");
                 }
             }
         }
@@ -124,7 +104,6 @@ namespace OdantDev.Model
         #endregion
 
         #region Common Methods for Project item
-
         public bool CopyToOdaBin(Project project)
         {
             try
@@ -139,7 +118,7 @@ namespace OdantDev.Model
                 var versionPath = @$"{version.Major}.{version.Minor}\{version.Build}\{version.Revision}";
 
                 var outDirParent = new FileInfo(project.FullName).Directory.Parent;
-                outDirParent.CreateSubdirectory("bin").Delete(true);
+                outDirParent.CreateSubdirectory("bin").TryDeleteDirectory();
                 var outputDir = outDirParent.CreateSubdirectory("bin");
                 var outputBinDir = outputDir.CreateSubdirectory(versionPath);
                 var moduleDir = new ModuleDir(project);
@@ -267,7 +246,7 @@ namespace OdantDev.Model
 
         #region Download and init  logic for Module
 
-        public async Task<bool> OpenModuleAsync(StructureItem item)
+        public bool OpenModule(StructureItem item)
         {
             Project project = null;
             VSErrors.Clear();
@@ -276,13 +255,13 @@ namespace OdantDev.Model
                 _ = item ?? throw new NullReferenceException("Item was null");
                 var module = DownloadModule(item);
                 var csProj = module.csProj ?? throw new DirectoryNotFoundException("Module csproj file not found");
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                if (envDTE.Solution.IsOpen.Not())
+                ThreadHelper.ThrowIfNotOnUIThread();
+                if (EnvDTE.Solution.IsOpen.Not())
                 {
-                    envDTE.Solution.Create(TempFiles.TempPath.ToUpper(), item.Host.Name);
+                    EnvDTE.Solution.Create(TempFiles.TempPath.ToUpper(), item.Host.Name);
                 }
                
-                project = envDTE.Solution.AddFromFile(csProj.FullName);
+                project = EnvDTE.Solution.AddFromFile(csProj.FullName);
                 InitProject(project, item);
                 UpdateAssemblyReferences(project, AddinSettings.OdaLibraries);
                 UpdateAssemblyReferences(project, AddinSettings.UpdateReferenceLibraries);
@@ -295,15 +274,13 @@ namespace OdantDev.Model
             {
                 if (project != null)
                 {
-                    envDTE.Solution.Remove(project);
+                    EnvDTE.Solution.Remove(project);
                 }
-                envDTE.ShowError($"Error while load project from item {item.Name}: {ex.Message}");
+                EnvDTE.ShowError($"Error while load project from item {item.Name}: {ex.Message}");
                 return false;
             }
             return true;
         }
-
-        public Task<(FileInfo csProj, Dir moduleDir, DirectoryInfo localDir)> DownloadModuleAsync(StructureItem item) => Task.Run(() => DownloadModule(item));
         
         public (FileInfo csProj, Dir remoteDir, DirectoryInfo localDir) DownloadModule(StructureItem item)
         {
@@ -370,7 +347,7 @@ namespace OdantDev.Model
                 if(deletedDlls.Contains(dll).Not()) { continue; }
                 var reference = VSProj.References.Add(Path.Combine(OdaFolder.FullName,dll));
                 reference.CopyLocal = false;
-                logger?.Info($"{dll} updated");
+                Logger?.Info($"{dll} updated");
             }
             return false;
         }

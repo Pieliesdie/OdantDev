@@ -57,22 +57,26 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="CommunityToolkit.Mvvm, Version=8.0.0.0, Culture=neutral, PublicKeyToken=4aff67a105548ee2, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\SourceGenerators\CommunityToolkit.Mvvm.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="odaCore">
-      <HintPath>OdaLibs\odaCore.dll</HintPath>
+      <HintPath>..\Libraries\OdaLibs\odaCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="odaLib">
-      <HintPath>OdaLibs\odaLib.dll</HintPath>
+      <HintPath>..\Libraries\OdaLibs\odaLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="odaShare">
-      <HintPath>OdaLibs\odaShare.dll</HintPath>
+      <HintPath>..\Libraries\OdaLibs\odaShare.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="odaXML">
-      <HintPath>OdaLibs\odaXML.dll</HintPath>
+      <HintPath>..\Libraries\OdaLibs\odaXML.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
@@ -89,11 +93,14 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Community.VisualStudio.Toolkit.16">
+      <Version>16.0.451</Version>
+    </PackageReference>
     <PackageReference Include="MaterialDesignColors">
-      <Version>2.0.7-ci277</Version>
+      <Version>2.0.7</Version>
     </PackageReference>
     <PackageReference Include="MaterialDesignThemes">
-      <Version>4.6.0-ci277</Version>
+      <Version>4.6.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Validation">
       <Version>16.10.35</Version>
@@ -158,6 +165,9 @@
       <Link>Templates\ProjectTemplate\Init.cs</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\Libraries\SourceGenerators\CommunityToolkit.Mvvm.SourceGenerators.dll" />
   </ItemGroup>
   <Import Project="..\SharedOdantDev\SharedOdantDev.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

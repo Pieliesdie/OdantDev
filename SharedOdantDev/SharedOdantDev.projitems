@@ -46,10 +46,4 @@
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\VisualStudioIntegration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\VSErrors.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)OdaLibs\odaCore.dll" />
-    <None Include="$(MSBuildThisFileDirectory)OdaLibs\odaLib.dll" />
-    <None Include="$(MSBuildThisFileDirectory)OdaLibs\odaShare.dll" />
-    <None Include="$(MSBuildThisFileDirectory)OdaLibs\odaXML.dll" />
-  </ItemGroup>
 </Project>

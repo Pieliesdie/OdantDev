@@ -1,4 +1,5 @@
-﻿using oda;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using oda;
 using OdantDev.Model;
 using System;
 using System.Collections.Generic;
@@ -12,28 +13,30 @@ using System.Threading.Tasks;
 
 namespace OdantDev
 {
-    public class ConnectionModel : INotifyPropertyChanged
+    public partial class ConnectionModel : ObservableObject
     {
         public static readonly string[] odaClientLibraries = new string[] { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
         public static readonly string[] odaServerLibraries = new string[] { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
         private readonly ILogger logger;
+
+        [ObservableProperty]
         private List<StructureItemViewModel<StructureItem>> hosts;
+
+        [ObservableProperty]
         private List<DomainDeveloper> developers;
-        private bool autoLogin;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void NotifyPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
-        public List<StructureItemViewModel<StructureItem>> Hosts { get => hosts; set { hosts = value; NotifyPropertyChanged("Hosts"); } }
-        public List<DomainDeveloper> Developers { get => developers; set { developers = value; NotifyPropertyChanged("Developers"); } }
 
         public static List<IntPtr> ServerAssemblies { get; set; }
 
         public static List<Assembly> ClientAssemblies { get; set; }
-        public bool AutoLogin { get => autoLogin; set { autoLogin = value; Connection.AutoLogin = value; NotifyPropertyChanged("AutoLogin"); } }
+
+        [ObservableProperty]
+        private bool autoLogin;
+
+        partial void OnAutoLoginChanged(bool value)
+        {
+            Connection.AutoLogin = value;
+        }
+
         public Connection Connection { get; }
         public AddinSettings AddinSettings { get; }
 
@@ -55,7 +58,7 @@ namespace OdantDev
                 await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 stopWatch = new Stopwatch();
                 stopWatch.Start();
-                Connection.CoreMode = CoreMode.Debug;
+                Connection.CoreMode = CoreMode.AddIn;
                 var connected = await Task.Run(() => Connection.Login());
                 if (connected.Not())
                     return (false, "Can't connect to oda");
@@ -64,10 +67,10 @@ namespace OdantDev
 
                 Hosts = await HostsListAsync();
 
-                Developers = Connection.LocalHost?.Develope?.Domains?.OfType<DomainDeveloper>().ToList();
-                if (Developers.Any() && Connection.LocalHost?.Develope is { } developDomain)
+                Developers = Connection?.LocalHost?.Develope?.Domains?.OfType<DomainDeveloper>()?.ToList();
+                if (Developers.Any() && Connection?.LocalHost?.Develope is { } developDomain)
                 {
-                    Hosts = Hosts.Prepend(new StructureItemViewModel<StructureItem>(developDomain, AddinSettings.IsLazyTreeLoad, logger: logger)).ToList();
+                    Hosts = Hosts?.Prepend(new StructureItemViewModel<StructureItem>(developDomain, AddinSettings.IsLazyTreeLoad, logger: logger))?.ToList();
                 }
                 stopWatch.Stop();
                 TimeSpan ts = stopWatch.Elapsed;
@@ -91,17 +94,17 @@ namespace OdantDev
             return await Task.Run(async () =>
             {
                 var retryCount = 10;
-                while (retryCount-- > 0 && Connection.LocalHost?.OnLine == false)
+                while (retryCount-- > 0 && Connection?.LocalHost?.OnLine == false)
                 {
-                    Connection.LocalHost?.Reset();
+                    Connection?.LocalHost?.Reset();
                     await Task.Delay(1000);
                 }
                 return Connection
-                    .Hosts
-                    .Sorted
-                    .OfType<Host>()
-                    .Select(host => new StructureItemViewModel<StructureItem>(host, AddinSettings.IsLazyTreeLoad, logger: logger))
-                    .ToList();
+                    ?.Hosts
+                    ?.Sorted
+                    ?.OfType<Host>()
+                    ?.Select(host => new StructureItemViewModel<StructureItem>(host, AddinSettings.IsLazyTreeLoad, logger: logger))
+                    ?.ToList();
             });
         }
 

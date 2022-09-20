@@ -1,48 +1,51 @@
-﻿using EnvDTE80;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using EnvDTE80;
 using MaterialDesignColors;
+using MaterialDesignExtensions.Controls;
 using MaterialDesignThemes.Wpf;
 using Microsoft.VisualStudio.PlatformUI;
 using oda;
 using OdantDev.Model;
+using SharedOdanDev.Common;
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reflection;
+using System.Runtime.ExceptionServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using MaterialDesignExtensions.Controls;
-using System.Threading.Tasks;
 using File = System.IO.File;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.ExceptionServices;
-using System.Security;
-using odaCore;
-using SharedOdanDev.Common;
 
 namespace OdantDev
 {
     /// <summary>
     /// Interaction logic for ToolWindow1Control.
     /// </summary>
-    public partial class ToolWindow1Control : UserControl, INotifyPropertyChanged
+    [ObservableObject]
+    public partial class ToolWindow1Control : UserControl
     {
         private bool isOdaLibraryesloaded;
-        private ConnectionModel odaModel;
         private DirectoryInfo OdaFolder;
         private ILogger logger;
-        private DTE2 DTE2 { get; }
         private VisualStudioIntegration odaAddinModel;
         private bool isDarkTheme;
-        private AddinSettings addinSettings;
-        private bool isBusy;
+        private DTE2 DTE2 { get; }
+
+        [ObservableProperty]
         private string status;
 
-        public string Status { get => status; set { status = value; NotifyPropertyChanged("Status"); } }
+        [ObservableProperty]
+        private bool isBusy;
+
+        [ObservableProperty]
+        private AddinSettings addinSettings;
+
+        [ObservableProperty]
+        private ConnectionModel odaModel;
         public bool IsDarkTheme
         {
             get => isDarkTheme;
@@ -54,16 +57,6 @@ namespace OdantDev
                 isDarkTheme = value;
             }
         }
-        public bool IsBusy { get => isBusy; set { isBusy = value; NotifyPropertyChanged("IsBusy"); } }
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void NotifyPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
-        public AddinSettings AddinSettings { get => addinSettings; set { addinSettings = value; NotifyPropertyChanged("AddinSettings"); } }
-        public ConnectionModel OdaModel { get => odaModel; set { odaModel = value; NotifyPropertyChanged("OdaModel"); } }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ToolWindow1Control"/> class.
         /// </summary>
@@ -170,6 +163,7 @@ namespace OdantDev
             }
             odaAddinModel = new VisualStudioIntegration(AddinSettings, DTE2, logger);
             IsBusy = false;
+            AddinSettings.Save();
         }
         private async Task<(bool Success, string Error)> LoadModelAsync()
         {
@@ -283,16 +277,14 @@ namespace OdantDev
                 }
             }
         }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
-        private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
+        private void OpenModuleButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedItem = (OdaTree.SelectedItem as StructureItemViewModel<StructureItem>).Item;
             OpenModule(selectedItem);
         }
-        private async void OpenModule(StructureItem item)
+        private void OpenModule(StructureItem item)
         {
-            await odaAddinModel.OpenModuleAsync(item);
+            odaAddinModel.OpenModule(item);
             AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(
                 AddinSettings.LastProjects.Except(AddinSettings.LastProjects.Where(x => x.FullId == item.FullId)));
             AddinSettings.LastProjects.Add(new AddinSettings.Project(item.Name, item.Description, item.FullId, item.Host.Name, DateTime.Now));

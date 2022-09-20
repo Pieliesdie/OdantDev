@@ -8,6 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
 namespace OdantDev
@@ -79,27 +81,38 @@ namespace OdantDev
                 CopyDirectory(diSourceSubDir, nextTargetSubDir);
             }
         }
-        public static DirectoryInfo Clear(this DirectoryInfo directoryInfo)
+        public static bool TryDeleteDirectory(this DirectoryInfo baseDir, int maxRetries = 10,  int millisecondsDelay = 30)
         {
-            if (directoryInfo == null) { return null; }
-            try
+            if (baseDir == null)
+                throw new ArgumentNullException(nameof(baseDir));
+            if (maxRetries < 1)
+                throw new ArgumentOutOfRangeException(nameof(maxRetries));
+            if (millisecondsDelay < 1)
+                throw new ArgumentOutOfRangeException(nameof(millisecondsDelay));
+
+            for (int i = 0; i < maxRetries; ++i)
             {
-                foreach (FileInfo file in directoryInfo.EnumerateFiles())
+                try
                 {
-                    file.Delete();
+                    if (baseDir.Exists)
+                    {
+                        baseDir.Delete(true);
+                    }
+                    return true;
                 }
-                foreach (DirectoryInfo dir in directoryInfo.EnumerateDirectories())
+                catch (IOException)
                 {
-                    dir.Clear();
-                    dir.Delete();
+                    Thread.Sleep(millisecondsDelay);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    Thread.Sleep(millisecondsDelay);
                 }
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            return directoryInfo;
+
+            return false;
         }
+
         public static BitmapImage ConvertToBitmapImage(this Bitmap src)
         {
             if (src == null) return null;
