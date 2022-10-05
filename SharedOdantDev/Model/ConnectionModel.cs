@@ -67,7 +67,7 @@ namespace OdantDev
 
                 Hosts = await HostsListAsync();
 
-                Developers = Connection?.LocalHost?.Develope?.Domains?.OfType<DomainDeveloper>()?.ToList();
+                Developers = await DevelopListAsync();
                 if (Developers.Any() && Connection?.LocalHost?.Develope is { } developDomain)
                 {
                     Hosts = Hosts?.Prepend(new StructureItemViewModel<StructureItem>(developDomain, AddinSettings.IsLazyTreeLoad, logger: logger))?.ToList();
@@ -87,6 +87,19 @@ namespace OdantDev
             {
                 stopWatch?.Stop();
             }
+        }
+        private async Task<List<DomainDeveloper>> DevelopListAsync()
+        {
+            return await Task.Run(async () =>
+            {
+                var developList = Developers = Connection?.LocalHost?.Develope?.Domains?.OfType<DomainDeveloper>()?.ToList();
+                var retryCount = 5;
+                while (retryCount-- > 0 && developList is null)
+                {
+                    await Task.Delay(1000);
+                }
+                return developList ?? new();
+            });
         }
 
         private async Task<List<StructureItemViewModel<StructureItem>>> HostsListAsync()
