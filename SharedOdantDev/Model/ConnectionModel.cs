@@ -47,8 +47,6 @@ namespace OdantDev
             this.logger = logger;
         }
 
-        public static Bitness Platform => IntPtr.Size == 4 ? Bitness.x86 : Bitness.x64;
-
         [HandleProcessCorruptedStateExceptions]
         public async Task<(bool Success, string Error)> LoadAsync()
         {
@@ -138,7 +136,7 @@ namespace OdantDev
         {
             try
             {
-                ServerAssemblies = Extension.LoadServerLibraries(OdaFolder.FullName, Platform, odaServerLibraries);
+                ServerAssemblies = Extension.LoadServerLibraries(OdaFolder.FullName, Extension.Platform , odaServerLibraries);
                 ClientAssemblies = Extension.LoadClientLibraries(OdaFolder.FullName, odaClientLibraries);
                 return (true, null);
             }

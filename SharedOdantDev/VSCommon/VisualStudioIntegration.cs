@@ -38,7 +38,7 @@ namespace OdantDev.Model
                 EnvDTE.Solution.Close();
             }
             SolutionEvents = (DTE.Events as Events2).SolutionEvents;
-            SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;            
+            SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;
             SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
 
             BuildEvents = (DTE.Events as Events2).BuildEvents;
@@ -260,7 +260,7 @@ namespace OdantDev.Model
                 {
                     EnvDTE.Solution.Create(TempFiles.TempPath.ToUpper(), item.Host.Name);
                 }
-               
+
                 project = EnvDTE.Solution.AddFromFile(csProj.FullName);
                 InitProject(project, item);
                 UpdateAssemblyReferences(project, AddinSettings.OdaLibraries);
@@ -281,7 +281,7 @@ namespace OdantDev.Model
             }
             return true;
         }
-        
+
         public (FileInfo csProj, Dir remoteDir, DirectoryInfo localDir) DownloadModule(StructureItem item)
         {
             var localDir = item.Dir.ServerToFolder();
@@ -291,7 +291,7 @@ namespace OdantDev.Model
                 ?.OrderByDescending(x => x.LastWriteTime)
                 .FirstOrDefault(), item.Dir, localDir);
         }
-        
+
         private void InitProject(Project project, StructureItem sourceItem)
         {
             if (project == null) { throw new NullReferenceException(nameof(project)); }
@@ -299,7 +299,8 @@ namespace OdantDev.Model
             project.Name = $"{sourceItem.Name}-{sourceItem.Id}";
 
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartAction").Value = prjStartAction.prjStartActionProgram;
-            project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartProgram").Value = Path.Combine(OdaFolder.FullName, "oda.wrapper32.exe");
+            var startProgram = Extension.Platform == Bitness.x64 ? "ODA.exe" : "oda.wrapper32.exe";
+            project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartProgram").Value = Path.Combine(OdaFolder.FullName, startProgram);
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartArguments").Value = "debug";
             project.Properties.Item("AssemblyName").Value = project.Name;
             project.Properties.Item("ReferencePath").Value = OdaFolder.FullName;
@@ -326,7 +327,7 @@ namespace OdantDev.Model
             if (assemblyInfo.IsOpen.Not()) { assemblyInfo.Open(); }
             assemblyInfo.Save();
         }
-        
+
         private bool UpdateAssemblyReferences(Project project, IEnumerable<string> references)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
@@ -335,7 +336,7 @@ namespace OdantDev.Model
             foreach (Reference reference in VSProj.References)
             {
                 var assemblyName = new AssemblyName(GetFullName(reference));
-                if (references.Contains($"{assemblyName.Name}.dll") 
+                if (references.Contains($"{assemblyName.Name}.dll")
                     && (File.Exists(reference.Path).Not() || AddinSettings.ForceUpdateReferences))
                 {
                     reference.Remove();
@@ -344,8 +345,8 @@ namespace OdantDev.Model
             }
             foreach (var dll in references)
             {
-                if(deletedDlls.Contains(dll).Not()) { continue; }
-                var reference = VSProj.References.Add(Path.Combine(OdaFolder.FullName,dll));
+                if (deletedDlls.Contains(dll).Not()) { continue; }
+                var reference = VSProj.References.Add(Path.Combine(OdaFolder.FullName, dll));
                 reference.CopyLocal = false;
                 Logger?.Info($"{dll} updated");
             }

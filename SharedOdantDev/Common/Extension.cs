@@ -16,6 +16,8 @@ namespace OdantDev
 {
     public static class Extension
     {
+        public static Bitness Platform => IntPtr.Size == 4 ? Bitness.x86 : Bitness.x64;
+
         public static DirectoryInfo VSIXPath = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory;
         public static string Or(this string text, string alternative)
         {
