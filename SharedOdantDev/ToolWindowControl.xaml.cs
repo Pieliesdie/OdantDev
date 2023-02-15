@@ -70,12 +70,12 @@ namespace OdantDev
             InitializeComponent();
             logger = new PopupController(this.MessageContainer);
             VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
-            ThemeCheckBox.IsChecked = IsVisualStudioDark();
+            ThemeCheckBox.IsChecked = IsVisualStudioDarkTheme();
             this.DataContext = this;
         }
         private void VSColorTheme_ThemeChanged(Microsoft.VisualStudio.PlatformUI.ThemeChangedEventArgs e)
         {
-            ThemeCheckBox.IsChecked = IsVisualStudioDark();
+            ThemeCheckBox.IsChecked = IsVisualStudioDarkTheme();
         }
 
         [HandleProcessCorruptedStateExceptions]
@@ -115,7 +115,7 @@ namespace OdantDev
         {
             return ConnectionModel.odaClientLibraries.ToList().TrueForAll(x => File.Exists(Path.Combine(folder, x)));
         }
-        private bool IsVisualStudioDark()
+        private bool IsVisualStudioDarkTheme()
         {
             var defaultBackground = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowBackgroundColorKey);
             var isDarkTheme = (384 - defaultBackground.R - defaultBackground.G - defaultBackground.B) > 0 ? true : false;
@@ -277,23 +277,26 @@ namespace OdantDev
                 }
             }
         }
-        private void OpenModuleButton_Click(object sender, RoutedEventArgs e)
+        private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedItem = (OdaTree.SelectedItem as StructureItemViewModel<StructureItem>).Item;
-            OpenModule(selectedItem);
+            await OpenModule(selectedItem);
         }
-        private void OpenModule(StructureItem item)
+        private async Task OpenModule(StructureItem item)
         {
-            odaAddinModel.OpenModule(item);
-            AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(
-                AddinSettings.LastProjects.Except(AddinSettings.LastProjects.Where(x => x.FullId == item.FullId)));
-            AddinSettings.LastProjects.Add(new AddinSettings.Project(item.Name, item.Description, item.FullId, item.Host.Name, DateTime.Now));
-            AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(AddinSettings.LastProjects.OrderByDescending(x => x.OpenTime).Take(15)
-                ?? new List<AddinSettings.Project>());
-            if (AddinSettings.Save().Not())
+            await odaAddinModel.OpenModule(item);
+            await Task.Run(() =>
             {
-                logger.Info("Error while saving settings");
-            }
+                AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(
+                    AddinSettings.LastProjects.Except(AddinSettings.LastProjects.Where(x => x.FullId == item.FullId)));
+                AddinSettings.LastProjects.Add(new AddinSettings.Project(item.Name, item.Description, item.FullId, item.Host.Name, DateTime.Now));
+                AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(AddinSettings.LastProjects.OrderByDescending(x => x.OpenTime).Take(15)
+                    ?? new List<AddinSettings.Project>());
+                if (AddinSettings.Save().Not())
+                {
+                    logger.Info("Error while saving settings");
+                }
+            });
         }
         private void CheckBox_Checked(object sender, RoutedEventArgs e)
         {
@@ -355,32 +358,37 @@ namespace OdantDev
 
         private void DeleteRecentlyProject_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as Button)?.Tag is AddinSettings.Project project)
+            if ((sender as Button)?.Tag is not AddinSettings.Project project)
             {
-                AddinSettings.LastProjects.Remove(project);
-                if (AddinSettings.Save().Not())
-                {
-                    logger.Info("Error while saving settings");
-                }
+                return;
+            }
+            AddinSettings.LastProjects.Remove(project);
+            if (AddinSettings.Save().Not())
+            {
+                logger.Info("Error while saving settings");
             }
         }
-        private void ProjectCard_Click(object sender, RoutedEventArgs e)
+        private async void ProjectCard_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as Button)?.Tag is AddinSettings.Project project)
+            if ((sender as Button)?.Tag is not AddinSettings.Project project)
+            {
+                return;
+            }
+            await Task.Run(async () =>
             {
                 if (string.IsNullOrWhiteSpace(project.FullId))
                 {
                     logger?.Info("Can't find project's ID");
                     return;
                 }
-                var selectedItem = OdaModel?.Connection?.FindItem(project.FullId) as StructureItem;
+                var selectedItem = await Task.Run(() => OdaModel?.Connection?.FindItem(project.FullId) as StructureItem);
                 if (selectedItem == null)
                 {
                     logger?.Info("Can't find this project");
                     return;
                 }
-                OpenModule(selectedItem);
-            }
+                await OpenModule(selectedItem);
+            });
         }
         private void DialogAddLibraryButton_Click(object sender, RoutedEventArgs e)
         {

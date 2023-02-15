@@ -396,7 +396,7 @@
                                                                 HorizontalAlignment="Center"
                                                                 Click="ProjectCard_Click"
                                                                 Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                Content="Yes"
+                                                                Content="Yes"                                                                
                                                                 DockPanel.Dock="Left"
                                                                 IsDefault="True"
                                                                 Tag="{Binding}" />

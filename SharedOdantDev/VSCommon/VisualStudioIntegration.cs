@@ -1,8 +1,12 @@
 ﻿using EnvDTE;
+
 using EnvDTE80;
+
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
+
 using oda;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,7 +14,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+
 using VSLangProj;
+
 using File = System.IO.File;
 using Task = System.Threading.Tasks.Task;
 
@@ -19,8 +25,8 @@ namespace OdantDev.Model
     public partial class VisualStudioIntegration
     {
         #region Global Variables
-        private BuildEvents BuildEvents { get; }
-        private SolutionEvents SolutionEvents { get; }
+        private BuildEvents BuildEvents { get; set; }
+        private SolutionEvents SolutionEvents { get; set; }
         private DTE2 EnvDTE { get; }
         private Dictionary<string, BuildInfo> LoadedModules { get; } = new Dictionary<string, BuildInfo>();
         private AddinSettings AddinSettings { get; }
@@ -29,7 +35,6 @@ namespace OdantDev.Model
         #endregion
         public VisualStudioIntegration(AddinSettings addinSettings, DTE2 DTE, ILogger logger = null)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
             this.Logger = logger;
             this.AddinSettings = addinSettings;
             EnvDTE = DTE ?? throw new NullReferenceException("Can't get EnvDTE from visual studio");
@@ -37,17 +42,33 @@ namespace OdantDev.Model
             {
                 EnvDTE.Solution.Close();
             }
-            SolutionEvents = (DTE.Events as Events2).SolutionEvents;
+            SubscribeToStudioEvents();
+        }
+
+        #region Visual studio events
+        private void SubscribeToStudioEvents()
+        {
+            SolutionEvents = (EnvDTE.Events as Events2).SolutionEvents;
             SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;
             SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
 
-            BuildEvents = (DTE.Events as Events2).BuildEvents;
+            BuildEvents = (EnvDTE.Events as Events2).BuildEvents;
             BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
             BuildEvents.OnBuildDone += BuildEvents_OnBuildDone;
             BuildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
         }
 
-        #region Visual studio events
+        private void UnsubscribeToStudioEvents()
+        {
+            SolutionEvents.ProjectRemoved -= SolutionEvents_ProjectRemoved;
+            SolutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
+            SolutionEvents = null;
+            BuildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
+            BuildEvents.OnBuildDone -= BuildEvents_OnBuildDone;
+            BuildEvents.OnBuildProjConfigDone -= BuildEvents_OnBuildProjConfigDone;
+            BuildEvents = null;
+        }
+
         // Если закрыть Solution и потом открыть модуль он попадает в коллекцию, после этого открывается Solution и событие очищает коллекцию модулей
         // добавил эвент SolutionEvents_AfterClosing, думаю в таком случае будет правильнее там очищать
         private void SolutionEvents_AfterClosing()
@@ -57,7 +78,6 @@ namespace OdantDev.Model
 
         private void SolutionEvents_ProjectRemoved(Project Project)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
             var guid = GetProjectGuid(Project);
             LoadedModules[guid].Dispose();
             LoadedModules.Remove(guid);
@@ -65,7 +85,6 @@ namespace OdantDev.Model
 
         private void BuildEvents_OnBuildProjConfigDone(string Project, string ProjectConfig, string Platform, string SolutionConfig, bool Success)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
             Project project = EnvDTE.Solution.Item(Project);
             LoadedModules[GetProjectGuid(project)].isBuildSuccess = Success;
             if (Success.Not())
@@ -108,7 +127,6 @@ namespace OdantDev.Model
         {
             try
             {
-                ThreadHelper.ThrowIfNotOnUIThread();
                 var currentDirectory = new FileInfo(project.FullName).Directory;
                 var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs")
                     ?? throw new NullReferenceException($"Missing AssemblyInfo.cs in {project.Name}");
@@ -183,7 +201,6 @@ namespace OdantDev.Model
         {
             try
             {
-                ThreadHelper.ThrowIfNotOnUIThread();
                 var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs")
                     ?? throw new NullReferenceException($"Missing AssemblyInfo.cs in {project.Name}");
                 var version = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>().FirstOrDefault(x => x.Name == "AssemblyVersion");
@@ -213,7 +230,6 @@ namespace OdantDev.Model
 
         private string GetProjectGuid(Project project)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
             //same guid in different projects :(
             /* var solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
             IVsHierarchy hierarchy;
@@ -230,7 +246,6 @@ namespace OdantDev.Model
 
         private void SetAttributeToProjectItem(IDictionary<string, CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
             codeAttributes.TryGetValue(name, out var attribute);
             if (attribute == null)
             {
@@ -246,8 +261,12 @@ namespace OdantDev.Model
 
         #region Download and init  logic for Module
 
-        public bool OpenModule(StructureItem item)
+        public async Task<bool> OpenModule(StructureItem item)
         {
+            if (BuildEvents is null)
+            {
+                SubscribeToStudioEvents();
+            }
             Project project = null;
             VSErrors.Clear();
             try
@@ -255,7 +274,6 @@ namespace OdantDev.Model
                 _ = item ?? throw new NullReferenceException("Item was null");
                 var module = DownloadModule(item);
                 var csProj = module.csProj ?? throw new DirectoryNotFoundException("Module csproj file not found");
-                ThreadHelper.ThrowIfNotOnUIThread();
                 if (EnvDTE.Solution.IsOpen.Not())
                 {
                     EnvDTE.Solution.Create(TempFiles.TempPath.ToUpper(), item.Host.Name);
@@ -276,7 +294,7 @@ namespace OdantDev.Model
                 {
                     EnvDTE.Solution.Remove(project);
                 }
-                EnvDTE.ShowError($"Error while load project from item {item.Name}: {ex.Message}");
+                await EnvDTE.ShowError($"Error while load project from item {item.Name}: {ex.Message}");
                 return false;
             }
             return true;
@@ -295,7 +313,6 @@ namespace OdantDev.Model
         private void InitProject(Project project, StructureItem sourceItem)
         {
             if (project == null) { throw new NullReferenceException(nameof(project)); }
-            ThreadHelper.ThrowIfNotOnUIThread();
             project.Name = $"{sourceItem.Name}-{sourceItem.Id}";
 
             project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartAction").Value = prjStartAction.prjStartActionProgram;
@@ -330,7 +347,6 @@ namespace OdantDev.Model
 
         private bool UpdateAssemblyReferences(Project project, IEnumerable<string> references)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
             var VSProj = project.Object as VSProject;
             List<string> deletedDlls = new();
             foreach (Reference reference in VSProj.References)
