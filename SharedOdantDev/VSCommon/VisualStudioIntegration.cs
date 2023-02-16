@@ -74,6 +74,8 @@ namespace OdantDev.Model
         {
             LoadedModules.Clear();
             UnsubscribeToStudioEvents();
+            oda.OdaOverride.INI.DebugINI.Clear();
+            oda.OdaOverride.INI.DebugINI.Save();
         }
 
         private void SolutionEvents_ProjectRemoved(Project Project)
@@ -283,7 +285,11 @@ namespace OdantDev.Model
                 InitProject(project, item);
                 UpdateAssemblyReferences(project, AddinSettings.OdaLibraries);
                 UpdateAssemblyReferences(project, AddinSettings.UpdateReferenceLibraries);
-                Common.DebugINI.Write("DEBUG", item.FullId, true);
+                oda.OdaOverride.INI.DebugINI.Write("DEBUG", item.FullId, true);
+                if (!oda.OdaOverride.INI.DebugINI.Save())
+                {
+                    throw new Exception("Can't save debug INI");
+                }
                 IncreaseVersion(project);
                 project.Save();
                 LoadedModules.Add(GetProjectGuid(project), new BuildInfo(project.UniqueName, module.remoteDir, module.localDir));

@@ -37,6 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Model\PathInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\PopupController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\StructureItemViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)odaoverride\INI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ToolWindowControl.xaml.cs">
       <DependentUpon>ToolWindowControl.xaml</DependentUpon>
     </Compile>
@@ -45,5 +46,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\ToolWindowCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\VisualStudioIntegration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\VSErrors.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)OdaOverride\" />
   </ItemGroup>
 </Project>

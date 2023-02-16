@@ -20,11 +20,19 @@ namespace OdantDev.Model
                     Clipboard.Clear();
                     Clipboard.SetText(s);
                 });
-            snackbar?.MessageQueue.Enqueue(message, "Copy", copyAction, message);
+            var enqueueAction = new Action(() => snackbar.MessageQueue.Enqueue(message, "Copy", copyAction, message));
+            if (snackbar.Dispatcher.CheckAccess())
+            {
+                enqueueAction.Invoke();
+            }
+            else
+            {
+                snackbar?.Dispatcher.Invoke(enqueueAction);
+            }          
         }
         public PopupController(Snackbar snackbar)
         {
-            this.snackbar = snackbar;
+            this.snackbar = snackbar ?? throw new NullReferenceException(nameof(snackbar));
         }
     }
 }

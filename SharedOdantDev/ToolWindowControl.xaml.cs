@@ -238,7 +238,7 @@ namespace OdantDev
                     else
                     {
                         logger?.Info("Module created");
-                        OpenModule(cls);
+                        await OpenModule(cls);
                     }
                 }
                 catch (Exception ex)
