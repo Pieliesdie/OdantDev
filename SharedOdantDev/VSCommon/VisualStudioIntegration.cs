@@ -42,7 +42,6 @@ namespace OdantDev.Model
             {
                 EnvDTE.Solution.Close();
             }
-            SubscribeToStudioEvents();
         }
 
         #region Visual studio events
