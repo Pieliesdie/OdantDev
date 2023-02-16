@@ -74,6 +74,7 @@ namespace OdantDev.Model
         private void SolutionEvents_AfterClosing()
         {
             LoadedModules.Clear();
+            UnsubscribeToStudioEvents();
         }
 
         private void SolutionEvents_ProjectRemoved(Project Project)
