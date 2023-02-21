@@ -27,16 +27,12 @@ public class DevHelpers
 
     public static async Task DownloadAndCopyFramework4_5Async(ILogger logger = null)
     {
-        logger?.Info("Start loading .Net 4.5");
         await DownloadAndCopyFrameworkGenericAsync("net45", "v4.5", "1.0.2", logger);
-        logger?.Info(".Net 4.5 loaded");
     }
 
     public static async Task DownloadAndCopyFramework4_0Async(ILogger logger = null)
     {
-        logger?.Info("Start loading .Net 4.0");
         await DownloadAndCopyFrameworkGenericAsync("net40", "v4.0", "1.0.2", logger);
-        logger?.Info(".Net 4.0 loaded");
     }
 
     private static async Task RemoveExistsFolderWithAdminRights(string path)
@@ -63,6 +59,7 @@ public class DevHelpers
     }
     public static async Task DownloadAndCopyFrameworkGenericAsync(string netVersion, string folder, string nugetVersion, ILogger logger = null)
     {
+        logger?.Info($"Start loading .Net {folder}");
         var url = $"https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.{netVersion}/{nugetVersion}";
         var netFolder = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\" + folder;
         var netFolder2 = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\" + folder;
@@ -89,10 +86,8 @@ public class DevHelpers
                 await RemoveExistsFolderWithAdminRights(netFolder2);
             }
             await CopyFolderWithAdminRights(tempExtractNetFolder, netFolder2);
-        }
-        catch (Exception ex)
-        {
-            throw;
+            logger?.Info($".Net {folder} loaded");
+            logger?.Info($"Please reopen Visual Studio");
         }
         finally
         {
