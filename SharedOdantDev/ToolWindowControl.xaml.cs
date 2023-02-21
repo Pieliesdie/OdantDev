@@ -417,15 +417,39 @@ namespace OdantDev
             AddinSettings.OdaFolders.Add(new PathInfo(DialogAddOdaLibraryName.Text, DialogAddOdaLibrary.Text));
         }
 
-        private async void DownloadNet_Click(object sender, RoutedEventArgs e)
+        private async void DownloadNet4_0_Click(object sender, RoutedEventArgs e)
         {
+            var button = sender as Button;
             try
             {
-                await DevHelpers.DownloadAndCopyFramework4_0And4_5Async(this.logger);
+                button.IsEnabled = false;
+                await DevHelpers.DownloadAndCopyFramework4_0Async(this.logger);
             }
             catch(Exception ex)
             {
                 logger.Info(ex.Message);
+            }
+            finally
+            {
+                button.IsEnabled = true;
+            }
+        }
+
+        private async void DownloadNet4_5_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            try
+            {
+                button.IsEnabled = false;
+                await DevHelpers.DownloadAndCopyFramework4_5Async(this.logger);
+            }
+            catch (Exception ex)
+            {
+                logger.Info(ex.Message);
+            }
+            finally
+            {
+                button.IsEnabled = true;
             }
         }
         #endregion

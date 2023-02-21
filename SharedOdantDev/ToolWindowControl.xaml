@@ -812,25 +812,26 @@
                                     </Grid>
                                 </Border>
                             </materialDesign:DialogHost>
-                            <GroupBox Grid.Row="6"
-                                      Margin="0,10,0,0"
-                                      materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+                            <Expander Grid.Row="6"
+                                      Margin="0,10,0,0"     
+                                      materialDesign:ColorZoneAssist.Mode="PrimaryMid"                                        
                                       materialDesign:ShadowAssist.ShadowDepth="Depth3"
+                                      BorderBrush="{DynamicResource PrimaryHueMidBrush}"
                                       BorderThickness="0.8"
                                       FontSize="14"
-                                      Header="Develop helpers"
                                       SnapsToDevicePixels="True"
                                       ToolTip="Some useful things"
                                       ToolTipService.Placement="Mouse">
+                                <Expander.Header>
+                                    <TextBlock Text="Develop helpers" />
+                                </Expander.Header>
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="auto" />
                                         <RowDefinition Height="auto" />
                                         <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
                                     </Grid.RowDefinitions>
-                                    <materialDesign:ColorZone Grid.Row="0"
-                                                              Effect="{DynamicResource MaterialDesignShadowDepth3}"
-                                                              Mode="PrimaryMid" />
                                     <Button Name="RepairToolboxButton" Grid.Row="1"
                                             Margin="5"
                                             materialDesign:ColorZoneAssist.Mode="PrimaryMid"
@@ -838,15 +839,22 @@
                                             Content="Repair Toolbox"
                                             FontWeight="Regular"
                                             ToolTip="Add DevExpress controls to toolbox" />
-                                    <Button Name="DownloadNet" Grid.Row="2"
+                                    <Button Name="DownloadNet4_0" Grid.Row="2"
                                             Margin="5"
                                             materialDesign:ColorZoneAssist.Mode="PrimaryMid"
-                                            Click="DownloadNet_Click"
-                                            Content="Install .Net Framework 4.0 &amp; 4.5"
+                                            Click="DownloadNet4_0_Click"
+                                            Content="Install .Net Framework 4.0"
+                                            FontWeight="Regular"
+                                            ToolTip="If you need to open old projects" />
+                                    <Button Name="DownloadNet4_5" Grid.Row="3"
+                                            Margin="5"
+                                            materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+                                            Click="DownloadNet4_5_Click"
+                                            Content="Install .Net Framework 4.5"
                                             FontWeight="Regular"
                                             ToolTip="If you need to open old projects" />
                                 </Grid>
-                            </GroupBox>
+                            </Expander>
                             <Button Name="SaveSettingsButton" Grid.Row="7"
                                     Margin="0,20,0,0"
                                     materialDesign:ColorZoneAssist.Mode="PrimaryMid"
