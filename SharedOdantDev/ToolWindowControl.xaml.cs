@@ -227,11 +227,11 @@ namespace OdantDev
                 await OdaModel.InitReposAsync();
                 IsBusy = false;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ShowException(ex.Message);
             }
-                       
+
         }
 
         private void CreateRepoButton_Click(object sender, RoutedEventArgs e)
@@ -283,7 +283,7 @@ namespace OdantDev
             var selectedItem = RepoTree?.SelectedItem as RepoBaseViewModel;
             if (selectedItem?.Item is ProjectItem project)
             {
-                _ = InitRepositoryAsync(project.Object as GitLabApiClient.Models.Projects.Responses.Project);                
+                _ = InitRepositoryAsync(project.Object as GitLabApiClient.Models.Projects.Responses.Project);
             }
         }
 
@@ -291,7 +291,7 @@ namespace OdantDev
         {
             GitLabApiClient.Models.Files.Responses.File file = await GitClient.FindTopOclFileAsync(project);
             if (file == null)
-            {                
+            {
                 logger?.Info("Classes in repository not found.");
                 return;
             }
@@ -300,8 +300,8 @@ namespace OdantDev
             if (xmlDoc.Root != null)
             {
                 string cid = xmlDoc.Root.GetAttribute("ClassId");
-                string type = xmlDoc.Root.GetAttribute("Type");                
-                
+                string type = xmlDoc.Root.GetAttribute("Type");
+
                 Domain domain = odaModel.Connection.FindDomain(odaModel.AddinSettings.SelectedDevelopeDomain);
                 if (domain != null)
                 {
@@ -309,12 +309,12 @@ namespace OdantDev
                     if (item != null)
                     {
                         await Community.VisualStudio.Toolkit.VS.MessageBox.ShowAsync("Module already exists in developer domain.", "", OLEMSGICON.OLEMSGICON_WARNING, OLEMSGBUTTON.OLEMSGBUTTON_OK);
-                        logger?.Info("Module already exists in developer domain.");                        
+                        logger?.Info("Module already exists in developer domain.");
                     }
                     else
                     {
                         try
-                        {                        
+                        {
                             string rootDomainFolderPath = TempFiles.TempPath;
                             string modulePath = GitClient.CloneProject(project, rootDomainFolderPath, type == "MODULE");
                             var rootDir = new DirectoryInfo(modulePath);
@@ -332,8 +332,8 @@ namespace OdantDev
                         OpenModuleDialog.DataContext = item;
                         OpenModuleDialog.IsOpen = true;
                     }
-                }                
-            }            
+                }
+            }
         }
 
         private async void DialogOpenModule_OnClick(object sender, RoutedEventArgs e)
@@ -346,50 +346,64 @@ namespace OdantDev
                 switch (item.ItemType)
                 {
                     case ItemType.Class:
-                    {
-                        await OpenModule(item);
-                        break;
-                    }
-                    case ItemType.Module:
-                    {
-                        foreach (Class child in item.getChilds(ItemType.Class, Deep.Near))
                         {
-                            await OpenModule(child);
+                            await OpenModule(item);
+                            break;
                         }
-                        break;
-                    }
+                    case ItemType.Module:
+                        {
+                            foreach (Class child in item.getChilds(ItemType.Class, Deep.Near))
+                            {
+                                await OpenModule(child);
+                            }
+                            break;
+                        }
                 }
             }
         }
 
-        private void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
+        private async void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
         {
-            if (((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is Class cls))
+            if ((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is not Class cls)
             {
-                if (DeveloperCb.SelectedItem is DomainDeveloper domainDeveloper)
+                logger?.Info("Selected item is not a class");
+                return;
+            }
+            if (DeveloperCb.SelectedItem is not DomainDeveloper domainDeveloper)
+            {
+                logger?.Info("Please select developer domain on settings tab");
+                return;
+            }
+
+            try
+            {
+                logger?.Info("Start downloading module");
+                var createdClass = await Task.Run(() =>
                 {
-                    try
-                    {
-                        Domain createdDomain = domainDeveloper.CreateDomain(cls.Domain.Name, "MODULE");
-                        createdDomain.Save();
-                        Class createdClass = createdDomain.CreateClass(cls.Name);
-                        createdClass.Type = cls.Type;
-                        createdClass.Save();
-                        cls.Dir.CopyTo(createdClass.Dir);
-                        createdClass.Dir.Save();
-                        createdClass.ReloadClassFromServer();
-                        logger?.Info($"New module downloaded to {createdClass.FullId}");
-                    }
-                    catch (Exception ex)
-                    {
-                        logger?.Info(ex.ToString());
-                    }
-                }
-                else
+                    Domain createdDomain = domainDeveloper.CreateDomain(cls.Domain.Name, "MODULE");
+                    createdDomain.Save();
+                    Class createdClass = createdDomain.CreateClass(cls.Name);
+                    createdClass.Type = cls.Type;
+                    createdClass.Save();
+                    cls.Dir.CopyTo(createdClass.Dir);
+                    createdClass.Dir.Save();
+                    createdClass.ReloadClassFromServer();
+                    createdClass.SetPrivateFieldValue("_has_module", StateBool.True);
+                    logger?.Info($"New module downloaded to {createdClass.FullId}");
+                    return createdClass;
+                });
+                if (createdClass is null)
                 {
-                    logger?.Info("Please select developer domain on settings tab");
+                    logger?.Info("Can't create class in developer domain");
+                    return;
                 }
-            }        
+                logger?.Info("Module created");
+                await OpenModule(createdClass);
+            }
+            catch (Exception ex)
+            {
+                logger?.Info(ex.ToString());
+            }
         }
         private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
         {
@@ -404,19 +418,19 @@ namespace OdantDev
             switch (structureItem.ItemType)
             {
                 case ItemType.Class:
-                {
-                    await OpenModule(structureItem);
-                    break;
-                }
-                case ItemType.Module:
-                {
-                    foreach (StructureItemViewModel<StructureItem> child in selectedItem.Children)
                     {
-                        if (child.Item is Class { HasModule: true })
-                            await OpenModule(child.Item);
+                        await OpenModule(structureItem);
+                        break;
                     }
-                    break;
-                }
+                case ItemType.Module:
+                    {
+                        foreach (StructureItemViewModel<StructureItem> child in selectedItem.Children)
+                        {
+                            if (child.Item is Class { HasModule: true })
+                                await OpenModule(child.Item);
+                        }
+                        break;
+                    }
             }
         }
 
@@ -465,7 +479,7 @@ namespace OdantDev
                     }
                 }
                 else
-                    CommonButtons.Visibility = Visibility.Collapsed;                
+                    CommonButtons.Visibility = Visibility.Collapsed;
             }
         }
 

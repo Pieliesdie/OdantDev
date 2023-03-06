@@ -257,7 +257,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
         await SetIconAsync();
         OnPropertyChanged("Name");
         OnPropertyChanged("Item");
-        OnPropertyChanged("Icon");
+        OnPropertyChanged("HasModule");
     }
 
     [RelayCommand]

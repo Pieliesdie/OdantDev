@@ -80,8 +80,11 @@ public partial class VisualStudioIntegration
     private void SolutionEvents_ProjectRemoved(Project Project)
     {
         var guid = GetProjectGuid(Project);
-        LoadedModules[guid].Dispose();
-        LoadedModules.Remove(guid);
+        if (LoadedModules.TryGetValue(guid, out var loadedModules))
+        {
+            loadedModules.Dispose();
+            LoadedModules.Remove(guid);
+        }
     }
 
     private void BuildEvents_OnBuildProjConfigDone(string Project, string ProjectConfig, string Platform, string SolutionConfig, bool Success)
