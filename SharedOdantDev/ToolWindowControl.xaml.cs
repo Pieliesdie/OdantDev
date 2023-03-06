@@ -6,11 +6,11 @@ using MaterialDesignThemes.Wpf;
 using Microsoft.VisualStudio.PlatformUI;
 using oda;
 using OdantDev.Model;
-using SharedOdanDev.Common;
+using SharedOdantDev.Common;
+using SharedOdantDev.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
@@ -18,7 +18,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Microsoft.VisualStudio.Shell.Interop;
 using File = System.IO.File;
+using SharedOdanDev.OdaOverride;
 
 namespace OdantDev
 {
@@ -42,6 +44,9 @@ namespace OdantDev
         private bool isBusy;
 
         [ObservableProperty]
+        private List<RepoBaseViewModel> _groups;
+
+        [ObservableProperty]
         private AddinSettings addinSettings;
 
         [ObservableProperty]
@@ -63,19 +68,19 @@ namespace OdantDev
         public ToolWindow1Control(DTE2 dTE2)
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            this.DTE2 = dTE2;
+            DTE2 = dTE2;
             var AddinSettingsFolder = Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ODA", "AddinSettings"));
             AddinSettings = AddinSettings.Create(AddinSettingsFolder);
             InitializeMaterialDesign();
             InitializeComponent();
             logger = new PopupController(this.MessageContainer);
             VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
-            ThemeCheckBox.IsChecked = IsVisualStudioDarkTheme();
+            ThemeCheckBox.IsChecked = IsVisualStudioDark();
             this.DataContext = this;
         }
         private void VSColorTheme_ThemeChanged(Microsoft.VisualStudio.PlatformUI.ThemeChangedEventArgs e)
         {
-            ThemeCheckBox.IsChecked = IsVisualStudioDarkTheme();
+            ThemeCheckBox.IsChecked = IsVisualStudioDark();
         }
 
         [HandleProcessCorruptedStateExceptions]
@@ -115,7 +120,7 @@ namespace OdantDev
         {
             return ConnectionModel.odaClientLibraries.ToList().TrueForAll(x => File.Exists(Path.Combine(folder, x)));
         }
-        private bool IsVisualStudioDarkTheme()
+        private bool IsVisualStudioDark()
         {
             var defaultBackground = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowBackgroundColorKey);
             var isDarkTheme = (384 - defaultBackground.R - defaultBackground.G - defaultBackground.B) > 0 ? true : false;
@@ -169,6 +174,7 @@ namespace OdantDev
         {
             OdaModel = new ConnectionModel(Common.Connection, AddinSettings, logger);
             var GetDataResult = await OdaModel.LoadAsync();
+            await OdaModel.InitReposAsync();
             if (GetDataResult.Success)
             {
                 spConnect.Visibility = Visibility.Collapsed;
@@ -211,6 +217,29 @@ namespace OdantDev
                 return;
             }
         }
+
+        private async void RefreshRepoButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                IsBusy = true;
+                Status = "Geting data from server...";
+                await OdaModel.InitReposAsync();
+                IsBusy = false;
+            }
+            catch(Exception ex)
+            {
+                ShowException(ex.Message);
+            }
+                       
+        }
+
+        private void CreateRepoButton_Click(object sender, RoutedEventArgs e)
+        {
+            var item = new RootItem(GitClient.Client.HostUrl);
+            Groups = new List<RepoBaseViewModel> { new RepoRootViewModel(item, true, false, logger) };
+        }
+
         private async void CreateModuleButton_Click(object sender, RoutedEventArgs e)
         {
             if (((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is Class cls))
@@ -248,6 +277,91 @@ namespace OdantDev
             }
         }
 
+
+        private void DownloadRepoButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = RepoTree?.SelectedItem as RepoBaseViewModel;
+            if (selectedItem?.Item is ProjectItem project)
+            {
+                _ = InitRepositoryAsync(project.Object as GitLabApiClient.Models.Projects.Responses.Project);                
+            }
+        }
+
+        public async Task InitRepositoryAsync(GitLabApiClient.Models.Projects.Responses.Project project)
+        {
+            GitLabApiClient.Models.Files.Responses.File file = await GitClient.FindTopOclFileAsync(project);
+            if (file == null)
+            {                
+                logger?.Info("Classes in repository not found.");
+                return;
+            }
+
+            var xmlDoc = new xmlDocument(file.ContentDecoded);
+            if (xmlDoc.Root != null)
+            {
+                string cid = xmlDoc.Root.GetAttribute("ClassId");
+                string type = xmlDoc.Root.GetAttribute("Type");                
+                
+                Domain domain = odaModel.Connection.FindDomain(odaModel.AddinSettings.SelectedDevelopeDomain);
+                if (domain != null)
+                {
+                    var item = domain.FindItem(cid) as StructureItem;
+                    if (item != null)
+                    {
+                        await Community.VisualStudio.Toolkit.VS.MessageBox.ShowAsync("Module already exists in developer domain.", "", OLEMSGICON.OLEMSGICON_WARNING, OLEMSGBUTTON.OLEMSGBUTTON_OK);
+                        logger?.Info("Module already exists in developer domain.");                        
+                    }
+                    else
+                    {
+                        try
+                        {                        
+                            string rootDomainFolderPath = TempFiles.TempPath;
+                            string modulePath = GitClient.CloneProject(project, rootDomainFolderPath, type == "MODULE");
+                            var rootDir = new DirectoryInfo(modulePath);
+                            if (!string.IsNullOrEmpty(modulePath))
+                            {
+                                item = odaModel.CreateItemsFromFiles(domain, rootDir);
+                            }
+
+                            rootDir.Delete(true);
+                        }
+                        catch { }
+
+                        logger?.Info("Repository has been cloned.");
+
+                        OpenModuleDialog.DataContext = item;
+                        OpenModuleDialog.IsOpen = true;
+                    }
+                }                
+            }            
+        }
+
+        private async void DialogOpenModule_OnClick(object sender, RoutedEventArgs e)
+        {
+            OpenModuleDialog.IsOpen = false;
+
+            var item = OpenModuleDialog?.DataContext as StructureItem;
+            if (item != null)
+            {
+                switch (item.ItemType)
+                {
+                    case ItemType.Class:
+                    {
+                        await OpenModule(item);
+                        break;
+                    }
+                    case ItemType.Module:
+                    {
+                        foreach (Class child in item.getChilds(ItemType.Class, Deep.Near))
+                        {
+                            await OpenModule(child);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
         private void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
         {
             if (((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is Class cls))
@@ -256,9 +370,9 @@ namespace OdantDev
                 {
                     try
                     {
-                        var createdDomain = domainDeveloper.CreateDomain(cls.Domain.Name, "MODULE");
+                        Domain createdDomain = domainDeveloper.CreateDomain(cls.Domain.Name, "MODULE");
                         createdDomain.Save();
-                        var createdClass = createdDomain.CreateClass(cls.Name);
+                        Class createdClass = createdDomain.CreateClass(cls.Name);
                         createdClass.Type = cls.Type;
                         createdClass.Save();
                         cls.Dir.CopyTo(createdClass.Dir);
@@ -273,23 +387,48 @@ namespace OdantDev
                 }
                 else
                 {
-                    logger?.Info("Please selecet developer domain on settings tab");
+                    logger?.Info("Please select developer domain on settings tab");
                 }
-            }
+            }        
         }
         private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
         {
-            var selectedItem = (OdaTree.SelectedItem as StructureItemViewModel<StructureItem>).Item;
-            await OpenModule(selectedItem);
+            var selectedItem = OdaTree.SelectedItem as StructureItemViewModel<StructureItem>;
+            StructureItem structureItem = selectedItem?.Item;
+            if (structureItem == null)
+            {
+                logger?.Info("Item not found.");
+                return;
+            }
+
+            switch (structureItem.ItemType)
+            {
+                case ItemType.Class:
+                {
+                    await OpenModule(structureItem);
+                    break;
+                }
+                case ItemType.Module:
+                {
+                    foreach (StructureItemViewModel<StructureItem> child in selectedItem.Children)
+                    {
+                        if (child.Item is Class { HasModule: true })
+                            await OpenModule(child.Item);
+                    }
+                    break;
+                }
+            }
         }
+
         private async Task OpenModule(StructureItem item)
         {
             await odaAddinModel.OpenModule(item);
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(
                     AddinSettings.LastProjects.Except(AddinSettings.LastProjects.Where(x => x.FullId == item.FullId)));
-                AddinSettings.LastProjects.Add(new AddinSettings.Project(item.Name, item.Description, item.FullId, item.Host.Name, DateTime.Now));
+                var icon = await item.GetImageSource();
+                AddinSettings.LastProjects.Add(new AddinSettings.Project(item.Name, item.FullId, item.Host.Name, DateTime.Now, icon));
                 AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(AddinSettings.LastProjects.OrderByDescending(x => x.OpenTime).Take(15)
                     ?? new List<AddinSettings.Project>());
                 if (AddinSettings.Save().Not())
@@ -310,10 +449,23 @@ namespace OdantDev
         {
             if (e.Source is TabControl tabControl)
             {
-                if (tabControl.SelectedIndex == 0)
+                if (tabControl.SelectedIndex == 0 || tabControl.SelectedIndex == 1)
+                {
                     CommonButtons.Visibility = Visibility.Visible;
+
+                    if (tabControl.SelectedIndex == 0)
+                    {
+                        CreateModuleButton.Visibility = Visibility.Visible;
+                        OpenModuleButton.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        CreateModuleButton.Visibility = Visibility.Hidden;
+                        OpenModuleButton.Visibility = Visibility.Hidden;
+                    }
+                }
                 else
-                    CommonButtons.Visibility = Visibility.Collapsed;
+                    CommonButtons.Visibility = Visibility.Collapsed;                
             }
         }
 
@@ -358,14 +510,16 @@ namespace OdantDev
 
         private void DeleteRecentlyProject_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as Button)?.Tag is not AddinSettings.Project project)
+            if ((sender as Button)?.Tag is AddinSettings.Project project)
             {
-                return;
-            }
-            AddinSettings.LastProjects.Remove(project);
-            if (AddinSettings.Save().Not())
-            {
-                logger.Info("Error while saving settings");
+                var isDeleted = AddinSettings.LastProjects.Remove(project);
+                if (isDeleted)
+                {
+                    if (AddinSettings.Save().Not())
+                    {
+                        logger.Info("Error while saving settings");
+                    }
+                }
             }
         }
         private async void ProjectCard_Click(object sender, RoutedEventArgs e)
@@ -425,7 +579,7 @@ namespace OdantDev
                 button.IsEnabled = false;
                 await DevHelpers.DownloadAndCopyFramework4_0Async(this.logger);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.Info(ex.Message);
             }
@@ -454,10 +608,70 @@ namespace OdantDev
         }
         #endregion
 
-        private void CreateItemInfo_Click(object sender, RoutedEventArgs e)
+        private void CreateRepo_OnClick(object sender, RoutedEventArgs e)
         {
-
+            var selectedItem = OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>;
+            var selectedGroup = DialogRepoGroupTree?.SelectedItem as RepoBaseViewModel;
+            string name = DialogTextBoxRepoName?.Text;
+            if (selectedItem != null && selectedItem.Item != null && !string.IsNullOrWhiteSpace(name))
+            {
+                _ = CreateGitLabProjectAsync(selectedItem.Item, selectedGroup?.Item?.FullPath, name);
+            }
         }
 
+        private async Task<GitLabApiClient.Models.Projects.Responses.Project> CreateGitLabProjectAsync(StructureItem item, string groupPath, string name)
+        {
+            string modulePath = item.Dir.RemoteFolder.LoadFolder();
+            modulePath = DevHelpers.ClearDomainAndClassInPath(modulePath);
+
+            GitLabApiClient.Models.Projects.Responses.Project project = await GitClient.CreateProjectAsync(modulePath, groupPath, name);
+
+            if (project != null)
+            {
+                item.Root.SetAttribute(GitClient.GIT_REPO_FIELD_NAME, project.SshUrlToRepo);
+                item.Root.SetAttribute(GitClient.GIT_PROJECT_ID_FIELD_NAME, project.Id);
+                item.Save();
+            }
+            return project;
+        }
+
+        private void DeleteRepo_OnClick(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>;
+            if (selectedItem == null)
+                return;
+
+            bool? isDeleteLink = DialogCheckBoxDeleteLink?.IsChecked;
+            bool? isDeleteLocalRepo = DialogCheckBoxDeleteLocalRepo?.IsChecked;
+            bool? isDeleteRemoteRepo = DialogCheckBoxDeleteRemoteRepo?.IsChecked;
+
+            if (isDeleteLocalRepo.HasValue && isDeleteLocalRepo.Value)
+            {
+                string modulePath = selectedItem.Item.Dir.RemoteFolder.LoadFolder();
+                modulePath = DevHelpers.ClearDomainAndClassInPath(modulePath);
+                var directoryInfo = new DirectoryInfo(System.IO.Path.Combine(modulePath, ".git"));
+                if (directoryInfo.Exists)
+                {
+                    DevHelpers.SetAttributesNormal(directoryInfo);
+                    directoryInfo.Delete(true);
+                }
+            }
+
+            if (isDeleteRemoteRepo.HasValue && isDeleteRemoteRepo.Value)
+            {
+                string projectId = selectedItem.Item.Root.GetAttribute(GitClient.GIT_PROJECT_ID_FIELD_NAME);
+                if (!string.IsNullOrWhiteSpace(projectId))
+                {
+                    _ = GitClient.DeleteProjectAsync(projectId);
+                }
+            }
+
+            if (isDeleteLink.HasValue && isDeleteLink.Value)
+            {
+                selectedItem.Item.Root.RemoveAttribute(GitClient.GIT_REPO_FIELD_NAME);
+                selectedItem.Item.Root.RemoveAttribute(GitClient.GIT_PROJECT_ID_FIELD_NAME);
+                selectedItem.Item.Save();
+            }
+        }
     }
 }

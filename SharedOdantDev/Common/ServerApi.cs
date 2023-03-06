@@ -1,5 +1,7 @@
 ﻿using oda;
+
 using odaServer;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,9 @@ namespace OdantDev
 {
     public static class ServerApi
     {
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
+
         public delegate void OnUpdate_CALLBACK(int Type, IntPtr Params);
         [DllImport("odaClient.dll", EntryPoint = "ODAItem_set_on_update", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         public static extern void _SetOnUpdate(IntPtr item, OnUpdate_CALLBACK func);
@@ -29,39 +34,38 @@ namespace OdantDev
 
         [DllImport("odaClient.dll", EntryPoint = "ODAVariantsList_get_length", CallingConvention = CallingConvention.Cdecl)]
         public static extern int _GetLength(IntPtr list);
-        public static async Task<IEnumerable<T>> getChildsAsync<T>(this StructureItem item, ItemType itemType, Deep deep)
+
+        public static IEnumerable<StructureItem> FindConfigItems(this StructureItem structureItem)
         {
-            return await Task.Run(() => item.getChilds(itemType, deep).OfType<T>());
-        }
-        public static List<StructureItem> getChildren(this StructureItem structureItem, ItemType item_type, Deep deep)
-        {
-            string str1 = deep == Deep.Near ? "/" : "//";
-            string str2 = item_type switch
-            {
-                ItemType.Module => "D[@t = 'MODULE']",
-                ItemType.Base => "D[@t='ORGANIZATION' or @t='BASE']",
-                _ => "*"
-            };
-            return FindConfigItems(structureItem, $".{str1}{str2}");
-        }
-        public static List<StructureItem> FindConfigItems(this StructureItem structureItem, string xq)
-        {
-            if (structureItem.RemoteItem == null) { return null; }
+            if (structureItem.RemoteItem == null) { yield break; }
+            var xq = GetConfigFilter(structureItem);
+
             IntPtr intPtr = structureItem.RemoteItem.GetIntPtr();
             IntPtr configItemsIntPtr = _FindConfigItems(intPtr, xq);
             int listLength = _GetLength(configItemsIntPtr);
             var ODAItems = Enumerable.Range(0, listLength)
-                .AsParallel()
-                .AsUnordered()
-                .Select(x => CreateByType(_GetItem(configItemsIntPtr, x)))
-                .ToList();
-            try
+                .Select(x => oda.OdaOverride.ItemFactory.GetStorageItem(CreateByType(_GetItem(configItemsIntPtr, x))));
+            foreach (var item in ODAItems)
             {
-                _Release(configItemsIntPtr);
+                yield return item;
             }
-            catch { }
-            return ODAItems.AsParallel().AsUnordered().Select(x => ItemFactory.getStorageItem(x)).ToList();
+            _Release(configItemsIntPtr);
         }
+        private static string GetConfigFilter(StructureItem item)
+        {
+            if (item.ItemType == ItemType.Host)
+            {
+                return "./(D[@i = 'ROOT'], D[@i = 'ROOT']/D[@i = ('DEVELOPE', 'WORK')])";
+            }
+
+            if (item.Id == "ROOT")
+            {
+                return "./(C[@i='ROOT']/*[not(@t=('SOLUTION', 'WORKPLACE'))], *[not(@i = (../@i, '000000000000000', 'SYSTEM', 'DEVELOPE', 'WORK')) and not(@t=('SOLUTION', 'WORKPLACE'))])";
+            }
+
+            return "./(*[not(@i = (../@i, '000000000000000', 'SYSTEM')) and not(@t=('SOLUTION', 'WORKPLACE'))], *[@i = ../@i]/*)";
+        }
+
         public static ODAItem GetItem(IntPtr _ptr, int index) => CreateByType(ServerApi._GetItem(_ptr, index));
         public static ODAItem CreateByType(IntPtr item_ptr)
         {

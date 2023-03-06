@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.VisualBasic.FileIO;
+using OdantDev.Model;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.VisualBasic.FileIO;
-using OdantDev.Model;
-using System.Security.Principal;
-using System.Security.Permissions;
 using System.Diagnostics;
 using Microsoft.VisualStudio.Threading;
 
-namespace SharedOdanDev.Common;
+namespace SharedOdantDev.Common;
 
 /// <summary>
 /// Example Usage: await DevHelpers.DownloadAndCopyFramework4_0And4_5();
@@ -108,5 +104,34 @@ public class DevHelpers
         var response = await client.GetAsync(uri);
         using var fs = new FileStream(fileName, FileMode.CreateNew);
         await response.Content.CopyToAsync(fs);
+    }
+
+    public static string ClearDomainAndClassInPath(string path)
+    {
+        if (path.EndsWith("\\CLASS"))
+        {
+            path = path.Substring(0, path.Length - 6);
+        }
+
+        if (path.EndsWith("\\DOMAIN"))
+        {
+            path = path.Substring(0, path.Length - 7);
+        }
+
+        return path;
+    }
+
+    public static void SetAttributesNormal(DirectoryInfo dir)
+    {
+        foreach (var subDir in dir.GetDirectories())
+        {
+            SetAttributesNormal(subDir);
+            subDir.Attributes = FileAttributes.Normal;
+        }
+        // Parallel.ForEach(dir.EnumerateFiles(), e => e.Attributes = FileAttributes.Normal);
+        foreach (var file in dir.GetFiles())
+        {
+            file.Attributes = FileAttributes.Normal;
+        }
     }
 }

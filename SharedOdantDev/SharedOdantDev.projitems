@@ -6,7 +6,7 @@
     <SharedGUID>bce37951-5744-4b02-ba49-25ee4c57ac5a</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>SharedOdanDev</Import_RootNamespace>
+    <Import_RootNamespace>SharedOdantDev</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Page Include="$(MSBuildThisFileDirectory)ToolWindowControl.xaml">
@@ -18,6 +18,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BindingHelpers\BooleanToCollapsedVisibility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BindingHelpers\NotEmptyRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\RelayCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Bitness.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\DevHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extension.cs" />
@@ -28,15 +29,25 @@
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ResetToolboxProcessor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ToolboxReseter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ToolboxReseterSettings.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\AddinSettings.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\BuildInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\ConnectionModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\ILogger.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\ModuleDir.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ViewModels\AddinSettingsViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VSCommon\Model\BuildInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ViewModels\ConnectionViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Git\GitClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Git\GitItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Git\RepoBaseViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Git\RepoGroupItemViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Git\RepoRootViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logger\ILogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VSCommon\Model\ModuleDir.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\PathInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\PopupController.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Model\StructureItemViewModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)odaoverride\INI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Logger\PopupController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Git\RepoProjectViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\ViewModels\StructureItemViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OdaOverride\DomainSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OdaOverride\ImageFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OdaOverride\INI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OdaOverride\ItemFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Reflection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ToolWindowControl.xaml.cs">
       <DependentUpon>ToolWindowControl.xaml</DependentUpon>
     </Compile>
@@ -47,6 +58,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\VSErrors.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)OdaOverride\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Logger\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Model\ViewModels\" />
+    <Folder Include="$(MSBuildThisFileDirectory)VSCommon\Model\" />
   </ItemGroup>
 </Project>

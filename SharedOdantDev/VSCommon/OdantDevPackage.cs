@@ -52,10 +52,16 @@ public sealed class OdantDevPackage : AsyncPackage
         await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
         Env_DTE = await this.GetServiceAsync<DTE,DTE2>();
 
-        IVsShell shellService = await GetServiceAsync(typeof(SVsShell)) as IVsShell;
-        ToolboxReseter = new ToolboxReseter(UserLocalDataPath);
-        ToolboxReseter.Start(Env_DTE as DTE, shellService);
-        
+        try
+        {
+            IVsShell shellService = await GetServiceAsync(typeof(SVsShell)) as IVsShell;
+            ToolboxReseter = new ToolboxReseter(UserLocalDataPath);
+            ToolboxReseter.Start(Env_DTE as DTE, shellService);
+        }
+        catch (Exception e)
+        {
+        }
+
         await ToolWindowCommand.InitializeAsync(this);
     }
 

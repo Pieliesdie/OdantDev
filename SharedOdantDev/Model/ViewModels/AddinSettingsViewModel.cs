@@ -1,14 +1,17 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Windows.Media.Imaging;
+using System.Windows.Media;
 using System.Xml.Serialization;
+using System.Collections.Generic;
 
 namespace OdantDev.Model;
 
-public partial class AddinSettings : ObservableObject
+[ObservableObject]
+public partial class AddinSettings
 {
     private const string FILE_NAME = "AddinSettings.xml";
     private static readonly string TemplatePath = Path.Combine(Extension.VSIXPath.FullName, "Templates", FILE_NAME);
@@ -26,18 +29,11 @@ public partial class AddinSettings : ObservableObject
     [ObservableProperty]
     private bool forceUpdateReferences = true;
 
-    [XmlIgnore]
-    [ObservableProperty]
-    private ObservableCollection<string> odaLibraries = new ObservableCollection<string> { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
-
     [ObservableProperty]
     private ObservableCollection<string> updateReferenceLibraries;
 
     [ObservableProperty]
     private bool isSimpleTheme;
-
-    [ObservableProperty]
-    private bool isLazyTreeLoad;
 
     [ObservableProperty]
     private string selectedDevelopeDomain;
@@ -51,27 +47,39 @@ public partial class AddinSettings : ObservableObject
     [ObservableProperty]
     private PathInfo selectedOdaFolder;
 
+    // [XmlIgnore]
+    // public bool IsLazyTreeLoad => true;
+
+    [XmlIgnore]
+    public ObservableCollection<string> OdaLibraries => new() { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
+
     [XmlIgnore]
     public string AddinSettingsPath { get; private set; }
 
+    [ObservableProperty]
+    private string gitLabApiKey;
+
+    [ObservableProperty]
+    private string gitLabApiPath;
+
     public static AddinSettings Create(DirectoryInfo folder)
     {
-        AddinSettings settings = null;
-        var path = Path.Combine(folder.FullName, FILE_NAME);
+        AddinSettings settings;
+        string path = Path.Combine(folder.FullName, FILE_NAME);
         try
         {
-            var loadPath = path;
+            string loadPath = path;
             if (File.Exists(loadPath).Not())
             {
                 loadPath = TemplatePath;
             }
-            using FileStream fs = new FileStream(loadPath, FileMode.Open, FileAccess.Read);
+            using var fs = new FileStream(loadPath, FileMode.Open, FileAccess.Read);
             settings = Serializer.Deserialize(fs) as AddinSettings;
             settings.OdaFolders.Remove(x => x.Name == "Last run");
         }
         catch
         {
-            using FileStream fs = new FileStream(TemplatePath, FileMode.Open, FileAccess.Read);
+            using var fs = new FileStream(TemplatePath, FileMode.Open, FileAccess.Read);
             settings = Serializer.Deserialize(fs) as AddinSettings;
         }
         settings.AddinSettingsPath = path;
@@ -84,7 +92,7 @@ public partial class AddinSettings : ObservableObject
         try
         {
             File.Delete(AddinSettingsPath);
-            using FileStream fs = new FileStream(AddinSettingsPath, FileMode.OpenOrCreate);
+            using var fs = new FileStream(AddinSettingsPath, FileMode.OpenOrCreate);
             Serializer.Serialize(fs, this);
             return true;
         }
@@ -93,23 +101,35 @@ public partial class AddinSettings : ObservableObject
             return false;
         }
     }
-
-
     public struct Project
     {
-        public Project(string name, string description, string fullId, string domainName, DateTime openTime)
+        private ImageSource _icon;
+        public Project(string name, string fullId, string domainName, DateTime openTime, BitmapImage icon = null)
         {
             Name = name;
-            Description = description;
             FullId = fullId;
             HostName = domainName;
             OpenTime = openTime;
+            IconBase64 = icon.ToBase64String();
         }
 
+        public string IconBase64 { get; set; }
+        public ImageSource Icon => _icon ??= IconBase64?.FromBase64String();
+        public bool HasIcon => Icon is not null;
         public string Name { get; set; }
-        public string Description { get; set; }
         public string FullId { get; set; }
         public string HostName { get; set; }
         public DateTime OpenTime { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Project project &&
+                   FullId == project.FullId;
+        }
+
+        public override int GetHashCode()
+        {
+            return -191063783 + EqualityComparer<string>.Default.GetHashCode(FullId);
+        }
     }
 }
