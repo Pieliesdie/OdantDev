@@ -31,7 +31,7 @@ namespace OdantDev.Model;
 [ObservableObject]
 public partial class StructureItemViewModel<T> where T : StructureItem
 {
-    static IEnumerable<StructureItemViewModel<T>> dummyList = new List<StructureItemViewModel<T>>() { new StructureItemViewModel<T>() { Category = "Loading...", Icon = Images.GetImage(Images.GetImageIndex(Icons.Clock)).ConvertToBitmapImage() } };
+    static readonly IEnumerable<StructureItemViewModel<T>> dummyList = new List<StructureItemViewModel<T>>() { new StructureItemViewModel<T>() { Name = "Loading...", Icon = Images.GetImage(Images.GetImageIndex(Icons.Clock)).ConvertToBitmapImage() } };
     ILogger logger;
     bool isLoaded;
 
@@ -40,7 +40,12 @@ public partial class StructureItemViewModel<T> where T : StructureItem
     ServerApi.OnUpdate_CALLBACK Update_CALLBACK;
     void Updated(int type, IntPtr Params)
     {
-        if (type < 6)
+        if (type == 2)
+        {
+            RefreshCommand.Execute(this);
+            this.Parent?.RefreshCommand.Execute(this);
+        }
+        else if (type < 6)
         {
             RefreshCommand.Execute(this);
         }
@@ -49,20 +54,19 @@ public partial class StructureItemViewModel<T> where T : StructureItem
 
     ODAItem RemoteItem => this.Item?.RemoteItem;
     public bool HasRepository => !string.IsNullOrWhiteSpace(Item?.Root?.GetAttribute("GitLabRepository"));
-    public string Name => $"{RemoteItem?.Label ?? RemoteItem?.Name ?? Category}";
     public bool CanCreateModule => Item is Class && !HasModule;
     public bool IsLocal => Item?.Host?.IsLocal ?? false;
     public bool IsItemAvailable => Item != null;
     public ItemType ItemType { get; private set; }
 
     [ObservableProperty]
+    string name;
+
+    [ObservableProperty]
     T item;
 
     [ObservableProperty]
-    T parent;
-
-    [ObservableProperty]
-    string category;
+    StructureItemViewModel<T> parent;
 
     [ObservableProperty]
     ImageSource icon;
@@ -80,7 +84,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             if (Children is null || Children == dummyList)
             {
                 await SetChildrenAsync(Item, logger);
-            }        
+            }
         }
     }
     public bool HasModule
@@ -94,7 +98,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
                 case ItemType.Module:
                     {
                         if (Children == dummyList || Children is null)
-                            Children = GetChildren(Item, logger);
+                            Children = GetChildren(Item, this, logger);
 
                         return Children?.Any(x => x.HasModule) ?? false;
                     }
@@ -102,12 +106,17 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             return false;
         }
     }
+
+    private bool? _hasChildren;
     public bool HasChildren
     {
         get
         {
+            if (_hasChildren is not null)
+                return (bool)_hasChildren;
             if (Item is Host || Item is null)
             {
+                _hasChildren = true;
                 return true;
             }
             var hasChildren = Item.RemoteItem.HasChilds;
@@ -115,17 +124,18 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             {
                 hasChildren = Item.Class?.RemoteItem?.HasChilds ?? false;
             }
+            _hasChildren = hasChildren;
             return hasChildren;
         }
     }
     public StructureItemViewModel() { }
-    public StructureItemViewModel(T item, T parent = null, ILogger logger = null) : this()
+    public StructureItemViewModel(T item, StructureItemViewModel<T> parent = null, ILogger logger = null) : this()
     {
         this.logger = logger;
         Item = item;
         Parent = parent;
         ItemType = Item.ItemType;
-        Category = ItemType.ToString();
+        Name = $"{RemoteItem?.Label ?? RemoteItem?.Name}";
         Update_CALLBACK = Updated;
         GC.SuppressFinalize(Update_CALLBACK);
         ServerApi._SetOnUpdate(Item.RemoteItem.GetIntPtr(), Update_CALLBACK);
@@ -162,7 +172,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
     }
     async Task SetChildrenAsync(T item, ILogger logger = null)
     {
-        var task = Task.Run(() => GetChildren(item, logger).ToList());
+        var task = Task.Run(() => GetChildren(item, this, logger).ToList());
         if (task == await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(10))))
         {
             Children = await task;
@@ -173,12 +183,12 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             Children = null;
         }
     }
-    static IEnumerable<StructureItemViewModel<T>> GetChildren(T item, ILogger logger = null)
+    static IEnumerable<StructureItemViewModel<T>> GetChildren(T item, StructureItemViewModel<T> parent = null, ILogger logger = null)
     {
         var items = ServerApi.FindConfigItems(item);
         var children = items
             .Where(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution)
-            .Select(child => new StructureItemViewModel<T>(child as T, item, logger))
+            .Select(child => new StructureItemViewModel<T>(child as T, parent, logger))
             .OrderBy(x => x.Item.SortIndex)
             .ThenBy(x => x.Name);
 
@@ -194,7 +204,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
                     {
                         if (child.RemoteItem.Id == item.RemoteItem.Id)
                         {
-                            var rootItems = GetChildren(child.Item as T, logger);
+                            var rootItems = GetChildren(child.Item as T, parent, logger);
                             foreach (var rootItem in rootItems)
                             {
                                 yield return rootItem;
@@ -212,9 +222,9 @@ public partial class StructureItemViewModel<T> where T : StructureItem
         {
             var workplace = new StructureItemViewModel<T>()
             {
-                Category = "Workplaces",
+                Name = "Workplaces",
                 Icon = Images.GetImage(Images.GetImageIndex(Icons.UserRole)).ConvertToBitmapImage(),
-                children = workplaces.Select(child => new StructureItemViewModel<T>(child as T, item, logger))
+                children = workplaces.Select(child => new StructureItemViewModel<T>(child as T, parent, logger))
             };
             yield return workplace;
         }
@@ -222,19 +232,19 @@ public partial class StructureItemViewModel<T> where T : StructureItem
         {
             var module = new StructureItemViewModel<T>()
             {
-                Category = "Modules",
+                Name = "Modules",
                 Icon = Images.GetImage(Images.GetImageIndex(Icons.MagentaFolder)).ConvertToBitmapImage(),
-                children = modules.Select(child => new StructureItemViewModel<T>(child as T, item, logger))
+                children = modules.Select(child => new StructureItemViewModel<T>(child as T, parent, logger))
             };
             yield return module;
         }
         //TODO: refactor me
         foreach (var child in children)
         {
-            if(child.RemoteItem.Id == item.RemoteItem.Id)
+            if (child.RemoteItem.Id == item.RemoteItem.Id)
             {
-                var rootItems = GetChildren(child.Item as T, logger);
-                foreach(var rootItem in rootItems)
+                var rootItems = GetChildren(child.Item as T, parent, logger);
+                foreach (var rootItem in rootItems)
                 {
                     yield return rootItem;
                 }
@@ -255,7 +265,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             await SetChildrenAsync(this.Item, logger);
         }
         await SetIconAsync();
-        OnPropertyChanged("Name");
+        Name = $"{RemoteItem?.Label ?? RemoteItem?.Name}";
         OnPropertyChanged("Item");
         OnPropertyChanged("HasModule");
     }

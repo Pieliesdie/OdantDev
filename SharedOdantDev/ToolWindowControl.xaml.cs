@@ -98,6 +98,7 @@ namespace OdantDev
             var card = new Card();
             var hue = new Hue("Dummy", Colors.Black, Colors.White);
             var ext = new OpenDirectoryControl();
+            _ = new MdXaml.TextToFlowDocumentConverter();
         }
 
         private bool InitializeOdaComponents()
@@ -686,6 +687,10 @@ namespace OdantDev
                 selectedItem.Item.Root.RemoveAttribute(GitClient.GIT_PROJECT_ID_FIELD_NAME);
                 selectedItem.Item.Save();
             }
+        }
+        void TreeViewItem_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+        {
+            e.Handled = true;
         }
     }
 }

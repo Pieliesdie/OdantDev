@@ -360,11 +360,13 @@ public partial class VisualStudioIntegration
         foreach (Reference reference in VSProj.References)
         {
             var assemblyName = new AssemblyName(GetFullName(reference));
-            if (references.Contains($"{assemblyName.Name}.dll")
-                && (File.Exists(reference.Path).Not() || AddinSettings.ForceUpdateReferences))
+            if (references.Contains($"{assemblyName.Name}.dll"))
             {
-                reference.Remove();
-                deletedDlls.Add($"{assemblyName.Name}.dll");
+                if ((File.Exists(reference.Path).Not() || AddinSettings.ForceUpdateReferences))
+                {
+                    reference.Remove();
+                    deletedDlls.Add($"{assemblyName.Name}.dll");
+                }
             }
         }
         foreach (var dll in references)
