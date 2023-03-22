@@ -490,14 +490,13 @@
                             <TreeView
                                 x:Name="OdaTree"
                                 Grid.Row="1"
-                                HorizontalContentAlignment="Left"
-                                ItemsSource="{Binding OdaModel.Hosts, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}"
+                                HorizontalContentAlignment="Left"                               
+                                ItemsSource="{Binding OdaModel.Hosts, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, BindsDirectlyToSource=True}"
                                 VirtualizingPanel.CacheLengthUnit="Item"
-                                VirtualizingPanel.IsVirtualizing="True"
+                                VirtualizingPanel.IsVirtualizing="False"
                                 VirtualizingPanel.IsVirtualizingWhenGrouping="True"
                                 VirtualizingPanel.ScrollUnit="Item"
-                                VirtualizingPanel.VirtualizationMode="Recycling"
-                                Visibility="{Binding AddinSettings.IsSimpleTheme, Converter={StaticResource InverseBooleanToCollapsedVisibility}}">
+                                VirtualizingPanel.VirtualizationMode="Recycling">
                                 <TreeView.Resources>
                                     <Style BasedOn="{StaticResource MaterialDesignTreeViewItem}" TargetType="TreeViewItem">
                                         <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18" />
@@ -507,7 +506,7 @@
                                     </Style>
                                 </TreeView.Resources>
                                 <TreeView.ItemTemplate>
-                                    <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}">
+                                    <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, BindsDirectlyToSource=True}">
                                         <Grid Margin="0,0,0,0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
@@ -554,7 +553,7 @@
                                                 Width="16"
                                                 Margin="0,0,5,0"
                                                 HorizontalAlignment="Left"
-                                                Source="{Binding Path=Icon, UpdateSourceTrigger=PropertyChanged, IsAsync=True}" />
+                                                Source="{Binding Path=Icon, UpdateSourceTrigger=PropertyChanged}" />
                                             <TextBlock
                                                 Grid.Column="1"
                                                 materialDesign:ColorZoneAssist.Foreground="{DynamicResource MaterialDesignBody}"

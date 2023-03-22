@@ -107,16 +107,12 @@ public partial class StructureItemViewModel<T> where T : StructureItem
         }
     }
 
-    private bool? _hasChildren;
     public bool HasChildren
     {
         get
         {
-            if (_hasChildren is not null)
-                return (bool)_hasChildren;
             if (Item is Host || Item is null)
             {
-                _hasChildren = true;
                 return true;
             }
             var hasChildren = Item.RemoteItem.HasChilds;
@@ -124,7 +120,6 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             {
                 hasChildren = Item.Class?.RemoteItem?.HasChilds ?? false;
             }
-            _hasChildren = hasChildren;
             return hasChildren;
         }
     }
@@ -144,9 +139,9 @@ public partial class StructureItemViewModel<T> where T : StructureItem
     }
     ~StructureItemViewModel()
     {
-        if (item?.RemoteItem != null)
+        if (Item?.RemoteItem != null)
         {
-            ServerApi._SetOnUpdate(item.RemoteItem.GetIntPtr(), null);
+            ServerApi._SetOnUpdate(Item.RemoteItem.GetIntPtr(), null);
         }
         if (Update_CALLBACK != null)
         {
@@ -224,7 +219,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             {
                 Name = "Workplaces",
                 Icon = Images.GetImage(Images.GetImageIndex(Icons.UserRole)).ConvertToBitmapImage(),
-                children = workplaces.Select(child => new StructureItemViewModel<T>(child as T, parent, logger))
+                Children = workplaces.Select(child => new StructureItemViewModel<T>(child as T, parent, logger))
             };
             yield return workplace;
         }
@@ -234,7 +229,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             {
                 Name = "Modules",
                 Icon = Images.GetImage(Images.GetImageIndex(Icons.MagentaFolder)).ConvertToBitmapImage(),
-                children = modules.Select(child => new StructureItemViewModel<T>(child as T, parent, logger))
+                Children = modules.Select(child => new StructureItemViewModel<T>(child as T, parent, logger))
             };
             yield return module;
         }
