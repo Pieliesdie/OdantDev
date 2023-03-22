@@ -493,7 +493,7 @@
                                 HorizontalContentAlignment="Left"                               
                                 ItemsSource="{Binding OdaModel.Hosts, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, BindsDirectlyToSource=True}"
                                 VirtualizingPanel.CacheLengthUnit="Item"
-                                VirtualizingPanel.IsVirtualizing="False"
+                                VirtualizingPanel.IsVirtualizing="{Binding AddinSettings.IsVirtualizeTreeView, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                 VirtualizingPanel.IsVirtualizingWhenGrouping="True"
                                 VirtualizingPanel.ScrollUnit="Item"
                                 VirtualizingPanel.VirtualizationMode="Recycling">
@@ -968,6 +968,17 @@
                                             ToolTip="Disabling material theme on hosts"
                                             Unchecked="IsSimpleThemeCheckBox_Checked">
                                             <TextBlock VerticalAlignment="Center">Simple hosts tree</TextBlock>
+                                        </CheckBox>
+                                        <CheckBox
+                                            x:Name="IsVirtualizingTreeView"
+                                            Grid.Row="2"
+                                            Margin="5"
+                                            VerticalContentAlignment="Top"
+                                            materialDesign:CheckBoxAssist.CheckBoxSize="22"
+                                            FontSize="16"
+                                            IsChecked="{Binding AddinSettings.IsVirtualizeTreeView, Mode=TwoWay}"
+                                            ToolTip="Set IsVirtualize=true in TreeView">
+                                            <TextBlock VerticalAlignment="Center">[Experimental] Enable tree view virtualization</TextBlock>
                                         </CheckBox>
                                     </Grid>
                                 </GroupBox>

@@ -20,47 +20,47 @@ public partial class AddinSettings
     public AddinSettings() { }
 
     [ObservableProperty]
-    private ObservableCollection<Project> lastProjects;
+    bool isVirtualizeTreeView;
+        
+    [ObservableProperty]
+    ObservableCollection<Project> lastProjects;
     partial void OnLastProjectsChanging(ObservableCollection<Project> value)
     {
         value = new ObservableCollection<Project>(value.OrderByDescending(x => x.OpenTime).Take(15));
     }
 
     [ObservableProperty]
-    private bool forceUpdateReferences = true;
+    bool forceUpdateReferences = true;
 
     [ObservableProperty]
-    private ObservableCollection<string> updateReferenceLibraries;
+    ObservableCollection<string> updateReferenceLibraries;
 
     [ObservableProperty]
-    private bool isSimpleTheme;
+    bool isSimpleTheme;
 
     [ObservableProperty]
-    private string selectedDevelopeDomain;
+    string selectedDevelopeDomain;
 
     [ObservableProperty]
-    private ObservableCollection<string> lastOdaFolders;
+    ObservableCollection<string> lastOdaFolders;
 
     [ObservableProperty]
-    private ObservableCollection<PathInfo> odaFolders;
+    ObservableCollection<PathInfo> odaFolders;
 
     [ObservableProperty]
-    private PathInfo selectedOdaFolder;
+    PathInfo selectedOdaFolder;
 
-    // [XmlIgnore]
-    // public bool IsLazyTreeLoad => true;
+    [ObservableProperty]
+    string gitLabApiKey;
+
+    [ObservableProperty]
+    string gitLabApiPath;
 
     [XmlIgnore]
     public ObservableCollection<string> OdaLibraries => new() { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
 
     [XmlIgnore]
     public string AddinSettingsPath { get; private set; }
-
-    [ObservableProperty]
-    private string gitLabApiKey;
-
-    [ObservableProperty]
-    private string gitLabApiPath;
 
     public static AddinSettings Create(DirectoryInfo folder)
     {
