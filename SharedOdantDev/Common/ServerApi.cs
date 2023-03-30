@@ -14,6 +14,9 @@ namespace OdantDev
 {
     public static class ServerApi
     {
+        [DllImport("kernel32", SetLastError = true)]
+        public static extern bool FreeLibrary(IntPtr hModule);
+
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
 
@@ -31,6 +34,15 @@ namespace OdantDev
 
         [DllImport("odaClient.dll", EntryPoint = "ODAItem_find_config_items", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr _FindConfigItems(IntPtr item, [MarshalAs(UnmanagedType.LPWStr)] string xq);
+
+        [DllImport("odaClient.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "ODAServer_hosts", ExactSpelling = true)]
+        public static extern IntPtr _Hosts(IntPtr server);
+
+        [DllImport("odaClient.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "ODADomain_domains", ExactSpelling = true)]
+        private static extern IntPtr _Domains(IntPtr domain);
+
+        [DllImport("odaClient.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode, EntryPoint = "ODAItem_find_item", ExactSpelling = true)]
+        public static extern IntPtr _FindItem(IntPtr item, [MarshalAs(UnmanagedType.LPWStr)] string search_path);
 
         [DllImport("odaClient.dll", EntryPoint = "ODAVariantsList_get_length", CallingConvention = CallingConvention.Cdecl)]
         public static extern int _GetLength(IntPtr list);
@@ -51,6 +63,56 @@ namespace OdantDev
             }
             _Release(configItemsIntPtr);
         }
+
+        public static IEnumerable<Host> FindHosts(this Connection connection)
+        {
+            if (connection.RemoteItem == null) { yield break; }
+
+            IntPtr intPtr = connection.RemoteItem.GetIntPtr();
+            IntPtr configItemsIntPtr = _Hosts(intPtr);
+            int listLength = _GetLength(configItemsIntPtr);
+            var ODAItems = Enumerable.Range(0, listLength)
+                .Select(x => oda.OdaOverride.ItemFactory.GetStorageItem(CreateByType(_GetItem(configItemsIntPtr, x))))
+                .OfType<Host>();
+            foreach (var item in ODAItems)
+            {
+                yield return item;
+            }
+            _Release(configItemsIntPtr);
+        }
+
+        public static OdaItem FindItem(this Item item, string path)
+        {
+            if (item.RemoteItem == null) { return null; }
+
+            IntPtr intPtr = item.RemoteItem.GetIntPtr();
+            IntPtr configItemIntPtr = _FindItem(intPtr, path);
+            return oda.OdaOverride.ItemFactory.GetStorageItem(CreateByType(configItemIntPtr));
+        }
+
+        public static Domain FindDomain(this Item item, string path)
+        {
+            return FindItem(item, path) as Domain;
+        }
+
+        public static IEnumerable<Domain> FindDomains(this Domain domain)
+        {
+            var remoteDomain = domain?.RemoteItem as ODADomain;
+            if (remoteDomain == null) { yield break; }
+
+            IntPtr intPtr = remoteDomain.GetIntPtr();
+            IntPtr configItemsIntPtr = _Domains(intPtr);
+            int listLength = _GetLength(configItemsIntPtr);
+            var ODAItems = Enumerable.Range(0, listLength)
+                .Select(x => oda.OdaOverride.ItemFactory.GetStorageItem(CreateByType(_GetItem(configItemsIntPtr, x))))
+                .OfType<Domain>();
+            foreach (var item in ODAItems)
+            {
+                yield return item;
+            }
+            _Release(configItemsIntPtr);
+        }
+
         private static string GetConfigFilter(StructureItem item)
         {
             if (item.ItemType == ItemType.Host)

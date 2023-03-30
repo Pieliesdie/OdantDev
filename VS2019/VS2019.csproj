@@ -15,7 +15,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>VS2019</RootNamespace>
-    <AssemblyName>VS2019</AssemblyName>
+    <AssemblyName>OdantDev</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <LangVersion>latest</LangVersion>
@@ -117,6 +117,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Validation">
       <Version>16.10.35</Version>
+    </PackageReference>
+    <PackageReference Include="morelinq">
+      <Version>3.4.1</Version>
     </PackageReference>
     <PackageReference Include="System.Linq.Parallel">
       <Version>4.3.0</Version>

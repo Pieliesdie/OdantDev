@@ -58,6 +58,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <mde:BusyOverlay
+                Name="BusyOverlayControl"
                 Grid.Row="0"
                 FontSize="18"
                 IsBusy="{Binding IsBusy}"
@@ -89,8 +90,12 @@
                     x:Name="DBGrid"
                     Grid.Row="1"
                     Grid.Column="0"
-                    Margin="12,5,12,10"
+                    Margin="12,5,5,5"
                     DockPanel.Dock="Top">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
                     <materialDesign:PackIcon
                         Grid.Column="0"
                         Width="20"
@@ -100,10 +105,32 @@
                     <ComboBox
                         Name="FoldersComboBox"
                         Grid.Row="0"
-                        Margin="25,0,0,0"
+                        Grid.Column="0"
+                        Margin="25,0,10,0"
                         materialDesign:HintAssist.Hint="Run app with admin rights before start addin"
                         ItemsSource="{Binding AddinSettings.OdaFolders}"
                         SelectedItem="{Binding AddinSettings.SelectedOdaFolder, Mode=TwoWay}" />
+                    <Button
+                        Name="ExitButton"
+                        Grid.Column="1"
+                        Width="32"
+                        Height="25"
+                        Margin="0"
+                        HorizontalAlignment="Right"
+                        Click="Exit"
+                        FontSize="12"
+                        Style="{StaticResource MaterialDesignFlatMidBgButton}"
+                        ToolTip="Exit"
+                        ToolTipService.ShowOnDisabled="True"
+                        Visibility="Collapsed">
+                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                            <materialDesign:PackIcon
+                                Width="18"
+                                Height="18"
+                                Margin="-10,0,-10,0"
+                                Kind="ExitToApp" />
+                        </StackPanel>
+                    </Button>
                 </Grid>
 
                 <StackPanel
@@ -490,7 +517,7 @@
                             <TreeView
                                 x:Name="OdaTree"
                                 Grid.Row="1"
-                                HorizontalContentAlignment="Left"                               
+                                HorizontalContentAlignment="Left"
                                 ItemsSource="{Binding OdaModel.Hosts, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, BindsDirectlyToSource=True}"
                                 VirtualizingPanel.CacheLengthUnit="Item"
                                 VirtualizingPanel.IsVirtualizing="{Binding AddinSettings.IsVirtualizeTreeView, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
@@ -506,7 +533,7 @@
                                     </Style>
                                 </TreeView.Resources>
                                 <TreeView.ItemTemplate>
-                                    <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, BindsDirectlyToSource=True}">
+                                    <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, BindsDirectlyToSource=True, IsAsync=True}">
                                         <Grid Margin="0,0,0,0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
@@ -530,14 +557,6 @@
                                                             <materialDesign:PackIcon Kind="InformationCircleOutline" />
                                                         </MenuItem.Icon>
                                                     </MenuItem>
-                                                    <!-- <MenuItem Name="MenuItemClearRepoLink" Command="{Binding ClearRepoLinkCommand}" Visibility="{Binding HasRepository, Converter={StaticResource BooleanToVisibilityConverter}}"> -->
-                                                    <!--     <MenuItem.Header> -->
-                                                    <!--         <TextBlock Text="Clear repo link" /> -->
-                                                    <!--     </MenuItem.Header> -->
-                                                    <!--     <MenuItem.Icon> -->
-                                                    <!--         <materialDesign:PackIcon Kind="CloseCircleOutline" /> -->
-                                                    <!--     </MenuItem.Icon> -->
-                                                    <!-- </MenuItem> -->
                                                     <MenuItem Name="MenuItemOpenDir" Command="{Binding OpenDirCommand}">
                                                         <MenuItem.Header>
                                                             <TextBlock Text="Open folder" />
@@ -553,7 +572,8 @@
                                                 Width="16"
                                                 Margin="0,0,5,0"
                                                 HorizontalAlignment="Left"
-                                                Source="{Binding Path=Icon, UpdateSourceTrigger=PropertyChanged}" />
+                                                RenderOptions.BitmapScalingMode="HighQuality"
+                                                Source="{Binding Path=Icon, UpdateSourceTrigger=PropertyChanged, IsAsync=True}" />
                                             <TextBlock
                                                 Grid.Column="1"
                                                 materialDesign:ColorZoneAssist.Foreground="{DynamicResource MaterialDesignBody}"
@@ -1326,7 +1346,7 @@
                             </Grid>
                         </ScrollViewer>
                     </TabItem>
-                    <TabItem x:Name="ReadmeTab">
+                    <TabItem x:Name="ReadmeTab" Visibility="Collapsed">
                         <TabItem.Header>
                             <StackPanel Width="auto" Height="auto">
                                 <materialDesign:PackIcon

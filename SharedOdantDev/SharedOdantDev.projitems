@@ -29,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ToolboxReseter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ToolboxReseterSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ViewModels\AddinSettingsViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Disposable.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\Model\BuildInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ViewModels\ConnectionViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\Git\GitClient.cs" />

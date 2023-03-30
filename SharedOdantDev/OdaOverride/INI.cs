@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Threading.Tasks;
 using System.Timers;
 
 using odaServer;
@@ -467,6 +468,10 @@ public sealed class INI
         }
     }
 
+    public async Task<bool> SaveAsync()
+    {
+        return await Task.Run(() => Save());
+    }
     public bool Save()
     {
         if (!isChanged || isSaving)

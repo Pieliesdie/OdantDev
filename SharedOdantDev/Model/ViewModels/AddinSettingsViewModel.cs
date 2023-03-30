@@ -7,6 +7,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Xml.Serialization;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Collections.Immutable;
 
 namespace OdantDev.Model;
 
@@ -21,7 +23,10 @@ public partial class AddinSettings
 
     [ObservableProperty]
     bool isVirtualizeTreeView;
-        
+
+    [ObservableProperty]
+    ObservableCollection<string> pinnedItems = new() { "localhost/D:Develope" };
+
     [ObservableProperty]
     ObservableCollection<Project> lastProjects;
     partial void OnLastProjectsChanging(ObservableCollection<Project> value)
@@ -57,7 +62,7 @@ public partial class AddinSettings
     string gitLabApiPath;
 
     [XmlIgnore]
-    public ObservableCollection<string> OdaLibraries => new() { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
+    public ImmutableArray<string> OdaLibraries => new() { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
 
     [XmlIgnore]
     public string AddinSettingsPath { get; private set; }
@@ -101,6 +106,12 @@ public partial class AddinSettings
             return false;
         }
     }
+
+    public async Task<bool> SaveAsync()
+    {
+        return await Task.Run(() => Save());
+    }
+
     public struct Project
     {
         private ImageSource _icon;

@@ -22,6 +22,25 @@ public static class Extension
     public static Bitness Platform => IntPtr.Size == 4 ? Bitness.x86 : Bitness.x64;
 
     public static DirectoryInfo VSIXPath = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory;
+
+    public static string SubstringBefore(this string str, string search)
+    {
+        var index = str.IndexOf(search);
+        if (index > 0)
+        {
+            return str.Substring(0, index);
+        }
+        return str;
+    }
+    public static string SubstringAfter(this string str, string search, bool takeLast = false)
+    {
+        var index = (takeLast? str.LastIndexOf(search) : str.IndexOf(search));
+        if (index >= 0)
+        {
+            return str.Substring(index + search.Length);
+        }
+        return str;
+    }
     public static string Or(this string text, string alternative)
     {
         return string.IsNullOrWhiteSpace(text) ? alternative : text;

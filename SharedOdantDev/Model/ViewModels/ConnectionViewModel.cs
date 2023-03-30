@@ -13,31 +13,40 @@ using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using GitLabApiClient.Models.Users.Responses;
 using SharedOdantDev.Common;
+using odaServer;
 
 namespace OdantDev;
 
 [ObservableObject]
-public partial class ConnectionModel 
+public partial class ConnectionModel : IDisposable
 {
     public static readonly string[] odaClientLibraries = { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
     public static readonly string[] odaServerLibraries = { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
     private readonly ILogger logger;
 
-    [ObservableProperty]
-    private List<StructureItemViewModel<StructureItem>> hosts;
+    private List<Host> _hosts;
 
     [ObservableProperty]
-    private List<RepoBaseViewModel> _repos;
+    Domain develope;
 
     [ObservableProperty]
-    private List<DomainDeveloper> developers;
+    Host localhost;
+
+    [ObservableProperty]
+    List<StructureItemViewModel<StructureItem>> hosts;
+
+    [ObservableProperty]
+    List<RepoBaseViewModel> _repos;
+
+    [ObservableProperty]
+    List<DomainDeveloper> developers;
 
     public static List<IntPtr> ServerAssemblies { get; set; }
 
     public static List<Assembly> ClientAssemblies { get; set; }
 
     [ObservableProperty]
-    private bool autoLogin;
+    bool autoLogin;
 
     partial void OnAutoLoginChanged(bool value)
     {
@@ -62,6 +71,7 @@ public partial class ConnectionModel
         try
         {
             await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             stopWatch = new Stopwatch();
             stopWatch.Start();
             Connection.CoreMode = CoreMode.AddIn;
@@ -70,19 +80,18 @@ public partial class ConnectionModel
                 return (false, "Can't connect to oda");
 
             AutoLogin = Connection.AutoLogin;
-            
             Hosts = await HostsListAsync();
-            await InitReposAsync();
             Developers = await DevelopListAsync();
-            if (Developers.Any() && Connection?.LocalHost?.Develope is { } developDomain)
+            if (Develope is not null)
             {
-                Hosts = Hosts?.Prepend(new StructureItemViewModel<StructureItem>(developDomain, logger: logger))?.ToList();
+                Hosts = Hosts?.Prepend(new StructureItemViewModel<StructureItem>(item: Develope, logger: logger))?.ToList();
             }
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
             string elapsedTime = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}.{ts.Milliseconds / 10:00}";
             logger?.Info($"Load time: {elapsedTime}");
-            Common.DebugINI.Clear();
+            oda.OdaOverride.INI.DebugINI.Clear();
+            await oda.OdaOverride.INI.DebugINI.SaveAsync();
             return (true, null);
         }
         catch (Exception ex)
@@ -99,7 +108,8 @@ public partial class ConnectionModel
     {
         return await Task.Run(async () =>
         {
-            var developList = Developers = Connection?.LocalHost?.Develope?.Domains?.OfType<DomainDeveloper>()?.ToList();
+            Develope = ServerApi.FindDomain(Localhost, "D:DEVELOPE");
+            var developList = Developers = Develope.FindDomains()?.OfType<DomainDeveloper>()?.ToList();
             var retryCount = 5;
             while (retryCount-- > 0 && developList is null)
             {
@@ -125,11 +135,11 @@ public partial class ConnectionModel
         if (string.IsNullOrEmpty(AddinSettings.GitLabApiPath) || string.IsNullOrEmpty(AddinSettings.GitLabApiKey))
             return null;
 
-        GitClient.CreateClient(AddinSettings.GitLabApiPath, AddinSettings.GitLabApiKey);
-
-        var item = new RootItem(GitClient.Client.HostUrl);
         return await Task.Run(() =>
         {
+            GitClient.CreateClient(AddinSettings.GitLabApiPath, AddinSettings.GitLabApiKey);
+
+            var item = new RootItem(GitClient.Client.HostUrl);
             var list = new List<RepoBaseViewModel>
             {
                 new RepoRootViewModel(item, true, true, logger: logger)
@@ -142,18 +152,19 @@ public partial class ConnectionModel
     {
         return await Task.Run(async () =>
         {
+            var hosts = _hosts = Connection.FindHosts().ToList();
+            var localHost = Localhost = hosts.FirstOrDefault(x => x.IsLocal);
             var retryCount = 10;
-            while (retryCount-- > 0 && Connection?.LocalHost?.OnLine == false)
+            while (retryCount-- > 0 && localHost?.OnLine == false)
             {
-                Connection?.LocalHost?.Reset();
+                localHost?.Reset();
                 await Task.Delay(1000);
             }
-            return Connection
-                ?.Hosts
-                ?.Sorted
-                ?.OfType<Host>()
-                ?.Select(host => new StructureItemViewModel<StructureItem>(host, logger: logger))
-                ?.ToList();
+            return hosts
+                .OrderBy(x=> x.SortIndex)
+                .ThenBy(x=> x.Label)
+                .Select(host => new StructureItemViewModel<StructureItem>(host, logger: logger))
+                .ToList();
         });
     }
 
@@ -174,7 +185,7 @@ public partial class ConnectionModel
     {
         try
         {
-            ServerAssemblies = Extension.LoadServerLibraries(odaFolder.FullName, Extension.Platform , odaServerLibraries);
+            ServerAssemblies = Extension.LoadServerLibraries(odaFolder.FullName, Extension.Platform, odaServerLibraries);
             ClientAssemblies = Extension.LoadClientLibraries(odaFolder.FullName, odaClientLibraries);
             return (true, null);
         }
@@ -191,7 +202,7 @@ public partial class ConnectionModel
 
         var domainDirs = rootDir.GetDirectories("DOMAIN");
         if (domainDirs.Length > 0)
-        {                
+        {
             searchDir = domainDirs[0];
             itemType = ItemType.Domain;
         }
@@ -210,7 +221,7 @@ public partial class ConnectionModel
                 string path = root.Dir.RemoteFolder.LoadFolder();
                 path = DevHelpers.ClearDomainAndClassInPath(path);
 
-                FileSystem.CopyDirectory(rootDir.FullName, System.IO.Path.Combine(path, rootDir.Name), UIOption.OnlyErrorDialogs);              
+                FileSystem.CopyDirectory(rootDir.FullName, System.IO.Path.Combine(path, rootDir.Name), UIOption.OnlyErrorDialogs);
             }
             catch
             {
@@ -246,7 +257,7 @@ public partial class ConnectionModel
         DirectoryInfo[] domainClassDirs = dir.GetDirectories("CLASS");
         if (domainClassDirs.Length > 0)
         {
-            
+
             DirectoryInfo classDir = domainClassDirs[0];
             var oclFiles = classDir.GetFiles("class.ocl");
             if (oclFiles.Length > 0)
@@ -287,13 +298,13 @@ public partial class ConnectionModel
         {
             case ItemType.Class:
                 string newCid = rootItem.Command("create_class", xml);
-                resultItem = rootItem.FindClass(newCid);                    
+                resultItem = rootItem.FindClass(newCid);
                 break;
-                
+
             case ItemType.Domain:
                 string newDomainId = rootItem.Command("create_domain", xml);
                 resultItem = rootItem.FindDomain(newDomainId);
-                break; 
+                break;
             default:
                 return null;
         }
@@ -301,5 +312,16 @@ public partial class ConnectionModel
         System.IO.File.Copy(oclFilePath, Path.Combine(resultItem.Dir.RemoteFolder.LoadFolder(), "class.ocl"), true);
 
         return resultItem;
+    }
+
+    public void Dispose()
+    {
+        if (Connection != null)
+        {
+            Connection.Logout();
+            Connection.ServerItem?.Dispose();
+            Connection.Dispose();
+        }
+        ServerAssemblies.ForEach(x => ServerApi.FreeLibrary(x));
     }
 }

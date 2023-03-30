@@ -41,7 +41,7 @@ public class DevHelpers
         await InvokeCmdCommand($"Xcopy \"{from}\" \"{to}\" /E /H /C /I /y");
     }
 
-    private static async Task InvokeCmdCommand(string command)
+    public static async Task InvokeCmdCommand(string command)
     {
         System.Diagnostics.Process process = new System.Diagnostics.Process();
         System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();

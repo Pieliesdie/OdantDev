@@ -66,6 +66,8 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="CommunityToolkit.Mvvm, Version=8.0.0.0, Culture=neutral, PublicKeyToken=4aff67a105548ee2, processorArchitecture=MSIL">
+	<PrivateAssets>all</PrivateAssets>
+	  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\SourceGenerators\CommunityToolkit.Mvvm.dll</HintPath>
     </Reference>
@@ -128,6 +130,9 @@
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.4.2123">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="morelinq">
+      <Version>3.4.1</Version>
     </PackageReference>
     <PackageReference Include="System.Linq.Parallel">
       <Version>4.3.0</Version>

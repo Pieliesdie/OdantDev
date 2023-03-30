@@ -28,8 +28,9 @@ using System.Windows.Media;
 
 namespace OdantDev.Model;
 
+
 [ObservableObject]
-public partial class StructureItemViewModel<T> where T : StructureItem
+public sealed partial class StructureItemViewModel<T>  where T : StructureItem
 {
     static readonly IEnumerable<StructureItemViewModel<T>> dummyList = new List<StructureItemViewModel<T>>() { new StructureItemViewModel<T>() { Name = "Loading...", Icon = Images.GetImage(Images.GetImageIndex(Icons.Clock)).ConvertToBitmapImage() } };
     ILogger logger;
@@ -76,6 +77,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
 
     [ObservableProperty]
     bool isExpanded;
+
     async partial void OnIsExpandedChanged(bool value)
     {
         if (value && !isLoaded)
@@ -100,7 +102,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
                         if (Children == dummyList || Children is null)
                             Children = GetChildren(Item, this, logger);
 
-                        return Children?.Any(x => x.HasModule) ?? false;
+                        return Children?.OfType<StructureItemViewModel<T>>().Any(x => x.HasModule) ?? false;
                     }
             }
             return false;
@@ -167,52 +169,31 @@ public partial class StructureItemViewModel<T> where T : StructureItem
     }
     async Task SetChildrenAsync(T item, ILogger logger = null)
     {
-        var task = Task.Run(() => GetChildren(item, this, logger).ToList());
+        var task = Task.Run(() => GetChildren(item, this, logger).ToImmutableList());
         if (task == await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(10))))
         {
             Children = await task;
         }
         else
         {
-            logger?.Info($"Timeout when getting children for {item}");
+            logger?.Info($"Timeout when getting children for {this}");
             Children = null;
         }
     }
-    static IEnumerable<StructureItemViewModel<T>> GetChildren(T item, StructureItemViewModel<T> parent = null, ILogger logger = null)
+
+    IEnumerable<StructureItemViewModel<T>> GetChildren(T item, StructureItemViewModel<T> parent = null, ILogger logger = null)
     {
-        var items = ServerApi.FindConfigItems(item);
-        var children = items
-            .Where(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution)
+        var items = ServerApi.FindConfigItems(item)
+            .ToLookup(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution);
+
+        IEnumerable<StructureItemViewModel<T>> children = items[true]
             .Select(child => new StructureItemViewModel<T>(child as T, parent, logger))
             .OrderBy(x => x.Item.SortIndex)
             .ThenBy(x => x.Name);
 
-        switch (item.ItemType)
-        {
-            case ItemType.Class:
-            case ItemType.Module:
-            case ItemType.Solution:
-            case ItemType.Host:
-                {
-                    //TODO: refactor me
-                    foreach (var child in children)
-                    {
-                        if (child.RemoteItem.Id == item.RemoteItem.Id)
-                        {
-                            var rootItems = GetChildren(child.Item as T, parent, logger);
-                            foreach (var rootItem in rootItems)
-                            {
-                                yield return rootItem;
-                            }
-                            continue;
-                        }
-                        yield return child;
-                    }
-                    yield break;
-                }
-        };
-        var modules = items.OfType<DomainModule>();
-        var workplaces = items.OfType<DomainSolution>();
+        //create folders for modules and workplaces
+        var modules = items[false].OfType<DomainModule>();
+        var workplaces = items[false].OfType<DomainSolution>();
         if (workplaces.Any())
         {
             var workplace = new StructureItemViewModel<T>()
@@ -233,7 +214,18 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             };
             yield return module;
         }
-        //TODO: refactor me
+
+        //create folders for categories
+        if (item.ItemType == ItemType.Organization)
+        {
+            var emptyGroupedChildren = children.ToLookup(x => string.IsNullOrWhiteSpace(x.Item.Category));
+
+            foreach (var groupedItem in ApplyCategories(emptyGroupedChildren[false]))
+                yield return groupedItem;
+            children = emptyGroupedChildren[true];
+        }
+
+        //hide inner class in domain
         foreach (var child in children)
         {
             if (child.RemoteItem.Id == item.RemoteItem.Id)
@@ -246,6 +238,23 @@ public partial class StructureItemViewModel<T> where T : StructureItem
                 continue;
             }
             yield return child;
+        }
+    }
+
+    IEnumerable<StructureItemViewModel<T>> ApplyCategories(IEnumerable<StructureItemViewModel<T>> structureItems, string subGroupParent = "")
+    {
+        var groups = structureItems
+            .GroupBy(x => x.Item.Category.SubstringAfter(subGroupParent).SubstringBefore("/"))
+            .OrderBy(x => x.Key);
+        foreach (var group in groups)
+        {
+            var rootItems = group.ToLookup(x => group.Key == x.Item.Category.SubstringAfter(subGroupParent));
+            yield return new StructureItemViewModel<T>()
+            {
+                Name = group.Key,
+                Icon = Images.GetImage(Images.GetImageIndex(Icons.Folder)).ConvertToBitmapImage(),
+                Children = ApplyCategories(rootItems[false], $"{group.Key}/").Concat(rootItems[true])
+            };
         }
     }
 
@@ -277,7 +286,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
     [RelayCommand]
     public void OpenDir()
     {
-        DirectoryInfo dirPath = Item.Dir.ServerToFolder();
+        DirectoryInfo dirPath = Item.Dir?.ServerToFolder();
         if (dirPath is not { Exists: true })
             return;
 
