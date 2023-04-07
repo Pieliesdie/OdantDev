@@ -1,0 +1,62 @@
+using EnvDTE80;
+
+using Microsoft.Win32;
+
+using oda;
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
+
+namespace OdantDev;
+
+public static class BitmapEx
+{ 
+    public static BitmapImage ConvertToBitmapImage(this Bitmap src)
+    {
+        if (src == null) return null;
+        using MemoryStream ms = new MemoryStream();
+        src.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+        BitmapImage image = new BitmapImage();
+        image.BeginInit();
+        image.CacheOption = BitmapCacheOption.OnLoad;
+        ms.Seek(0, SeekOrigin.Begin);
+        image.StreamSource = ms;
+        image.EndInit();
+        image.Freeze();
+        return image;
+    }
+    public static string ToBase64String(this BitmapImage src)
+    {
+        if (src == null) return null;
+        var encoder = new PngBitmapEncoder();
+        var frame = BitmapFrame.Create(src);
+        encoder.Frames.Add(frame);
+        using (var stream = new MemoryStream())
+        {
+            encoder.Save(stream);
+            return Convert.ToBase64String(stream.ToArray());
+        }
+    }
+    public static BitmapImage FromBase64String(this string src)
+    {
+        if (src == null) return null;
+        byte[] binaryData = Convert.FromBase64String(src);
+        using MemoryStream ms = new MemoryStream(binaryData);
+        ms.Seek(0, SeekOrigin.Begin);
+        BitmapImage image = new BitmapImage();
+        image.BeginInit();
+        image.CacheOption = BitmapCacheOption.OnLoad;
+        image.StreamSource = ms;
+        image.EndInit();
+        image.Freeze();
+        return image;
+    }
+}

@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("OdantDev")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Infostandart")]
 [assembly: AssemblyProduct("OdantDev")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]

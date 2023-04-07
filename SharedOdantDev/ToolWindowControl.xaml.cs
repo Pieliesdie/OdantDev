@@ -24,6 +24,7 @@ using SharedOdanDev.OdaOverride;
 using System.Diagnostics;
 using MoreLinq;
 using odaServer;
+using System.Windows.Data;
 
 namespace OdantDev;
 
@@ -118,7 +119,7 @@ public partial class ToolWindow1Control : UserControl
     private bool IsVisualStudioDark()
     {
         var defaultBackground = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowBackgroundColorKey);
-        var isDarkTheme = (384 - defaultBackground.R - defaultBackground.G - defaultBackground.B) > 0 ? true : false;
+        var isDarkTheme = (384 - defaultBackground.R - defaultBackground.G - defaultBackground.B) > 0;
         return isDarkTheme;
     }
 
@@ -146,7 +147,7 @@ public partial class ToolWindow1Control : UserControl
     #region Connect to oda and get data
     private async void Connect(object sender, RoutedEventArgs e)
     {
-        using var statusCleaner = Disposable.Create(() => Status = string.Empty);
+        using var cleaner = Disposable.Create(() => Status = string.Empty);
         Status = "Checking DLLs in oda folder";
         string odaPath = AddinSettings.SelectedOdaFolder.Path;
 
@@ -219,6 +220,7 @@ public partial class ToolWindow1Control : UserControl
         OdaTree.Visibility = Visibility.Collapsed;
         MainTabControl.Visibility = Visibility.Collapsed;
         ExitButton.Visibility = Visibility.Collapsed;
+
         spConnect.IsEnabled = true;
         ErrorTb.Text = message;
     }
@@ -269,7 +271,7 @@ public partial class ToolWindow1Control : UserControl
             var uploadTask = Task.Run(() =>
             {
                 var moduleFolder = cls.Dir.OpenOrCreateFolder("modules");
-                var templateFolder = new DirectoryInfo(Path.Combine(Extension.VSIXPath.FullName, @"Templates\ProjectTemplate"));
+                var templateFolder = new DirectoryInfo(Path.Combine(VsixExtension.VSIXPath.FullName, @"Templates\ProjectTemplate"));
                 moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "AssemblyInfo.cs"), @"AssemblyInfo.cs", true);
                 moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "Init.cs"), @"Init.cs", true);
                 moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "TemplateProject.csproj"), @"TemplateProject.csproj", true);

@@ -119,7 +119,7 @@
       <Version>16.10.35</Version>
     </PackageReference>
     <PackageReference Include="morelinq">
-      <Version>3.4.1</Version>
+      <Version>3.4.2</Version>
     </PackageReference>
     <PackageReference Include="System.Linq.Parallel">
       <Version>4.3.0</Version>

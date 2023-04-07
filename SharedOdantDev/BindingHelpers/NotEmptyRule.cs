@@ -6,20 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
-namespace OdantDev
+namespace OdantDev;
+
+public class NotEmptyRule : ValidationRule
 {
-    public class NotEmptyRule : ValidationRule
+    public override ValidationResult Validate(object value, CultureInfo cultureInfo)
     {
-        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
+        switch (value)
         {
-            switch (value)
-            {
-                case null:
-                case "MyToolWindow":
-                    return new ValidationResult(false, "Value can't be null");
-                default:
-                    return new ValidationResult(true, null);
-            }
+            case null:
+            case "MyToolWindow":
+                return new ValidationResult(false, "Value can't be null");
+            default:
+                return new ValidationResult(true, null);
         }
     }
 }

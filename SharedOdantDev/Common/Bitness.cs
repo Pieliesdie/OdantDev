@@ -1,8 +1,6 @@
-﻿namespace OdantDev
+﻿namespace OdantDev;
+public enum Bitness
 {
-    public enum Bitness
-    {
-        x64,
-        x86
-    }
+    x64,
+    x86
 }

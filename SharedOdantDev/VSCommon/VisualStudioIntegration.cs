@@ -324,7 +324,7 @@ public partial class VisualStudioIntegration
         project.Name = $"{sourceItem.Name}-{sourceItem.Id}";
 
         project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartAction").Value = prjStartAction.prjStartActionProgram;
-        var startProgram = Extension.Platform == Bitness.x64 ? "ODA.exe" : "oda.wrapper32.exe";
+        var startProgram = VsixExtension.Platform == Bitness.x64 ? "ODA.exe" : "oda.wrapper32.exe";
         project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartProgram").Value = Path.Combine(OdaFolder.FullName, startProgram);
         project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartArguments").Value = "debug";
         project.Properties.Item("AssemblyName").Value = project.Name;
@@ -337,7 +337,7 @@ public partial class VisualStudioIntegration
             {
                 File.Delete(assemblyFile);
             }
-            assemblyInfo = project.ProjectItems.AddFromFileCopy(Path.Combine(Extension.VSIXPath.FullName, @"Templates\AssemblyInfo.cs"));
+            assemblyInfo = project.ProjectItems.AddFromFileCopy(Path.Combine(VsixExtension.VSIXPath.FullName, @"Templates\AssemblyInfo.cs"));
         }
         var attributes = assemblyInfo.FileCodeModel?.CodeElements?.OfType<CodeAttribute2>()?.ToDictionary(x => x.Name);
         if (attributes != null)

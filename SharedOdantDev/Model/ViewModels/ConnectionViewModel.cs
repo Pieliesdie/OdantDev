@@ -11,9 +11,8 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
-using GitLabApiClient.Models.Users.Responses;
 using SharedOdantDev.Common;
-using odaServer;
+using System.Collections.ObjectModel;
 
 namespace OdantDev;
 
@@ -21,10 +20,8 @@ namespace OdantDev;
 public partial class ConnectionModel : IDisposable
 {
     public static readonly string[] odaClientLibraries = { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
-    public static readonly string[] odaServerLibraries = { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
+    private static readonly string[] odaServerLibraries = { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
     private readonly ILogger logger;
-
-    private List<Host> _hosts;
 
     [ObservableProperty]
     Domain develope;
@@ -32,8 +29,14 @@ public partial class ConnectionModel : IDisposable
     [ObservableProperty]
     Host localhost;
 
+    [ObservableProperty] 
+    ObservableCollection<StructureItemViewModel<StructureItem>> hosts;
+
+    [ObservableProperty] 
+    ObservableCollection<StructureItemViewModel<StructureItem>> pinnedItems;
+
     [ObservableProperty]
-    List<StructureItemViewModel<StructureItem>> hosts;
+    ConcatenatedCollection<ObservableCollection<StructureItemViewModel<StructureItem>>, StructureItemViewModel<StructureItem>> items;
 
     [ObservableProperty]
     List<RepoBaseViewModel> _repos;
@@ -74,24 +77,26 @@ public partial class ConnectionModel : IDisposable
 
             stopWatch = new Stopwatch();
             stopWatch.Start();
+
             Connection.CoreMode = CoreMode.AddIn;
             var connected = await Task.Run(() => Connection.Login());
             if (connected.Not())
                 return (false, "Can't connect to oda");
 
             AutoLogin = Connection.AutoLogin;
-            Hosts = await HostsListAsync();
+            Hosts = new ObservableCollection<StructureItemViewModel<StructureItem>>(await HostsListAsync());
+            PinnedItems = new ObservableCollection<StructureItemViewModel<StructureItem>>(await PinnedListAsync());
             Developers = await DevelopListAsync();
-            if (Develope is not null)
-            {
-                Hosts = Hosts?.Prepend(new StructureItemViewModel<StructureItem>(item: Develope, logger: logger))?.ToList();
-            }
+            Items = new(PinnedItems, Hosts);
+
+            oda.OdaOverride.INI.DebugINI.Clear();
+            await oda.OdaOverride.INI.DebugINI.SaveAsync();
+
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
             string elapsedTime = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}.{ts.Milliseconds / 10:00}";
             logger?.Info($"Load time: {elapsedTime}");
-            oda.OdaOverride.INI.DebugINI.Clear();
-            await oda.OdaOverride.INI.DebugINI.SaveAsync();
+
             return (true, null);
         }
         catch (Exception ex)
@@ -103,12 +108,22 @@ public partial class ConnectionModel : IDisposable
             stopWatch?.Stop();
         }
     }
+    private async Task<IEnumerable<StructureItemViewModel<StructureItem>>> PinnedListAsync()
+    {
+        return await Task.Run(() =>
+        {
+            return AddinSettings
+            .PinnedItems
+            .Select(x => StructureItemEx.FindItem(Connection, x))
+            .Select(x => new StructureItemViewModel<StructureItem>(x, null, logger, this));
+        });
+    }
 
     private async Task<List<DomainDeveloper>> DevelopListAsync()
     {
         return await Task.Run(async () =>
         {
-            Develope = ServerApi.FindDomain(Localhost, "D:DEVELOPE");
+            Develope = StructureItemEx.FindDomain(Localhost, "D:DEVELOPE");
             var developList = Developers = Develope.FindDomains()?.OfType<DomainDeveloper>()?.ToList();
             var retryCount = 5;
             while (retryCount-- > 0 && developList is null)
@@ -148,11 +163,11 @@ public partial class ConnectionModel : IDisposable
         });
     }
 
-    private async Task<List<StructureItemViewModel<StructureItem>>> HostsListAsync()
+    private async Task<IEnumerable<StructureItemViewModel<StructureItem>>> HostsListAsync()
     {
         return await Task.Run(async () =>
         {
-            var hosts = _hosts = Connection.FindHosts().ToList();
+            var hosts = Connection.FindHosts().ToList();
             var localHost = Localhost = hosts.FirstOrDefault(x => x.IsLocal);
             var retryCount = 10;
             while (retryCount-- > 0 && localHost?.OnLine == false)
@@ -161,10 +176,9 @@ public partial class ConnectionModel : IDisposable
                 await Task.Delay(1000);
             }
             return hosts
-                .OrderBy(x=> x.SortIndex)
-                .ThenBy(x=> x.Label)
-                .Select(host => new StructureItemViewModel<StructureItem>(host, logger: logger))
-                .ToList();
+                .OrderBy(x => x.SortIndex)
+                .ThenBy(x => x.Label)
+                .Select(host => new StructureItemViewModel<StructureItem>(host, logger: logger, connection: this));
         });
     }
 
@@ -185,8 +199,8 @@ public partial class ConnectionModel : IDisposable
     {
         try
         {
-            ServerAssemblies = Extension.LoadServerLibraries(odaFolder.FullName, Extension.Platform, odaServerLibraries);
-            ClientAssemblies = Extension.LoadClientLibraries(odaFolder.FullName, odaClientLibraries);
+            ServerAssemblies = VsixExtension.LoadServerLibraries(odaFolder.FullName, VsixExtension.Platform, odaServerLibraries);
+            ClientAssemblies = VsixExtension.LoadClientLibraries(odaFolder.FullName, odaClientLibraries);
             return (true, null);
         }
         catch (Exception ex)

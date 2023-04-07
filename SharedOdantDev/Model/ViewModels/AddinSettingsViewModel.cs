@@ -16,8 +16,9 @@ namespace OdantDev.Model;
 public partial class AddinSettings
 {
     private const string FILE_NAME = "AddinSettings.xml";
-    private static readonly string TemplatePath = Path.Combine(Extension.VSIXPath.FullName, "Templates", FILE_NAME);
+    private static readonly string TemplatePath = Path.Combine(VsixExtension.VSIXPath.FullName, "Templates", FILE_NAME);
     private static readonly XmlSerializer Serializer = new(typeof(AddinSettings));
+    public static readonly string[] OdaLibraries = new[] { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
 
     public AddinSettings() { }
 
@@ -25,7 +26,7 @@ public partial class AddinSettings
     bool isVirtualizeTreeView;
 
     [ObservableProperty]
-    ObservableCollection<string> pinnedItems = new() { "localhost/D:Develope" };
+    ObservableCollection<string> pinnedItems;
 
     [ObservableProperty]
     ObservableCollection<Project> lastProjects;
@@ -62,9 +63,6 @@ public partial class AddinSettings
     string gitLabApiPath;
 
     [XmlIgnore]
-    public ImmutableArray<string> OdaLibraries => new() { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
-
-    [XmlIgnore]
     public string AddinSettingsPath { get; private set; }
 
     public static AddinSettings Create(DirectoryInfo folder)
@@ -88,7 +86,7 @@ public partial class AddinSettings
             settings = Serializer.Deserialize(fs) as AddinSettings;
         }
         settings.AddinSettingsPath = path;
-        settings.OdaFolders.Insert(0, new PathInfo("Last run", Extension.LastOdaFolder.FullName));
+        settings.OdaFolders.Insert(0, new PathInfo("Last run", VsixExtension.LastOdaFolder.FullName));
         return settings;
     }
 

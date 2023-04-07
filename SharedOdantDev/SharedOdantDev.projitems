@@ -17,19 +17,26 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BindingHelpers\BooleanToCollapsedVisibility.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)bindinghelpers\ConcatenatedCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BindingHelpers\NotEmptyRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)common\BitmapEx.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Bitness.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\DevHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)common\DirectoryEx.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\ServerApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)common\Task.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)common\VsixExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\DTEWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\HelperMain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\MenuBarHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ResetToolboxProcessor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ToolboxReseter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ToolboxReseterSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ViewModels\AddinSettingsViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Disposable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)odaoverride\StructureItemEx.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\Model\BuildInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ViewModels\ConnectionViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\Git\GitClient.cs" />

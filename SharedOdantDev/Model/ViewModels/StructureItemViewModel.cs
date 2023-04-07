@@ -28,12 +28,12 @@ using System.Windows.Media;
 
 namespace OdantDev.Model;
 
-
 [ObservableObject]
-public sealed partial class StructureItemViewModel<T>  where T : StructureItem
+public partial class StructureItemViewModel<T> where T : StructureItem
 {
     static readonly IEnumerable<StructureItemViewModel<T>> dummyList = new List<StructureItemViewModel<T>>() { new StructureItemViewModel<T>() { Name = "Loading...", Icon = Images.GetImage(Images.GetImageIndex(Icons.Clock)).ConvertToBitmapImage() } };
     ILogger logger;
+    ConnectionModel connection;
     bool isLoaded;
 
     delegate void Update(int Type, string Params);
@@ -54,6 +54,7 @@ public sealed partial class StructureItemViewModel<T>  where T : StructureItem
     }
 
     ODAItem RemoteItem => this.Item?.RemoteItem;
+    public bool IsPinned => connection?.PinnedItems?.Contains(this as StructureItemViewModel<StructureItem>) ?? false;// .AddinSettings?.PinnedItems?.Contains(Item?.FullId) ?? false;
     public bool HasRepository => !string.IsNullOrWhiteSpace(Item?.Root?.GetAttribute("GitLabRepository"));
     public bool CanCreateModule => Item is Class && !HasModule;
     public bool IsLocal => Item?.Host?.IsLocal ?? false;
@@ -85,7 +86,7 @@ public sealed partial class StructureItemViewModel<T>  where T : StructureItem
             isLoaded = true;
             if (Children is null || Children == dummyList)
             {
-                await SetChildrenAsync(Item, logger);
+                await SetChildrenAsync(Item, logger, connection);
             }
         }
     }
@@ -126,9 +127,10 @@ public sealed partial class StructureItemViewModel<T>  where T : StructureItem
         }
     }
     public StructureItemViewModel() { }
-    public StructureItemViewModel(T item, StructureItemViewModel<T> parent = null, ILogger logger = null) : this()
+    public StructureItemViewModel(T item, StructureItemViewModel<T> parent = null, ILogger logger = null, ConnectionModel connection = null) : this()
     {
         this.logger = logger;
+        this.connection = connection;
         Item = item;
         Parent = parent;
         ItemType = Item.ItemType;
@@ -167,9 +169,10 @@ public sealed partial class StructureItemViewModel<T>  where T : StructureItem
             Icon = await Item.GetImageSource();
         }
     }
-    async Task SetChildrenAsync(T item, ILogger logger = null)
+    async Task SetChildrenAsync(T item, ILogger logger = null, ConnectionModel connection = null)
     {
-        var task = Task.Run(() => GetChildren(item, this, logger).ToImmutableList());
+        var task = Task.Run(() => GetChildren(item, this, logger, connection).ToImmutableList());
+
         if (task == await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(10))))
         {
             Children = await task;
@@ -181,13 +184,12 @@ public sealed partial class StructureItemViewModel<T>  where T : StructureItem
         }
     }
 
-    IEnumerable<StructureItemViewModel<T>> GetChildren(T item, StructureItemViewModel<T> parent = null, ILogger logger = null)
+    IEnumerable<StructureItemViewModel<T>> GetChildren(T item, StructureItemViewModel<T> parent = null, ILogger logger = null, ConnectionModel connection = null)
     {
-        var items = ServerApi.FindConfigItems(item)
-            .ToLookup(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution);
+        var items = item.FindConfigItems().ToLookup(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution);
 
         IEnumerable<StructureItemViewModel<T>> children = items[true]
-            .Select(child => new StructureItemViewModel<T>(child as T, parent, logger))
+            .Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))
             .OrderBy(x => x.Item.SortIndex)
             .ThenBy(x => x.Name);
 
@@ -199,8 +201,8 @@ public sealed partial class StructureItemViewModel<T>  where T : StructureItem
             var workplace = new StructureItemViewModel<T>()
             {
                 Name = "Workplaces",
-                Icon = Images.GetImage(Images.GetImageIndex(Icons.UserRole)).ConvertToBitmapImage(),
-                Children = workplaces.Select(child => new StructureItemViewModel<T>(child as T, parent, logger))
+                Icon = ImageFactory.WorkplaceImage,
+                Children = workplaces.Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))
             };
             yield return workplace;
         }
@@ -209,8 +211,8 @@ public sealed partial class StructureItemViewModel<T>  where T : StructureItem
             var module = new StructureItemViewModel<T>()
             {
                 Name = "Modules",
-                Icon = Images.GetImage(Images.GetImageIndex(Icons.MagentaFolder)).ConvertToBitmapImage(),
-                Children = modules.Select(child => new StructureItemViewModel<T>(child as T, parent, logger))
+                Icon = ImageFactory.ModuleImage,
+                Children = modules.Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))
             };
             yield return module;
         }
@@ -252,7 +254,7 @@ public sealed partial class StructureItemViewModel<T>  where T : StructureItem
             yield return new StructureItemViewModel<T>()
             {
                 Name = group.Key,
-                Icon = Images.GetImage(Images.GetImageIndex(Icons.Folder)).ConvertToBitmapImage(),
+                Icon = ImageFactory.FolderImage,
                 Children = ApplyCategories(rootItems[false], $"{group.Key}/").Concat(rootItems[true])
             };
         }
@@ -266,7 +268,7 @@ public sealed partial class StructureItemViewModel<T>  where T : StructureItem
         (Item as Class)?.ReloadClassFromServer();
         if (isLoaded)
         {
-            await SetChildrenAsync(this.Item, logger);
+            await SetChildrenAsync(this.Item, logger, connection);
         }
         await SetIconAsync();
         Name = $"{RemoteItem?.Label ?? RemoteItem?.Name}";
@@ -284,13 +286,45 @@ public sealed partial class StructureItemViewModel<T>  where T : StructureItem
     }
 
     [RelayCommand]
-    public void OpenDir()
+    public async Task OpenDirAsync()
     {
-        DirectoryInfo dirPath = Item.Dir?.ServerToFolder();
-        if (dirPath is not { Exists: true })
-            return;
+        try
+        {
+            if(Item.Dir is null)
+            {
+                logger.Info($"{Item} has no directory");
+                return;
+            }
 
-        Process.Start("explorer", DevHelpers.ClearDomainAndClassInPath(dirPath.FullName));
+            var dirPath = await Task.Run(Item.Dir.RemoteFolder.LoadFolder).ConfigureAwait(true);
+
+            if (Directory.Exists(dirPath).Not())
+                return;
+
+            Process.Start("explorer", DevHelpers.ClearDomainAndClassInPath(dirPath));
+        }
+        catch(Exception ex)
+        {
+            logger.Info(ex.ToString());
+        }
+    }
+
+    [RelayCommand]
+    public async Task PinAsync()
+    {
+        if (!IsPinned)
+        {
+            var copy = new StructureItemViewModel<StructureItem>(Item, Parent as StructureItemViewModel<StructureItem>, logger, connection);
+            connection.PinnedItems.Insert(0, copy);
+            connection.AddinSettings.PinnedItems.Add(copy.Item.FullId);
+        }
+        else
+        {
+            connection.PinnedItems.Remove(x => x.Item.FullId == this.Item.FullId);
+            connection.AddinSettings.PinnedItems.Remove(Item.FullId);
+        }
+        await connection.AddinSettings.SaveAsync().ConfigureAwait(true);
+        OnPropertyChanged("IsPinned");
     }
 
     public override string ToString() => Name;
