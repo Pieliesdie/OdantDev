@@ -6,6 +6,8 @@ using Microsoft.Extensions.Caching.Memory;
 
 using odaCore.Views;
 
+using OdantDev;
+
 using odaServer;
 
 namespace oda.OdaOverride;
@@ -22,6 +24,26 @@ public static class ItemFactory
     {
         get => _connection ??= new Connection(visible: true, login: false);
         set => _connection = value;
+    }
+
+    public static Class CreateClass(this StructureItem structureItem, string name)
+    {
+        var cls = (structureItem as Class) ?? structureItem.Class ?? throw new Exception("Class can't be created here");
+        return cls.CreateChildClass(name);
+    }
+
+    public static Domain CreateDomain(this Domain domain, string name, string type)
+    {
+        if(domain.RemoteItem is not ODADomain remoteDomain)
+        {
+            throw new NullReferenceException("Can't get remote domain");
+        }
+        var newDomain = StructureItemEx.CreateByType(ServerApi._Create_Domain(remoteDomain.GetIntPtr(), name, type));
+        if (newDomain == null || !newDomain.Validate)
+        {
+            throw new Exception(newDomain.error);
+        }
+        return (GetStorageItem(newDomain) as Domain) ?? throw new Exception("Uknown error");
     }
 
     public static StructureItem GetStorageItem(ODAItem item)

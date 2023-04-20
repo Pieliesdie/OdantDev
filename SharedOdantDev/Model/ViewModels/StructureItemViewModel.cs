@@ -25,9 +25,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace OdantDev.Model;
-
 [ObservableObject]
 public partial class StructureItemViewModel<T> where T : StructureItem
 {
@@ -39,22 +39,22 @@ public partial class StructureItemViewModel<T> where T : StructureItem
     delegate void Update(int Type, string Params);
     event Update OnUpdate;
     ServerApi.OnUpdate_CALLBACK Update_CALLBACK;
-    void Updated(int type, IntPtr Params)
+    async void Updated(int type, IntPtr Params)
     {
         if (type == 2)
         {
-            RefreshCommand.Execute(this);
-            this.Parent?.RefreshCommand.Execute(this);
+            await this.RefreshAsync();
+            await this.Parent?.RefreshAsync();
         }
         else if (type < 6)
         {
-            RefreshCommand.Execute(this);
+            await this.RefreshAsync();
         }
         OnUpdate?.Invoke(type, Params == IntPtr.Zero ? String.Empty : Marshal.PtrToStringUni(Params));
     }
 
     ODAItem RemoteItem => this.Item?.RemoteItem;
-    public bool IsPinned => connection?.PinnedItems?.Contains(this as StructureItemViewModel<StructureItem>) ?? false;// .AddinSettings?.PinnedItems?.Contains(Item?.FullId) ?? false;
+    public bool IsPinned => connection?.PinnedItems?.Contains(this as StructureItemViewModel<StructureItem>) ?? false;
     public bool HasRepository => !string.IsNullOrWhiteSpace(Item?.Root?.GetAttribute("GitLabRepository"));
     public bool CanCreateModule => Item is Class && !HasModule;
     public bool IsLocal => Item?.Host?.IsLocal ?? false;
@@ -101,7 +101,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
                 case ItemType.Module:
                     {
                         if (Children == dummyList || Children is null)
-                            Children = GetChildren(Item, this, logger);
+                            Children = GetChildren(Item, this, logger, connection);
 
                         return Children?.OfType<StructureItemViewModel<T>>().Any(x => x.HasModule) ?? false;
                     }
@@ -175,7 +175,8 @@ public partial class StructureItemViewModel<T> where T : StructureItem
 
         if (task == await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(10))))
         {
-            Children = await task;
+            var children = await task;
+            Dispatcher.CurrentDispatcher.Invoke(() => Children =  children);
         }
         else
         {
@@ -186,7 +187,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
 
     IEnumerable<StructureItemViewModel<T>> GetChildren(T item, StructureItemViewModel<T> parent = null, ILogger logger = null, ConnectionModel connection = null)
     {
-        var items = item.FindConfigItems().ToLookup(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution);
+        var items = item.FindConfigItems().OrderBy(x=> x.Name).ToLookup(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution);
 
         IEnumerable<StructureItemViewModel<T>> children = items[true]
             .Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))
@@ -232,7 +233,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
         {
             if (child.RemoteItem.Id == item.RemoteItem.Id)
             {
-                var rootItems = GetChildren(child.Item as T, parent, logger);
+                var rootItems = GetChildren(child.Item as T, parent, logger, connection);
                 foreach (var rootItem in rootItems)
                 {
                     yield return rootItem;
@@ -260,10 +261,10 @@ public partial class StructureItemViewModel<T> where T : StructureItem
         }
     }
 
-    [RelayCommand]
-    public async Task Refresh()
+    public async Task RefreshAsync()
     {
         if (Item == null) { return; }
+
         Item.Reset();
         (Item as Class)?.ReloadClassFromServer();
         if (isLoaded)
@@ -290,7 +291,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
     {
         try
         {
-            if(Item.Dir is null)
+            if (Item.Dir is null)
             {
                 logger.Info($"{Item} has no directory");
                 return;
@@ -299,23 +300,26 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             var dirPath = await Task.Run(Item.Dir.RemoteFolder.LoadFolder).ConfigureAwait(true);
 
             if (Directory.Exists(dirPath).Not())
+            {
+                logger.Info($"Folder {dirPath} doesn't exist for {Item}");
                 return;
+            }
 
             Process.Start("explorer", DevHelpers.ClearDomainAndClassInPath(dirPath));
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             logger.Info(ex.ToString());
         }
     }
 
     [RelayCommand]
-    public async Task PinAsync()
+    public void Pin()
     {
         if (!IsPinned)
         {
             var copy = new StructureItemViewModel<StructureItem>(Item, Parent as StructureItemViewModel<StructureItem>, logger, connection);
-            connection.PinnedItems.Insert(0, copy);
+            connection.PinnedItems.Add(copy);
             connection.AddinSettings.PinnedItems.Add(copy.Item.FullId);
         }
         else
@@ -323,7 +327,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             connection.PinnedItems.Remove(x => x.Item.FullId == this.Item.FullId);
             connection.AddinSettings.PinnedItems.Remove(Item.FullId);
         }
-        await connection.AddinSettings.SaveAsync().ConfigureAwait(true);
+        _ = connection.AddinSettings.SaveAsync();
         OnPropertyChanged("IsPinned");
     }
 

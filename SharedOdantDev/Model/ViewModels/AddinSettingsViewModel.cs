@@ -16,7 +16,9 @@ namespace OdantDev.Model;
 public partial class AddinSettings
 {
     private const string FILE_NAME = "AddinSettings.xml";
-    private static readonly string TemplatePath = Path.Combine(VsixExtension.VSIXPath.FullName, "Templates", FILE_NAME);
+    private const string TEMPLATES_FOLDER_NAME = "Templates";
+
+    private static readonly string TemplatePath = Path.Combine(VsixExtension.VSIXPath.FullName, TEMPLATES_FOLDER_NAME, FILE_NAME);
     private static readonly XmlSerializer Serializer = new(typeof(AddinSettings));
     public static readonly string[] OdaLibraries = new[] { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
 
@@ -107,7 +109,7 @@ public partial class AddinSettings
 
     public async Task<bool> SaveAsync()
     {
-        return await Task.Run(() => Save());
+        return await Task.Run(Save);
     }
 
     public struct Project

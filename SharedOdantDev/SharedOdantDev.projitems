@@ -9,6 +9,10 @@
     <Import_RootNamespace>SharedOdantDev</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)Dialogs\InputDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="$(MSBuildThisFileDirectory)ToolWindowControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -33,6 +37,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ResetToolboxProcessor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ToolboxReseter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ToolboxReseterSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Dialogs\InputDialog.xaml.cs">
+	  <DependentUpon>InputDialog.xaml</DependentUpon>
+	</Compile>
     <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ViewModels\AddinSettingsViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Disposable.cs" />

@@ -23,8 +23,7 @@ using File = System.IO.File;
 using SharedOdanDev.OdaOverride;
 using System.Diagnostics;
 using MoreLinq;
-using odaServer;
-using System.Windows.Data;
+using oda.OdaOverride;
 
 namespace OdantDev;
 
@@ -98,9 +97,9 @@ public partial class ToolWindow1Control : UserControl
         // from this assembly, which causes the MaterialDesign assemblies to be searched
         // relative to this assembly's path. Otherwise, the MaterialDesign assemblies
         // are searched relative to Eclipse's path, so they're not found.
-        var card = new Card();
-        var hue = new Hue("Dummy", Colors.Black, Colors.White);
-        var ext = new OpenDirectoryControl();
+        _ = new Card();
+        _ = new Hue("Dummy", Colors.Black, Colors.White);
+        _= new OpenDirectoryControl();
         _ = new MdXaml.TextToFlowDocumentConverter();
     }
 
@@ -227,6 +226,68 @@ public partial class ToolWindow1Control : UserControl
     #endregion
 
     #region ui button logic
+    public void CreateDomainClick(object sender, RoutedEventArgs e)
+    {
+        if ((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is not Domain domain)
+        {
+            logger?.Info("Domain can be created only from another domain");
+            return;
+        }
+        var dialog = new Dialogs.InputDialog("Domain name", "Insert name") { IsDarkTheme = this.IsDarkTheme };
+        if(!(dialog.ShowDialog() == true))
+        {
+            return;
+        }
+        try
+        {
+            var newDomain = oda.OdaOverride.ItemFactory.CreateDomain(domain, dialog.Answer, "MODULE");
+        }
+        catch (Exception ex) 
+        {
+            logger.Info(ex.Message); 
+        }
+    }
+
+    public async void CreateClassClick(object sender, RoutedEventArgs e)
+    {
+        var selectedItem = OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>;
+        var innerItem = selectedItem?.Item;
+        if (selectedItem is null || innerItem is null)
+        {
+            logger?.Info("Class can't be created here");
+            return;
+        }
+        var dialog = new Dialogs.InputDialog("Class name", "Insert name") { IsDarkTheme = this.IsDarkTheme };
+        if (!(dialog.ShowDialog() == true))
+        {
+            return;
+        }
+        try
+        {
+            innerItem?.CreateClass(dialog.Answer);
+            await selectedItem.RefreshAsync();
+
+        }
+        catch(Exception ex)
+        {
+            logger.Info(ex.Message);
+        }
+    }
+
+    public async void RemoveItemClick(object sender, RoutedEventArgs e)
+    {
+        if (OdaTree?.SelectedItem is StructureItemViewModel<StructureItem> { Item: StructureItem structureItem })
+        {
+            try
+            {
+                if(Community.VisualStudio.Toolkit.VS.MessageBox.ShowConfirm($"Remove {structureItem}?"))
+                    structureItem.Remove();
+            }
+            catch (Exception ex) { logger.Info(ex.Message); }
+            return;
+        }
+    }
+
     private async void RefreshTreeButton_Click(object sender, RoutedEventArgs e)
     {
         using var statusCleaner = Disposable.Create(() => Status = string.Empty);

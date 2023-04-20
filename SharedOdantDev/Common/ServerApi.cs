@@ -46,4 +46,7 @@ public static class ServerApi
 
     [DllImport("odaClient.dll", EntryPoint = "ODAVariantsList_get_length", CallingConvention = CallingConvention.Cdecl)]
     public static extern int _GetLength(IntPtr list);
+
+    [DllImport("odaClient.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode, EntryPoint = "ODADomain_create_domain2", ExactSpelling = true)]
+    public static extern IntPtr _Create_Domain(IntPtr domain, [MarshalAs(UnmanagedType.LPWStr)] string name, [MarshalAs(UnmanagedType.LPWStr)] string type);
 }

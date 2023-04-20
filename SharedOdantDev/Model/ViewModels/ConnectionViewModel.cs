@@ -29,10 +29,10 @@ public partial class ConnectionModel : IDisposable
     [ObservableProperty]
     Host localhost;
 
-    [ObservableProperty] 
+    [ObservableProperty]
     ObservableCollection<StructureItemViewModel<StructureItem>> hosts;
 
-    [ObservableProperty] 
+    [ObservableProperty]
     ObservableCollection<StructureItemViewModel<StructureItem>> pinnedItems;
 
     [ObservableProperty]
@@ -115,6 +115,7 @@ public partial class ConnectionModel : IDisposable
             return AddinSettings
             .PinnedItems
             .Select(x => StructureItemEx.FindItem(Connection, x))
+            .Where(x => x != null)
             .Select(x => new StructureItemViewModel<StructureItem>(x, null, logger, this));
         });
     }
