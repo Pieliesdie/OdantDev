@@ -265,6 +265,8 @@ public partial class ToolWindow1Control : UserControl
         try
         {
             innerItem?.CreateClass(dialog.Answer);
+
+            //TODO: Подумать как обработать ситуацию с доменом модуля, тк. фактически мы не подписываемся на изменения внутреннего класса домена
             await selectedItem.RefreshAsync();
 
         }
@@ -280,8 +282,12 @@ public partial class ToolWindow1Control : UserControl
         {
             try
             {
-                if(Community.VisualStudio.Toolkit.VS.MessageBox.ShowConfirm($"Remove {structureItem}?"))
+                if (Community.VisualStudio.Toolkit.VS.MessageBox.ShowConfirm($"Remove {structureItem}?"))
+                {
                     structureItem.Remove();
+                    //TODO: Подумать как обработать ситуацию с доменом модуля, тк. фактически мы не подписываемся на изменения внутреннего класса домена
+                    await (OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>).Parent.RefreshAsync();
+                }
             }
             catch (Exception ex) { logger.Info(ex.Message); }
             return;
