@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using Microsoft.VisualStudio.Threading;
+
 using oda;
 
 using odaCore;
@@ -176,7 +178,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
         if (task == await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(10))))
         {
             var children = await task;
-            Dispatcher.CurrentDispatcher.Invoke(() => Children =  children);
+            Children =  children;
         }
         else
         {
@@ -261,13 +263,13 @@ public partial class StructureItemViewModel<T> where T : StructureItem
         }
     }
 
-    public async Task RefreshAsync()
+    public async Task RefreshAsync(bool force = false)
     {
         if (Item == null) { return; }
 
         Item.Reset();
         (Item as Class)?.ReloadClassFromServer();
-        if (isLoaded)
+        if (isLoaded || force)
         {
             await SetChildrenAsync(this.Item, logger, connection);
         }

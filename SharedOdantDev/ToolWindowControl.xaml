@@ -445,6 +445,7 @@
                                                         </MenuItem.Icon>
                                                     </MenuItem>
                                                     <MenuItem Name="MenuItemRefresh"
+                                                              Click="RefreshItem"
                                                               Command="{Binding RefreshCommand}"
                                                               Header="Refresh">
                                                         <MenuItem.Icon>

@@ -99,7 +99,7 @@ public partial class ToolWindow1Control : UserControl
         // are searched relative to Eclipse's path, so they're not found.
         _ = new Card();
         _ = new Hue("Dummy", Colors.Black, Colors.White);
-        _= new OpenDirectoryControl();
+        _ = new OpenDirectoryControl();
         _ = new MdXaml.TextToFlowDocumentConverter();
     }
 
@@ -226,6 +226,15 @@ public partial class ToolWindow1Control : UserControl
     #endregion
 
     #region ui button logic
+    public async void RefreshItem(object sender, RoutedEventArgs e)
+    {
+        if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> item)
+        {
+            return;
+        }
+        await item.RefreshAsync(true);
+    }
+
     public void CreateDomainClick(object sender, RoutedEventArgs e)
     {
         if ((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is not Domain domain)
@@ -234,7 +243,7 @@ public partial class ToolWindow1Control : UserControl
             return;
         }
         var dialog = new Dialogs.InputDialog("Domain name", "Insert name") { IsDarkTheme = this.IsDarkTheme };
-        if(!(dialog.ShowDialog() == true))
+        if (!(dialog.ShowDialog() == true))
         {
             return;
         }
@@ -242,9 +251,9 @@ public partial class ToolWindow1Control : UserControl
         {
             var newDomain = oda.OdaOverride.ItemFactory.CreateDomain(domain, dialog.Answer, "MODULE");
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
-            logger.Info(ex.Message); 
+            logger.Info(ex.Message);
         }
     }
 
@@ -267,10 +276,10 @@ public partial class ToolWindow1Control : UserControl
             innerItem?.CreateClass(dialog.Answer);
 
             //TODO: Подумать как обработать ситуацию с доменом модуля, тк. фактически мы не подписываемся на изменения внутреннего класса домена
-            await selectedItem.RefreshAsync();
+            await selectedItem.RefreshAsync(true);
 
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             logger.Info(ex.Message);
         }
@@ -286,7 +295,7 @@ public partial class ToolWindow1Control : UserControl
                 {
                     structureItem.Remove();
                     //TODO: Подумать как обработать ситуацию с доменом модуля, тк. фактически мы не подписываемся на изменения внутреннего класса домена
-                    await (OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>).Parent.RefreshAsync();
+                    await (OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>).Parent.RefreshAsync(true);
                 }
             }
             catch (Exception ex) { logger.Info(ex.Message); }
