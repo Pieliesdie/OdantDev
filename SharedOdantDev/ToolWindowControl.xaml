@@ -185,7 +185,7 @@
                                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                                             <materialDesign:PackIcon Width="18" Height="18"
                                                                      Margin="-10,0,-10,0"
-                                                                     Kind="FolderPlusOutline" />
+                                                                     Kind="PackageVariantPlus" />
                                             <!--<TextBlock VerticalAlignment="Center"  Visibility="Hidden">Create</TextBlock>-->
                                         </StackPanel>
                                     </Button>
@@ -377,7 +377,8 @@
                                       VirtualizingPanel.CacheLengthUnit="Item"
                                       VirtualizingPanel.IsVirtualizing="{Binding AddinSettings.IsVirtualizeTreeView, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
                                       VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.ScrollUnit="Item"
-                                      VirtualizingPanel.VirtualizationMode="Recycling">
+                                      VirtualizingPanel.VirtualizationMode="Recycling"
+                                      PreviewMouseRightButtonDown="OnPreviewMouseRightButtonDown" >
                                 <TreeView.Resources>
                                     <Style BasedOn="{StaticResource MaterialDesignTreeViewItem}" TargetType="TreeViewItem">
                                         <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18" />
@@ -431,10 +432,17 @@
                                                                 <materialDesign:PackIcon Foreground="MediumSeaGreen" Kind="Class" />
                                                             </MenuItem.Icon>
                                                         </MenuItem>
-                                                        <MenuItem x:Name="MenuItemCreateModule"
+                                                        <MenuItem x:Name="MenuItemCreateDomainModule"
                                                                   Click="CreateDomainClick" Header="Module domain">
                                                             <MenuItem.Icon>
                                                                 <materialDesign:PackIcon Foreground="MediumSeaGreen" Kind="Domain" />
+                                                            </MenuItem.Icon>
+                                                        </MenuItem>
+                                                        <MenuItem x:Name="MenuItemCreateCSharpModule"
+                                                                  Visibility="{Binding CanCreateModule, Converter={StaticResource BooleanToCollapsedVisibility} }"
+                                                                  Click="CreateModuleButton_Click" Header="Module project">
+                                                            <MenuItem.Icon>
+                                                                <materialDesign:PackIcon Foreground="MediumSeaGreen" Kind="PackageVariantPlus" />
                                                             </MenuItem.Icon>
                                                         </MenuItem>
                                                     </MenuItem>

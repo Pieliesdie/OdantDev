@@ -24,6 +24,7 @@ using SharedOdanDev.OdaOverride;
 using System.Diagnostics;
 using MoreLinq;
 using oda.OdaOverride;
+using System.Windows.Input;
 
 namespace OdantDev;
 
@@ -340,6 +341,7 @@ public partial class ToolWindow1Control : UserControl
     {
         if ((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is not Class cls)
         {
+            logger?.Info("Can't create module here");
             return;
         }
         try
@@ -555,6 +557,25 @@ public partial class ToolWindow1Control : UserControl
         {
             IsDarkTheme = checkBox.IsChecked ?? false;
         }
+    }
+
+    private void OnPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        TreeViewItem treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+
+        if (treeViewItem != null)
+        {
+            treeViewItem.Focus();
+            treeViewItem.IsSelected = true;
+            e.Handled = true;
+        }
+    }
+    static TreeViewItem VisualUpwardSearch(DependencyObject source)
+    {
+        while (source != null && !(source is TreeViewItem))
+            source = VisualTreeHelper.GetParent(source);
+
+        return source as TreeViewItem;
     }
 
     private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
