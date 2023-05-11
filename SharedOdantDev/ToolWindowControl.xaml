@@ -1062,8 +1062,7 @@
                             </StackPanel>
                         </TabItem.Header>
                         <mdxam:MarkdownScrollViewer Margin="10"
-                                                    xml:space="preserve"
-                                                    Foreground="{DynamicResource MaterialDesignBody}"
+                                                    xml:space="preserve"                                 
                                                     HereMarkdown="{odantdev:Text Readme.md}"
                                                     VerticalScrollBarVisibility="Auto" />
                     </TabItem>
