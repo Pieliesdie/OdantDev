@@ -48,26 +48,22 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="..\SharedFiles\img\create_moduleclass.png">
+    <Resource Include="..\SharedFiles\img\create_moduleclass.png">
       <Link>img\create_moduleclass.png</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\SharedFiles\img\create_moduledomain.png">
+    </Resource>
+    <Resource Include="..\SharedFiles\img\create_moduledomain.png">
       <Link>img\create_moduledomain.png</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\SharedFiles\img\create_project.png">
+    </Resource>
+    <Resource Include="..\SharedFiles\img\create_project.png">
       <Link>img\create_project.png</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\SharedFiles\img\sample_project.png">
+    </Resource>
+    <Resource Include="..\SharedFiles\img\sample_project.png">
       <Link>img\sample_project.png</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Resource>
     <Content Include="..\SharedFiles\Templates\ProjectTemplate\TemplateProject.csproj">
       <Link>Templates\ProjectTemplate\TemplateProject.csproj</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
