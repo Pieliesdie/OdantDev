@@ -1,9 +1,8 @@
-﻿<UserControl x:Class="OdantDev.ToolWindow1Control"
+﻿<UserControl Name="MyToolWindow"
+             x:Class="OdantDev.ToolWindow1Control"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:mde="https://spiegelp.github.io/MaterialDesignExtensions/winfx/xaml"
-             xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml" xmlns:oda="clr-namespace:oda;assembly=odaCore"
-             xmlns:odantdev="clr-namespace:OdantDev" xmlns:odantdevModel="clr-namespace:OdantDev.Model"
-             Name="MyToolWindow"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:mde="https://spiegelp.github.io/MaterialDesignExtensions/winfx/xaml" xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml"
+             xmlns:oda="clr-namespace:oda;assembly=odaCore" xmlns:odantdev="clr-namespace:OdantDev" xmlns:odantdevModel="clr-namespace:OdantDev.Model"
              Background="{DynamicResource MaterialDesignPaper}"
              FontFamily="{DynamicResource MaterialDesignFont}"
              TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -12,13 +11,15 @@
         <ResourceDictionary>
             <odantdev:BooleanToCollapsedVisibility x:Key="BooleanToCollapsedVisibility" />
             <odantdev:InverseBooleanToCollapsedVisibility x:Key="InverseBooleanToCollapsedVisibility" />
-            <Style x:Key="defaultTree" x:Name="defaultTree"
+            <Style x:Name="defaultTree"
+                   x:Key="defaultTree"
                    BasedOn="{StaticResource MaterialDesignTreeViewItem}"
                    TargetType="TreeViewItem">
                 <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18" />
                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
             </Style>
-            <Style x:Key="simpleTree" x:Name="simpleTree"
+            <Style x:Name="simpleTree"
+                   x:Key="simpleTree"
                    TargetType="TreeViewItem">
                 <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
@@ -90,8 +91,7 @@
                             Margin="0" HorizontalAlignment="Right"
                             Click="Exit" FontSize="12"
                             Style="{StaticResource MaterialDesignFlatMidBgButton}"
-                            ToolTip="Exit" ToolTipService.ShowOnDisabled="True"
-                            Visibility="Collapsed">
+                            ToolTip="Exit" ToolTipService.ShowOnDisabled="True" Visibility="Collapsed">
                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                             <materialDesign:PackIcon Width="18" Height="18"
                                                      Margin="-10,0,-10,0"
@@ -103,8 +103,7 @@
                 <StackPanel x:Name="spConnect"
                             Grid.Row="3" Grid.Column="0"
                             HorizontalAlignment="Center" VerticalAlignment="Center"
-                            DockPanel.Dock="Top" Orientation="Vertical"
-                            Visibility="Visible">
+                            DockPanel.Dock="Top" Orientation="Vertical" Visibility="Visible">
                     <Button Name="ConnectButton"
                             Width="120" Height="31"
                             Margin="10,100,10,10"
@@ -125,14 +124,12 @@
 
                 <TabControl x:Name="MainTabControl"
                             Grid.Row="5" Grid.Column="0"
-                            materialDesign:ColorZoneAssist.Mode="Standard" materialDesign:ElevationAssist.Elevation="Dp3"
-                            materialDesign:NavigationRailAssist.ShowSelectionBackground="True" BorderBrush="Transparent"
-                            BorderThickness="0" SelectionChanged="MainTabControl_SelectionChanged"
+                            materialDesign:ColorZoneAssist.Mode="Standard" materialDesign:ElevationAssist.Elevation="Dp3" materialDesign:NavigationRailAssist.ShowSelectionBackground="True"
+                            BorderBrush="Transparent" BorderThickness="0" SelectionChanged="MainTabControl_SelectionChanged"
                             Style="{StaticResource MaterialDesignNavigatilRailTabControl}"
                             TabStripPlacement="Left" Visibility="Collapsed">
                     <TabItem Name="TreeTab"
-                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
                         <TabItem.Header>
                             <StackPanel Width="auto" Height="auto">
                                 <materialDesign:PackIcon Width="24" Height="24"
@@ -153,8 +150,7 @@
                             </Grid.RowDefinitions>
                             <StackPanel x:Name="CommonButtons"
                                         Grid.Row="0" Grid.Column="0"
-                                        materialDesign:ThemeAssist.Theme="Inherit" DockPanel.Dock="Top"
-                                        Visibility="Visible">
+                                        materialDesign:ThemeAssist.Theme="Inherit" DockPanel.Dock="Top" Visibility="Visible">
                                 <WrapPanel Orientation="Horizontal">
                                     <Button Name="RefreshTreeButton"
                                             Width="32" Height="25"
@@ -178,8 +174,8 @@
                                             ToolTip="Create new module in selected item">
                                         <Button.IsEnabled>
                                             <MultiBinding Converter="{StaticResource BooleanAllConverter}">
-                                                <Binding ElementName="OdaTree" FallbackValue="false"
-                                                         Path="SelectedItem.CanCreateModule" TargetNullValue="false" />
+                                                <Binding ElementName="OdaTree" FallbackValue="false" Path="SelectedItem.CanCreateModule"
+                                                         TargetNullValue="false" />
                                             </MultiBinding>
                                         </Button.IsEnabled>
                                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
@@ -197,11 +193,11 @@
                                             ToolTip="Download module to selected local developer domain" ToolTipService.ShowOnDisabled="True">
                                         <Button.IsEnabled>
                                             <MultiBinding Converter="{StaticResource BooleanAllConverter}">
-                                                <Binding ElementName="OdaTree" FallbackValue="false"
-                                                         Path="SelectedItem.HasModule" TargetNullValue="false" />
+                                                <Binding ElementName="OdaTree" FallbackValue="false" Path="SelectedItem.HasModule"
+                                                         TargetNullValue="false" />
                                                 <Binding Converter="{StaticResource InvertBooleanConverter}"
-                                                         ElementName="OdaTree" FallbackValue="false"
-                                                         Path="SelectedItem.IsLocal" TargetNullValue="false" />
+                                                         ElementName="OdaTree" FallbackValue="false" Path="SelectedItem.IsLocal"
+                                                         TargetNullValue="false" />
                                             </MultiBinding>
                                         </Button.IsEnabled>
                                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
@@ -219,10 +215,10 @@
                                             ToolTip="Open local module" ToolTipService.ShowOnDisabled="True">
                                         <Button.IsEnabled>
                                             <MultiBinding Converter="{StaticResource BooleanAllConverter}">
-                                                <Binding ElementName="OdaTree" FallbackValue="false"
-                                                         Path="SelectedItem.HasModule" TargetNullValue="false" />
-                                                <Binding ElementName="OdaTree" FallbackValue="false"
-                                                         Path="SelectedItem.IsLocal" TargetNullValue="false" />
+                                                <Binding ElementName="OdaTree" FallbackValue="false" Path="SelectedItem.HasModule"
+                                                         TargetNullValue="false" />
+                                                <Binding ElementName="OdaTree" FallbackValue="false" Path="SelectedItem.IsLocal"
+                                                         TargetNullValue="false" />
                                             </MultiBinding>
                                         </Button.IsEnabled>
                                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
@@ -249,9 +245,8 @@
                                                           Grid.Row="1"
                                                           Margin="10" HorizontalContentAlignment="Stretch"
                                                           ItemsSource="{Binding Groups, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}"
-                                                          ScrollViewer.IsDeferredScrollingEnabled="True" VirtualizingPanel.CacheLengthUnit="Page"
-                                                          VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True"
-                                                          VirtualizingPanel.ScrollUnit="Item" VirtualizingPanel.VirtualizationMode="Recycling">
+                                                          ScrollViewer.IsDeferredScrollingEnabled="True" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.IsVirtualizing="True"
+                                                          VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.ScrollUnit="Item" VirtualizingPanel.VirtualizationMode="Recycling">
                                                     <TreeView.Resources>
                                                         <Style BasedOn="{StaticResource MaterialDesignTreeViewItem}" TargetType="TreeViewItem">
                                                             <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18" />
@@ -296,13 +291,13 @@
                                                 ToolTip="Create repository for module" ToolTipService.ShowOnDisabled="True">
                                             <Button.IsEnabled>
                                                 <MultiBinding Converter="{StaticResource BooleanAllConverter}">
-                                                    <Binding ElementName="OdaTree" FallbackValue="false"
-                                                             Path="SelectedItem.HasModule" TargetNullValue="false" />
-                                                    <Binding ElementName="OdaTree" FallbackValue="false"
-                                                             Path="SelectedItem.IsLocal" TargetNullValue="false" />
+                                                    <Binding ElementName="OdaTree" FallbackValue="false" Path="SelectedItem.HasModule"
+                                                             TargetNullValue="false" />
+                                                    <Binding ElementName="OdaTree" FallbackValue="false" Path="SelectedItem.IsLocal"
+                                                             TargetNullValue="false" />
                                                     <Binding Converter="{StaticResource InvertBooleanConverter}"
-                                                             ElementName="OdaTree" FallbackValue="false"
-                                                             Path="SelectedItem.HasRepository" TargetNullValue="false" />
+                                                             ElementName="OdaTree" FallbackValue="false" Path="SelectedItem.HasRepository"
+                                                             TargetNullValue="false" />
 
                                                 </MultiBinding>
                                             </Button.IsEnabled>
@@ -354,10 +349,10 @@
                                                 ToolTip="Delete repository" ToolTipService.ShowOnDisabled="True">
                                             <Button.IsEnabled>
                                                 <MultiBinding Converter="{StaticResource BooleanAllConverter}">
-                                                    <Binding ElementName="OdaTree" FallbackValue="false"
-                                                             Path="SelectedItem.HasRepository" TargetNullValue="false" />
-                                                    <Binding ElementName="OdaTree" FallbackValue="false"
-                                                             Path="SelectedItem.IsLocal" TargetNullValue="false" />
+                                                    <Binding ElementName="OdaTree" FallbackValue="false" Path="SelectedItem.HasRepository"
+                                                             TargetNullValue="false" />
+                                                    <Binding ElementName="OdaTree" FallbackValue="false" Path="SelectedItem.IsLocal"
+                                                             TargetNullValue="false" />
                                                 </MultiBinding>
                                             </Button.IsEnabled>
                                             <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
@@ -374,11 +369,9 @@
                                       HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
                                       DataContext="{Binding OdaModel}"
                                       ItemsSource="{Binding Items}"
-                                      VirtualizingPanel.CacheLengthUnit="Item"
+                                      PreviewMouseRightButtonDown="OnPreviewMouseRightButtonDown" VirtualizingPanel.CacheLengthUnit="Item"
                                       VirtualizingPanel.IsVirtualizing="{Binding AddinSettings.IsVirtualizeTreeView, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
-                                      VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.ScrollUnit="Item"
-                                      VirtualizingPanel.VirtualizationMode="Recycling"
-                                      PreviewMouseRightButtonDown="OnPreviewMouseRightButtonDown" >
+                                      VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.ScrollUnit="Item" VirtualizingPanel.VirtualizationMode="Recycling">
                                 <TreeView.Resources>
                                     <Style BasedOn="{StaticResource MaterialDesignTreeViewItem}" TargetType="TreeViewItem">
                                         <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18" />
@@ -439,15 +432,15 @@
                                                             </MenuItem.Icon>
                                                         </MenuItem>
                                                         <MenuItem x:Name="MenuItemCreateCSharpModule"
-                                                                  Visibility="{Binding CanCreateModule, Converter={StaticResource BooleanToCollapsedVisibility} }"
-                                                                  Click="CreateModuleButton_Click" Header="Module project">
+                                                                  Click="CreateModuleButton_Click" Header="Module project"
+                                                                  Visibility="{Binding CanCreateModule, Converter={StaticResource BooleanToCollapsedVisibility}}">
                                                             <MenuItem.Icon>
                                                                 <materialDesign:PackIcon Foreground="MediumSeaGreen" Kind="PackageVariantPlus" />
                                                             </MenuItem.Icon>
                                                         </MenuItem>
                                                     </MenuItem>
-                                                    <MenuItem x:Name="MenuItemRemoveItem" Click="RemoveItemClick"
-                                                                  Header="Remove item">
+                                                    <MenuItem x:Name="MenuItemRemoveItem"
+                                                              Click="RemoveItemClick" Header="Remove item">
                                                         <MenuItem.Icon>
                                                             <materialDesign:PackIcon Foreground="PaleVioletRed" Kind="Remove" />
                                                         </MenuItem.Icon>
@@ -478,8 +471,7 @@
                                             </Grid.ContextMenu>
                                             <Image Grid.Column="0"
                                                    Width="16"
-                                                   Margin="0,0,5,0" HorizontalAlignment="Left"
-                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Center"
                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                    Source="{Binding Path=Icon, UpdateSourceTrigger=PropertyChanged, IsAsync=True}" />
                                             <TextBlock Grid.Column="1"
@@ -491,8 +483,7 @@
                                                        TextTrimming="CharacterEllipsis" TextWrapping="WrapWithOverflow" />
                                             <materialDesign:PackIcon Grid.Column="2"
                                                                      Width="14" Height="14"
-                                                                     Margin="0,0,0,0" HorizontalAlignment="Right"
-                                                                     VerticalAlignment="Center"
+                                                                     Margin="0,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Center"
                                                                      Foreground="Orange" Kind="Pin"
                                                                      Visibility="{Binding IsPinned, Converter={StaticResource BooleanToCollapsedVisibility}, UpdateSourceTrigger=PropertyChanged}" />
                                         </Grid>
@@ -502,8 +493,7 @@
                         </Grid>
                     </TabItem>
                     <TabItem Name="RepoTreeTab"
-                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                             VerticalContentAlignment="Stretch">
+                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
                         <TabItem.Header>
                             <StackPanel Width="auto" Height="auto">
                                 <materialDesign:PackIcon Width="24" Height="24"
@@ -522,8 +512,7 @@
                             </Grid.RowDefinitions>
                             <StackPanel x:Name="RepoCommonButtons"
                                         Grid.Row="0" Grid.Column="0"
-                                        materialDesign:ThemeAssist.Theme="Inherit" DockPanel.Dock="Top"
-                                        Visibility="Visible">
+                                        materialDesign:ThemeAssist.Theme="Inherit" DockPanel.Dock="Top" Visibility="Visible">
                                 <WrapPanel Orientation="Horizontal">
                                     <Button Name="RefreshRepoTreeButton"
                                             Width="32" Height="25"
@@ -562,8 +551,8 @@
                                                 ToolTip="Download module to selected local developer domain" ToolTipService.ShowOnDisabled="True">
                                             <Button.IsEnabled>
                                                 <MultiBinding Converter="{StaticResource BooleanAllConverter}">
-                                                    <Binding ElementName="RepoTree" FallbackValue="false"
-                                                             Path="SelectedItem.HasModule" TargetNullValue="false" />
+                                                    <Binding ElementName="RepoTree" FallbackValue="false" Path="SelectedItem.HasModule"
+                                                             TargetNullValue="false" />
                                                 </MultiBinding>
                                             </Button.IsEnabled>
                                             <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
@@ -579,9 +568,8 @@
                                       Grid.Row="1"
                                       HorizontalContentAlignment="Stretch"
                                       ItemsSource="{Binding OdaModel.Repos, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}"
-                                      ScrollViewer.IsDeferredScrollingEnabled="True" VirtualizingPanel.CacheLengthUnit="Page"
-                                      VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True"
-                                      VirtualizingPanel.ScrollUnit="Item" VirtualizingPanel.VirtualizationMode="Recycling">
+                                      ScrollViewer.IsDeferredScrollingEnabled="True" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.IsVirtualizing="True"
+                                      VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.ScrollUnit="Item" VirtualizingPanel.VirtualizationMode="Recycling">
                                 <TreeView.Resources>
                                     <Style BasedOn="{StaticResource MaterialDesignTreeViewItem}" TargetType="TreeViewItem">
                                         <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18" />
@@ -646,14 +634,12 @@
                                                                     Margin="5" HorizontalAlignment="Center"
                                                                     Click="ProjectCard_Click"
                                                                     Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                    Content="Yes" DockPanel.Dock="Left"
-                                                                    IsDefault="True"
+                                                                    Content="Yes" DockPanel.Dock="Left" IsDefault="True"
                                                                     Tag="{Binding}" />
                                                             <Button Width="65"
                                                                     Margin="5" HorizontalAlignment="Right"
                                                                     Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                    Content="No" DockPanel.Dock="Right"
-                                                                    IsCancel="True" />
+                                                                    Content="No" DockPanel.Dock="Right" IsCancel="True" />
                                                         </DockPanel>
                                                     </StackPanel>
                                                 </Button.CommandParameter>
@@ -702,8 +688,7 @@
                                                         </StackPanel>
                                                         <Button Name="DeleteRecentlyProject"
                                                                 Width="15" Height="15"
-                                                                Margin="0,3,0,0" HorizontalAlignment="Right"
-                                                                VerticalAlignment="Top"
+                                                                Margin="0,3,0,0" HorizontalAlignment="Right" VerticalAlignment="Top"
                                                                 Click="DeleteRecentlyProject_Click" Foreground="#b71c1c"
                                                                 Style="{StaticResource MaterialDesignIconForegroundButton}"
                                                                 Tag="{Binding}">
@@ -713,13 +698,11 @@
                                                     </StackPanel>
                                                     <Separator Grid.Row="2" Style="{StaticResource MaterialDesignLightSeparator}" />
                                                     <StackPanel Grid.Row="3" Orientation="Horizontal">
-                                                        <TextBlock Margin="0,0,0,8" HorizontalAlignment="Left"
-                                                                   VerticalAlignment="Center"
+                                                        <TextBlock Margin="0,0,0,8" HorizontalAlignment="Left" VerticalAlignment="Center"
                                                                    FontSize="12"
                                                                    Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
                                                                    Text="{Binding OpenTime, StringFormat={}{0:dd MMM. yyyy}}" />
-                                                        <TextBlock Margin="16,0,0,8" HorizontalAlignment="Left"
-                                                                   VerticalAlignment="Center"
+                                                        <TextBlock Margin="16,0,0,8" HorizontalAlignment="Left" VerticalAlignment="Center"
                                                                    FontSize="12"
                                                                    Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
                                                                    Text="{Binding OpenTime, StringFormat={}{0:HH:mm:ss}}" />
@@ -763,9 +746,8 @@
                                 <StackPanel Grid.Row="0">
                                     <ComboBox x:Name="DeveloperCb"
                                               Margin="0,0,0,20"
-                                              materialDesign:HintAssist.HelperText="Please select developer domain on localhost" materialDesign:HintAssist.HelperTextFontSize="11"
-                                              materialDesign:HintAssist.Hint="Developer domain" materialDesign:HintAssist.IsFloating="True"
-                                              materialDesign:TextFieldAssist.HasClearButton="True"
+                                              materialDesign:HintAssist.HelperText="Please select developer domain on localhost" materialDesign:HintAssist.HelperTextFontSize="11" materialDesign:HintAssist.Hint="Developer domain"
+                                              materialDesign:HintAssist.IsFloating="True" materialDesign:TextFieldAssist.HasClearButton="True"
                                               materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
                                               FontSize="16" IsEditable="False"
                                               ItemsSource="{Binding OdaModel.Developers, Mode=OneWay}"
@@ -775,21 +757,18 @@
                                 </StackPanel>
                                 <CheckBox Grid.Row="1"
                                           Margin="0,5,0,10"
-                                          materialDesign:CheckBoxAssist.CheckBoxSize="22" Content="Force update oda libraries"
-                                          FontSize="16"
+                                          materialDesign:CheckBoxAssist.CheckBoxSize="22" Content="Force update oda libraries" FontSize="16"
                                           IsChecked="{Binding OdaModel.AddinSettings.ForceUpdateReferences}"
                                           ToolTip="True: always update / False: update only if reference file is missing" />
                                 <CheckBox Grid.Row="2"
                                           Margin="0,5,0,10"
-                                          materialDesign:CheckBoxAssist.CheckBoxSize="22" Content="Auto login to oda server"
-                                          FontSize="16"
+                                          materialDesign:CheckBoxAssist.CheckBoxSize="22" Content="Auto login to oda server" FontSize="16"
                                           IsChecked="{Binding OdaModel.AutoLogin}"
                                           ToolTip="Enable/disable oda login window" />
                                 <GroupBox Name="UISettingsGroupBox"
                                           Grid.Row="3"
-                                          materialDesign:ColorZoneAssist.Mode="PrimaryMid" materialDesign:ElevationAssist.Elevation="Dp3"
-                                          BorderThickness="0.8" FontSize="14"
-                                          Header="UI Settings" SnapsToDevicePixels="True"
+                                          materialDesign:ColorZoneAssist.Mode="PrimaryMid" materialDesign:ElevationAssist.Elevation="Dp3" BorderThickness="0.8"
+                                          FontSize="14" Header="UI Settings" SnapsToDevicePixels="True"
                                           ToolTip="UI settings" ToolTipService.Placement="Mouse">
                                     <Grid Margin="5">
                                         <Grid.RowDefinitions>
@@ -803,15 +782,14 @@
                                         <CheckBox x:Name="ThemeCheckBox"
                                                   Grid.Row="0"
                                                   Margin="5"
-                                                  materialDesign:CheckBoxAssist.CheckBoxSize="22" Checked="CheckBox_Checked"
-                                                  Content="Dark theme" FontSize="16"
+                                                  materialDesign:CheckBoxAssist.CheckBoxSize="22" Checked="CheckBox_Checked" Content="Dark theme"
+                                                  FontSize="16"
                                                   IsChecked="{x:Null}"
                                                   ToolTip="Change color theme" Unchecked="CheckBox_Checked" />
                                         <CheckBox x:Name="IsSimpleThemeCheckBox"
                                                   Grid.Row="1"
                                                   Margin="5" VerticalContentAlignment="Top"
-                                                  materialDesign:CheckBoxAssist.CheckBoxSize="22" Checked="IsSimpleThemeCheckBox_Checked"
-                                                  FontSize="16"
+                                                  materialDesign:CheckBoxAssist.CheckBoxSize="22" Checked="IsSimpleThemeCheckBox_Checked" FontSize="16"
                                                   IsChecked="{Binding AddinSettings.IsSimpleTheme, Mode=TwoWay}"
                                                   ToolTip="Disabling material theme on hosts" Unchecked="IsSimpleThemeCheckBox_Checked">
                                             <TextBlock VerticalAlignment="Center">Simple hosts tree</TextBlock>
@@ -856,13 +834,11 @@
                                                                       Effect="{DynamicResource MaterialDesignShadowDepth3}"
                                                                       Mode="PrimaryMid">
                                                 <TextBlock Margin="10"
-                                                           FontSize="14" Text="Libraries for update references"
-                                                           ToolTip="Search this libraries in selected oda folder and replace references in projects" />
+                                                           FontSize="14" Text="Libraries for update references" ToolTip="Search this libraries in selected oda folder and replace references in projects" />
                                             </materialDesign:ColorZone>
                                             <materialDesign:PopupBox Grid.Row="0"
                                                                      Width="35" Height="35"
-                                                                     Margin="0,0,10,-5" HorizontalAlignment="Right"
-                                                                     VerticalAlignment="Bottom"
+                                                                     Margin="0,0,10,-5" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                                                      PlacementMode="LeftAndAlignMiddles"
                                                                      Style="{StaticResource MaterialDesignMultiFloatingActionAccentPopupBox}"
                                                                      ToolTip="Manage items" UnfurlOrientation="Horizontal">
@@ -880,13 +856,11 @@
                                                                             Margin="0,10,5,0" HorizontalAlignment="Center"
                                                                             Click="DialogAddLibraryButton_Click"
                                                                             Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                            Content="Add" DockPanel.Dock="Left"
-                                                                            IsDefault="True" />
+                                                                            Content="Add" DockPanel.Dock="Left" IsDefault="True" />
                                                                     <Button Width="75"
                                                                             Margin="5,10,0,0" HorizontalAlignment="Right"
                                                                             Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                            Content="Cancel" DockPanel.Dock="Right"
-                                                                            IsCancel="True" />
+                                                                            Content="Cancel" DockPanel.Dock="Right" IsCancel="True" />
                                                                 </DockPanel>
                                                             </StackPanel>
                                                         </Button.CommandParameter>
@@ -929,13 +903,11 @@
                                                                       Effect="{DynamicResource MaterialDesignShadowDepth3}"
                                                                       Mode="PrimaryMid">
                                                 <TextBlock Margin="10"
-                                                           FontSize="14" Text="Odant folders"
-                                                           ToolTip="Remembered folders with odant" />
+                                                           FontSize="14" Text="Odant folders" ToolTip="Remembered folders with odant" />
                                             </materialDesign:ColorZone>
                                             <materialDesign:PopupBox Grid.Row="0"
                                                                      Width="35" Height="35"
-                                                                     Margin="0,0,10,-5" HorizontalAlignment="Right"
-                                                                     VerticalAlignment="Bottom"
+                                                                     Margin="0,0,10,-5" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                                                      PlacementMode="LeftAndAlignMiddles"
                                                                      Style="{StaticResource MaterialDesignMultiFloatingActionAccentPopupBox}"
                                                                      ToolTip="Manage items" UnfurlOrientation="Horizontal">
@@ -976,8 +948,7 @@
                                                                                  TextWrapping="NoWrap" />
                                                                         <Button Grid.Column="1"
                                                                                 Width="25" Height="25"
-                                                                                Margin="10,0,0,0" HorizontalAlignment="Right"
-                                                                                VerticalAlignment="Bottom"
+                                                                                Margin="10,0,0,0" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                                                                 Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
                                                                                 Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}"
                                                                                 Style="{StaticResource MaterialDesignIconButton}">
@@ -990,13 +961,11 @@
                                                                             Margin="0,10,5,0" HorizontalAlignment="Center"
                                                                             Click="DialogAddOdaLibraryClick"
                                                                             Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                            Content="Add" DockPanel.Dock="Left"
-                                                                            IsDefault="True" />
+                                                                            Content="Add" DockPanel.Dock="Left" IsDefault="True" />
                                                                     <Button Width="75"
                                                                             Margin="5,10,0,0" HorizontalAlignment="Right"
                                                                             Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                            Content="Cancel" DockPanel.Dock="Right"
-                                                                            IsCancel="True" />
+                                                                            Content="Cancel" DockPanel.Dock="Right" IsCancel="True" />
                                                                 </DockPanel>
                                                             </StackPanel>
                                                         </Button.CommandParameter>
@@ -1014,9 +983,8 @@
                                           Margin="0,10,0,0"
                                           materialDesign:ColorZoneAssist.Mode="PrimaryMid" materialDesign:ElevationAssist.Elevation="Dp3"
                                           BorderBrush="{DynamicResource PrimaryHueMidBrush}"
-                                          BorderThickness="0.8" FontSize="14"
-                                          SnapsToDevicePixels="True" ToolTip="Some useful things"
-                                          ToolTipService.Placement="Mouse">
+                                          BorderThickness="0.8" FontSize="14" SnapsToDevicePixels="True"
+                                          ToolTip="Some useful things" ToolTipService.Placement="Mouse">
                                     <Expander.Header>
                                         <TextBlock Text="Develop helpers" />
                                     </Expander.Header>
@@ -1030,28 +998,24 @@
                                         <Button Name="RepairToolboxButton"
                                                 Grid.Row="1"
                                                 Margin="5"
-                                                materialDesign:ColorZoneAssist.Mode="PrimaryMid" Click="RepairToolboxButton_Click"
-                                                Content="Repair Toolbox" FontWeight="Regular"
-                                                ToolTip="Add DevExpress controls to toolbox" />
+                                                materialDesign:ColorZoneAssist.Mode="PrimaryMid" Click="RepairToolboxButton_Click" Content="Repair Toolbox"
+                                                FontWeight="Regular" ToolTip="Add DevExpress controls to toolbox" />
                                         <Button Name="DownloadNet4_0"
                                                 Grid.Row="2"
                                                 Margin="5"
-                                                materialDesign:ColorZoneAssist.Mode="PrimaryMid" Click="DownloadNet4_0_Click"
-                                                Content="Install .Net Framework 4.0" FontWeight="Regular"
-                                                ToolTip="If you need to open old projects" />
+                                                materialDesign:ColorZoneAssist.Mode="PrimaryMid" Click="DownloadNet4_0_Click" Content="Install .Net Framework 4.0"
+                                                FontWeight="Regular" ToolTip="If you need to open old projects" />
                                         <Button Name="DownloadNet4_5"
                                                 Grid.Row="3"
                                                 Margin="5"
-                                                materialDesign:ColorZoneAssist.Mode="PrimaryMid" Click="DownloadNet4_5_Click"
-                                                Content="Install .Net Framework 4.5" FontWeight="Regular"
-                                                ToolTip="If you need to open old projects" />
+                                                materialDesign:ColorZoneAssist.Mode="PrimaryMid" Click="DownloadNet4_5_Click" Content="Install .Net Framework 4.5"
+                                                FontWeight="Regular" ToolTip="If you need to open old projects" />
                                     </Grid>
                                 </Expander>
                                 <GroupBox Grid.Row="7"
                                           Margin="0,10,0,0"
-                                          materialDesign:ColorZoneAssist.Mode="PrimaryMid" materialDesign:ElevationAssist.Elevation="Dp3"
-                                          BorderThickness="0.8" FontSize="14"
-                                          Header="GitLab settings" SnapsToDevicePixels="True"
+                                          materialDesign:ColorZoneAssist.Mode="PrimaryMid" materialDesign:ElevationAssist.Elevation="Dp3" BorderThickness="0.8"
+                                          FontSize="14" Header="GitLab settings" SnapsToDevicePixels="True"
                                           ToolTip="Some useful things" ToolTipService.Placement="Mouse">
                                     <Grid>
                                         <Grid.RowDefinitions>
@@ -1061,9 +1025,8 @@
                                         <TextBox x:Name="GitLabAPIPathTb"
                                                  Grid.Row="0"
                                                  Margin="0,0,0,20"
-                                                 materialDesign:HintAssist.HelperText="Enter gitlab api path" materialDesign:HintAssist.HelperTextFontSize="11"
-                                                 materialDesign:HintAssist.Hint="GitLab API Path" materialDesign:HintAssist.IsFloating="True"
-                                                 materialDesign:TextFieldAssist.HasClearButton="True"
+                                                 materialDesign:HintAssist.HelperText="Enter gitlab api path" materialDesign:HintAssist.HelperTextFontSize="11" materialDesign:HintAssist.Hint="GitLab API Path"
+                                                 materialDesign:HintAssist.IsFloating="True" materialDesign:TextFieldAssist.HasClearButton="True"
                                                  materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
                                                  FontSize="16"
                                                  Style="{StaticResource MaterialDesignFloatingHintTextBox}"
@@ -1072,9 +1035,8 @@
                                         <TextBox x:Name="GitLabAPIKeyTb"
                                                  Grid.Row="1"
                                                  Margin="0,0,0,20"
-                                                 materialDesign:HintAssist.HelperText="Enter gitlab api key" materialDesign:HintAssist.HelperTextFontSize="11"
-                                                 materialDesign:HintAssist.Hint="GitLab API Key" materialDesign:HintAssist.IsFloating="True"
-                                                 materialDesign:TextFieldAssist.HasClearButton="True"
+                                                 materialDesign:HintAssist.HelperText="Enter gitlab api key" materialDesign:HintAssist.HelperTextFontSize="11" materialDesign:HintAssist.Hint="GitLab API Key"
+                                                 materialDesign:HintAssist.IsFloating="True" materialDesign:TextFieldAssist.HasClearButton="True"
                                                  materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
                                                  FontSize="16"
                                                  Style="{StaticResource MaterialDesignFloatingHintTextBox}"
@@ -1085,13 +1047,12 @@
                                 <Button Name="SaveSettingsButton"
                                         Grid.Row="8"
                                         Margin="0,20,0,0"
-                                        materialDesign:ColorZoneAssist.Mode="PrimaryMid" Click="SaveSettingsButton_Click"
-                                        Content="Save" FontSize="18"
-                                        ToolTip="Save settings to file" />
+                                        materialDesign:ColorZoneAssist.Mode="PrimaryMid" Click="SaveSettingsButton_Click" Content="Save"
+                                        FontSize="18" ToolTip="Save settings to file" />
                             </Grid>
                         </ScrollViewer>
                     </TabItem>
-                    <TabItem x:Name="ReadmeTab" Visibility="Collapsed">
+                    <TabItem x:Name="ReadmeTab" Visibility="Visible">
                         <TabItem.Header>
                             <StackPanel Width="auto" Height="auto">
                                 <materialDesign:PackIcon Width="24" Height="24"
@@ -1100,12 +1061,11 @@
                                 <TextBlock HorizontalAlignment="Center" Text="Readme" />
                             </StackPanel>
                         </TabItem.Header>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <mdxam:MarkdownScrollViewer Margin="10"
-                                                        xml:space="preserve" VerticalScrollBarVisibility="Auto">
-		                        # In progress...
-	                        </mdxam:MarkdownScrollViewer>
-                        </ScrollViewer>
+                        <mdxam:MarkdownScrollViewer Margin="10"
+                                                    xml:space="preserve"
+                                                    Foreground="{DynamicResource MaterialDesignBody}"
+                                                    HereMarkdown="{odantdev:Text Readme.md}"
+                                                    VerticalScrollBarVisibility="Auto" />
                     </TabItem>
                 </TabControl>
                 <StackPanel Grid.Row="7" Grid.Column="0"

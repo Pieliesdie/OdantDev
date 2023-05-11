@@ -23,6 +23,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)BindingHelpers\BooleanToCollapsedVisibility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)bindinghelpers\ConcatenatedCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)BindingHelpers\NotEmptyRule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)bindinghelpers\TextExtension.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)common\BitmapEx.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Bitness.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\DevHelpers.cs" />
@@ -38,8 +39,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ToolboxReseter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevExpress\ToolboxReseterSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Dialogs\InputDialog.xaml.cs">
-	  <DependentUpon>InputDialog.xaml</DependentUpon>
-	</Compile>
+      <DependentUpon>InputDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)GlobalSuppressions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Model\ViewModels\AddinSettingsViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Disposable.cs" />

@@ -34,3 +34,4 @@ _ReSharper*/
 #Nuget packages folder
 packages/
 */obj/*
+/UpgradeLog.htm
