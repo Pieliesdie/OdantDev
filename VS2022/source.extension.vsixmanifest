@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="OdantDev.e72cd637-63b6-4219-a90f-fd8231cd4c0f" Version="1.1" Language="en-US" Publisher="haketxx" />
-        <DisplayName>OdantDev</DisplayName>
+        <Identity Id="OdantDev.e82cd637-63b6-4219-a90f-fd8231cd4c0f" Version="1.1" Language="en-US" Publisher="Pieliesdie" />
+        <DisplayName>OdantDev(VS2022)</DisplayName>
         <Description xml:space="preserve">Addin for odant modules</Description>
         <MoreInfo>https://github.com/Pieliesdie/OdantDev</MoreInfo>
-        <Icon>Resources\Icon.png</Icon>
+        <Icon>Icon.png</Icon>
         <Preview>true</Preview>
     </Metadata>
     <Installation>

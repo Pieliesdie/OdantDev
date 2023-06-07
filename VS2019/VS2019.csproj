@@ -15,7 +15,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>VS2019</RootNamespace>
-    <AssemblyName>OdantDev</AssemblyName>
+    <AssemblyName>OdantDev%28VS2019%29</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <LangVersion>latest</LangVersion>
@@ -179,6 +179,7 @@
     <Content Include="..\SharedFiles\Icon.png">
       <Link>Icon.png</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="..\SharedFiles\Templates\AddinSettings.xml">
       <Link>Templates\AddinSettings.xml</Link>
