@@ -5,12 +5,21 @@
         <DisplayName>OdantDev(VS2019)</DisplayName>
         <Description xml:space="preserve">Addin for odant modules</Description>
         <Icon>Icon.png</Icon>
+        <Preview>true</Preview>
     </Metadata>
     <Installation>
-        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)" />
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)">
+            <ProductArchitecture>x86</ProductArchitecture>
+        </InstallationTarget>
+        <InstallationTarget Version="[16.0,17.0)" Id="Microsoft.VisualStudio.Enterprise">
+            <ProductArchitecture>x86</ProductArchitecture>
+        </InstallationTarget>
+        <InstallationTarget Version="[16.0,17.0)" Id="Microsoft.VisualStudio.Pro">
+            <ProductArchitecture>x86</ProductArchitecture>
+        </InstallationTarget>
     </Installation>
     <Dependencies>
-        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.8,)" />
     </Dependencies>
     <Prerequisites>
         <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,17.0)" DisplayName="Visual Studio core editor" />
