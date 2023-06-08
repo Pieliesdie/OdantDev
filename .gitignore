@@ -35,3 +35,4 @@ _ReSharper*/
 packages/
 */obj/*
 /UpgradeLog.htm
+/vsix
