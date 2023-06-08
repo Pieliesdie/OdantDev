@@ -5,9 +5,12 @@ using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
 
+using MoreLinq;
+
 using oda;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -27,7 +30,7 @@ public partial class VisualStudioIntegration
     private BuildEvents BuildEvents { get; set; }
     private SolutionEvents SolutionEvents { get; set; }
     private DTE2 EnvDTE { get; }
-    private Dictionary<string, BuildInfo> LoadedModules { get; } = new Dictionary<string, BuildInfo>();
+    private ConcurrentDictionary<string, BuildInfo> LoadedModules { get; } = new();
     private AddinSettings AddinSettings { get; }
     private DirectoryInfo OdaFolder => new DirectoryInfo(AddinSettings.SelectedOdaFolder.Path);
     private ILogger Logger { get; }
@@ -37,6 +40,7 @@ public partial class VisualStudioIntegration
         this.Logger = logger;
         this.AddinSettings = addinSettings;
         EnvDTE = DTE ?? throw new NullReferenceException("Can't get EnvDTE from visual studio");
+        ThreadHelper.ThrowIfNotOnUIThread();
         if (EnvDTE.Solution.IsOpen)
         {
             EnvDTE.Solution.Close();
@@ -83,33 +87,40 @@ public partial class VisualStudioIntegration
         if (LoadedModules.TryGetValue(guid, out var loadedModules))
         {
             loadedModules.Dispose();
-            LoadedModules.Remove(guid);
+            LoadedModules.TryRemove(guid, out _);
         }
     }
 
-    private void BuildEvents_OnBuildProjConfigDone(string Project, string ProjectConfig, string Platform, string SolutionConfig, bool Success)
+    private async void BuildEvents_OnBuildProjConfigDone(string Project, string ProjectConfig, string Platform, string SolutionConfig, bool Success)
     {
+        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
         Project project = EnvDTE.Solution.Item(Project);
-        LoadedModules[GetProjectGuid(project)].isBuildSuccess = Success;
-        if (Success.Not())
+        if (LoadedModules.TryGetValue(GetProjectGuid(project), out var buildInfo))
         {
-            EnvDTE.ExecuteCommand("Build.Cancel");
+            buildInfo.isBuildSuccess = Success;
+            if (Success.Not())
+            {
+                EnvDTE.ExecuteCommand("Build.Cancel");
+            }
         }
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
+
     public async void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
     {
         if ((Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll)) { return; }
-        if (LoadedModules.Values.ToList().TrueForAll(x => x.isBuildSuccess).Not()) { return; }
+        if (LoadedModules.Values.ToList().TrueForAll(x => x.isBuildSuccess).Not())
+        {
+            LoadedModules.Values.ForEach(x => x.isBuildSuccess = true);
+            return;
+        }
         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
         foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).Cast<Project>())
         {
-            CopyToOdaBin(project);
+            await CopyToOdaBinAsync(project);
         }
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
     public async void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
     {
         if (Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll) { return; }
@@ -117,7 +128,7 @@ public partial class VisualStudioIntegration
         VSErrors.Clear();
         foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).Cast<Project>())
         {
-            if (IncreaseVersion(project).Not())
+            if ((await IncreaseVersionAsync(project)).Not())
             {
                 EnvDTE.ExecuteCommand("Build.Cancel");
             }
@@ -127,10 +138,11 @@ public partial class VisualStudioIntegration
     #endregion
 
     #region Common Methods for Project item
-    public bool CopyToOdaBin(Project project)
+    public async Task<bool> CopyToOdaBinAsync(Project project)
     {
         try
         {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             var currentDirectory = new FileInfo(project.FullName).Directory;
             var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs")
                 ?? throw new NullReferenceException($"Missing AssemblyInfo.cs in {project.Name}");
@@ -150,7 +162,10 @@ public partial class VisualStudioIntegration
             moduleDir.BinInfo.CopyToDir(outputBinDir);
             moduleDir.PdbInfo.CopyToDir(outputBinDir);
 
-            var buildInfo = LoadedModules[GetProjectGuid(project)];
+            if (!LoadedModules.TryGetValue(GetProjectGuid(project), out var buildInfo))
+            {
+                return false;
+            }
             var remoteBinDir = buildInfo.RemoteDir.Class.Dir.OpenOrCreateFolder("bin");
             var remoteVersionDir = remoteBinDir.OpenOrCreateFolder(versionPath);
 
@@ -181,7 +196,7 @@ public partial class VisualStudioIntegration
         }
         catch (Exception ex)
         {
-            project.ShowError($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
+            await project.ShowError($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
         }
         return true;
     }
@@ -201,10 +216,11 @@ public partial class VisualStudioIntegration
         }
     }
 
-    public bool IncreaseVersion(Project project)
+    public async Task<bool> IncreaseVersionAsync(Project project)
     {
         try
         {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs")
                 ?? throw new NullReferenceException($"Missing AssemblyInfo.cs in {project.Name}");
             var version = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>().FirstOrDefault(x => x.Name == "AssemblyVersion");
@@ -227,13 +243,14 @@ public partial class VisualStudioIntegration
         }
         catch (Exception ex)
         {
-            project.ShowError($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
+            await project.ShowError($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
             return false;
         }
     }
 
     private string GetProjectGuid(Project project)
     {
+        ThreadHelper.ThrowIfNotOnUIThread();
         //same guid in different projects :(
         /* var solution = serviceProvider.GetService(typeof(SVsSolution)) as IVsSolution;
         IVsHierarchy hierarchy;
@@ -250,6 +267,7 @@ public partial class VisualStudioIntegration
 
     private void SetAttributeToProjectItem(IDictionary<string, CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
     {
+        ThreadHelper.ThrowIfNotOnUIThread();
         codeAttributes.TryGetValue(name, out var attribute);
         if (attribute == null)
         {
@@ -265,8 +283,9 @@ public partial class VisualStudioIntegration
 
     #region Download and init  logic for Module
 
-    public async Task<bool> OpenModule(StructureItem item)
+    public async Task<bool> OpenModuleAsync(StructureItem item)
     {
+        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
         if (BuildEvents is null)
         {
             SubscribeToStudioEvents();
@@ -278,23 +297,24 @@ public partial class VisualStudioIntegration
             _ = item ?? throw new NullReferenceException("Item was null");
             var module = DownloadModule(item);
             var csProj = module.csProj ?? throw new DirectoryNotFoundException("Module csproj file not found");
+
             if (EnvDTE.Solution.IsOpen.Not())
             {
                 EnvDTE.Solution.Create(TempFiles.TempPath.ToUpper(), item.Host.Name);
             }
 
             project = EnvDTE.Solution.AddFromFile(csProj.FullName);
-            InitProject(project, item);
-            UpdateAssemblyReferences(project, AddinSettings.OdaLibraries);
-            UpdateAssemblyReferences(project, AddinSettings.UpdateReferenceLibraries);
+            await InitProject(project, item);
+            UpdateAssemblyReferences(project.Object as VSProject, AddinSettings.OdaLibraries);
+            UpdateAssemblyReferences(project.Object as VSProject, AddinSettings.UpdateReferenceLibraries);
             oda.OdaOverride.INI.DebugINI.Write("DEBUG", item.FullId, true);
-            if (!oda.OdaOverride.INI.DebugINI.Save())
+            if (!await oda.OdaOverride.INI.DebugINI.SaveAsync())
             {
                 throw new Exception("Can't save debug INI");
             }
-            IncreaseVersion(project);
+            await IncreaseVersionAsync(project);
             project.Save();
-            LoadedModules.Add(GetProjectGuid(project), new BuildInfo(project.UniqueName, module.remoteDir, module.localDir));
+            LoadedModules.TryAdd(GetProjectGuid(project), new BuildInfo(project.UniqueName, module.remoteDir, module.localDir));
         }
         catch (Exception ex)
         {
@@ -318,9 +338,10 @@ public partial class VisualStudioIntegration
             .FirstOrDefault(), item.Dir, localDir);
     }
 
-    private void InitProject(Project project, StructureItem sourceItem)
+    private async Task InitProject(Project project, StructureItem sourceItem)
     {
         if (project == null) { throw new NullReferenceException(nameof(project)); }
+        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
         project.Name = $"{sourceItem.Name}-{sourceItem.Id}";
 
         project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartAction").Value = prjStartAction.prjStartActionProgram;
@@ -353,9 +374,8 @@ public partial class VisualStudioIntegration
         assemblyInfo.Save();
     }
 
-    private bool UpdateAssemblyReferences(Project project, IEnumerable<string> references)
+    private bool UpdateAssemblyReferences(VSProject VSProj, IEnumerable<string> references)
     {
-        var VSProj = project.Object as VSProject;
         List<string> deletedDlls = new();
         foreach (Reference reference in VSProj.References)
         {

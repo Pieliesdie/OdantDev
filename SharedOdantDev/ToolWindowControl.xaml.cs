@@ -536,7 +536,7 @@ public partial class ToolWindow1Control : UserControl
 
     private async Task OpenModule(StructureItem item)
     {
-        await odaAddinModel.OpenModule(item);
+        await odaAddinModel.OpenModuleAsync(item);
         await Task.Run(async () =>
         {
             AddinSettings.LastProjects = new ObservableCollection<AddinSettings.Project>(

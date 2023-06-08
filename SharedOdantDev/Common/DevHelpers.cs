@@ -31,17 +31,17 @@ public class DevHelpers
         await DownloadAndCopyFrameworkGenericAsync("net40", "v4.0", "1.0.2", logger);
     }
 
-    private static async Task RemoveExistsFolderWithAdminRights(string path)
+    private static async Task RemoveExistsFolderWithAdminRightsAsync(string path)
     {
-        await InvokeCmdCommand($"rmdir \"{path}\" /Q /S");
+        await InvokeCmdCommandAsync($"rmdir \"{path}\" /Q /S");
     }
 
-    private static async Task CopyFolderWithAdminRights(string from, string to)
+    private static async Task CopyFolderWithAdminRightsAsync(string from, string to)
     {
-        await InvokeCmdCommand($"Xcopy \"{from}\" \"{to}\" /E /H /C /I /y");
+        await InvokeCmdCommandAsync($"Xcopy \"{from}\" \"{to}\" /E /H /C /I /y");
     }
 
-    public static async Task InvokeCmdCommand(string command)
+    public static async Task InvokeCmdCommandAsync(string command)
     {
         System.Diagnostics.Process process = new System.Diagnostics.Process();
         System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
@@ -73,15 +73,15 @@ public class DevHelpers
 
             if (Directory.Exists(netFolder))
             {
-                await RemoveExistsFolderWithAdminRights(netFolder);
+                await RemoveExistsFolderWithAdminRightsAsync(netFolder);
             }
-            await CopyFolderWithAdminRights(tempExtractNetFolder, netFolder);
+            await CopyFolderWithAdminRightsAsync(tempExtractNetFolder, netFolder);
 
             if (Directory.Exists(netFolder2))
             {
-                await RemoveExistsFolderWithAdminRights(netFolder2);
+                await RemoveExistsFolderWithAdminRightsAsync(netFolder2);
             }
-            await CopyFolderWithAdminRights(tempExtractNetFolder, netFolder2);
+            await CopyFolderWithAdminRightsAsync(tempExtractNetFolder, netFolder2);
             logger?.Info($".Net {folder} loaded");
             logger?.Info($"Please reopen Visual Studio");
         }
