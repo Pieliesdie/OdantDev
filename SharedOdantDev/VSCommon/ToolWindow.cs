@@ -26,4 +26,10 @@ public class ToolWindow : ToolWindowPane
         this.Caption = "ODANT Dev";
         this.Content = new ToolWindow1Control(OdantDevPackage.Env_DTE);
     }
+
+    protected override void Initialize()
+    {
+        base.Initialize();
+        var test = this.GetIVsWindowPane();
+    }
 }

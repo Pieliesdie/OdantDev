@@ -27,7 +27,7 @@ namespace OdantDev;
 /// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
 /// </para>
 /// </remarks>
-[PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
+[PackageRegistration(UseManagedResourcesOnly = false, AllowsBackgroundLoading = true)]
 [Guid(OdantDevPackage.PackageGuidString)]
 [ProvideMenuResource("Menus.ctmenu", 1)]
 [ProvideToolWindow(typeof(ToolWindow))]
