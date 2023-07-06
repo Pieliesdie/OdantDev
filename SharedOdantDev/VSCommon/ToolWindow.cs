@@ -27,25 +27,33 @@ namespace OdantDev;
 [Guid("e477ca93-32f7-4a68-ab0d-7472ff3e7964")]
 public class ToolWindow : ToolWindowPane
 {
-    private bool OutOfProcess = true;
+    private bool OutOfProcess = false;
     private Process ChildProcess { get; set; }
     private WindowsFormsHost Host { get; }
     private IntPtr HostHandle { get; }
     private async Task RunDevApp(bool restart = false)
     {
-        var currentProcess = Process.GetCurrentProcess();
-        var args = new CommandLineArgs() { ProcessId = currentProcess.Id };
-        var process = ChildProcess = await StartProcessAsync(@"OdantDevApp.exe", args);
-        WinApi.SetParent(process.MainWindowHandle, HostHandle);
-        WinApi.SetWindowLong(process.MainWindowHandle, WinApi.GWL_STYLE, WinApi.WS_VISIBLE);
-        //Remove border and whatnot
-        WinApi.MoveWindow(process.MainWindowHandle, 0, 0, (int)Host.ActualWidth, (int)Host.ActualHeight, true);
-
-        KillAfterExit(process);
-        RestartIfFail(process);
-        if (!restart)
+        try
         {
-            SubscribeToSizeChanging(Host);
+            var currentProcess = Process.GetCurrentProcess();
+            var args = new CommandLineArgs() { ProcessId = currentProcess.Id };
+            var process = ChildProcess = await StartProcessAsync(@"OdantDevApp.exe", args);
+            WinApi.SetParent(process.MainWindowHandle, HostHandle);
+            WinApi.SetWindowLong(process.MainWindowHandle, WinApi.GWL_STYLE, WinApi.WS_VISIBLE);
+            //Remove border and whatnot
+            WinApi.MoveWindow(process.MainWindowHandle, 0, 0, (int)Host.ActualWidth, (int)Host.ActualHeight, true);
+
+            KillAfterExit(process);
+            RestartIfFail(process);
+            if (!restart)
+            {
+                SubscribeToSizeChanging(Host);
+            }
+        }
+        catch(Exception ex)
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            Host.Child = new System.Windows.Forms.Label() { Text = ex.ToString() };
         }
     }
 
@@ -55,13 +63,13 @@ public class ToolWindow : ToolWindowPane
         process.Exited += Process_Exited;
     }
 
-    private async void Process_Exited(object sender, EventArgs e)
+    private void Process_Exited(object sender, EventArgs e)
     {
         if (sender is not Process process)
             return;
         if (process.ExitCode == (int)ExitCodes.Restart)
         {
-            await RunDevApp();
+            _ = RunDevApp(true);
         }
     }
 
@@ -77,6 +85,7 @@ public class ToolWindow : ToolWindowPane
     private async void KillAfterExit(Process process)
     {
         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
         Action kill = () =>
         {
             if (process.HasExited) return;
@@ -108,6 +117,8 @@ public class ToolWindow : ToolWindowPane
                 UseShellExecute = true
             };
             var process = Process.Start(psi);
+
+            
             while (process.MainWindowHandle == IntPtr.Zero)
             {
                 process.Refresh();
@@ -139,14 +150,14 @@ public class ToolWindow : ToolWindowPane
         }
         else
         {
-            this.Content = new ToolWindow1Control() { DTE2 = OdantDevPackage.Env_DTE };
+            this.Content = new ToolWindow1Control(OdantDevPackage.Env_DTE);
         }
     }
 
-    public override async void OnToolWindowCreated()
+    public override void OnToolWindowCreated()
     {
         base.OnToolWindowCreated();
         if (!OutOfProcess) return;
-        await RunDevApp();
+        _ = RunDevApp();
     }
 }

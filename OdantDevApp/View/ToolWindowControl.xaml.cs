@@ -54,7 +54,6 @@ public partial class ToolWindow1Control : UserControl
     private ILogger logger;
     private VisualStudioIntegration odaAddinModel;
     private bool isDarkTheme;
-    private DTE2 dTE2;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBusy))]
@@ -82,22 +81,23 @@ public partial class ToolWindow1Control : UserControl
             isDarkTheme = value;
         }
     }
-    public DTE2 DTE2 { get => dTE2 ??= OdantDevApp.VSCommon.ExternalEnvDTE.Instance; set => dTE2 = value; }
+    private DTE2 DTE2 { get; set; }
     /// <summary>
     /// Initializes a new instance of the <see cref="ToolWindow1Control"/> class.
     /// </summary>
-    public ToolWindow1Control()
+    public ToolWindow1Control() : this(OdantDevApp.VSCommon.ExternalEnvDTE.Instance) {}
+    public ToolWindow1Control(DTE2 dte)
     {
         InitializeMaterialDesign();
         InitializeComponent();
+
+        DTE2 = dte;
         var AddinSettingsFolder = Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ODA", "AddinSettings"));
         AddinSettings = AddinSettings.Create(AddinSettingsFolder);
         logger = new PopupController(this.MessageContainer);
         ThemeCheckBox.IsChecked = IsVisualStudioDark();
         this.DataContext = this;
-
         Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
-        //VSColorTheme.ThemeChanged += VSColorTheme_ThemeChanged;
     }
 
 
@@ -252,7 +252,10 @@ public partial class ToolWindow1Control : UserControl
             ErrorSp.Visibility = Visibility.Collapsed;
             OdaTree.Visibility = Visibility.Visible;
             MainTabControl.Visibility = Visibility.Visible;
-            ExitButton.Visibility = Visibility.Visible;
+            if (CommandLine.Args() != null)
+            {
+                ExitButton.Visibility = Visibility.Visible;
+            }
             DeveloperCb.SelectedItem = OdaModel.Developers?.Where(x => x.FullId == AddinSettings.SelectedDevelopeDomain).FirstOrDefault();
             return (true, null);
         }

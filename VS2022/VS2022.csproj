@@ -55,6 +55,18 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="..\SharedFiles\img\create_moduleclass.png">
+      <Link>img\create_moduleclass.png</Link>
+    </Content>
+    <Content Include="..\SharedFiles\img\create_moduledomain.png">
+      <Link>img\create_moduledomain.png</Link>
+    </Content>
+    <Content Include="..\SharedFiles\img\create_project.png">
+      <Link>img\create_project.png</Link>
+    </Content>
+    <Content Include="..\SharedFiles\img\sample_project.png">
+      <Link>img\sample_project.png</Link>
+    </Content>
     <Content Include="..\SharedFiles\Templates\ProjectTemplate\TemplateProject.csproj">
       <Link>Templates\ProjectTemplate\TemplateProject.csproj</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -96,6 +108,7 @@
     <ProjectReference Include="..\OdantDevApp\OdantDevApp.csproj">
       <Project>{cf75790b-dc2c-4fe4-ba65-2c002e7d6314}</Project>
       <Name>OdantDevApp</Name>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
     <ProjectReference Include="..\SharedOdantDevLib\SharedOdantDevLib.csproj">
       <Project>{5b6d1f87-2805-42e9-90ed-40a37b0344fd}</Project>

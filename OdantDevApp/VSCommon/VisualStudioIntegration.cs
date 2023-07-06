@@ -44,7 +44,6 @@ public partial class VisualStudioIntegration
         this.AddinSettings = addinSettings;
 
         EnvDTE = DTE
-            ?? OdantDevApp.VSCommon.ExternalEnvDTE.Instance
             ?? throw new NullReferenceException("Can't get EnvDTE2 from visual studio");
 
         if (EnvDTE.Solution.IsOpen)

@@ -4,7 +4,7 @@
         <Identity Id="OdantDev.e52cd637-63b6-4219-a90f-fd8231cd4c0f" Version="1.2" Language="en-US" Publisher="Pieliesdie" />
         <DisplayName>OdantDev(VS2019)</DisplayName>
         <Description xml:space="preserve">Addin for odant modules</Description>
-		<MoreInfo>https://github.com/Pieliesdie/OdantDev</MoreInfo>
+        <MoreInfo>https://github.com/Pieliesdie/OdantDev</MoreInfo>
         <Icon>Icon.png</Icon>
         <Preview>true</Preview>
     </Metadata>
