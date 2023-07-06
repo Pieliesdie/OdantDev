@@ -4,8 +4,8 @@
     <MinimumVisualStudioVersion>16.0</MinimumVisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <TargetFrameworkProfile />
-    <Ngen>true</Ngen>
-    <NgenArchitecture>X86</NgenArchitecture>
+    <Ngen>false</Ngen>
+    <NgenArchitecture>NotSpecified</NgenArchitecture>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -51,58 +51,17 @@
     <DeployExtension>False</DeployExtension>
   </PropertyGroup>
   <ItemGroup>
-    <Resource Include="..\SharedFiles\img\create_moduleclass.png">
-      <Link>img\create_moduleclass.png</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="..\SharedFiles\img\create_moduledomain.png">
-      <Link>img\create_moduledomain.png</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="..\SharedFiles\img\create_project.png">
-      <Link>img\create_project.png</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="..\SharedFiles\img\sample_project.png">
-      <Link>img\sample_project.png</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
     <Content Include="..\SharedFiles\Templates\ProjectTemplate\TemplateProject.csproj">
       <Link>Templates\ProjectTemplate\TemplateProject.csproj</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="..\SharedFiles\Readme.md">
-      <Link>Readme.md</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="CommunityToolkit.Mvvm, Version=8.0.0.0, Culture=neutral, PublicKeyToken=4aff67a105548ee2, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\SourceGenerators\CommunityToolkit.Mvvm.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="odaCore">
-      <HintPath>..\Libraries\OdaLibs\odaCore.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="odaLib">
-      <HintPath>..\Libraries\OdaLibs\odaLib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="odaShare">
-      <HintPath>..\Libraries\OdaLibs\odaShare.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="odaXML">
-      <HintPath>..\Libraries\OdaLibs\odaXML.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -111,42 +70,12 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Community.VisualStudio.Toolkit.16">
-      <Version>16.0.503</Version>
-    </PackageReference>
-    <PackageReference Include="GitLabApiClient">
-      <Version>1.8.0</Version>
-    </PackageReference>
-    <PackageReference Include="MaterialDesignColors">
-      <Version>2.1.4</Version>
-    </PackageReference>
-    <PackageReference Include="MaterialDesignThemes">
-      <Version>4.9.0</Version>
-    </PackageReference>
-    <PackageReference Include="MdXaml">
-      <Version>1.19.2</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory">
-      <Version>7.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection">
-      <Version>7.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Validation">
-      <Version>16.10.35</Version>
-    </PackageReference>
-    <PackageReference Include="morelinq">
-      <Version>3.4.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.Linq.Parallel">
-      <Version>4.3.0</Version>
-    </PackageReference>
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
@@ -155,6 +84,14 @@
     <ProjectReference Include="..\MaterialDesignExtensions\MaterialDesignExtensions.csproj">
       <Project>{2dc67c48-ed97-4529-8fdc-44573392230b}</Project>
       <Name>MaterialDesignExtensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OdantDevApp\OdantDevApp.csproj">
+      <Project>{cf75790b-dc2c-4fe4-ba65-2c002e7d6314}</Project>
+      <Name>OdantDevApp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharedOdantDevLib\SharedOdantDevLib.csproj">
+      <Project>{5b6d1f87-2805-42e9-90ed-40a37b0344fd}</Project>
+      <Name>SharedOdantDevLib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -202,9 +139,6 @@
       <Link>Templates\ProjectTemplate\Init.cs</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\Libraries\SourceGenerators\CommunityToolkit.Mvvm.SourceGenerators.dll" />
   </ItemGroup>
   <Import Project="..\SharedOdantDev\SharedOdantDev.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

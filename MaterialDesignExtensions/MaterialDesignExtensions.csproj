@@ -4,6 +4,7 @@
   <PropertyGroup>
     <TargetFrameworks>net48</TargetFrameworks>
     <UseWPF>true</UseWPF>
+	<LangVersion>latest</LangVersion>
     <AssemblyTitle>Material Design Extensions</AssemblyTitle>
     <Summary>Material Design Extensions is based on Material Design in XAML Toolkit to provide additional controls and features for WPF apps. The controls might not be specified in the Material Design specification or would crash the scope of Material Design in XAML Toolkit.</Summary>
     <Description>Material Design Extensions is based on Material Design in XAML Toolkit to provide additional controls and features for WPF apps. The controls might not be specified in the Material Design specification or would crash the scope of Material Design in XAML Toolkit.

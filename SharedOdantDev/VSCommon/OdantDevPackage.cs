@@ -1,11 +1,14 @@
-﻿using DevExpress.ProjectUpgrade.Package;
-using EnvDTE;
+﻿using EnvDTE;
+
 using EnvDTE80;
+
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
+
 using Task = System.Threading.Tasks.Task;
 
 namespace OdantDev;
@@ -50,36 +53,10 @@ public sealed class OdantDevPackage : AsyncPackage
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-        Env_DTE = await this.GetServiceAsync<DTE,DTE2>();
-
-        try
-        {
-            IVsShell shellService = await GetServiceAsync(typeof(SVsShell)) as IVsShell;
-            ToolboxReseter = new ToolboxReseter(UserLocalDataPath);
-            ToolboxReseter.Start(Env_DTE as DTE, shellService);
-        }
-        catch (Exception e)
-        {
-        }
-
+        Env_DTE = await this.GetServiceAsync<DTE, DTE2>();
         await ToolWindowCommand.InitializeAsync(this);
     }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (ToolboxReseter != null)
-        {
-            ToolboxReseter.DoFinish();
-            ToolboxReseter.Dispose();
-        }
-        
-        base.Dispose(disposing);
-    }
-
     public static DTE2 Env_DTE { get; set; }
-
-    internal static ToolboxReseter ToolboxReseter { get; set; }
-
     public static IServiceProvider ServiceProvider { get; set; }
     #endregion
 }
