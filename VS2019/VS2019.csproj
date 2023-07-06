@@ -61,7 +61,6 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -81,10 +80,6 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MaterialDesignExtensions\MaterialDesignExtensions.csproj">
-      <Project>{2dc67c48-ed97-4529-8fdc-44573392230b}</Project>
-      <Name>MaterialDesignExtensions</Name>
-    </ProjectReference>
     <ProjectReference Include="..\OdantDevApp\OdantDevApp.csproj">
       <Project>{cf75790b-dc2c-4fe4-ba65-2c002e7d6314}</Project>
       <Name>OdantDevApp</Name>
