@@ -55,22 +55,6 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="..\SharedFiles\img\create_moduleclass.png">
-      <Link>img\create_moduleclass.png</Link>
-    </Content>
-    <Content Include="..\SharedFiles\img\create_moduledomain.png">
-      <Link>img\create_moduledomain.png</Link>
-    </Content>
-    <Content Include="..\SharedFiles\img\create_project.png">
-      <Link>img\create_project.png</Link>
-    </Content>
-    <Content Include="..\SharedFiles\img\sample_project.png">
-      <Link>img\sample_project.png</Link>
-    </Content>
-    <Content Include="..\SharedFiles\Templates\ProjectTemplate\TemplateProject.csproj">
-      <Link>Templates\ProjectTemplate\TemplateProject.csproj</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -119,43 +103,23 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\SharedFiles\dxtoolbox.v18.1.pkgdef">
+    <Content Include="..\SharedOdantDevFiles\dxtoolbox.v18.1.pkgdef">
       <Link>dxtoolbox.v18.1.pkgdef</Link>
     </Content>
-    <Content Include="..\SharedFiles\Icon.png">
+    <Content Include="..\SharedOdantDevFiles\Icon.png">
       <Link>Icon.png</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\SharedFiles\Templates\AddinSettings.xml">
-      <Link>Templates\AddinSettings.xml</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <VSCTCompile Include="..\SharedFiles\OdantDevPackage.vsct">
+    <VSCTCompile Include="..\SharedOdantDevFiles\OdantDevPackage.vsct">
       <Link>OdantDevPackage.vsct</Link>
       <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\SharedFiles\Templates\AssemblyInfo.cs">
-      <Link>Templates\AssemblyInfo.cs</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="..\SharedFiles\Templates\ProjectTemplate\AssemblyInfo.cs">
-      <Link>Templates\ProjectTemplate\AssemblyInfo.cs</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="..\SharedFiles\Templates\ProjectTemplate\Init.cs">
-      <Link>Templates\ProjectTemplate\Init.cs</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
   </ItemGroup>
   <Import Project="..\SharedOdantDev\SharedOdantDev.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir "$(SolutionDir)\vsix"
-COPY /Y "$(TargetDir)\$(TargetName).vsix" "$(SolutionDir)\vsix"</PostBuildEvent>
+    <PostBuildEvent>mkdir "$(SolutionDir)\.artifacts"
+COPY /Y "$(TargetDir)\$(TargetName).vsix" "$(SolutionDir)\.artifacts"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
