@@ -29,7 +29,7 @@ namespace OdantDev;
 [Guid("e477ca93-32f7-4a68-ab0d-7472ff3e7964")]
 public class ToolWindow : ToolWindowPane
 {
-    private bool OutOfProcess = false;
+    private bool OutOfProcess = true;
     private Process ChildProcess { get; set; }
     private WindowsFormsHost Host { get; }
     private IntPtr HostHandle { get; }
@@ -45,7 +45,6 @@ public class ToolWindow : ToolWindowPane
             //Remove border and whatnot
             WinApi.MoveWindow(process.MainWindowHandle, 0, 0, (int)Host.ActualWidth, (int)Host.ActualHeight, true);
 
-            KillAfterExit(process);
             RestartIfFail(process);
             if (!restart)
             {
@@ -82,30 +81,6 @@ public class ToolWindow : ToolWindowPane
             Child = new System.Windows.Forms.Panel() { Dock = System.Windows.Forms.DockStyle.Fill, }
         };
         return host;
-    }
-
-    private async void KillAfterExit(Process process)
-    {
-        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-        Action kill = () =>
-        {
-            if (process.HasExited) return;
-            try
-            {
-                process?.Kill(); process?.WaitForExit();
-            }
-            catch { }
-        };
-        Application.Current.Exit += (s, e) => { kill(); };
-        AppDomain.CurrentDomain.ProcessExit += (s, e) =>
-        {
-            kill();
-        };
-        AppDomain.CurrentDomain.DomainUnload += (s, e) =>
-        {
-            kill();
-        };
     }
 
     private async Task<Process> StartProcessAsync(string path, CommandLineArgs arguments)
