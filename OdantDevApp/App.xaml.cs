@@ -33,7 +33,7 @@ public partial class App : Application
     {
         if (CommandLine.TryGetParentProcess() is Process parent)
         {
-            TaskEx.StartInfiniteTask(() => CheckForZombie(parent), TimeSpan.FromSeconds(4));
+            _ = TaskEx.StartInfiniteTask(() => CheckForZombie(parent), TimeSpan.FromSeconds(4));
         }
     }
 

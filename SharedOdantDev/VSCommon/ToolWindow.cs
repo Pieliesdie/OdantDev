@@ -1,16 +1,18 @@
-﻿using Microsoft.VisualStudio.Shell;
-
-using SharedOdantDevLib;
-
-using System;
+﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Forms.Integration;
 
+using Microsoft.VisualStudio.Shell;
+
+using SharedOdantDevLib;
+
 using Task = System.Threading.Tasks.Task;
+
 namespace OdantDev;
 
 /// <summary>
@@ -118,10 +120,17 @@ public class ToolWindow : ToolWindowPane
             };
             var process = Process.Start(psi);
 
-            
-            while (process.MainWindowHandle == IntPtr.Zero)
+            try
             {
-                process.Refresh();
+                while (process.MainWindowHandle == IntPtr.Zero)
+                {
+                    process.Refresh();
+                }
+            }
+            catch
+            {
+                process.Close();
+                throw;
             }
             WinApi.ShowWindow(process.MainWindowHandle, WinApi.SW_HIDE);
             return process;
