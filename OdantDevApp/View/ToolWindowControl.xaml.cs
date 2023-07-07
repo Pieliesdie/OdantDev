@@ -156,7 +156,7 @@ public partial class ToolWindow1Control : UserControl
 
     private async void Exit(object sender, RoutedEventArgs e)
     {
-        if (CommandLine.Args() == null)
+        if (!CommandLine.IsOutOfProcess)
         {
             logger.Error("Supported only in out of process");
             return;
@@ -252,7 +252,7 @@ public partial class ToolWindow1Control : UserControl
             ErrorSp.Visibility = Visibility.Collapsed;
             OdaTree.Visibility = Visibility.Visible;
             MainTabControl.Visibility = Visibility.Visible;
-            if (CommandLine.Args() != null)
+            if (CommandLine.IsOutOfProcess)
             {
                 ExitButton.Visibility = Visibility.Visible;
             }

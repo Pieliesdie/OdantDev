@@ -19,11 +19,11 @@ namespace OdantDevApp.VSCommon;
 
 public static class ExternalEnvDTE
 {
-    private static DTE2 instance;
-
     public static DTE2 Instance { get { Init(); return instance; } set => instance = value; }
 
-    public static void Init()
+    private static DTE2 instance;
+
+    private static void Init()
     {
         if (instance != null) { return; }
         if (instance == null && CommandLine.TryGetParentProcess() is System.Diagnostics.Process parentProcess)

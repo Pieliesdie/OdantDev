@@ -14,7 +14,7 @@ namespace OdantDevApp.Model;
 public static class CommandLine
 {
     private static CommandLineArgs _args;
-    public static CommandLineArgs Args()
+    private static CommandLineArgs Args()
     {
         try
         {
@@ -26,6 +26,8 @@ public static class CommandLine
             return default;
         }
     }
+
+    public static bool IsOutOfProcess => Args() != null;
 
     public static System.Diagnostics.Process TryGetParentProcess()
     {

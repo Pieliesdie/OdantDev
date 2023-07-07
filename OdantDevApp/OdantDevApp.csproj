@@ -2,8 +2,8 @@
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<AssemblyName>OdantDevApp</AssemblyName>
-		<UseWPF>true</UseWPF>	
-		<TargetFramework>net48</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<TargetFrameworks>net48</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<IncludePackageReferencesDuringMarkupCompilation>true</IncludePackageReferencesDuringMarkupCompilation>
 	</PropertyGroup>
@@ -11,20 +11,29 @@
 		<ApplicationIcon>Icon.ico</ApplicationIcon>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<Nullable>warnings</Nullable>
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
 	</PropertyGroup>
 	<ItemGroup>
-		<Reference Include="netstandard" />
 		<Reference Include="odaCore">
 			<HintPath>..\Libraries\OdaLibs\odaCore.dll</HintPath>
+			<SpecificVersion>False</SpecificVersion>
+			<Private>False</Private>
 		</Reference>
 		<Reference Include="odaLib">
 			<HintPath>..\Libraries\OdaLibs\odaLib.dll</HintPath>
+			<SpecificVersion>False</SpecificVersion>
+			<Private>False</Private>
 		</Reference>
 		<Reference Include="odaShare">
 			<HintPath>..\Libraries\OdaLibs\odaShare.dll</HintPath>
+			<SpecificVersion>False</SpecificVersion>
+			<Private>False</Private>
 		</Reference>
 		<Reference Include="odaXML">
 			<HintPath>..\Libraries\OdaLibs\odaXML.dll</HintPath>
+			<SpecificVersion>False</SpecificVersion>
+			<Private>False</Private>
 		</Reference>
 	</ItemGroup>
 	<ItemGroup>

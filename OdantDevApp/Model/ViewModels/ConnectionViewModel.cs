@@ -14,6 +14,7 @@ using SharedOdantDev.Common;
 using System.Collections.ObjectModel;
 using Microsoft.VisualBasic.FileIO;
 using OdantDevApp.Common;
+using OdantDevApp.Model;
 
 namespace OdantDev;
 
@@ -87,13 +88,13 @@ public partial class ConnectionModel : IDisposable
             PinnedItems = new AsyncObservableCollection<StructureItemViewModel<StructureItem>>(await PinnedListAsync());
             Developers = await DevelopListAsync();
 
-            if(AddinSettings.SelectedDevelopeDomain is null)
+            if (AddinSettings.SelectedDevelopeDomain is null)
             {
                 AddinSettings.SelectedDevelopeDomain = Developers.FirstOrDefault()?.FullId;
             }
 
             Items = new(PinnedItems, Hosts);
-          
+
             oda.OdaOverride.INI.DebugINI.Clear();
             await oda.OdaOverride.INI.DebugINI.SaveAsync();
 
@@ -207,12 +208,24 @@ public partial class ConnectionModel : IDisposable
         {
             ServerAssemblies = VsixExtension.LoadServerLibraries(odaFolder.FullName, VsixExtension.Platform, odaServerLibraries);
             ClientAssemblies = VsixExtension.LoadClientLibraries(odaFolder.FullName, odaClientLibraries);
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
             return (true, null);
         }
         catch (Exception ex)
         {
             return (false, ex.Message);
         }
+    }
+
+    private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+    {
+        var requestAssemblyName = new AssemblyName(args.Name);
+        
+        var tryResolveInClientAssemblies = ClientAssemblies.FirstOrDefault(x => new AssemblyName(x.FullName).Name == requestAssemblyName.Name);
+        if (tryResolveInClientAssemblies != null)
+            return tryResolveInClientAssemblies;
+
+        return null;
     }
 
     public StructureItem CreateItemsFromFiles(StructureItem rootItem, DirectoryInfo rootDir)
