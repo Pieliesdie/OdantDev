@@ -85,7 +85,7 @@ namespace SharedOdantDev.Model
 
                 return string.Empty;
             }
-            catch (System.Exception e)
+            catch
             {
                 throw;
             }
