@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -37,7 +38,8 @@ public class ToolWindow : ToolWindowPane
         {
             var currentProcess = Process.GetCurrentProcess();
             var args = new CommandLineArgs() { ProcessId = currentProcess.Id };
-            var process = ChildProcess = await StartProcessAsync(@"OdantDevApp.exe", args);
+            var appPath = Path.Combine(VsixExtension.VSIXPath.FullName, "app", "OdantDevApp.exe");
+            var process = ChildProcess = await StartProcessAsync(appPath, args);
             WinApi.SetParent(process.MainWindowHandle, HostHandle);
             WinApi.SetWindowLong(process.MainWindowHandle, WinApi.GWL_STYLE, WinApi.WS_VISIBLE);
             //Remove border and whatnot
@@ -78,6 +80,7 @@ public class ToolWindow : ToolWindowPane
         {
             Child = new System.Windows.Forms.Panel() { Dock = System.Windows.Forms.DockStyle.Fill, }
         };
+        host.Child.Controls.Add(new System.Windows.Forms.Label() { Text = "We are loading your extension, please wait", Dock = System.Windows.Forms.DockStyle.Fill });
         return host;
     }
 

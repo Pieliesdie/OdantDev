@@ -13,6 +13,5 @@
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\OdantDevPackage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\ToolWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\ToolWindowCommand.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)vscommon\WinApi.cs" />
   </ItemGroup>
 </Project>

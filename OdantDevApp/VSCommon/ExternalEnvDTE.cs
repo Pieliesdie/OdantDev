@@ -72,7 +72,7 @@ public static class ExternalEnvDTE
 
         try
         {
-            Marshal.ThrowExceptionForHR(NativeMethods.CreateBindCtx(reserved: 0, ppbc: out bindCtx));
+            Marshal.ThrowExceptionForHR(WinApi.CreateBindCtx(reserved: 0, ppbc: out bindCtx));
             bindCtx.GetRunningObjectTable(out rot);
             rot.EnumRunning(out enumMonikers);
 

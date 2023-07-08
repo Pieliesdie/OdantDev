@@ -2,19 +2,10 @@
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OdantDev;
+namespace OdantDevApp.OdaOverride;
 
 internal static class NativeMethods
 {
-    [DllImport("ole32.dll")]
-    public static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
-
-    [DllImport("kernel32", SetLastError = true)]
-    public static extern bool FreeLibrary(IntPtr hModule);
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    public static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, uint dwFlags);
-
     public delegate void OnUpdate_CALLBACK(int Type, IntPtr Params);
     [DllImport("odaClient.dll", EntryPoint = "ODAItem_set_on_update", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
     public static extern void _SetOnUpdate(IntPtr item, OnUpdate_CALLBACK func);

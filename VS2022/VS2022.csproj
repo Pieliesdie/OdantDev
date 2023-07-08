@@ -85,6 +85,13 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
+  	<Target Name="CopyLocalDevApp" AfterTargets="GetVsixSourceItems">
+		<ItemGroup>
+			<VSIXSourceItem Include="@(ReferenceCopyLocalPaths)">
+				<VSIXSubPath>app</VSIXSubPath>
+			</VSIXSourceItem>
+		</ItemGroup>
+	</Target>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>

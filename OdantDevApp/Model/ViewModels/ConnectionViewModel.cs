@@ -225,11 +225,12 @@ public partial class ConnectionModel : IDisposable
     {
         var requestAssemblyName = new AssemblyName(args.Name);
 
+        //return oda assemblies which was loaded before
         var tryResolveInClientAssemblies = ClientAssemblies.FirstOrDefault(x => new AssemblyName(x.FullName).Name == requestAssemblyName.Name);
         if (tryResolveInClientAssemblies != null)
             return tryResolveInClientAssemblies;
 
-        //todo: search visual studio folders
+        //other cases
         return null;
     }
 
@@ -360,6 +361,6 @@ public partial class ConnectionModel : IDisposable
             Connection.ServerItem?.Dispose();
             Connection.Dispose();
         }
-        ServerAssemblies.ForEach(x => NativeMethods.FreeLibrary(x));
+        ServerAssemblies.ForEach(x => WinApi.FreeLibrary(x));
     }
 }

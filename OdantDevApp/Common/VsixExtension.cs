@@ -20,7 +20,7 @@ public static class VsixExtension
         var output = new List<IntPtr>();
         foreach (var path in libPaths)
         {
-            var assembly = NativeMethods.LoadLibraryEx(Path.Combine(serverPath, path), IntPtr.Zero, 8U);
+            var assembly = WinApi.LoadLibraryEx(Path.Combine(serverPath, path), IntPtr.Zero, 8U);
             output.Add(assembly);
         }
         return output;
