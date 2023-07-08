@@ -37,11 +37,12 @@ public static class ItemFactory
             throw new NullReferenceException("Can't get remote domain");
         }
         var newDomain = StructureItemEx.CreateByType(NativeMethods._Create_Domain(remoteDomain.GetIntPtr(), name, type));
-        if (newDomain == null || !newDomain.Validate)
+        if (newDomain == null) return null;
+        if (string.IsNullOrEmpty(newDomain.error).Not() || !newDomain.Validate)
         {
             throw new Exception(newDomain.error);
         }
-        return (GetStorageItem(newDomain) as Domain) ?? throw new Exception("Uknown error");
+        return (GetStorageItem(newDomain) as Domain) ?? throw new Exception("Unknown error");
     }
 
     public static StructureItem GetStorageItem(ODAItem item)
@@ -126,7 +127,7 @@ public static class ItemFactory
                     return null;
                 }
 
-                if (owner is Host || (owner is Part && (owner as Part).ItemType == ItemType.RootPart && (item.Id == "DEVELOPE" || item.Id == "WORK")))
+                if (owner is Host || (owner is Part && (owner as Part)?.ItemType == ItemType.RootPart && (item.Id == "DEVELOPE" || item.Id == "WORK")))
                 {
                     return new Part(item as ODADomain, owner);
                 }

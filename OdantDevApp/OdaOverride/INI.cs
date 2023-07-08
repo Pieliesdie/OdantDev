@@ -270,17 +270,15 @@ public sealed class INI
         }
 
         Remove(section, text);
-        if (value is Array)
+        if (value is object[] array)
         {
-            object[] array = value as object[];
             for (int i = 0; i < array.Length; i++)
             {
                 Write(section, key, array[i], i);
             }
         }
-        else if (value is IList<object>)
+        else if (value is IList<object> list)
         {
-            IList<object> list = value as IList<object>;
             for (int j = 0; j < list.Count; j++)
             {
                 Write(section, key, list[j], j);

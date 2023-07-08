@@ -317,7 +317,10 @@ public partial class ToolWindow1Control : UserControl
                 {
                     structureItem.Remove();
                     //TODO: Подумать как обработать ситуацию с доменом модуля, тк. фактически мы не подписываемся на изменения внутреннего класса домена
-                    await (OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>).Parent.RefreshAsync(true);
+                    if (OdaTree?.SelectedItem is StructureItemViewModel<StructureItem> { Parent: { } })
+                    {
+                        await ((StructureItemViewModel<StructureItem>)OdaTree.SelectedItem).RefreshAsync(true);
+                    }
                 }
             }
             catch (Exception ex) { logger.Info(ex.Message); }
@@ -441,7 +444,10 @@ public partial class ToolWindow1Control : UserControl
 
             rootDir.Delete(true);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            logger?.Error(ex.Message);
+        }
 
         logger?.Info("Repository has been cloned.");
 
@@ -520,7 +526,7 @@ public partial class ToolWindow1Control : UserControl
     {
         var selectedItem = OdaTree.SelectedItem as StructureItemViewModel<StructureItem>;
         StructureItem structureItem = selectedItem?.Item;
-        if (structureItem == null)
+        if (structureItem == null || selectedItem == null)
         {
             logger?.Info("Item not found.");
             return;
@@ -705,6 +711,7 @@ public partial class ToolWindow1Control : UserControl
     private async void DownloadNet4_0_Click(object sender, RoutedEventArgs e)
     {
         var button = sender as Button;
+        if (button == null) return;
         try
         {
             button.IsEnabled = false;
@@ -722,6 +729,7 @@ public partial class ToolWindow1Control : UserControl
     private async void DownloadNet4_5_Click(object sender, RoutedEventArgs e)
     {
         var button = sender as Button;
+        if (button == null) return;
         try
         {
             button.IsEnabled = false;

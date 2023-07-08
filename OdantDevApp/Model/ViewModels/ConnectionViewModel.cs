@@ -48,7 +48,7 @@ public partial class ConnectionModel : IDisposable
     List<RepoBaseViewModel> _repos;
 
     [ObservableProperty]
-    List<DomainDeveloper> developers;
+    List<DomainDeveloper>? developers;
 
     public static List<IntPtr> ServerAssemblies { get; set; }
 
@@ -135,7 +135,7 @@ public partial class ConnectionModel : IDisposable
         return await Task.Run(async () =>
         {
             Develope = StructureItemEx.FindDomain(Localhost, "D:DEVELOPE");
-            var developList = Developers = Develope.FindDomains()?.OfType<DomainDeveloper>()?.ToList();
+            var developList = Developers = Develope?.FindDomains()?.OfType<DomainDeveloper>()?.ToList();
             var retryCount = 5;
             while (retryCount-- > 0 && developList is null)
             {

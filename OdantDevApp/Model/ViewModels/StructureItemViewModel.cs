@@ -37,7 +37,10 @@ public partial class StructureItemViewModel<T> where T : StructureItem
         if (type == 2)
         {
             await this.RefreshAsync();
-            await this.Parent?.RefreshAsync();
+            if (Parent != null)
+            {
+                await this.Parent.RefreshAsync();
+            }
         }
         else if (type < 6)
         {
@@ -47,7 +50,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
     }
 
     ODAItem RemoteItem => this.Item?.RemoteItem;
-    public bool IsPinned => connection?.PinnedItems?.Contains(this as StructureItemViewModel<StructureItem>) ?? false;
+    public bool IsPinned => this is StructureItemViewModel<StructureItem> item && (connection?.PinnedItems?.Contains(item) ?? false); 
     public bool HasRepository => !string.IsNullOrWhiteSpace(Item?.Root?.GetAttribute("GitLabRepository"));
     public bool CanCreateModule => Item is Class && !HasModule;
     public bool IsLocal => Item?.Host?.IsLocal ?? false;
@@ -90,7 +93,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             switch (ItemType)
             {
                 case ItemType.Class:
-                    return (Item as Class).HasModule;
+                    return (Item as Class)?.HasModule ?? false;
                 case ItemType.Module:
                     {
                         if (Children == dummyList || Children is null)
