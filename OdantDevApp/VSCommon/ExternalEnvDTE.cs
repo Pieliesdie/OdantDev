@@ -1,19 +1,15 @@
-﻿using EnvDTE;
+﻿using System;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
+using System.Text.RegularExpressions;
+
+using EnvDTE;
 
 using EnvDTE80;
 
 using OdantDev;
 
 using OdantDevApp.Model;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace OdantDevApp.VSCommon;
 
@@ -101,10 +97,11 @@ public static class ExternalEnvDTE
                 }
 
                 Regex monikerRegex = new Regex(@"!VisualStudio.DTE\.\d+\.\d+\:" + processId, RegexOptions.IgnoreCase);
+                Marshal.ThrowExceptionForHR(rot.GetObject(runningObjectMoniker, out var runningObject1));
                 if (!string.IsNullOrEmpty(name) && monikerRegex.IsMatch(name))
                 {
                     Marshal.ThrowExceptionForHR(rot.GetObject(runningObjectMoniker, out runningObject));
-                    break;
+                    //break;
                 }
             }
         }

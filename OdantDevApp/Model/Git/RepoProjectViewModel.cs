@@ -1,5 +1,6 @@
-﻿using OdantDev.Model;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
+using OdantDev.Model;
 
 namespace SharedOdantDev.Model
 {
@@ -9,7 +10,7 @@ namespace SharedOdantDev.Model
 
         private RepoProjectViewModel() { }
 
-        public RepoProjectViewModel(ProjectItem item, bool lazyLoad, BaseGitItem parent, ILogger logger = null)   
+        public RepoProjectViewModel(ProjectItem item, bool lazyLoad, BaseGitItem parent, ILogger logger = null)
         {
             _isLazyLoading = lazyLoad;
             _logger = logger;

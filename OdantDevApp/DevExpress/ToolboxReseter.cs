@@ -1,13 +1,13 @@
-﻿using DevExpress.Web.Projects.Menu.Package;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+
+using DevExpress.Web.Projects.Menu.Package;
 
 using EnvDTE;
 
 using Microsoft.VisualStudio.CommandBars;
 using Microsoft.VisualStudio.Shell.Interop;
-
-using System;
-using System.Collections.Generic;
-using System.Threading;
 
 using Image = System.Drawing.Image;
 using Window = EnvDTE.Window;

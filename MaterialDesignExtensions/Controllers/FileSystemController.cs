@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
-using MaterialDesignThemes.Wpf;
 
 using MaterialDesignExtensions.Model;
+
+using MaterialDesignThemes.Wpf;
 
 // use Pri.LongPath classes instead of System.IO for the MaterialDesignExtensions.LongPath build to support long file system paths on older Windows and .NET versions
 #if LONG_PATH

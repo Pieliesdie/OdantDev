@@ -1,12 +1,10 @@
-﻿using EnvDTE;
-using EnvDTE80;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+
+using EnvDTE;
+
+using EnvDTE80;
 
 namespace OdantDev.Model
 {
@@ -22,7 +20,7 @@ namespace OdantDev.Model
             //Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs");
             Name = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>()
-                .FirstOrDefault(x => x.Name == "AssemblyDefaultAlias")?.Value.Replace("\"",string.Empty);
+                .FirstOrDefault(x => x.Name == "AssemblyDefaultAlias")?.Value.Replace("\"", string.Empty);
 
             string fullPath = project.Properties.Item("FullPath").Value.ToString();
             string outputPath = project.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value.ToString();

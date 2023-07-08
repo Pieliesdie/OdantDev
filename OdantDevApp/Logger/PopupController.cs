@@ -1,12 +1,7 @@
-﻿using MaterialDesignThemes.Wpf;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows;
-using System.Windows.Controls;
+
+using MaterialDesignThemes.Wpf;
 
 namespace OdantDev.Model;
 internal class PopupController : ILogger
@@ -21,7 +16,7 @@ internal class PopupController : ILogger
                 Clipboard.Clear();
                 Clipboard.SetText(s);
             });
-        var enqueueAction = new Action(() => snackbar.MessageQueue.Enqueue(message, "Copy", copyAction, message));
+        var enqueueAction = new Action(() => snackbar?.MessageQueue?.Enqueue(message, "Copy", copyAction, message));
         if (snackbar.Dispatcher.CheckAccess())
         {
             enqueueAction.Invoke();

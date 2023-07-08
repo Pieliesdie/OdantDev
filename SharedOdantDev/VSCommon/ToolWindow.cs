@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -29,7 +27,7 @@ namespace OdantDev;
 [Guid("e477ca93-32f7-4a68-ab0d-7472ff3e7964")]
 public class ToolWindow : ToolWindowPane
 {
-    private bool OutOfProcess = false;
+    private bool OutOfProcess = true;
     private Process ChildProcess { get; set; }
     private WindowsFormsHost Host { get; }
     private IntPtr HostHandle { get; }
@@ -51,7 +49,7 @@ public class ToolWindow : ToolWindowPane
                 SubscribeToSizeChanging(Host);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             Host.Child = new System.Windows.Forms.Label() { Text = ex.ToString() };
@@ -90,7 +88,7 @@ public class ToolWindow : ToolWindowPane
             ProcessStartInfo psi = new ProcessStartInfo(path, arguments.SerializeBinary())
             {
                 CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden, 
+                WindowStyle = ProcessWindowStyle.Hidden,
                 UseShellExecute = true
             };
             var process = Process.Start(psi);

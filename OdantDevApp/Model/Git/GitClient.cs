@@ -1,14 +1,14 @@
-﻿using EnvDTE;
-using GitLabApiClient;
-using GitLabApiClient.Models.Groups.Responses;
-using GitLabApiClient.Models.Trees.Responses;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+
+using GitLabApiClient;
 using GitLabApiClient.Internal.Paths;
+using GitLabApiClient.Models.Trees.Responses;
 using GitLabApiClient.Models.Users.Responses;
+
 using Process = System.Diagnostics.Process;
 using Project = GitLabApiClient.Models.Projects.Responses.Project;
 
@@ -26,7 +26,7 @@ namespace SharedOdantDev.Model
         {
             if (string.IsNullOrEmpty(apiPath) || string.IsNullOrEmpty(apiKey))
                 return;
-            
+
             Client = new GitLabClient(apiPath, apiKey);
             _ = LoadSessionAsync();
         }
@@ -87,7 +87,7 @@ namespace SharedOdantDev.Model
             }
             catch (System.Exception e)
             {
-                throw e;
+                throw;
             }
         }
 

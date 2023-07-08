@@ -1,10 +1,10 @@
-using Microsoft.Win32;
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+
+using Microsoft.Win32;
 
 namespace OdantDev;
 
@@ -12,8 +12,8 @@ public static class VsixExtension
 {
     public static Bitness Platform => IntPtr.Size == 4 ? Bitness.x86 : Bitness.x64;
 
-    public static DirectoryInfo VSIXPath = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory;
- 
+    public static DirectoryInfo VSIXPath { get; } = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory;
+
     public static List<IntPtr> LoadServerLibraries(string odaPath, Bitness bitness, params string[] libPaths)
     {
         var serverPath = Path.Combine(odaPath, "server", Enum.GetName(typeof(Bitness), bitness));
@@ -30,7 +30,7 @@ public static class VsixExtension
         return libPaths.Select(libPath => Assembly.LoadFrom(Path.Combine(path, libPath))).ToList();
     }
 
-    public static DirectoryInfo LastOdaFolder = LastOdaPath().Directory;
+    public static DirectoryInfo LastOdaFolder { get; } = LastOdaPath().Directory;
 
     public static FileInfo LastOdaPath()
     {

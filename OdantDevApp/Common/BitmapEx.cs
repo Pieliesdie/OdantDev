@@ -6,7 +6,7 @@ using System.Windows.Media.Imaging;
 namespace OdantDev;
 
 public static class BitmapEx
-{ 
+{
     public static BitmapImage ConvertToBitmapImage(this Bitmap src)
     {
         if (src == null) return null;

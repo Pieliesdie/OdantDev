@@ -2,14 +2,11 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
-using MaterialDesignThemes.Wpf;
-
 using MaterialDesignExtensions.Controllers;
+
+using MaterialDesignThemes.Wpf;
 
 // use Pri.LongPath classes instead of System.IO for the MaterialDesignExtensions.LongPath build to support long file system paths on older Windows and .NET versions
 #if LONG_PATH

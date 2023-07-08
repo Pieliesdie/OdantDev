@@ -1,19 +1,19 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using System.Xml.Serialization;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Xml.Serialization;
+
+using CommunityToolkit.Mvvm.ComponentModel;
+
 using OdantDevApp.Common;
 
 namespace OdantDev.Model;
 
-[ObservableObject]
-public partial class AddinSettings
+public partial class AddinSettings : ObservableObject
 {
     private const string FILE_NAME = "AddinSettings.xml";
     private const string TEMPLATES_FOLDER_NAME = "Templates";
@@ -83,7 +83,7 @@ public partial class AddinSettings
             }
             using var fs = new FileStream(loadPath, FileMode.Open, FileAccess.Read);
             settings = Serializer.Deserialize(fs) as AddinSettings;
-            settings.OdaFolders.Remove(x => x.Name == "Last run");
+            settings?.OdaFolders.Remove(x => x.Name == "Last run");
         }
         catch
         {

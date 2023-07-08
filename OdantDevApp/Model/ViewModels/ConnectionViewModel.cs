@@ -1,8 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using oda;
-using OdantDev.Model;
-using SharedOdantDev.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,11 +6,19 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
-using SharedOdantDev.Common;
-using System.Collections.ObjectModel;
+
+using CommunityToolkit.Mvvm.ComponentModel;
+
 using Microsoft.VisualBasic.FileIO;
+
+using oda;
+
+using OdantDev.Model;
+
 using OdantDevApp.Common;
-using OdantDevApp.Model;
+
+using SharedOdantDev.Common;
+using SharedOdantDev.Model;
 
 namespace OdantDev;
 
@@ -90,7 +94,7 @@ public partial class ConnectionModel : IDisposable
 
             if (AddinSettings.SelectedDevelopeDomain is null)
             {
-                AddinSettings.SelectedDevelopeDomain = Developers.FirstOrDefault()?.FullId;
+                AddinSettings.SelectedDevelopeDomain = Developers?.FirstOrDefault()?.FullId;
             }
 
             Items = new(PinnedItems, Hosts);
@@ -220,11 +224,12 @@ public partial class ConnectionModel : IDisposable
     private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
     {
         var requestAssemblyName = new AssemblyName(args.Name);
-        
+
         var tryResolveInClientAssemblies = ClientAssemblies.FirstOrDefault(x => new AssemblyName(x.FullName).Name == requestAssemblyName.Name);
         if (tryResolveInClientAssemblies != null)
             return tryResolveInClientAssemblies;
 
+        //todo: search visual studio folders
         return null;
     }
 

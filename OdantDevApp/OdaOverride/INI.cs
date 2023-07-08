@@ -8,9 +8,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
-using System.Timers;
-
-using odaServer;
 
 namespace oda.OdaOverride;
 public sealed class INI
@@ -338,7 +335,7 @@ public sealed class INI
                 return (string[])def_value;
             }
 
-            return new string[0];
+            return Array.Empty<string>();
         }
 
         return xmlElement.XQuery("string-join(@*[starts-with(name(),'v')], '|')").Split('|');
@@ -517,14 +514,14 @@ public sealed class INI
     {
         if (Root == null)
         {
-            return new string[0];
+            return Array.Empty<string>();
         }
 
         string xquery = (string.IsNullOrEmpty(section) ? "string-join(VAL/@name,'|')" : ("string-join(//SECTION[@name = '" + section + "']/VAL/@name,'|')"));
         string text = Root.XQuery(xquery);
         if (string.IsNullOrEmpty(text))
         {
-            return new string[0];
+            return Array.Empty<string>();
         }
 
         return text.Split('|');
@@ -611,7 +608,7 @@ public sealed class INI
     {
         if (string.IsNullOrEmpty(section) || Root == null)
         {
-            return new string[0];
+            return Array.Empty<string>();
         }
 
         string xquery = "string-join(subsequence(for $a in SECTION[@name='" + section + "']/VAL order by $a/(@date) descending return $a/@name, 1, 20), '|')";

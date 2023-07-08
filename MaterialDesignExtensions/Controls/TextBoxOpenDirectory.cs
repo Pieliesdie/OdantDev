@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System.Windows;
 
 namespace MaterialDesignExtensions.Controls
@@ -93,7 +89,8 @@ namespace MaterialDesignExtensions.Controls
             if (DialogHost != null)
             {
                 result = await OpenDirectoryDialog.ShowDialogAsync(DialogHost, args);
-            } else
+            }
+            else
             {
                 result = await OpenDirectoryDialog.ShowDialogAsync(DialogHostName, args);
             }

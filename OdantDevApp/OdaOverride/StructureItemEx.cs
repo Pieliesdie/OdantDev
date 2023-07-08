@@ -1,11 +1,11 @@
-using oda;
-
-using odaServer;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+
+using oda;
+
+using odaServer;
 
 namespace OdantDev;
 public static class StructureItemEx
@@ -26,7 +26,7 @@ public static class StructureItemEx
 
         var xq = GetConfigFilter(structureItem);
         IntPtr configItemsIntPtr = NativeMethods._FindConfigItems(structureItem.GetIntPtr(), xq);
-        return ReadList<StructureItem>(configItemsIntPtr); 
+        return ReadList<StructureItem>(configItemsIntPtr);
     }
 
     public static IEnumerable<Host> FindHosts(this Connection connection)

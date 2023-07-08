@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -142,7 +137,7 @@ namespace MaterialDesignExtensions.Controls
         /// <summary>
         /// Creates a new <see cref="MaterialWindow" />.
         /// </summary>
-        public MaterialWindow() : base() 
+        public MaterialWindow() : base()
         {
             UseLayoutRounding = true;
             ContentRendered += (_, _) =>
@@ -213,6 +208,6 @@ namespace MaterialDesignExtensions.Controls
             WindowState = WindowState.Minimized;
         }
 
-        public bool? ShowDialog() => base.ShowDialog();
+        public new bool? ShowDialog() => base.ShowDialog();
     }
 }

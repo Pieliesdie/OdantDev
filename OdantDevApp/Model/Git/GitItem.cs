@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using GitLabApiClient.Models.Groups.Responses;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Media;
+
+using GitLabApiClient.Models.Groups.Responses;
 
 namespace SharedOdantDev.Model
 {
@@ -38,14 +38,14 @@ namespace SharedOdantDev.Model
         public virtual bool HasModule { get; set; }
 
         private ImageSource GetImageSource(string geometry, Pen pen, Brush brush, Transform transform, IValueConverter converter, object parameter)
-        {       
+        {
             var geom = new GeometryDrawing
             {
                 Geometry = Geometry.Parse(geometry),
             };
             if (pen != null)
             {
-               // geom.Pen = pen;
+                // geom.Pen = pen;
             }
             if (brush != null)
             {

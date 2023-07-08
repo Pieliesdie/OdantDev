@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace OdantDev;
+﻿namespace OdantDev;
 
 public static class Extension
 {
@@ -16,7 +13,7 @@ public static class Extension
     }
     public static string SubstringAfter(this string str, string search, bool takeLast = false)
     {
-        var index = (takeLast? str.LastIndexOf(search) : str.IndexOf(search));
+        var index = (takeLast ? str.LastIndexOf(search) : str.IndexOf(search));
         if (index >= 0)
         {
             return str.Substring(index + search.Length);

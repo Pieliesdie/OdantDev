@@ -13,6 +13,9 @@
 		<Nullable>warnings</Nullable>
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+		<BaseOutputPath></BaseOutputPath>
+		<EnableNETAnalyzers>True</EnableNETAnalyzers>
+		<AnalysisLevel>latest-minimum</AnalysisLevel>
 	</PropertyGroup>
 	<ItemGroup>
 		<Reference Include="odaCore">
@@ -65,6 +68,7 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.10.31321.278">
 		</PackageReference>
+		<PackageReference Include="Microsoft.VisualStudio.Validation" Version="16.10.26" />
 		<PackageReference Include="morelinq">
 			<Version>3.4.2</Version>
 		</PackageReference>

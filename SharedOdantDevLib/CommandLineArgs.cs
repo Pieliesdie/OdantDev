@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OdantDev;
+﻿namespace OdantDev;
 
 [Serializable]
 public class CommandLineArgs
 {
     public int ProcessId { get; set; }
+
+    public List<string> ExternalAssemblies { get; set; } 
 }

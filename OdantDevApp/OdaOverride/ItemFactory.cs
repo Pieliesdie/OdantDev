@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 
 using Microsoft.Extensions.Caching.Memory;
 
@@ -34,7 +32,7 @@ public static class ItemFactory
 
     public static Domain CreateDomain(this Domain domain, string name, string type)
     {
-        if(domain.RemoteItem is not ODADomain remoteDomain)
+        if (domain.RemoteItem is not ODADomain remoteDomain)
         {
             throw new NullReferenceException("Can't get remote domain");
         }

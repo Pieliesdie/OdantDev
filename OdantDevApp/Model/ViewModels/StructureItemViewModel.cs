@@ -1,17 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-
-
-
-using oda;
-
-using odaServer;
-
-using SharedOdanDev.OdaOverride;
-
-using SharedOdantDev.Common;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -21,6 +8,17 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+using oda;
+
+using odaServer;
+
+using SharedOdanDev.OdaOverride;
+
+using SharedOdantDev.Common;
 
 namespace OdantDev.Model;
 [ObservableObject]
@@ -171,7 +169,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
         if (task == await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(10))))
         {
             var children = await task;
-            Children =  children;
+            Children = children;
         }
         else
         {
@@ -182,7 +180,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
 
     IEnumerable<StructureItemViewModel<T>> GetChildren(T item, StructureItemViewModel<T> parent = null, ILogger logger = null, ConnectionModel connection = null)
     {
-        var items = item.FindConfigItems().OrderBy(x=> x.Name).ToLookup(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution);
+        var items = item.FindConfigItems().OrderBy(x => x.Name).ToLookup(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution);
 
         IEnumerable<StructureItemViewModel<T>> children = items[true]
             .Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))

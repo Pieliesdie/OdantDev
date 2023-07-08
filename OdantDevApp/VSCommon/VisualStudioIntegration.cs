@@ -1,4 +1,14 @@
-﻿using EnvDTE;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using System.Windows.Media;
+
+using EnvDTE;
 
 using EnvDTE80;
 
@@ -6,24 +16,11 @@ using MoreLinq;
 
 using oda;
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
 using VSLangProj;
 
 using VSLangProj80;
 
 using File = System.IO.File;
-using Process = System.Diagnostics.Process;
 using Task = System.Threading.Tasks.Task;
 
 namespace OdantDev.Model;
@@ -38,6 +35,24 @@ public partial class VisualStudioIntegration
     private DirectoryInfo OdaFolder => new DirectoryInfo(AddinSettings.SelectedOdaFolder.Path);
     private ILogger Logger { get; }
     #endregion
+
+    public static bool IsVisualStudioDark(DTE2 dte)
+    {
+        try
+        {
+            if (dte == null) return false;
+            var uintClr = dte.GetThemeColor(vsThemeColors.vsThemeColorToolWindowBackground);
+            byte[] bytes = BitConverter.GetBytes(uintClr);
+            var defaultBackground = Color.FromArgb(bytes[3], bytes[0], bytes[1], bytes[2]);
+            var isDarkTheme = (384 - defaultBackground.R - defaultBackground.G - defaultBackground.B) > 0;
+            return isDarkTheme;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public VisualStudioIntegration(AddinSettings addinSettings, DTE2 DTE, ILogger logger = null)
     {
         this.Logger = logger;
@@ -270,7 +285,6 @@ public partial class VisualStudioIntegration
     #endregion
 
     #region Download and init  logic for Module
-
     public async Task<bool> OpenModuleAsync(StructureItem item)
     {
         if (BuildEvents is null)
@@ -372,7 +386,7 @@ public partial class VisualStudioIntegration
                 var notExist = File.Exists(reference.Path).Not();
                 var isInUpdateList = references.Contains($"{assemblyName.Name}.dll");
 
-                if (isInUpdateList && 
+                if (isInUpdateList &&
                     (notExist || GetFileVersion(newPath) != GetFileVersion(reference.Path) || AddinSettings.ForceUpdateReferences))
                 {
                     reference.Remove();

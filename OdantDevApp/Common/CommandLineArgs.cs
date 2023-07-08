@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using OdantDev;
-
-using OdantDevApp.Common;
 
 namespace OdantDevApp.Model;
 
@@ -34,7 +28,7 @@ public static class CommandLine
         try
         {
             var args = Args();
-            if(args == null) return null;
+            if (args == null) return null;
             var VSId = Args().ProcessId;
             var VSProcess = System.Diagnostics.Process.GetProcessById(VSId);
             return VSProcess;

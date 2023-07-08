@@ -11,77 +11,77 @@ using System.Xml.Serialization;
 
 namespace DevExpress.ProjectUpgrade.Package
 {
-  [Serializable]
-  public class ToolboxReseterSettings : ISerializable
-  {
-    public bool IsAlreadyResetedToolbox;
-    public bool IsRequestResetToolbox;
-    private const string SettingsDirectoryName = "Toolbox Reseter";
-    private const string SettingsFileName = "ToolboxReseterSettings.xml";
-
-    private ToolboxReseterSettings()
-      : this(false, false, string.Empty)
+    [Serializable]
+    public class ToolboxReseterSettings : ISerializable
     {
-    }
+        public bool IsAlreadyResetedToolbox;
+        public bool IsRequestResetToolbox;
+        private const string SettingsDirectoryName = "Toolbox Reseter";
+        private const string SettingsFileName = "ToolboxReseterSettings.xml";
 
-    private ToolboxReseterSettings(
-      bool isAlreadyResetedToolbox,
-      bool isShowResetMessage,
-      string resetedToolboxVSVersion)
-    {
-      this.IsRequestResetToolbox = isShowResetMessage;
-      this.IsAlreadyResetedToolbox = isAlreadyResetedToolbox;
-    }
+        private ToolboxReseterSettings()
+          : this(false, false, string.Empty)
+        {
+        }
 
-    public ToolboxReseterSettings(SerializationInfo info, StreamingContext context)
-      : this(info.GetBoolean(nameof (IsAlreadyResetedToolbox)), false, info.GetString("ResetedToolboxVSVersion"))
-    {
-    }
+        private ToolboxReseterSettings(
+          bool isAlreadyResetedToolbox,
+          bool isShowResetMessage,
+          string resetedToolboxVSVersion)
+        {
+            this.IsRequestResetToolbox = isShowResetMessage;
+            this.IsAlreadyResetedToolbox = isAlreadyResetedToolbox;
+        }
 
-    void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-      info.AddValue("IsAlreadyResetedToolbox", this.IsAlreadyResetedToolbox);
-    }
+        public ToolboxReseterSettings(SerializationInfo info, StreamingContext context)
+          : this(info.GetBoolean(nameof(IsAlreadyResetedToolbox)), false, info.GetString("ResetedToolboxVSVersion"))
+        {
+        }
 
-    public static ToolboxReseterSettings Load()
-    {
-      string settingsFilePath = ToolboxReseterSettings.GetSettingsFilePath();
-      if (!File.Exists(settingsFilePath))
-        return new ToolboxReseterSettings();
-      try
-      {
-        XmlSerializer xmlSerializer = new XmlSerializer(typeof (ToolboxReseterSettings));
-        FileStream fileStream = new FileStream(settingsFilePath, FileMode.Open);
-        ToolboxReseterSettings toolboxReseterSettings = xmlSerializer.Deserialize((Stream) fileStream) as ToolboxReseterSettings;
-        fileStream.Close();
-        return toolboxReseterSettings;
-      }
-      catch
-      {
-        return new ToolboxReseterSettings();
-      }
-    }
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("IsAlreadyResetedToolbox", this.IsAlreadyResetedToolbox);
+        }
 
-    public static string GetSettingsDirectory()
-    {
-      string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), SettingsDirectoryName);
-      if (!Directory.Exists(path))
-        Directory.CreateDirectory(path);
-      return path;
-    }
+        public static ToolboxReseterSettings Load()
+        {
+            string settingsFilePath = ToolboxReseterSettings.GetSettingsFilePath();
+            if (!File.Exists(settingsFilePath))
+                return new ToolboxReseterSettings();
+            try
+            {
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(ToolboxReseterSettings));
+                FileStream fileStream = new FileStream(settingsFilePath, FileMode.Open);
+                ToolboxReseterSettings toolboxReseterSettings = xmlSerializer.Deserialize((Stream)fileStream) as ToolboxReseterSettings;
+                fileStream.Close();
+                return toolboxReseterSettings;
+            }
+            catch
+            {
+                return new ToolboxReseterSettings();
+            }
+        }
 
-    public void Save()
-    {
-      string settingsFilePath = ToolboxReseterSettings.GetSettingsFilePath();
-      XmlSerializer xmlSerializer = new XmlSerializer(typeof (ToolboxReseterSettings));
-      FileStream fileStream = new FileStream(settingsFilePath, FileMode.Create);
-      xmlSerializer.Serialize((Stream) fileStream, (object) this);
-      fileStream.Close();
-    }
+        public static string GetSettingsDirectory()
+        {
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), SettingsDirectoryName);
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+            return path;
+        }
 
-    private static string GetSettingsFilePath()
-    {
-      return Path.Combine(GetSettingsDirectory(), SettingsFileName);
+        public void Save()
+        {
+            string settingsFilePath = ToolboxReseterSettings.GetSettingsFilePath();
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(ToolboxReseterSettings));
+            FileStream fileStream = new FileStream(settingsFilePath, FileMode.Create);
+            xmlSerializer.Serialize((Stream)fileStream, (object)this);
+            fileStream.Close();
+        }
+
+        private static string GetSettingsFilePath()
+        {
+            return Path.Combine(GetSettingsDirectory(), SettingsFileName);
+        }
     }
-  }
 }

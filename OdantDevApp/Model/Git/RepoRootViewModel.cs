@@ -1,7 +1,9 @@
-﻿using GitLabApiClient.Models.Groups.Responses;
-using OdantDev.Model;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+
+using GitLabApiClient.Models.Groups.Responses;
+
+using OdantDev.Model;
 
 namespace SharedOdantDev.Model
 {

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace OdantDev;
 
-public static class NativeMethods
+internal static class NativeMethods
 {
     [DllImport("ole32.dll")]
     public static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);

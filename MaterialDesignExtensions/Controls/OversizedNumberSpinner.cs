@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -155,7 +151,7 @@ namespace MaterialDesignExtensions.Controls
         private void EditValueCommandHandler(object sender, ExecutedRoutedEventArgs args)
         {
             IsEditing = true;
-            
+
             try
             {
                 m_valueTextBox.Focus();
