@@ -4,6 +4,8 @@ using MaterialDesignExtensions.Controls;
 
 using MaterialDesignThemes.Wpf;
 
+using OdantDevApp.Common;
+
 namespace OdantDev.Dialogs;
 
 /// <summary>
@@ -22,6 +24,7 @@ public partial class ConfirmDialog : MaterialWindow
         InitializeComponent();
         base.Title = title;
         lblQuestion.Content = question;
+        IsDarkTheme = AppSettings.DarkTheme;
     }
 
     private void btnDialogOk_Click(object sender, RoutedEventArgs e)

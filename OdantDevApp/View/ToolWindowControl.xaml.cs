@@ -77,6 +77,7 @@ public partial class ToolWindow1Control : UserControl
             theme.SetBaseTheme(value ? Theme.Dark : Theme.Light);
             this.Resources.SetTheme(theme);
             isDarkTheme = value;
+            AppSettings.DarkTheme = value;
         }
     }
     private DTE2 DTE2 { get; set; }
@@ -265,7 +266,7 @@ public partial class ToolWindow1Control : UserControl
             logger?.Info("Domain can be created only from another domain");
             return;
         }
-        var dialog = new Dialogs.InputDialog("Domain name", "Insert name") { IsDarkTheme = this.IsDarkTheme };
+        var dialog = new Dialogs.InputDialog("Domain name", "Insert name");
         if (!(dialog.ShowDialog() == true))
         {
             return;
@@ -288,7 +289,7 @@ public partial class ToolWindow1Control : UserControl
             logger?.Info("Class can't be created here");
             return;
         }
-        var dialog = new Dialogs.InputDialog("Class name", "Insert name") { IsDarkTheme = this.IsDarkTheme };
+        var dialog = new Dialogs.InputDialog("Class name", "Insert name");
         if (!(dialog.ShowDialog() == true))
         {
             return;
@@ -312,7 +313,7 @@ public partial class ToolWindow1Control : UserControl
         {
             try
             {
-                var dialog = new ConfirmDialog($"Remove {structureItem}?", "") { IsDarkTheme = this.IsDarkTheme };
+                var dialog = new ConfirmDialog($"Remove {structureItem}?", "");
                 if (dialog.ShowDialog() == true)
                 {
                     structureItem.Remove();

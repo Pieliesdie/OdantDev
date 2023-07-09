@@ -5,6 +5,8 @@ using MaterialDesignExtensions.Controls;
 
 using MaterialDesignThemes.Wpf;
 
+using OdantDevApp.Common;
+
 namespace OdantDev.Dialogs;
 
 /// <summary>
@@ -18,6 +20,7 @@ public partial class InputDialog : MaterialWindow
         base.Title = title;
         lblQuestion.Content = question;
         txtAnswer.Text = defaultAnswer;
+        IsDarkTheme = AppSettings.DarkTheme;
     }
 
     private void btnDialogOk_Click(object sender, RoutedEventArgs e)

@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OdantDevApp", "OdantDevApp\OdantDevApp.csproj", "{CF75790B-DC2C-4FE4-BA65-2C002E7D6314}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedOdantDevLib", "SharedOdantDevLib\SharedOdantDevLib.csproj", "{5B6D1F87-2805-42E9-90ED-40A37B0344FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedOdantDevLib", "SharedOdantDevLib\SharedOdantDevLib.csproj", "{5B6D1F87-2805-42E9-90ED-40A37B0344FD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedOdantDevFiles", "SharedOdantDevFiles\SharedOdantDevFiles.csproj", "{6343DEAB-599C-4DAA-8AAB-66E3167B96F8}"
 EndProject

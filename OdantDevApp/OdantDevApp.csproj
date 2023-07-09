@@ -10,7 +10,7 @@
 	<PropertyGroup>
 		<ApplicationIcon>Icon.ico</ApplicationIcon>
 		<PlatformTarget>AnyCPU</PlatformTarget>
-		<Nullable>warnings</Nullable>
+		<Nullable>annotations</Nullable>
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 		<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
 		<BaseOutputPath></BaseOutputPath>

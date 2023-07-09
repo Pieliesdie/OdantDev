@@ -269,8 +269,8 @@ public partial class StructureItemViewModel<T> where T : StructureItem
         }
         await SetIconAsync();
         Name = $"{RemoteItem?.Label ?? RemoteItem?.Name}";
-        OnPropertyChanged("Item");
-        OnPropertyChanged("HasModule");
+        OnPropertyChanged(nameof(Item));
+        OnPropertyChanged(nameof(HasModule));
     }
 
     [RelayCommand]
@@ -324,7 +324,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
             connection.AddinSettings.PinnedItems.Remove(Item.FullId);
         }
         _ = connection.AddinSettings.SaveAsync();
-        OnPropertyChanged("IsPinned");
+        OnPropertyChanged(nameof(IsPinned));
     }
 
     public override string ToString() => Name;

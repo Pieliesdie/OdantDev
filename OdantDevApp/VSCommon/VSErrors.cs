@@ -12,7 +12,7 @@ namespace OdantDev;
 public static class VSErrors
 {
     private static ErrorListProvider ErrorListProvider { get; set; }
-    public static async Task ShowError(this DTE2 dte, string text)
+    public static Task ShowError(this DTE2 dte, string text)
     {
         //await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
         ErrorListProvider = ErrorListProvider ?? new ErrorListProvider(new ServiceProvider((Microsoft.VisualStudio.OLE.Interop.IServiceProvider)dte));
@@ -25,11 +25,12 @@ public static class VSErrors
         };
         ErrorListProvider.Tasks.Add(newError);
         ErrorListProvider.Show();
+        return Task.CompletedTask;
     }
-    public static async Task ShowError(this Project context, string text)
+    public static Task ShowError(this Project context, string text)
     {
         //await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-        ErrorListProvider = ErrorListProvider ?? new ErrorListProvider(new ServiceProvider((Microsoft.VisualStudio.OLE.Interop.IServiceProvider)context.DTE));
+        ErrorListProvider ??= new ErrorListProvider(new ServiceProvider((Microsoft.VisualStudio.OLE.Interop.IServiceProvider)context.DTE));
         var ivsSolution = (IVsSolution)Package.GetGlobalService(typeof(IVsSolution));
         ivsSolution.GetProjectOfUniqueName(context.FileName, out var hierarchyItem);
         var newError = new ErrorTask()
@@ -42,6 +43,8 @@ public static class VSErrors
         };
         ErrorListProvider.Tasks.Add(newError);
         ErrorListProvider.Show();
+
+        return Task.CompletedTask;
     }
 
     public static void Clear()

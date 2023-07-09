@@ -11,9 +11,9 @@ namespace SharedOdanDev.OdaOverride;
 
 public static class ImageFactory
 {
-    public static BitmapImage FolderImage = Images.GetImage(Images.GetImageIndex(Icons.Folder)).ConvertToBitmapImage();
-    public static BitmapImage WorkplaceImage = Images.GetImage(Images.GetImageIndex(Icons.UserRole)).ConvertToBitmapImage();
-    public static BitmapImage ModuleImage = Images.GetImage(Images.GetImageIndex(Icons.MagentaFolder)).ConvertToBitmapImage();
+    public static BitmapImage FolderImage { get; } = Images.GetImage(Images.GetImageIndex(Icons.Folder)).ConvertToBitmapImage();
+    public static BitmapImage WorkplaceImage { get; } = Images.GetImage(Images.GetImageIndex(Icons.UserRole)).ConvertToBitmapImage();
+    public static BitmapImage ModuleImage { get; } = Images.GetImage(Images.GetImageIndex(Icons.MagentaFolder)).ConvertToBitmapImage();
 
     static SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1);
 

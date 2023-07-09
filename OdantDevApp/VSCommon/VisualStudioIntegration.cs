@@ -116,7 +116,7 @@ public partial class VisualStudioIntegration
         Project project = EnvDTE.Solution.Item(Project);
         if (LoadedModules.TryGetValue(GetProjectGuid(project), out var buildInfo))
         {
-            buildInfo.isBuildSuccess = Success;
+            buildInfo.IsBuildSuccess = Success;
             if (Success.Not())
             {
                 EnvDTE.ExecuteCommand("Build.Cancel");
@@ -128,9 +128,9 @@ public partial class VisualStudioIntegration
     public async void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
     {
         if ((Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll)) { return; }
-        if (LoadedModules.Values.ToList().TrueForAll(x => x.isBuildSuccess).Not())
+        if (LoadedModules.Values.ToList().TrueForAll(x => x.IsBuildSuccess).Not())
         {
-            LoadedModules.Values.ForEach(x => x.isBuildSuccess = true);
+            LoadedModules.Values.ForEach(x => x.IsBuildSuccess = true);
             return;
         }
         foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).Cast<Project>())
@@ -217,7 +217,7 @@ public partial class VisualStudioIntegration
         return true;
     }
 
-    private bool CopyModuleDirToServer(BuildInfo buildInfo)
+    private static bool CopyModuleDirToServer(BuildInfo buildInfo)
     {
         try
         {
@@ -232,7 +232,7 @@ public partial class VisualStudioIntegration
         }
     }
 
-    public async Task<bool> IncreaseVersionAsync(Project project)
+    public static async Task<bool> IncreaseVersionAsync(Project project)
     {
         try
         {
@@ -264,12 +264,12 @@ public partial class VisualStudioIntegration
         }
     }
 
-    private string GetProjectGuid(Project project)
+    private static string GetProjectGuid(Project project)
     {
-        return project.UniqueName;
+        return project?.UniqueName;
     }
 
-    private void SetAttributeToProjectItem(IDictionary<string, CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
+    private static void SetAttributeToProjectItem(IDictionary<string, CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
     {
         codeAttributes.TryGetValue(name, out var attribute);
         if (attribute == null)
@@ -329,7 +329,7 @@ public partial class VisualStudioIntegration
         return true;
     }
 
-    public (FileInfo csProj, Dir remoteDir, DirectoryInfo localDir) DownloadModule(StructureItem item)
+    public static (FileInfo csProj, Dir remoteDir, DirectoryInfo localDir) DownloadModule(StructureItem item)
     {
         var localDir = item.Dir.ServerToFolder();
         var moduleDir = localDir.GetDirectories("modules").FirstOrDefault();
@@ -339,7 +339,7 @@ public partial class VisualStudioIntegration
             .FirstOrDefault(), item.Dir, localDir);
     }
 
-    private async Task InitProject(Project project, StructureItem sourceItem)
+    private Task InitProject(Project project, StructureItem sourceItem)
     {
         if (project == null) { throw new NullReferenceException(nameof(project)); }
         project.Name = $"{sourceItem.Name}-{sourceItem.Id}";
@@ -372,6 +372,7 @@ public partial class VisualStudioIntegration
         }
         if (assemblyInfo.IsOpen.Not()) { assemblyInfo.Open(); }
         assemblyInfo.Save();
+        return Task.CompletedTask;
     }
 
     private bool UpdateAssemblyReferences(VSProject VSProj, IEnumerable<string> references)

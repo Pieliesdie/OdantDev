@@ -37,7 +37,7 @@ namespace SharedOdantDev.Model
 
         public virtual bool HasModule { get; set; }
 
-        private ImageSource GetImageSource(string geometry, Pen pen, Brush brush, Transform transform, IValueConverter converter, object parameter)
+        private static ImageSource GetImageSource(string geometry, Pen pen, Brush brush, Transform transform, IValueConverter converter, object parameter)
         {
             var geom = new GeometryDrawing
             {
