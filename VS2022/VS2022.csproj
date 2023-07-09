@@ -107,9 +107,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="..\SharedOdantDevFiles\dxtoolbox.v18.1.pkgdef">
       <Link>dxtoolbox.v18.1.pkgdef</Link>
     </Content>
