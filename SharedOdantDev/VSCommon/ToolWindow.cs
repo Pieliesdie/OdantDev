@@ -78,9 +78,11 @@ public class ToolWindow : ToolWindowPane
 
     private WindowsFormsHost CreateHost()
     {
+        var imgPath = Path.Combine(VsixExtension.VSIXPath.FullName, "Spinner.gif");
+        var bitmap = new Bitmap(imgPath);
         var pb = new PictureBox() 
         { 
-            Image = new Bitmap("Spinner.gif"), 
+            Image = bitmap, 
             Dock = DockStyle.Fill, 
             SizeMode = PictureBoxSizeMode.AutoSize,
             Anchor = AnchorStyles.None 
