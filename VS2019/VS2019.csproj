@@ -97,6 +97,7 @@
   <Target Name="CopyLocalDevApp" AfterTargets="GetVsixSourceItems">
     <ItemGroup>
       <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)">
+	    <IncludeInVSIX>True</IncludeInVSIX>
         <VSIXSubPath>app</VSIXSubPath>
       </VSIXSourceItem>
     </ItemGroup>

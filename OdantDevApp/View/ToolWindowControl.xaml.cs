@@ -616,7 +616,7 @@ public partial class ToolWindow1Control : UserControl
     }
     private void RepairToolboxButton_Click(object sender, RoutedEventArgs e)
     {
-        // OdantDevPackage.ToolboxReseter.ResetToolboxQueue();
+        //OdantDevPackage.ToolboxReseter.ResetToolboxQueue();
     }
     private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
     {
