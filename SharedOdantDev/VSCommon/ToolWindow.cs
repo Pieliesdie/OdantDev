@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 
 using Microsoft.VisualStudio.Shell;
@@ -76,11 +78,21 @@ public class ToolWindow : ToolWindowPane
 
     private WindowsFormsHost CreateHost()
     {
+        var pb = new PictureBox() 
+        { 
+            Image = new Bitmap("Spinner.gif"), 
+            Dock = DockStyle.Fill, 
+            SizeMode = PictureBoxSizeMode.AutoSize,
+            Anchor = AnchorStyles.None 
+        };
         WindowsFormsHost host = new()
         {
-            Child = new System.Windows.Forms.Panel() { Dock = System.Windows.Forms.DockStyle.Fill, }
+            Child = new Panel() 
+            {                          
+                Dock = DockStyle.Fill
+            }
         };
-        host.Child.Controls.Add(new System.Windows.Forms.Label() { Text = "We are loading your extension, please wait", Dock = System.Windows.Forms.DockStyle.Fill });
+        host.Child.Controls.Add(pb);
         return host;
     }
 
