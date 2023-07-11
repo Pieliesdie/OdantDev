@@ -3,6 +3,8 @@ using System.Windows;
 
 using MaterialDesignThemes.Wpf;
 
+using OdantDevApp.Dialogs;
+
 namespace OdantDev.Model;
 internal class PopupController : ILogger
 {
@@ -29,7 +31,10 @@ internal class PopupController : ILogger
 
     public void Error(string message)
     {
-        Info(message);
+        if (string.IsNullOrEmpty(message))
+            message = "Unknown error";
+        MessageDialog.Show(message);
+        //Info(message);
     }
 
     public PopupController(Snackbar snackbar)

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows;
+using System.Windows.Data;
 using System.Windows.Threading;
 
 namespace OdantDevApp.Common;
@@ -20,7 +22,7 @@ public class AsyncObservableCollection<T> : ObservableCollection<T>
 
     protected override async void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
     {
-        await Dispatcher.CurrentDispatcher.InvokeAsync(new Action(() =>
+        await Application.Current.Dispatcher.InvokeAsync(new Action(() =>
         {
             RaiseCollectionChanged(e);
         }));
@@ -28,7 +30,6 @@ public class AsyncObservableCollection<T> : ObservableCollection<T>
 
     private void RaiseCollectionChanged(object param)
     {
-        // We are in the creator thread, call the base implementation directly
         base.OnCollectionChanged((NotifyCollectionChangedEventArgs)param);
     }
 
@@ -42,7 +43,6 @@ public class AsyncObservableCollection<T> : ObservableCollection<T>
 
     private void RaisePropertyChanged(object param)
     {
-        // We are in the creator thread, call the base implementation directly
         base.OnPropertyChanged((PropertyChangedEventArgs)param);
     }
 }

@@ -30,7 +30,7 @@ namespace OdantDev;
 [Guid("e477ca93-32f7-4a68-ab0d-7472ff3e7964")]
 public class ToolWindow : ToolWindowPane
 {
-    private bool OutOfProcess = true;
+    private readonly bool OutOfProcess = true;
     private Process ChildProcess { get; set; }
     private WindowsFormsHost Host { get; }
     private IntPtr HostHandle { get; }
@@ -40,7 +40,7 @@ public class ToolWindow : ToolWindowPane
         {
             var currentProcess = Process.GetCurrentProcess();
             var args = new CommandLineArgs() { ProcessId = currentProcess.Id };
-            var appPath = Path.Combine(VsixExtension.VSIXPath.FullName, "app", "OdantDevApp.exe");
+            var appPath = Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "OdantDevApp.exe");
             var process = ChildProcess = await StartProcessAsync(appPath, args);
             WinApi.SetParent(process.MainWindowHandle, HostHandle);
             WinApi.SetWindowLong(process.MainWindowHandle, WinApi.GWL_STYLE, WinApi.WS_VISIBLE);
@@ -66,19 +66,30 @@ public class ToolWindow : ToolWindowPane
         process.Exited += Process_Exited;
     }
 
-    private void Process_Exited(object sender, EventArgs e)
+    private async void Process_Exited(object sender, EventArgs e)
     {
         if (sender is not Process process)
             return;
-        if (process.ExitCode == (int)ExitCodes.Restart)
+#if DEBUG
+        _ = RunDevApp(true);
+        return;
+#endif
+        switch (process.ExitCode)
         {
-            _ = RunDevApp(true);
+            case (int)ExitCodes.Success:
+                break;
+            case < 0:
+            case (int)ExitCodes.Restart:
+                _ = RunDevApp(true);
+                break;
         }
+        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+        Host.Child = new System.Windows.Forms.Label() { };
     }
 
     private WindowsFormsHost CreateHost()
     {
-        var imgPath = Path.Combine(VsixExtension.VSIXPath.FullName, "Spinner.gif");
+        var imgPath = Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "Spinner.gif");
         var bitmap = new Bitmap(imgPath);
         var pb = new PictureBox() 
         { 
@@ -102,7 +113,7 @@ public class ToolWindow : ToolWindowPane
     {
         return await Task.Run(() =>
         {
-            ProcessStartInfo psi = new ProcessStartInfo(path, arguments.SerializeBinary())
+            var psi = new ProcessStartInfo(path, arguments.SerializeBinary())
             {
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
@@ -149,7 +160,7 @@ public class ToolWindow : ToolWindowPane
         }
         else
         {
-            this.Content = new ToolWindow1Control(OdantDevPackage.Env_DTE);
+            //this.Content = new ToolWindow1Control(OdantDevPackage.Env_DTE);
         }
     }
 

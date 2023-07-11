@@ -22,6 +22,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedOdantDevLib", "Shared
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedOdantDevFiles", "SharedOdantDevFiles\SharedOdantDevFiles.csproj", "{6343DEAB-599C-4DAA-8AAB-66E3167B96F8}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedFiles", "SharedFiles\SharedFiles.shproj", "{71B65BF2-8BA1-49B0-98C5-FA6BE828FAD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +88,7 @@ Global
 		SolutionGuid = {11B420B8-8D5A-4A8C-BB7A-2307AF7B7952}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		SharedFiles\SharedFiles.projitems*{71b65bf2-8ba1-49b0-98c5-fa6be828fad6}*SharedItemsImports = 13
 		SharedOdantDev\SharedOdantDev.projitems*{ac6b1c3b-13d4-46f6-95ac-04583649963d}*SharedItemsImports = 4
 		SharedOdantDev\SharedOdantDev.projitems*{bce37951-5744-4b02-ba49-25ee4c57ac5a}*SharedItemsImports = 13
 		SharedOdantDev\SharedOdantDev.projitems*{fef0688f-db99-496b-8429-e5b64332d8d0}*SharedItemsImports = 4

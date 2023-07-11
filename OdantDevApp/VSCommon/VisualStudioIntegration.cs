@@ -12,6 +12,8 @@ using EnvDTE;
 
 using EnvDTE80;
 
+using Microsoft.Extensions.Logging;
+
 using MoreLinq;
 
 using oda;
@@ -124,7 +126,6 @@ public partial class VisualStudioIntegration
         }
     }
 
-
     public async void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
     {
         if ((Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll)) { return; }
@@ -142,7 +143,6 @@ public partial class VisualStudioIntegration
     public async void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
     {
         if (Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll) { return; }
-        VSErrors.Clear();
         foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).Cast<Project>())
         {
             if ((await IncreaseVersionAsync(project)).Not())
@@ -212,7 +212,8 @@ public partial class VisualStudioIntegration
         }
         catch (Exception ex)
         {
-            await project.ShowError($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
+            Logger?.Error($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
+           // await project.ShowError($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
         }
         return true;
     }
@@ -232,7 +233,7 @@ public partial class VisualStudioIntegration
         }
     }
 
-    public static async Task<bool> IncreaseVersionAsync(Project project)
+    public async Task<bool> IncreaseVersionAsync(Project project)
     {
         try
         {
@@ -259,7 +260,8 @@ public partial class VisualStudioIntegration
         }
         catch (Exception ex)
         {
-            await project.ShowError($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
+            Logger?.Error($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
+           // await project.ShowError($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
             return false;
         }
     }
@@ -292,7 +294,6 @@ public partial class VisualStudioIntegration
             SubscribeToStudioEvents();
         }
         Project project = null;
-        VSErrors.Clear();
         try
         {
             _ = item ?? throw new NullReferenceException("Item was null");
@@ -323,7 +324,8 @@ public partial class VisualStudioIntegration
             {
                 EnvDTE.Solution.Remove(project);
             }
-            await EnvDTE.ShowError($"Error while load project from item {item.Name}: {ex.Message}");
+            Logger?.Error($"Error while load project from item {item.Name}: {ex.Message}");
+            //await EnvDTE.ShowError($"Error while load project from item {item.Name}: {ex.Message}");
             return false;
         }
         return true;

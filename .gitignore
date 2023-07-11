@@ -37,3 +37,4 @@ packages/
 /UpgradeLog.htm
 /vsix
 .artifacts/*
+artifacts

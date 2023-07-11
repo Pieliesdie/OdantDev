@@ -21,12 +21,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OdantDev</RootNamespace>
     <AssemblyName>OdantDev%28VS2022%29</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <LangVersion>latest</LangVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
-    <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
+    <IncludeDebugSymbolsInVSIXContainer>true</IncludeDebugSymbolsInVSIXContainer>
     <IncludeDebugSymbolsInLocalVSIXDeployment>true</IncludeDebugSymbolsInLocalVSIXDeployment>
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
@@ -87,9 +87,8 @@
   </ItemGroup>
   <Target Name="CopyLocalDevApp" AfterTargets="GetVsixSourceItems">
     <ItemGroup>
-      <VSIXSourceItem Include="@(ReferenceCopyLocalPaths)">
-	    <IncludeInVSIX>True</IncludeInVSIX>
-        <VSIXSubPath>app</VSIXSubPath>
+      <VSIXSourceItem Include="..\artifacts\app\**">
+        <IncludeInVSIX>True</IncludeInVSIX>
       </VSIXSourceItem>
     </ItemGroup>
   </Target>
@@ -100,7 +99,6 @@
     <ProjectReference Include="..\OdantDevApp\OdantDevApp.csproj">
       <Project>{cf75790b-dc2c-4fe4-ba65-2c002e7d6314}</Project>
       <Name>OdantDevApp</Name>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
     <ProjectReference Include="..\SharedOdantDevLib\SharedOdantDevLib.csproj">
       <Project>{5b6d1f87-2805-42e9-90ed-40a37b0344fd}</Project>
@@ -123,8 +121,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir "$(SolutionDir)\.artifacts"
-COPY /Y "$(TargetDir)\$(TargetName).vsix" "$(SolutionDir)\.artifacts"</PostBuildEvent>
+    <PostBuildEvent>mkdir "$(SolutionDir)artifacts"
+COPY /Y "$(TargetDir)\$(TargetName).vsix" "$(SolutionDir)artifacts\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

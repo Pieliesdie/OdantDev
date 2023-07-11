@@ -6,13 +6,15 @@ using System.Reflection;
 
 using Microsoft.Win32;
 
+using SharedOdantDevLib;
+
 namespace OdantDev;
 
 public static class VsixExtension
 {
     public static Bitness Platform => IntPtr.Size == 4 ? Bitness.x86 : Bitness.x64;
 
-    public static DirectoryInfo VSIXPath { get; } = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory;
+    public static DirectoryInfo VSIXPath { get; } = ProcessEx.CurrentExecutingFolder();
 
     public static List<IntPtr> LoadServerLibraries(string odaPath, Bitness bitness, params string[] libPaths)
     {

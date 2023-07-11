@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -96,6 +97,7 @@ public partial class ToolWindow1Control : UserControl
         logger = new PopupController(this.MessageContainer);
         ThemeCheckBox.IsChecked = VisualStudioIntegration.IsVisualStudioDark(DTE2);
         this.DataContext = this;
+
         Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
     }
     private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
@@ -367,7 +369,7 @@ public partial class ToolWindow1Control : UserControl
         }
         try
         {
-            var uploadTask = Task.Run(() =>
+            await Task.Run(() =>
             {
                 var moduleFolder = cls.Dir.OpenOrCreateFolder("modules");
                 var templateFolder = new DirectoryInfo(Path.Combine(VsixExtension.VSIXPath.FullName, @"Templates\ProjectTemplate"));
@@ -377,20 +379,10 @@ public partial class ToolWindow1Control : UserControl
                 moduleFolder.ServerToFolder();
                 moduleFolder.Save();
                 cls.SetPrivateFieldValue("_has_module", StateBool.True);
-                //cls.ReloadClassFromServer();
-                //cls.RemoteClass.Rebuild();
             });
-            await uploadTask;
 
-            if (uploadTask.IsFaulted)
-            {
-                logger?.Info(uploadTask.Exception?.ToString());
-            }
-            else
-            {
-                logger?.Info("Module created");
-                await OpenModule(cls);
-            }
+            logger?.Info("Module created");
+            await OpenModule(cls);
         }
         catch (Exception ex)
         {

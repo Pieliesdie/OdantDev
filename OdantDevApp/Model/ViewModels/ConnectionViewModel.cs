@@ -22,8 +22,7 @@ using SharedOdantDev.Model;
 
 namespace OdantDev;
 
-[ObservableObject]
-public partial class ConnectionModel : IDisposable
+public partial class ConnectionModel : ObservableObject, IDisposable
 {
     public static readonly string[] odaClientLibraries = { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
     private static readonly string[] odaServerLibraries = { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };

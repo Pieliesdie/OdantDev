@@ -1,14 +1,15 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 
 namespace SharedOdantDevLib;
 
 public static class ProcessEx
 {
-    private static readonly TimeSpan defaultDelayForSoftKill = TimeSpan.FromMilliseconds(3000);
-    public static void TrySoftKill(this Process process, TimeSpan waitForHardKill = default(TimeSpan))
+    private static readonly TimeSpan defaultDelayForSoftKill = TimeSpan.FromMilliseconds(5000);
+    public static void TrySoftKill(this Process process, TimeSpan waitForHardKill = default)
     {
         if (waitForHardKill == default)
-            waitForHardKill = TimeSpan.FromSeconds(5);
+            waitForHardKill = defaultDelayForSoftKill;
 
         process.CloseMainWindow();
         process.WaitForExit(waitForHardKill.Milliseconds);
@@ -16,5 +17,10 @@ public static class ProcessEx
         {
             process.Kill();
         }
+    }
+
+    public static DirectoryInfo CurrentExecutingFolder()
+    {
+        return new FileInfo(Assembly.GetExecutingAssembly().Location).Directory;
     }
 }
