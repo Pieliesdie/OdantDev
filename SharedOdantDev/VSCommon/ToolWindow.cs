@@ -30,7 +30,8 @@ namespace OdantDev;
 [Guid("e477ca93-32f7-4a68-ab0d-7472ff3e7964")]
 public class ToolWindow : ToolWindowPane
 {
-    private readonly bool OutOfProcess = true;
+    private string OutOfProcessPath => Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "app", "OdantDevApp.exe");
+    private bool OutOfProcess => true;
     private Process ChildProcess { get; set; }
     private WindowsFormsHost Host { get; }
     private IntPtr HostHandle { get; }
@@ -40,7 +41,7 @@ public class ToolWindow : ToolWindowPane
         {
             var currentProcess = Process.GetCurrentProcess();
             var args = new CommandLineArgs() { ProcessId = currentProcess.Id };
-            var appPath = Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "OdantDevApp.exe");
+            var appPath = OutOfProcessPath;
             var process = ChildProcess = await StartProcessAsync(appPath, args);
             WinApi.SetParent(process.MainWindowHandle, HostHandle);
             WinApi.SetWindowLong(process.MainWindowHandle, WinApi.GWL_STYLE, WinApi.WS_VISIBLE);
@@ -70,10 +71,6 @@ public class ToolWindow : ToolWindowPane
     {
         if (sender is not Process process)
             return;
-#if DEBUG
-        _ = RunDevApp(true);
-        return;
-#endif
         switch (process.ExitCode)
         {
             case (int)ExitCodes.Success:
@@ -160,7 +157,7 @@ public class ToolWindow : ToolWindowPane
         }
         else
         {
-            //this.Content = new ToolWindow1Control(OdantDevPackage.Env_DTE);
+            this.Content = new ToolWindow1Control(OdantDevPackage.Env_DTE);
         }
     }
 

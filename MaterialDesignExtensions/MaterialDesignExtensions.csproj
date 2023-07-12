@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   
   <PropertyGroup>
-    <TargetFrameworks>net472</TargetFrameworks>
+    <TargetFrameworks>net472;net48</TargetFrameworks>
     <UseWPF>true</UseWPF>
 	<LangVersion>latest</LangVersion>
     <AssemblyTitle>Material Design Extensions</AssemblyTitle>

@@ -23,6 +23,7 @@ public partial class App : Application
         //while(!Debugger.IsAttached) { Thread.Sleep(1000); }   
         //#endif
         _ = Task.Run(StartCheckingForZombie);
+        MessageBox.Show("123");
     }
 
     void StartCheckingForZombie()

@@ -9,9 +9,25 @@
     <Import_RootNamespace>SharedOdantDev</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)..\artifacts\app\**\*">
+      <Link>app\%(RecursiveDir)/%(FileName)%(Extension)</Link>
+        <IncludeInVSIX>true</IncludeInVSIX> 
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\OdantDevPackage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\ToolWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSCommon\ToolWindowCommand.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)dxtoolbox.v18.1.pkgdef" />
+    <VSCTCompile Include="$(MSBuildThisFileDirectory)OdantDevPackage.vsct">
+		<ResourceName>Menus.ctmenu</ResourceName>
+	</VSCTCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)Icon.png" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<OutputType>Library</OutputType>
 		<RootNamespace>SharedOdantDevLib</RootNamespace>
@@ -11,8 +11,5 @@
 		<PackageReference Include="Newtonsoft.Json">
 			<Version>13.0.3</Version>
 		</PackageReference>
-	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\SharedOdantDevFiles\SharedOdantDevFiles.csproj" />
 	</ItemGroup>
 </Project>

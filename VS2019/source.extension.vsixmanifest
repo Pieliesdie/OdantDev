@@ -6,6 +6,7 @@
         <Description xml:space="preserve">Addin for odant modules</Description>
         <MoreInfo>https://github.com/Pieliesdie/OdantDev</MoreInfo>
         <Icon>Icon.png</Icon>
+        <PreviewImage>Icon.png</PreviewImage>
         <Preview>true</Preview>
     </Metadata>
     <Installation>

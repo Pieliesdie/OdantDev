@@ -3,7 +3,7 @@
 		<OutputType>WinExe</OutputType>
 		<AssemblyName>OdantDevApp</AssemblyName>
 		<UseWPF>true</UseWPF>
-		<TargetFrameworks>net472</TargetFrameworks>
+		<TargetFrameworks>net472;net48</TargetFrameworks>
 		<PublishSingleFile>true</PublishSingleFile>
 		<SelfContained>true</SelfContained>
 		<LangVersion>latest</LangVersion>
@@ -74,10 +74,10 @@
 		<PackageReference Include="morelinq">
 			<Version>3.4.2</Version>
 		</PackageReference>
-		<PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
 	</ItemGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-	  <Exec Command="mkdir &quot;$(SolutionDir)artifacts&quot;&#xD;&#xA;rmdir &quot;$(SolutionDir)artifacts\app&quot;&#xD;&#xA;mkdir &quot;$(SolutionDir)artifacts\app&quot;&#xD;&#xA;xcopy &quot;$(TargetDir)&quot; &quot;$(SolutionDir)artifacts\app&quot; /s /e /y" />
+		<Exec Command="mkdir &quot;$(SolutionDir)artifacts&quot;&#xD;&#xA;rmdir &quot;$(SolutionDir)artifacts\app&quot;&#xD;&#xA;mkdir &quot;$(SolutionDir)artifacts\app&quot;&#xD;&#xA;xcopy &quot;$(TargetDir)&quot; &quot;$(SolutionDir)artifacts\app&quot; /s /e /y" />
 	</Target>
+	<Import Project="..\SharedFiles\SharedFiles.projitems" Label="Shared" />
 
 </Project>

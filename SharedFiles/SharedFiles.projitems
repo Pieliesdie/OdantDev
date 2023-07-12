@@ -9,5 +9,11 @@
     <Import_RootNamespace>SharedFiles</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory).\**">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+	<Content Remove="$(MSBuildThisFileDirectory)SharedFiles.shproj" />
+	<Content Remove="$(MSBuildThisFileDirectory)SharedFiles.projitems" />
   </ItemGroup>
 </Project>
