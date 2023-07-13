@@ -45,15 +45,18 @@ public class ToolWindow : ToolWindowPane
             var args = new CommandLineArgs() { ProcessId = currentProcess.Id };
             var appPath = OutOfProcessPath;
             var process = ChildProcess = await StartProcessAsync(appPath, args).ConfigureAwait(true);
+            //Move our app to visual studio
             WinApi.SetParent(process.MainWindowHandle, HostHandle);
-            WinApi.SetWindowLong(process.MainWindowHandle, WinApi.GWL_STYLE, WinApi.WS_VISIBLE);
             //Remove border and whatnot
-            UpdateSize();
+            WinApi.SetWindowLong(process.MainWindowHandle, WinApi.GWL_STYLE, WinApi.WS_VISIBLE);
+            //Initial size
+            WinApi.MoveWindow(process.MainWindowHandle, 0, 0, (Host.Child.Width), (Host.Child.Height), true);
 
             RestartIfFail(process);
             if (!restart)
             {
                 SubscribeToSizeChanging(Host);
+                SubscribeToVisibilityChanging(Host);
             }
         }
         catch (Exception ex)
@@ -62,6 +65,7 @@ public class ToolWindow : ToolWindowPane
             Host.Child = new Label() { Text = ex.ToString() };
         }
     }
+
     private void RestartIfFail(Process process)
     {
         process.EnableRaisingEvents = true;
@@ -138,14 +142,21 @@ public class ToolWindow : ToolWindowPane
             return process;
         });
     }
-    private void SubscribeToSizeChanging(WindowsFormsHost host) => host.SizeChanged += (_, _) => UpdateSize();
-    private void UpdateSize()
+    private void SubscribeToSizeChanging(WindowsFormsHost host) => host.SizeChanged += Host_SizeChanged;
+    private void Host_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (Host?.Child == null || ChildProcess is null || ChildProcess.MainWindowHandle == IntPtr.Zero) return;
+        if (Host.Child == null || ChildProcess is null || ChildProcess.MainWindowHandle == IntPtr.Zero) return;
         // Move the window to overlay it on this window
 
         WinApi.MoveWindow(ChildProcess.MainWindowHandle, 0, 0, ((Host.Child).Width), (Host.Child.Height), false);
     }
+    private void SubscribeToVisibilityChanging(WindowsFormsHost host) => host.IsVisibleChanged += Host_IsVisibleChanged;
+    private void Host_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if ((bool)e.NewValue == false) return;
+        Host.InvalidateVisual();
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ToolWindow"/> class.
     /// </summary>
