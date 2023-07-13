@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Threading;
 
 using SharedOdantDevLib;
 
@@ -43,11 +44,11 @@ public class ToolWindow : ToolWindowPane
             var currentProcess = Process.GetCurrentProcess();
             var args = new CommandLineArgs() { ProcessId = currentProcess.Id };
             var appPath = OutOfProcessPath;
-            var process = ChildProcess = await StartProcessAsync(appPath, args);
+            var process = ChildProcess = await StartProcessAsync(appPath, args).ConfigureAwait(true);
             WinApi.SetParent(process.MainWindowHandle, HostHandle);
             WinApi.SetWindowLong(process.MainWindowHandle, WinApi.GWL_STYLE, WinApi.WS_VISIBLE);
             //Remove border and whatnot
-            WinApi.MoveWindow(process.MainWindowHandle, 0, 0, (int)Host.ActualWidth, (int)Host.ActualHeight, true);
+            WinApi.MoveWindow(process.MainWindowHandle, 0, 0, (int)(Host.ActualWidth), (int)(Host.ActualHeight), true);
 
             RestartIfFail(process);
             if (!restart)
@@ -61,13 +62,11 @@ public class ToolWindow : ToolWindowPane
             Host.Child = new Label() { Text = ex.ToString() };
         }
     }
-
     private void RestartIfFail(Process process)
     {
         process.EnableRaisingEvents = true;
         process.Exited += Process_Exited;
     }
-
     private async void Process_Exited(object sender, EventArgs e)
     {
         if (sender is not Process process)
@@ -82,11 +81,10 @@ public class ToolWindow : ToolWindowPane
                 break;
             default:
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                Host.Child = new System.Windows.Forms.Label() { Text = $"Unexpected exit code: {process.ExitCode}" };
+                Host.Child = new Label() { Text = $"Unexpected exit code: {process.ExitCode}" };
                 break;
         }
     }
-
     private WindowsFormsHost CreateHost()
     {
         var imgPath = Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "Spinner.gif");
@@ -98,17 +96,20 @@ public class ToolWindow : ToolWindowPane
             SizeMode = PictureBoxSizeMode.AutoSize,
             Anchor = AnchorStyles.None
         };
+
         WindowsFormsHost host = new()
         {
+            HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
             Child = new Panel()
             {
+                BackColor = Color.Red,
                 Dock = DockStyle.Fill
             }
         };
         host.Child.Controls.Add(pb);
         return host;
     }
-
     private async Task<Process> StartProcessAsync(string path, CommandLineArgs arguments)
     {
         return await Task.Run(() =>
@@ -138,16 +139,14 @@ public class ToolWindow : ToolWindowPane
             return process;
         });
     }
-
     private void SubscribeToSizeChanging(WindowsFormsHost host) => host.SizeChanged += Host_SizeChanged;
-
     private void Host_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (ChildProcess is null || ChildProcess.MainWindowHandle == IntPtr.Zero) return;
+        if (Host.Child == null || ChildProcess is null || ChildProcess.MainWindowHandle == IntPtr.Zero) return;
         // Move the window to overlay it on this window
-        WinApi.MoveWindow(ChildProcess.MainWindowHandle, 0, 0, (int)e.NewSize.Width, (int)e.NewSize.Height, true);
+        
+        WinApi.MoveWindow(ChildProcess.MainWindowHandle, 0, 0, (int)((Host.Child).Width), (int)(Host.Child.Height), false);
     }
-
     /// <summary>
     /// Initializes a new instance of the <see cref="ToolWindow"/> class.
     /// </summary>
@@ -164,7 +163,6 @@ public class ToolWindow : ToolWindowPane
             this.Content = new ToolWindow1Control(OdantDevPackage.Env_DTE);
         }
     }
-
     public override void OnToolWindowCreated()
     {
         base.OnToolWindowCreated();

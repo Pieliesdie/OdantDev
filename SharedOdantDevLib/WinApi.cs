@@ -38,6 +38,9 @@ public static class WinApi
     [DllImport("user32.dll", SetLastError = true)]
     public static extern bool MoveWindow(IntPtr hwnd, int x, int y, int cx, int cy, bool repaint);
 
+    [DllImport("user32.dll")]
+    public static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, int flags);
+
     [DllImport("user32.dll", EntryPoint = "PostMessageA", SetLastError = true)]
     public static extern bool PostMessage(IntPtr hwnd, uint Msg, long wParam, long lParam);
 
