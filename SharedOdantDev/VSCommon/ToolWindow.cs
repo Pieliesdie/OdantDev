@@ -103,7 +103,6 @@ public class ToolWindow : ToolWindowPane
             VerticalAlignment = VerticalAlignment.Stretch,
             Child = new Panel()
             {
-                BackColor = Color.Red,
                 Dock = DockStyle.Fill
             }
         };
