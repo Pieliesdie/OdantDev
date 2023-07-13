@@ -18,6 +18,7 @@
 		<BaseOutputPath></BaseOutputPath>
 		<EnableNETAnalyzers>True</EnableNETAnalyzers>
 		<AnalysisLevel>latest-minimum</AnalysisLevel>
+		<RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
 	</PropertyGroup>
 	<ItemGroup>
 		<Reference Include="odaCore">

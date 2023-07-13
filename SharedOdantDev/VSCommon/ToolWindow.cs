@@ -48,7 +48,7 @@ public class ToolWindow : ToolWindowPane
             WinApi.SetParent(process.MainWindowHandle, HostHandle);
             WinApi.SetWindowLong(process.MainWindowHandle, WinApi.GWL_STYLE, WinApi.WS_VISIBLE);
             //Remove border and whatnot
-            WinApi.MoveWindow(process.MainWindowHandle, 0, 0, (int)(Host.ActualWidth), (int)(Host.ActualHeight), true);
+            UpdateSize();
 
             RestartIfFail(process);
             if (!restart)
@@ -138,13 +138,13 @@ public class ToolWindow : ToolWindowPane
             return process;
         });
     }
-    private void SubscribeToSizeChanging(WindowsFormsHost host) => host.SizeChanged += Host_SizeChanged;
-    private void Host_SizeChanged(object sender, SizeChangedEventArgs e)
+    private void SubscribeToSizeChanging(WindowsFormsHost host) => host.SizeChanged += (_, _) => UpdateSize();
+    private void UpdateSize()
     {
-        if (Host.Child == null || ChildProcess is null || ChildProcess.MainWindowHandle == IntPtr.Zero) return;
+        if (Host?.Child == null || ChildProcess is null || ChildProcess.MainWindowHandle == IntPtr.Zero) return;
         // Move the window to overlay it on this window
-        
-        WinApi.MoveWindow(ChildProcess.MainWindowHandle, 0, 0, (int)((Host.Child).Width), (int)(Host.Child.Height), false);
+
+        WinApi.MoveWindow(ChildProcess.MainWindowHandle, 0, 0, ((Host.Child).Width), (Host.Child.Height), false);
     }
     /// <summary>
     /// Initializes a new instance of the <see cref="ToolWindow"/> class.
