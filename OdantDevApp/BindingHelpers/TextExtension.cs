@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Markup;
 namespace OdantDev;
@@ -17,10 +18,6 @@ public class TextExtension : MarkupExtension
         {
             var path = Path.Combine(VsixExtension.VSIXPath.FullName, fileName);
             return File.ReadAllText(path);
-            //var uri = new Uri("pack://application:,,,/" + fileName);
-            //using var stream = Application.GetResourceStream(uri).Stream;
-            //using StreamReader reader = new StreamReader(stream, Encoding.UTF8);
-            //return reader.ReadToEnd();
         }
         catch (Exception ex)
         {

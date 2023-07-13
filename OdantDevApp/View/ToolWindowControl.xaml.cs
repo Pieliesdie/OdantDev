@@ -90,7 +90,6 @@ public partial class ToolWindow1Control : UserControl
     {
         InitializeMaterialDesign();
         InitializeComponent();
-
         DTE2 = dte;
         var AddinSettingsFolder = Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ODA", "AddinSettings"));
         AddinSettings = AddinSettings.Create(AddinSettingsFolder);

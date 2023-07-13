@@ -19,11 +19,7 @@ public partial class App : Application
 {
     void Application_Startup(object sender, StartupEventArgs e)
     {
-        //#if DEBUG
-        //while(!Debugger.IsAttached) { Thread.Sleep(1000); }   
-        //#endif
         _ = Task.Run(StartCheckingForZombie);
-        MessageBox.Show("123");
     }
 
     void StartCheckingForZombie()

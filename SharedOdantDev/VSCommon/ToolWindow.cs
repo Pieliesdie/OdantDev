@@ -30,8 +30,9 @@ namespace OdantDev;
 [Guid("e477ca93-32f7-4a68-ab0d-7472ff3e7964")]
 public class ToolWindow : ToolWindowPane
 {
-    private string OutOfProcessPath => Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "app", "OdantDevApp.exe");
     private bool OutOfProcess => true;
+    private string OutOfProcessFolder => Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "app");
+    private string OutOfProcessPath => Path.Combine(OutOfProcessFolder, "OdantDevApp.exe");
     private Process ChildProcess { get; set; }
     private WindowsFormsHost Host { get; }
     private IntPtr HostHandle { get; }
@@ -57,7 +58,7 @@ public class ToolWindow : ToolWindowPane
         catch (Exception ex)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            Host.Child = new System.Windows.Forms.Label() { Text = ex.ToString() };
+            Host.Child = new Label() { Text = ex.ToString() };
         }
     }
 
@@ -79,26 +80,28 @@ public class ToolWindow : ToolWindowPane
             case (int)ExitCodes.Restart:
                 _ = RunDevApp(true);
                 break;
+            default:
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                Host.Child = new System.Windows.Forms.Label() { Text = $"Unexpected exit code: {process.ExitCode}" };
+                break;
         }
-        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-        Host.Child = new System.Windows.Forms.Label() { };
     }
 
     private WindowsFormsHost CreateHost()
     {
         var imgPath = Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "Spinner.gif");
         var bitmap = new Bitmap(imgPath);
-        var pb = new PictureBox() 
-        { 
-            Image = bitmap, 
-            Dock = DockStyle.Fill, 
+        var pb = new PictureBox()
+        {
+            Image = bitmap,
+            Dock = DockStyle.Fill,
             SizeMode = PictureBoxSizeMode.AutoSize,
-            Anchor = AnchorStyles.None 
+            Anchor = AnchorStyles.None
         };
         WindowsFormsHost host = new()
         {
-            Child = new Panel() 
-            {                          
+            Child = new Panel()
+            {
                 Dock = DockStyle.Fill
             }
         };
@@ -112,6 +115,7 @@ public class ToolWindow : ToolWindowPane
         {
             var psi = new ProcessStartInfo(path, arguments.SerializeBinary())
             {
+                WorkingDirectory = OutOfProcessFolder,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 UseShellExecute = true
