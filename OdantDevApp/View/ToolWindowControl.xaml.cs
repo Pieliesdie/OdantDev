@@ -52,7 +52,7 @@ public partial class ToolWindow1Control : UserControl
 {
     private IDisposable StatusCleaner() => Disposable.Create(() => Status = string.Empty);
     private DirectoryInfo OdaFolder;
-    private ILogger logger;
+    private readonly ILogger logger;
     private VisualStudioIntegration visualStudioIntegration;
     private bool isDarkTheme;
 
@@ -91,7 +91,7 @@ public partial class ToolWindow1Control : UserControl
         InitializeMaterialDesign();
         InitializeComponent();
         DTE2 = dte;
-        var AddinSettingsFolder = Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ODA", "AddinSettings"));
+        var AddinSettingsFolder = CommonEx.DefaultSettingsFolder;
         AddinSettings = AddinSettings.Create(AddinSettingsFolder);
         logger = new PopupController(this.MessageContainer);
         ThemeCheckBox.IsChecked = VisualStudioIntegration.IsVisualStudioDark(DTE2);
@@ -213,7 +213,8 @@ public partial class ToolWindow1Control : UserControl
     }
     private async Task<(bool Success, string Error)> LoadModelAsync()
     {
-        OdaModel = new ConnectionModel(new Connection(), AddinSettings, logger);
+        var connection = CommonEx.Connection = new Connection();
+        OdaModel = new ConnectionModel(connection, AddinSettings, logger);
         var GetDataResult = await OdaModel.LoadAsync();
         await OdaModel.InitReposAsync();
         if (GetDataResult.Success)
@@ -357,7 +358,7 @@ public partial class ToolWindow1Control : UserControl
     private void CreateRepoButton_Click(object sender, RoutedEventArgs e)
     {
         var item = new RootItem(GitClient.Client.HostUrl);
-        Groups = new List<RepoBaseViewModel> { new RepoRootViewModel(item, true, false, logger) };
+        Groups = new List<RepoBaseViewModel> { new RepoRootViewModel(item, false, logger) };
     }
     private async void CreateModuleButton_Click(object sender, RoutedEventArgs e)
     {
@@ -413,7 +414,7 @@ public partial class ToolWindow1Control : UserControl
         string cid = xmlDoc.Root.GetAttribute("ClassId");
         string type = xmlDoc.Root.GetAttribute("Type");
 
-        Domain domain = OdaModel.Connection.FindDomain(OdaModel.AddinSettings.SelectedDevelopeDomain);
+        Domain domain = CommonEx.Connection.FindDomain(OdaModel.AddinSettings.SelectedDevelopeDomain);
         if (domain == null)
         {
             return;
@@ -668,7 +669,7 @@ public partial class ToolWindow1Control : UserControl
                 logger?.Info("Can't find project's ID");
                 return;
             }
-            var selectedItem = await Task.Run(() => OdaModel?.Connection?.FindItem(project.FullId) as StructureItem);
+            var selectedItem = await Task.Run(() => CommonEx.Connection?.FindItem(project.FullId) as StructureItem);
             if (selectedItem == null)
             {
                 logger?.Info("Can't find this project");
@@ -739,14 +740,20 @@ public partial class ToolWindow1Control : UserControl
     #endregion
 
     #region gitlab
-    private void CreateRepo_OnClick(object sender, RoutedEventArgs e)
+    private async void CreateRepo_OnClick(object sender, RoutedEventArgs e)
     {
-        var selectedItem = OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>;
-        var selectedGroup = DialogRepoGroupTree?.SelectedItem as RepoBaseViewModel;
-        string name = DialogTextBoxRepoName?.Text;
-        if (selectedItem != null && selectedItem.Item != null && !string.IsNullOrWhiteSpace(name))
+        try
         {
-            _ = CreateGitLabProjectAsync(selectedItem.Item, selectedGroup?.Item?.FullPath, name);
+            var selectedGroup = DialogRepoGroupTree?.SelectedItem as RepoBaseViewModel;
+            string name = DialogTextBoxRepoName?.Text;
+            if (OdaTree?.SelectedItem is StructureItemViewModel<StructureItem> selectedItem && selectedItem.Item != null && !string.IsNullOrWhiteSpace(name))
+            {
+                _ = await CreateGitLabProjectAsync(selectedItem.Item, selectedGroup?.Item?.FullPath, name);
+            }
+        }
+        catch(Exception ex)
+        {
+            logger?.Error(ex.Message);
         }
     }
     private async Task<GitLabApiClient.Models.Projects.Responses.Project> CreateGitLabProjectAsync(StructureItem item, string groupPath, string name)

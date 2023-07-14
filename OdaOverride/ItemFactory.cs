@@ -3,12 +3,10 @@
 using Microsoft.Extensions.Caching.Memory;
 
 using odaCore.Views;
-
-using OdantDev;
-using OdantDevApp.OdaOverride;
+using OdaOverride;
 using odaServer;
 
-namespace oda.OdaOverride;
+namespace OdaOverride;
 
 public static class ItemFactory
 {
@@ -17,17 +15,16 @@ public static class ItemFactory
     {
         SizeLimit = 500,
     });
-    static readonly MemoryCacheEntryOptions _defaultCacheOptions = new MemoryCacheEntryOptions().SetSize(1);
 
     public static Connection Connection
     {
-        get => _connection ??= CommonEx.Connection;
+        get => _connection ??= new Connection(visible: true, login: false);
         set => _connection = value;
     }
 
     public static Class CreateClass(this StructureItem structureItem, string name)
     {
-        var cls = (structureItem as Class) ?? structureItem.Class ?? throw new Exception("Class can't be created here");
+        var cls = structureItem as Class ?? structureItem.Class ?? throw new Exception("Class can't be created here");
         return cls.CreateChildClass(name);
     }
 
@@ -43,7 +40,7 @@ public static class ItemFactory
         {
             throw new Exception(newDomain.error);
         }
-        return (GetStorageItem(newDomain) as Domain) ?? throw new Exception("Unknown error");
+        return GetStorageItem(newDomain) as Domain ?? throw new Exception("Unknown error");
     }
 
     public static StructureItem GetStorageItem(ODAItem item)
@@ -60,7 +57,9 @@ public static class ItemFactory
         if (structureItem == null)
         {
             structureItem = CreateItem(item);
-            _cache.Set(item.FullId, structureItem, _defaultCacheOptions);
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetSize(1);
+            _cache.Set(item.FullId, structureItem, cacheEntryOptions);
         }
 
         return structureItem;
@@ -79,7 +78,7 @@ public static class ItemFactory
             case ODAItem.ItemType.CLASS_ITEM:
                 if (item2 != null && item.Owner != null && item.Owner.Id != item.Id && (item2.ItemType == ItemType.Solution || item2.ItemType == ItemType.ClassView))
                 {
-                    ClassView classView = (((item2.Host.AbilityExtension & ODAHost.AbilityExtensionFlags.LinkSupport) != ODAHost.AbilityExtensionFlags.LinkSupport) ? ((ClassView)new ClassViewClient(item2.Root.SelectSingleNode("LINKS/LINK[@id = '" + item.Id + "']") as xmlElement, (StructureItem)item2)) : ((ClassView)new ClassViewServer(item, item2)));
+                    ClassView classView = (item2.Host.AbilityExtension & ODAHost.AbilityExtensionFlags.LinkSupport) != ODAHost.AbilityExtensionFlags.LinkSupport ? (ClassView)new ClassViewClient(item2.Root.SelectSingleNode("LINKS/LINK[@id = '" + item.Id + "']") as xmlElement, (StructureItem)item2) : (ClassView)new ClassViewServer(item, item2);
                     structureItem = classView;
                     if (!classView.Hide || classView.IsAdmin)
                     {
@@ -117,7 +116,7 @@ public static class ItemFactory
             case "configuration":
                 return new DomainConfiguration(item as ODADomain, owner);
             case "system":
-                return new OdaOverride.DomainSystem(item as ODADomain, owner);
+                return new DomainSystem(item as ODADomain, owner);
             case "executable":
                 return new ExecutableDomain(item as ODADomain, owner);
             default:
@@ -126,7 +125,7 @@ public static class ItemFactory
                     return null;
                 }
 
-                if (owner is Host || (owner is Part && (owner as Part)?.ItemType == ItemType.RootPart && (item.Id == "DEVELOPE" || item.Id == "WORK")))
+                if (owner is Host || owner is Part && (owner as Part)?.ItemType == ItemType.RootPart && (item.Id == "DEVELOPE" || item.Id == "WORK"))
                 {
                     return new Part(item as ODADomain, owner);
                 }

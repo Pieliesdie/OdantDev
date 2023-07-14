@@ -1,21 +1,19 @@
-﻿namespace OdantDev.Model
+﻿namespace OdantDev.Model;
+public struct PathInfo
 {
-    public struct PathInfo
+    public PathInfo(string name, string path)
+        : this()
     {
-        public PathInfo(string name, string path)
-            : this()
-        {
-            Name = name;
-            Path = path;
-        }
+        Name = name;
+        Path = path;
+    }
 
-        public string Path { get; set; }
+    public string Path { get; set; }
 
-        public string Name { get; set; }
+    public string Name { get; set; }
 
-        public override string ToString()
-        {
-            return $"{Name} ({Path})";
-        }
+    public override string ToString()
+    {
+        return $"{Name} ({Path})";
     }
 }

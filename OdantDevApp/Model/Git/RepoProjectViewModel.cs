@@ -1,23 +1,17 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using OdantDev.Model;
 
 namespace SharedOdantDev.Model;
 public class RepoProjectViewModel : RepoBaseViewModel
 {
-    public override string Name => Item == null ? GitClient.Client?.HostUrl : Item.Name;
+    public override string Name => Item?.Name;
 
-    private RepoProjectViewModel() { }
-
-    public RepoProjectViewModel(ProjectItem item, bool lazyLoad, BaseGitItem parent, ILogger logger = null)
-    {
-        _isLazyLoading = lazyLoad;
-        _logger = logger;
-        Item = item;
-        Parent = parent;
-    }
+    public RepoProjectViewModel(ProjectItem item, BaseGitItem parent, ILogger logger = null) : base(item, parent, logger){}
 
     public override bool HasModule => Item.HasModule;
+    protected override bool CanBeExpanded => false;
 
-    public override IEnumerable<RepoBaseViewModel> Children => null;
+    public override Task<IEnumerable<RepoBaseViewModel>> GetChildrenAsync() => Task.FromResult<IEnumerable<RepoBaseViewModel>>(null);
 }

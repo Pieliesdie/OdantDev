@@ -60,8 +60,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
     {
         Connection.AutoLogin = value;
     }
-
-    public Connection Connection { get; }
+    private Connection Connection { get; }
     public AddinSettings AddinSettings { get; }
 
     public ConnectionModel(Connection connection, AddinSettings addinSettings, ILogger logger = null)
@@ -167,7 +166,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
             var item = new RootItem(GitClient.Client.HostUrl);
             var list = new List<RepoBaseViewModel>
             {
-                new RepoRootViewModel(item, true, true, logger: logger)
+                new RepoRootViewModel(item, true, logger: logger)
             };
             return list;
         });

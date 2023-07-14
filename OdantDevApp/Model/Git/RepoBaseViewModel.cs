@@ -1,73 +1,86 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace SharedOdantDev.Model
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace SharedOdantDev.Model;
+
+public class RepoLoadingViewModel : RepoBaseViewModel
 {
-    public abstract class RepoBaseViewModel : INotifyPropertyChanged
+    public RepoLoadingViewModel() : base(null, null, null) { }
+    public override string Name => "Loading";
+}
+
+public partial class RepoBaseViewModel : ObservableObject
+{
+    static readonly IEnumerable<RepoBaseViewModel> dummyList = new[] { new RepoLoadingViewModel() };
+
+    public RepoBaseViewModel(BaseGitItem item, BaseGitItem parent, OdantDev.Model.ILogger logger = null)
     {
-        protected BaseGitItem _item;
-        protected BaseGitItem _parent;
+        Item = item;
+        Parent = parent;
+        this.logger = logger;
+        children = CanBeExpanded ? dummyList : null;
+    }
 
-        protected int _imageIndex;
-        protected bool _isExpanded;
+    protected virtual bool CanBeExpanded => true;
 
-        protected OdantDev.Model.ILogger _logger;
-        protected IEnumerable<RepoBaseViewModel> _children;
+    [ObservableProperty]
+    protected BaseGitItem item;
 
-        public abstract string Name { get; }
+    [ObservableProperty]
+    protected BaseGitItem parent;
 
-        public bool IsItemAvailable => Item != null;
+    protected OdantDev.Model.ILogger logger { get; }
 
-        public bool HasChildren => Children.Any();
+    public virtual string Name => string.Empty;
 
-        public virtual ImageSource Icon => Item?.Icon;
+    public bool IsItemAvailable => Item != null;
 
-        public abstract bool HasModule { get; }
+    public bool HasChildren => Children?.Any() ?? false;
 
-        public virtual BaseGitItem Item { get => _item; protected set { _item = value; NotifyPropertyChanged("Item"); } }
-        public virtual BaseGitItem Parent { get => _parent; protected set { _parent = value; NotifyPropertyChanged("Parent"); } }
+    public virtual ImageSource Icon => Item?.Icon;
 
-        protected bool _isLazyLoading;
+    public virtual bool HasModule => false;
 
-        protected virtual List<RepoBaseViewModel> dummyList => new() { new RepoGroupViewModel() };
+    private bool isLoaded;
 
-
-        public virtual IEnumerable<RepoBaseViewModel> Children
+    [ObservableProperty]
+    bool isExpanded;
+    async partial void OnIsExpandedChanged(bool value)
+    {
+        if (value && !isLoaded)
         {
-            get => _isLazyLoading ? dummyList : _children;
-            set { _children = value; NotifyPropertyChanged("Children"); }
-        }
-
-        public bool IsExpanded
-        {
-            get => _isExpanded;
-            set
+            isLoaded = true;
+            if (Children is null || Children == dummyList)
             {
-                if (value != _isExpanded)
-                {
-                    _isExpanded = value;
-                    if (value && _isLazyLoading)
-                    {
-                        _isLazyLoading = false;
-                        NotifyPropertyChanged("Children");
-                    }
-                    NotifyPropertyChanged("IsExpanded");
-                }
+                await SetChildrenAsync();
             }
         }
+    }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+    [ObservableProperty]
+    public IEnumerable<RepoBaseViewModel> children;
 
-        protected void NotifyPropertyChanged(string name)
+    private async Task SetChildrenAsync()
+    {
+        var task = Task.Run(() => GetChildrenAsync());
+
+        if (task == await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(10))))
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            var children = await task;
+            Children = children;
         }
-
-        public override string ToString()
+        else
         {
-            return Name;
+            logger?.Info($"Timeout when getting children for {this}");
+            Children = null;
         }
     }
+    public virtual Task<IEnumerable<RepoBaseViewModel>> GetChildrenAsync() => Task.FromResult(Enumerable.Empty<RepoBaseViewModel>());
+
+    public override string ToString() => Name;
 }

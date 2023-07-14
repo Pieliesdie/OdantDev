@@ -21,6 +21,11 @@
 		<RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Compile Remove="Model\Git\GroupItem.cs" />
+	  <Compile Remove="Model\Git\ProjectItem.cs" />
+	  <Compile Remove="Model\Git\RootItem.cs" />
+	</ItemGroup>
+	<ItemGroup>
 		<Reference Include="odaCore">
 			<HintPath>..\Libraries\OdaLibs\odaCore.dll</HintPath>
 			<SpecificVersion>False</SpecificVersion>
@@ -80,5 +85,15 @@
 		<Exec Command="mkdir &quot;$(SolutionDir)artifacts&quot;&#xD;&#xA;rmdir &quot;$(SolutionDir)artifacts\app&quot;&#xD;&#xA;mkdir &quot;$(SolutionDir)artifacts\app&quot;&#xD;&#xA;xcopy &quot;$(TargetDir)&quot; &quot;$(SolutionDir)artifacts\app&quot; /s /e /y" />
 	</Target>
 	<Import Project="..\SharedFiles\SharedFiles.projitems" Label="Shared" />
+	<ItemGroup>
+	  <Content Remove="Model\Git\BaseGitItem.cs" />
+	  <Content Remove="Model\Git\RepoGroupViewModel.cs" />
+	  <Content Remove="OdaOverride\CommonEx.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="Model\Git\GitItems\GroupItem.cs" />
+	  <Content Include="Model\Git\GitItems\ProjectItem.cs" />
+	  <Content Include="Model\Git\GitItems\RootItem.cs" />
+	</ItemGroup>
 
 </Project>

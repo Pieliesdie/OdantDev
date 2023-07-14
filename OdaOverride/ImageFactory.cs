@@ -8,53 +8,60 @@ using Microsoft.Extensions.Caching.Memory;
 using oda;
 
 using OdantDev;
+using OdaOverride;
 
-namespace SharedOdanDev.OdaOverride;
+namespace OdaOverride;
 
 public static class ImageFactory
 {
     static readonly MemoryCache _cache = new(new MemoryCacheOptions
     {
-        SizeLimit = 1500,
+        SizeLimit = 500,
     });
-
-    static readonly MemoryCacheEntryOptions _defaultCacheOptions = new MemoryCacheEntryOptions().SetSize(1);
 
     public static BitmapImage FolderImage { get; } = Images.GetImage(Images.GetImageIndex(Icons.Folder)).ConvertToBitmapImage();
     public static BitmapImage WorkplaceImage { get; } = Images.GetImage(Images.GetImageIndex(Icons.UserRole)).ConvertToBitmapImage();
     public static BitmapImage ModuleImage { get; } = Images.GetImage(Images.GetImageIndex(Icons.MagentaFolder)).ConvertToBitmapImage();
 
-    static readonly SemaphoreSlim _semaphoreSlimGetImageIndex = new(1);
+    static readonly SemaphoreSlim _semaphoreSlim = new(1);
+
     public static async Task<int> GetImageIndex(this Item item)
     {
-        await _semaphoreSlimGetImageIndex.WaitAsync();
+        await _semaphoreSlim.WaitAsync();
         var ImageIndex = item.ImageIndex;
-        _semaphoreSlimGetImageIndex.Release();
+        _semaphoreSlim.Release();
         return ImageIndex;
     }
 
-    static readonly SemaphoreSlim _semaphoreSlimGetImage = new(1);
-    public static async Task<Bitmap> GetImage(int idx)
+    public static async Task<Bitmap> GetImage(this int idx)
     {
-        await _semaphoreSlimGetImage.WaitAsync();
+        if (_cache.TryGetValue<Bitmap>(idx, out var cachedBitmap))
+        {
+            return cachedBitmap;
+        }
+        await _semaphoreSlim.WaitAsync();
         var image = new Bitmap(Images.GetImage(idx));
-        _semaphoreSlimGetImage.Release();
+        _semaphoreSlim.Release();
+        _cache.Set(idx, image);
         return image;
     }
 
     public static async Task<BitmapImage> GetImageSource(this Item item)
     {
-        return await Task.Run(async () =>
+        if (_cache.TryGetValue<BitmapImage>(item.FullId, out var cachedBitmap))
         {
-            var ImageIndex = await GetImageIndex(item);
-            if(_cache.TryGetValue<BitmapImage>(ImageIndex, out var cacheimg))
-            {
-                return cacheimg;
-            }
-            var image = await GetImage(ImageIndex);
-            var bitmapImg = image.ConvertToBitmapImage();
-            _cache.Set(ImageIndex, bitmapImg, _defaultCacheOptions);
-            return bitmapImg;
+            return cachedBitmap;
+        }
+
+        var img = await Task.Run(async () =>
+        {
+            await _semaphoreSlim.WaitAsync();
+            var ImageIndex = item.ImageIndex;
+            var image = new Bitmap(Images.GetImage(ImageIndex));
+            _semaphoreSlim.Release();
+            return image.ConvertToBitmapImage();
         });
+        _cache.Set(item.FullId, img);
+        return img;
     }
 }

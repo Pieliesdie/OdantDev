@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using GitLabApiClient.Models.Groups.Responses;
@@ -8,57 +10,39 @@ using OdantDev.Model;
 namespace SharedOdantDev.Model;
 public class RepoRootViewModel : RepoGroupViewModel
 {
+    private string name = new Uri(GitClient.Client?.HostUrl).Host;
+    public override string Name => name;
     public override bool HasModule => false;
-
-    public RepoRootViewModel() { }
-
-    public RepoRootViewModel(BaseGitItem item, bool lazyLoad, bool loadProjects, ILogger logger = null)
-    {
-        Item = item;
-        _isLazyLoading = lazyLoad;
-        _logger = logger;
-        LoadProjects = loadProjects;
-
-        _ = InitChildrenAsync();
-    }
+    public RepoRootViewModel(BaseGitItem item, bool loadProjects, ILogger logger = null) 
+        : base(item, null, loadProjects, logger) {    }
 
     public override async Task<IEnumerable<RepoBaseViewModel>> GetChildrenAsync()
     {
+        if (GitClient.Client == null) { return Enumerable.Empty<RepoBaseViewModel>(); }
+
         var children = new List<RepoBaseViewModel>();
+        IList<Group> groups = await GitClient.Client.Groups.GetAsync();
 
-        if (GitClient.Client != null)
+        if (groups != null)
         {
-            IList<Group> groups = await GitClient.Client.Groups.GetAsync();
-            if (groups != null)
+            foreach (Group group in groups.Where(x=> x.ParentId != null))
             {
-                foreach (Group group in groups)
-                {
-                    if (group.ParentId != null)
-                        continue;
+                var newItem = new GroupItem(group);
 
-                    var newItem = new GroupItem(group);
-
-                    children.Add(new RepoGroupViewModel(newItem, _isLazyLoading, Item, LoadProjects, _logger));
-                }
-            }
-
-            if (LoadProjects)
-            {
-                IList<GitLabApiClient.Models.Projects.Responses.Project> projects = await GitClient.Client.Projects.GetAsync();
-                if (projects != null)
-                {
-                    foreach (GitLabApiClient.Models.Projects.Responses.Project project in projects)
-                    {
-                        if (project.Namespace.Kind == "group")
-                            continue;
-
-                        var newItem = new ProjectItem(project);
-                        children.Add(new RepoProjectViewModel(newItem, _isLazyLoading, Item, _logger));
-                    }
-                }
+                children.Add(new RepoGroupViewModel(newItem, Item, LoadProjects, logger));
             }
         }
 
+        if (!LoadProjects) { return children; }
+
+        var projects = await GitClient.Client.Projects.GetAsync();
+        if (projects == null) { return children; }
+
+        foreach (var project in projects.Where(x => x.Namespace.Kind != "group"))
+        {
+            var newItem = new ProjectItem(project);
+            children.Add(new RepoProjectViewModel(newItem, Item, logger));
+        }
         return children;
     }
 }
