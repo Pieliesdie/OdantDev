@@ -18,7 +18,7 @@ public abstract class BaseGitItem
     public virtual string FullPath { get; protected set; }
 
     protected abstract string ImageCode { get; }
-    public ImageSource Icon
+    public virtual ImageSource Icon
     {
         get
         {

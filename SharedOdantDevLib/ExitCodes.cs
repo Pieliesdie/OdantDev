@@ -1,6 +1,4 @@
-﻿namespace SharedOdantDevLib;
-
-
+﻿namespace OdantDev;
 
 //The posix standard says:
 //exit codes 1 - 2, 126 - 165, and 255 [1] have special meanings,

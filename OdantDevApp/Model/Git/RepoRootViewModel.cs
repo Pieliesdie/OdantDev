@@ -10,8 +10,6 @@ using OdantDev.Model;
 namespace SharedOdantDev.Model;
 public class RepoRootViewModel : RepoGroupViewModel
 {
-    private string name = new Uri(GitClient.Client?.HostUrl).Host;
-    public override string Name => name;
     public override bool HasModule => false;
     public RepoRootViewModel(BaseGitItem item, bool loadProjects, ILogger logger = null) 
         : base(item, null, loadProjects, logger) {    }

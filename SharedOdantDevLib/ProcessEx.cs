@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 
-namespace SharedOdantDevLib;
+namespace OdantDev;
 
 public static class ProcessEx
 {

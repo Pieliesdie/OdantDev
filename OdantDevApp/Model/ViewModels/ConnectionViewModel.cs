@@ -24,9 +24,13 @@ namespace OdantDev;
 
 public partial class ConnectionModel : ObservableObject, IDisposable
 {
-    public static readonly string[] odaClientLibraries = { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
-    private static readonly string[] odaServerLibraries = { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
+    public static List<IntPtr> ServerAssemblies { get; set; }
+    public static List<Assembly> ClientAssemblies { get; set; }
+    public static string[] OdaClientLibraries { get; } = { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
+    private static string[] OdaServerLibraries { get; } = { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
+
     private readonly ILogger logger;
+    private Connection Connection { get; }
 
     [ObservableProperty]
     Domain develope;
@@ -49,10 +53,6 @@ public partial class ConnectionModel : ObservableObject, IDisposable
     [ObservableProperty]
     List<DomainDeveloper>? developers;
 
-    public static List<IntPtr> ServerAssemblies { get; set; }
-
-    public static List<Assembly> ClientAssemblies { get; set; }
-
     [ObservableProperty]
     bool autoLogin;
 
@@ -60,7 +60,6 @@ public partial class ConnectionModel : ObservableObject, IDisposable
     {
         Connection.AutoLogin = value;
     }
-    private Connection Connection { get; }
     public AddinSettings AddinSettings { get; }
 
     public ConnectionModel(Connection connection, AddinSettings addinSettings, ILogger logger = null)
@@ -133,13 +132,15 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         return await Task.Run(async () =>
         {
             Develope = StructureItemEx.FindDomain(Localhost, "D:DEVELOPE");
-            var developList = Developers = Develope?.FindDomains()?.OfType<DomainDeveloper>()?.ToList();
-            var retryCount = 5;
-            while (retryCount-- > 0 && developList is null)
-            {
-                await Task.Delay(1000);
-            }
-            return developList ?? new List<DomainDeveloper>();
+
+            var developList = await Retry.RetryAsync(
+                () => Develope?.FindDomains()?.OfType<DomainDeveloper>()?.ToList(),
+                (e) => e != null,
+                TimeSpan.FromMilliseconds(300),
+                TimeSpan.FromSeconds(5)
+            );
+            Developers = developList;
+            return developList;
         });
     }
 
@@ -159,11 +160,11 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         if (string.IsNullOrEmpty(AddinSettings.GitLabApiPath) || string.IsNullOrEmpty(AddinSettings.GitLabApiKey))
             return null;
 
-        return await Task.Run(() =>
+        return await Task.Run(async () =>
         {
-            GitClient.CreateClient(AddinSettings.GitLabApiPath, AddinSettings.GitLabApiKey);
-
-            var item = new RootItem(GitClient.Client.HostUrl);
+            await GitClient.CreateClientAsync(AddinSettings.GitLabApiPath, AddinSettings.GitLabApiKey);
+            var uriHost = new Uri(GitClient.Client?.HostUrl).Host;
+            var item = new RootItem(uriHost);
             var list = new List<RepoBaseViewModel>
             {
                 new RepoRootViewModel(item, true, logger: logger)
@@ -177,13 +178,15 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         return await Task.Run(async () =>
         {
             var hosts = Connection.FindHosts().ToList();
-            var localHost = Localhost = hosts.FirstOrDefault(x => x.IsLocal);
-            var retryCount = 10;
-            while (retryCount-- > 0 && localHost?.OnLine == false)
-            {
-                localHost?.Reset();
-                await Task.Delay(1000);
-            }
+
+            var _localHost = Localhost = hosts.FirstOrDefault(x => x.IsLocal);
+
+           await Retry.RetryAsync(
+                () => { _localHost.Reset(); return _localHost.HostState; },
+                (e) => e == HostStates.On,
+                TimeSpan.FromMilliseconds(300),
+                TimeSpan.FromSeconds(10));
+
             return hosts
                 .OrderBy(x => x.SortIndex)
                 .ThenBy(x => x.Label)
@@ -208,8 +211,8 @@ public partial class ConnectionModel : ObservableObject, IDisposable
     {
         try
         {
-            ServerAssemblies = VsixExtension.LoadServerLibraries(odaFolder.FullName, VsixExtension.Platform, odaServerLibraries);
-            ClientAssemblies = VsixExtension.LoadClientLibraries(odaFolder.FullName, odaClientLibraries);
+            ServerAssemblies = VsixExtension.LoadServerLibraries(odaFolder.FullName, VsixExtension.Platform, OdaServerLibraries);
+            ClientAssemblies = VsixExtension.LoadClientLibraries(odaFolder.FullName, OdaClientLibraries);
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
             return (true, null);
         }

@@ -6,24 +6,21 @@ using System.Windows.Media;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace SharedOdantDev.Model;
+using OdantDev;
 
-public class RepoLoadingViewModel : RepoBaseViewModel
-{
-    public RepoLoadingViewModel() : base(null, null, null) { }
-    public override string Name => "Loading";
-}
+namespace SharedOdantDev.Model;
 
 public partial class RepoBaseViewModel : ObservableObject
 {
-    static readonly IEnumerable<RepoBaseViewModel> dummyList = new[] { new RepoLoadingViewModel() };
+    private static readonly IEnumerable<RepoBaseViewModel> dummyList = new[] { new RepoLoadingViewModel() };
+    private IEnumerable<RepoBaseViewModel>? DefaultChildren => CanBeExpanded ? dummyList : null;
 
     public RepoBaseViewModel(BaseGitItem item, BaseGitItem parent, OdantDev.Model.ILogger logger = null)
     {
         Item = item;
         Parent = parent;
         this.logger = logger;
-        children = CanBeExpanded ? dummyList : null;
+        children = DefaultChildren;
     }
 
     protected virtual bool CanBeExpanded => true;
@@ -36,7 +33,7 @@ public partial class RepoBaseViewModel : ObservableObject
 
     protected OdantDev.Model.ILogger logger { get; }
 
-    public virtual string Name => string.Empty;
+    public virtual string Name => Item?.Name ?? string.Empty;
 
     public bool IsItemAvailable => Item != null;
 
@@ -67,17 +64,25 @@ public partial class RepoBaseViewModel : ObservableObject
 
     private async Task SetChildrenAsync()
     {
-        var task = Task.Run(() => GetChildrenAsync());
-
-        if (task == await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(10))))
+        void СlearState()
         {
-            var children = await task;
-            Children = children;
+            Children = DefaultChildren;
+            isLoaded = false;
+            IsExpanded = false;
         }
-        else
+        try
+        {
+            Children = await Task.Run(GetChildrenAsync).WithTimeout(TimeSpan.FromSeconds(15));
+        }
+        catch (TimeoutException)
         {
             logger?.Info($"Timeout when getting children for {this}");
-            Children = null;
+            СlearState();
+        }
+        catch
+        {
+            СlearState();
+            throw;
         }
     }
     public virtual Task<IEnumerable<RepoBaseViewModel>> GetChildrenAsync() => Task.FromResult(Enumerable.Empty<RepoBaseViewModel>());

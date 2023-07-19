@@ -8,8 +8,6 @@ using OdantDev;
 
 using OdantDevApp.Model;
 
-using SharedOdantDevLib;
-
 namespace OdantDevApp;
 
 /// <summary>

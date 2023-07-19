@@ -21,13 +21,13 @@ public static class GitClient
 
     public static Session Session { get; set; }
 
-    public static void CreateClient(string apiPath, string apiKey)
+    public async static Task CreateClientAsync(string apiPath, string apiKey)
     {
         if (string.IsNullOrEmpty(apiPath) || string.IsNullOrEmpty(apiKey))
             return;
 
         Client = new GitLabClient(apiPath, apiKey);
-        _ = LoadSessionAsync();
+        await LoadSessionAsync();
     }
 
     public static async Task LoadSessionAsync()

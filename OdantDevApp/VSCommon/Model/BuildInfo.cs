@@ -7,7 +7,7 @@ namespace OdantDev.Model
 {
     public partial class VisualStudioIntegration
     {
-        public class BuildInfo : IDisposable
+        public struct BuildInfo
         {
             public BuildInfo(string name, Dir remoteDir, DirectoryInfo localDir)
             {
@@ -16,14 +16,8 @@ namespace OdantDev.Model
                 LocalDir = localDir;
             }
             public string Name { get; set; }
-            public bool IsBuildSuccess { get; set; }
             public Dir RemoteDir { get; set; }
             public DirectoryInfo LocalDir { get; set; }
-
-            public void Dispose()
-            {
-                //RemoteDir?.Dispose();
-            }
         }
     }
 }

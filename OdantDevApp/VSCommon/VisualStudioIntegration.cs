@@ -13,6 +13,7 @@ using EnvDTE;
 using EnvDTE80;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Shell.Interop;
 
 using MoreLinq;
 
@@ -29,6 +30,7 @@ namespace OdantDev.Model;
 public partial class VisualStudioIntegration
 {
     #region Private Variables
+    private bool IsLastBuildSuccess { get; set; } = true;
     private BuildEvents BuildEvents { get; set; }
     private SolutionEvents SolutionEvents { get; set; }
     private DTE2 EnvDTE { get; }
@@ -72,11 +74,11 @@ public partial class VisualStudioIntegration
     #region Visual studio events
     private void SubscribeToStudioEvents()
     {
-        SolutionEvents = (EnvDTE.Events as Events2).SolutionEvents;
+        SolutionEvents = EnvDTE.Events.SolutionEvents;
         SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;
         SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
 
-        BuildEvents = (EnvDTE.Events as Events2).BuildEvents;
+        BuildEvents = EnvDTE.Events.BuildEvents;
         BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
         BuildEvents.OnBuildDone += BuildEvents_OnBuildDone;
         BuildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
@@ -108,54 +110,43 @@ public partial class VisualStudioIntegration
         var guid = GetProjectGuid(Project);
         if (LoadedModules.TryGetValue(guid, out var loadedModules))
         {
-            loadedModules.Dispose();
             LoadedModules.TryRemove(guid, out _);
         }
     }
 
-    private async void BuildEvents_OnBuildProjConfigDone(string Project, string ProjectConfig, string Platform, string SolutionConfig, bool Success)
+    private void BuildEvents_OnBuildProjConfigDone(string Project, string ProjectConfig, string Platform, string SolutionConfig, bool Success)
     {
-        Project project = EnvDTE.Solution.Item(Project);
-        if (LoadedModules.TryGetValue(GetProjectGuid(project), out var buildInfo))
-        {
-            buildInfo.IsBuildSuccess = Success;
-            if (Success.Not())
-            {
-                EnvDTE.ExecuteCommand("Build.Cancel");
-            }
-        }
+        IsLastBuildSuccess = Success;
     }
 
-    public async void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
+    public void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
     {
         if ((Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll)) { return; }
-        if (LoadedModules.Values.ToList().TrueForAll(x => x.IsBuildSuccess).Not())
+        if (!IsLastBuildSuccess)
         {
-            LoadedModules.Values.ForEach(x => x.IsBuildSuccess = true);
             return;
         }
         foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).Cast<Project>())
         {
-            await CopyToOdaBinAsync(project);
+            CopyToOdaBin(project);
         }
     }
 
-    public async void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
+    public void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
     {
         if (Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll) { return; }
-        foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).Cast<Project>())
+        foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).OfType<Project>())
         {
-            if ((await IncreaseVersionAsync(project)).Not())
+            if (IncreaseVersion(project).Not())
             {
                 EnvDTE.ExecuteCommand("Build.Cancel");
             }
         }
     }
-
     #endregion
 
     #region Common Methods for Project item
-    public async Task<bool> CopyToOdaBinAsync(Project project)
+    public bool CopyToOdaBin(Project project)
     {
         try
         {
@@ -213,7 +204,6 @@ public partial class VisualStudioIntegration
         catch (Exception ex)
         {
             Logger?.Error($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
-           // await project.ShowError($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
         }
         return true;
     }
@@ -233,11 +223,10 @@ public partial class VisualStudioIntegration
         }
     }
 
-    public async Task<bool> IncreaseVersionAsync(Project project)
+    public bool IncreaseVersion(Project project)
     {
         try
         {
-            //await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs")
                 ?? throw new NullReferenceException($"Missing AssemblyInfo.cs in {project.Name}");
             var version = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>().FirstOrDefault(x => x.Name == "AssemblyVersion");
@@ -261,7 +250,6 @@ public partial class VisualStudioIntegration
         catch (Exception ex)
         {
             Logger?.Error($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
-           // await project.ShowError($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
             return false;
         }
     }
@@ -283,7 +271,6 @@ public partial class VisualStudioIntegration
             attribute.Value = $"\"{value}\"";
         }
     }
-
     #endregion
 
     #region Download and init  logic for Module
@@ -314,7 +301,7 @@ public partial class VisualStudioIntegration
             {
                 throw new Exception("Can't save debug INI");
             }
-            await IncreaseVersionAsync(project);
+            IncreaseVersion(project);
             project.Save();
             LoadedModules.TryAdd(GetProjectGuid(project), new BuildInfo(project.UniqueName, module.remoteDir, module.localDir));
         }

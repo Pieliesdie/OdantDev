@@ -75,7 +75,7 @@ public static class ExternalEnvDTE
             Marshal.ThrowExceptionForHR(WinApi.CreateBindCtx(reserved: 0, ppbc: out bindCtx));
             bindCtx.GetRunningObjectTable(out rot);
             rot.EnumRunning(out enumMonikers);
-
+           
             IMoniker[] moniker = new IMoniker[1];
             IntPtr numberFetched = IntPtr.Zero;
             while (enumMonikers.Next(1, moniker, numberFetched) == 0)
@@ -86,10 +86,7 @@ public static class ExternalEnvDTE
 
                 try
                 {
-                    if (runningObjectMoniker != null)
-                    {
-                        runningObjectMoniker.GetDisplayName(bindCtx, null, out name);
-                    }
+                    runningObjectMoniker?.GetDisplayName(bindCtx, null, out name);
                 }
                 catch (UnauthorizedAccessException)
                 {

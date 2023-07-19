@@ -8,10 +8,11 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Threading;
-
-using SharedOdantDevLib;
 
 using Task = System.Threading.Tasks.Task;
 
@@ -31,13 +32,13 @@ namespace OdantDev;
 [Guid("e477ca93-32f7-4a68-ab0d-7472ff3e7964")]
 public class ToolWindow : ToolWindowPane
 {
-    private bool OutOfProcess => false;
+    private bool OutOfProcess => true;
     private string OutOfProcessFolder => Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "app");
     private string OutOfProcessPath => Path.Combine(OutOfProcessFolder, "OdantDevApp.exe");
     private Process ChildProcess { get; set; }
     private WindowsFormsHost Host { get; }
     private IntPtr HostHandle { get; }
-    private async Task RunDevApp(bool restart = false)
+    private async Task RunDevAppAsync(bool restart = false)
     {
         try
         {
@@ -50,7 +51,7 @@ public class ToolWindow : ToolWindowPane
             //Remove border and whatnot
             WinApi.SetWindowLong(process.MainWindowHandle, WinApi.GWL_STYLE, WinApi.WS_VISIBLE);
             //Initial size
-            WinApi.MoveWindow(process.MainWindowHandle, 0, 0, (Host.Child.Width), (Host.Child.Height), true);
+            WinApi.MoveWindow(process.MainWindowHandle, 0, 0, (Host.Child.Width), (Host.Child.Height), false);
 
             RestartIfFail(process);
             if (!restart)
@@ -81,7 +82,7 @@ public class ToolWindow : ToolWindowPane
                 break;
             case < 0:
             case (int)ExitCodes.Restart:
-                _ = RunDevApp(true);
+                _ = RunDevAppAsync(true);
                 break;
             default:
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -177,6 +178,6 @@ public class ToolWindow : ToolWindowPane
     {
         base.OnToolWindowCreated();
         if (!OutOfProcess) return;
-        _ = RunDevApp();
+        _ = RunDevAppAsync();
     }
 }

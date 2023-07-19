@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 
+namespace OdantDev;
 public static class Reflection
 {
     /// <summary>

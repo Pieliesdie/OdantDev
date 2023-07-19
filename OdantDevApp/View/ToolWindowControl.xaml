@@ -574,6 +574,8 @@
                                     <Style BasedOn="{StaticResource MaterialDesignTreeViewItem}" TargetType="TreeViewItem">
                                         <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18" />
                                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                                        <Setter Property="OverridesDefaultStyle" Value="True" />
+                                        <EventSetter Event="RequestBringIntoView" Handler="TreeViewItem_RequestBringIntoView" />
                                     </Style>
                                 </TreeView.Resources>
                                 <TreeView.ItemTemplate>

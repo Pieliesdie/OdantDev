@@ -38,8 +38,6 @@ using SharedOdanDev.OdaOverride;
 using SharedOdantDev.Common;
 using SharedOdantDev.Model;
 
-using SharedOdantDevLib;
-
 using File = System.IO.File;
 
 namespace OdantDev;
@@ -209,7 +207,7 @@ public partial class ToolWindow1Control : UserControl
     }
     private bool CheckDllsInFolder(string folder)
     {
-        return ConnectionModel.odaClientLibraries.ToList().TrueForAll(x => File.Exists(Path.Combine(folder, x)));
+        return ConnectionModel.OdaClientLibraries.ToList().TrueForAll(x => File.Exists(Path.Combine(folder, x)));
     }
     private async Task<(bool Success, string Error)> LoadModelAsync()
     {
@@ -551,8 +549,11 @@ public partial class ToolWindow1Control : UserControl
             AddinSettings.LastProjects.Except(AddinSettings.LastProjects.Where(x => x.FullId == item.FullId)));
         var icon = await item.GetImageSource();
         AddinSettings.LastProjects.Add(new AddinSettings.Project(item.Name, item.FullId, item.Host.Name, DateTime.Now, icon));
-        AddinSettings.LastProjects = new AsyncObservableCollection<AddinSettings.Project>(AddinSettings.LastProjects.OrderByDescending(x => x.OpenTime).Take(15)
-            ?? new List<AddinSettings.Project>());
+        AddinSettings.LastProjects = new AsyncObservableCollection<AddinSettings.Project>(
+            AddinSettings
+            .LastProjects
+            .OrderByDescending(x => x.OpenTime)
+            .Take(15) ?? new List<AddinSettings.Project>());
         if ((await AddinSettings.SaveAsync()).Not())
         {
             logger.Info("Error while saving settings");
@@ -565,6 +566,11 @@ public partial class ToolWindow1Control : UserControl
             IsDarkTheme = checkBox.IsChecked ?? false;
         }
     }
+    void TreeViewItem_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+    {
+        e.Handled = true;
+    }
+
     private void OnPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
         TreeViewItem treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
@@ -751,7 +757,7 @@ public partial class ToolWindow1Control : UserControl
                 _ = await CreateGitLabProjectAsync(selectedItem.Item, selectedGroup?.Item?.FullPath, name);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             logger?.Error(ex.Message);
         }
@@ -808,10 +814,6 @@ public partial class ToolWindow1Control : UserControl
             selectedItem.Item.Root.RemoveAttribute(GitClient.GIT_PROJECT_ID_FIELD_NAME);
             selectedItem.Item.Save();
         }
-    }
-    void TreeViewItem_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
-    {
-        e.Handled = true;
     }
     #endregion
 }

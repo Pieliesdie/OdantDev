@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -21,8 +20,7 @@ using SharedOdanDev.OdaOverride;
 using SharedOdantDev.Common;
 
 namespace OdantDev.Model;
-[ObservableObject]
-public partial class StructureItemViewModel<T> where T : StructureItem
+public partial class StructureItemViewModel<T> : ObservableObject where T : StructureItem
 {
     static readonly IEnumerable<StructureItemViewModel<T>> dummyList = new List<StructureItemViewModel<T>>() { new StructureItemViewModel<T>() { Name = "Loading...", Icon = Images.GetImage(Images.GetImageIndex(Icons.Clock)).ConvertToBitmapImage() } };
     ILogger logger;
@@ -52,7 +50,7 @@ public partial class StructureItemViewModel<T> where T : StructureItem
     ODAItem RemoteItem => this.Item?.RemoteItem;
     public bool IsPinned => this is StructureItemViewModel<StructureItem> item && (connection?.PinnedItems?.Contains(item) ?? false); 
     public bool HasRepository => !string.IsNullOrWhiteSpace(Item?.Root?.GetAttribute("GitLabRepository"));
-    public bool CanCreateModule => Item is Class && !HasModule;
+    public bool CanCreateModule => Item is Class && !HasModule && IsLocal;
     public bool IsLocal => Item?.Host?.IsLocal ?? false;
     public bool IsItemAvailable => Item != null;
     public ItemType ItemType { get; private set; }
@@ -167,17 +165,21 @@ public partial class StructureItemViewModel<T> where T : StructureItem
     }
     async Task SetChildrenAsync(T item, ILogger logger = null, ConnectionModel connection = null)
     {
-        var task = Task.Run(() => GetChildren(item, this, logger, connection).ToImmutableList());
-
-        if (task == await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(10))))
+        try
         {
-            var children = await task;
-            Children = children;
+            Children = await Task.Run(() => GetChildren(item, this, logger, connection).ToArray())
+                .WithTimeout(TimeSpan.FromSeconds(10));
         }
-        else
+        catch(TimeoutException)
         {
             logger?.Info($"Timeout when getting children for {this}");
             Children = null;
+        }
+        catch
+        {
+            logger?.Info($"Unhandled exepction for {this}");
+            Children = null;
+            throw;
         }
     }
 

@@ -6,8 +6,6 @@ using System.Reflection;
 
 using Microsoft.Win32;
 
-using SharedOdantDevLib;
-
 namespace OdantDev;
 
 public static class VsixExtension

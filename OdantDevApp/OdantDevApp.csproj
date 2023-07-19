@@ -21,11 +21,6 @@
 		<RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
 	</PropertyGroup>
 	<ItemGroup>
-	  <Compile Remove="Model\Git\GroupItem.cs" />
-	  <Compile Remove="Model\Git\ProjectItem.cs" />
-	  <Compile Remove="Model\Git\RootItem.cs" />
-	</ItemGroup>
-	<ItemGroup>
 		<Reference Include="odaCore">
 			<HintPath>..\Libraries\OdaLibs\odaCore.dll</HintPath>
 			<SpecificVersion>False</SpecificVersion>
@@ -62,9 +57,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
-		<PackageReference Include="GitLabApiClient">
-			<Version>1.8.0</Version>
-		</PackageReference>
+		<PackageReference Include="GitLabApiClient" Version="1.8.0" />
 		<PackageReference Include="MdXaml">
 			<Version>1.21.0</Version>
 		</PackageReference>
@@ -86,14 +79,6 @@
 	</Target>
 	<Import Project="..\SharedFiles\SharedFiles.projitems" Label="Shared" />
 	<ItemGroup>
-	  <Content Remove="Model\Git\BaseGitItem.cs" />
-	  <Content Remove="Model\Git\RepoGroupViewModel.cs" />
-	  <Content Remove="OdaOverride\CommonEx.cs" />
+	  <Content Remove="Common\BitmapEx.cs" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Content Include="Model\Git\GitItems\GroupItem.cs" />
-	  <Content Include="Model\Git\GitItems\ProjectItem.cs" />
-	  <Content Include="Model\Git\GitItems\RootItem.cs" />
-	</ItemGroup>
-
 </Project>

@@ -1,9 +1,15 @@
-﻿namespace SharedOdantDev.Model;
+﻿using System;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+
+using GitLabApiClient.Models.Projects.Responses;
+
+namespace SharedOdantDev.Model;
 public class ProjectItem : BaseGitItem
 {
-    private readonly GitLabApiClient.Models.Projects.Responses.Project _project;
+    private readonly Project _project;
 
-    public ProjectItem(GitLabApiClient.Models.Projects.Responses.Project project)
+    public ProjectItem(Project project)
     {
         _project = project;
     }

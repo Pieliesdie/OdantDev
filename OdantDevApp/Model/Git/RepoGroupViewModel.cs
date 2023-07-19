@@ -15,10 +15,7 @@ public class RepoGroupViewModel : RepoBaseViewModel
     {
         LoadProjects = loadProjects;
     }
-
-    public override string Name => Item?.Name;
     public override bool HasModule => false;
-
     public virtual bool LoadProjects { get; set; }
 
     public override async Task<IEnumerable<RepoBaseViewModel>> GetChildrenAsync()

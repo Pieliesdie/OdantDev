@@ -10,9 +10,9 @@ public static class BitmapEx
     public static BitmapImage ConvertToBitmapImage(this Bitmap src)
     {
         if (src == null) return null;
-        using MemoryStream ms = new MemoryStream();
+        using MemoryStream ms = new();
         src.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-        BitmapImage image = new BitmapImage();
+        BitmapImage image = new();
         image.BeginInit();
         image.CacheOption = BitmapCacheOption.OnLoad;
         ms.Seek(0, SeekOrigin.Begin);
@@ -27,21 +27,32 @@ public static class BitmapEx
         var encoder = new PngBitmapEncoder();
         var frame = BitmapFrame.Create(src);
         encoder.Frames.Add(frame);
-        using (var stream = new MemoryStream())
-        {
-            encoder.Save(stream);
-            return Convert.ToBase64String(stream.ToArray());
-        }
+        using var stream = new MemoryStream();
+        encoder.Save(stream);
+        return Convert.ToBase64String(stream.ToArray());
     }
+
     public static BitmapImage FromBase64String(this string src)
     {
         if (src == null) return null;
         byte[] binaryData = Convert.FromBase64String(src);
-        using MemoryStream ms = new MemoryStream(binaryData);
+        using MemoryStream ms = new(binaryData);
         ms.Seek(0, SeekOrigin.Begin);
-        BitmapImage image = new BitmapImage();
+        BitmapImage image = new();
         image.BeginInit();
         image.CacheOption = BitmapCacheOption.OnLoad;
+        image.StreamSource = ms;
+        image.EndInit();
+        image.Freeze();
+        return image;
+    }
+
+    public static BitmapImage ToImage(this byte[] array)
+    {
+        using var ms = new MemoryStream(array);
+        var image = new BitmapImage();
+        image.BeginInit();
+        image.CacheOption = BitmapCacheOption.OnLoad; // here
         image.StreamSource = ms;
         image.EndInit();
         image.Freeze();
