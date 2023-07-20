@@ -6,6 +6,7 @@
 		<RootNamespace>SharedOdantDevLib</RootNamespace>
 		<AssemblyName>SharedOdantDevLib</AssemblyName>
 		<LangVersion>latest</LangVersion>
+		<AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json">

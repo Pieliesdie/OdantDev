@@ -8,6 +8,7 @@
 		<SelfContained>true</SelfContained>
 		<LangVersion>latest</LangVersion>
 		<IncludePackageReferencesDuringMarkupCompilation>true</IncludePackageReferencesDuringMarkupCompilation>
+		<AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
 	</PropertyGroup>
 	<PropertyGroup>
 		<ApplicationIcon>Icon.ico</ApplicationIcon>
