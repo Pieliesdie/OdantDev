@@ -7,9 +7,8 @@ using EnvDTE;
 
 using EnvDTE80;
 
-using OdantDev;
-
 using OdantDevApp.Model;
+using NativeMethods;
 
 namespace OdantDevApp.VSCommon;
 
@@ -72,7 +71,7 @@ public static class ExternalEnvDTE
 
         try
         {
-            Marshal.ThrowExceptionForHR(WinApi.CreateBindCtx(reserved: 0, ppbc: out bindCtx));
+            Marshal.ThrowExceptionForHR(global::NativeMethods.WinApi.CreateBindCtx(reserved: 0, ppbc: out bindCtx));
             bindCtx.GetRunningObjectTable(out rot);
             rot.EnumRunning(out enumMonikers);
            

@@ -12,7 +12,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using oda;
-using OdantDevApp.OdaOverride;
 using odaServer;
 
 using SharedOdanDev.OdaOverride;
@@ -29,7 +28,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
 
     delegate void Update(int Type, string Params);
     event Update OnUpdate;
-    NativeMethods.OnUpdate_CALLBACK Update_CALLBACK;
+    NativeMethods.OdaServerApi.OnUpdate_CALLBACK Update_CALLBACK;
     async void Updated(int type, IntPtr Params)
     {
         if (type == 2)
@@ -131,7 +130,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         Name = $"{RemoteItem?.Label ?? RemoteItem?.Name}";
         Update_CALLBACK = Updated;
         GC.SuppressFinalize(Update_CALLBACK);
-        NativeMethods._SetOnUpdate(Item.RemoteItem.GetIntPtr(), Update_CALLBACK);
+        NativeMethods.OdaServerApi._SetOnUpdate(Item.RemoteItem.GetIntPtr(), Update_CALLBACK);
         _ = SetExpanderAsync();
         _ = SetIconAsync();
     }
@@ -139,7 +138,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     {
         if (Item?.RemoteItem != null)
         {
-            NativeMethods._SetOnUpdate(Item.RemoteItem.GetIntPtr(), null);
+            NativeMethods.OdaServerApi._SetOnUpdate(Item.RemoteItem.GetIntPtr(), null);
         }
         if (Update_CALLBACK != null)
         {

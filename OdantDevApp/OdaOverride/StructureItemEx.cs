@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 
 using oda;
-using OdantDevApp.OdaOverride;
 using odaServer;
 
 namespace OdantDev;
@@ -12,12 +11,12 @@ public static class StructureItemEx
 {
     private static IEnumerable<T> ReadList<T>(IntPtr intPtr)
     {
-        int listLength = NativeMethods._GetLength(intPtr);
+        int listLength = NativeMethods.OdaServerApi._GetLength(intPtr);
         var ODAItems = Enumerable.Range(0, listLength)
-            .Select(x => oda.OdaOverride.ItemFactory.GetStorageItem(CreateByType(NativeMethods._GetItem(intPtr, x))))
+            .Select(x => oda.OdaOverride.ItemFactory.GetStorageItem(CreateByType(NativeMethods.OdaServerApi._GetItem(intPtr, x))))
             .OfType<T>()
             .ToHashSet();
-        NativeMethods._Release(intPtr);
+        NativeMethods.OdaServerApi._Release(intPtr);
         return ODAItems;
     }
     public static IEnumerable<StructureItem> FindConfigItems(this StructureItem structureItem)
@@ -25,7 +24,7 @@ public static class StructureItemEx
         if (structureItem.RemoteItem == null) { return Enumerable.Empty<StructureItem>(); }
 
         var xq = GetConfigFilter(structureItem);
-        IntPtr configItemsIntPtr = NativeMethods._FindConfigItems(structureItem.GetIntPtr(), xq);
+        IntPtr configItemsIntPtr = NativeMethods.OdaServerApi._FindConfigItems(structureItem.GetIntPtr(), xq);
         return ReadList<StructureItem>(configItemsIntPtr);
     }
 
@@ -33,7 +32,7 @@ public static class StructureItemEx
     {
         if (connection.RemoteItem == null) { return Enumerable.Empty<Host>(); }
 
-        IntPtr configItemsIntPtr = NativeMethods._Hosts(connection.GetIntPtr());
+        IntPtr configItemsIntPtr = NativeMethods.OdaServerApi._Hosts(connection.GetIntPtr());
         return ReadList<Host>(configItemsIntPtr);
     }
 
@@ -41,7 +40,7 @@ public static class StructureItemEx
     {
         if (item.RemoteItem == null) { return null; }
 
-        IntPtr configItemIntPtr = NativeMethods._FindItem(item.GetIntPtr(), path);
+        IntPtr configItemIntPtr = NativeMethods.OdaServerApi._FindItem(item.GetIntPtr(), path);
         return oda.OdaOverride.ItemFactory.GetStorageItem(CreateByType(configItemIntPtr));
     }
 
@@ -55,7 +54,7 @@ public static class StructureItemEx
         var remoteDomain = domain?.RemoteItem as ODADomain;
         if (remoteDomain == null) { return Enumerable.Empty<Domain>(); }
 
-        IntPtr configItemsIntPtr = NativeMethods._Domains(remoteDomain.GetIntPtr());
+        IntPtr configItemsIntPtr = NativeMethods.OdaServerApi._Domains(remoteDomain.GetIntPtr());
         return ReadList<Domain>(configItemsIntPtr);
     }
 
@@ -74,13 +73,13 @@ public static class StructureItemEx
         return "./(*[not(@i = (../@i, '000000000000000', 'SYSTEM')) and not(@t=('SOLUTION', 'WORKPLACE'))], *[@i = ../@i]/*)";
     }
 
-    public static ODAItem GetItem(IntPtr _ptr, int index) => CreateByType(NativeMethods._GetItem(_ptr, index));
+    public static ODAItem GetItem(IntPtr _ptr, int index) => CreateByType(NativeMethods.OdaServerApi._GetItem(_ptr, index));
     public static ODAItem CreateByType(IntPtr item_ptr)
     {
         if (item_ptr == IntPtr.Zero)
             return null;
         ODAItem odaItem = null;
-        switch (NativeMethods._GetType(item_ptr))
+        switch (NativeMethods.OdaServerApi._GetType(item_ptr))
         {
             case 2:
                 odaItem = new ODAHost(item_ptr);

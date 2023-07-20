@@ -2,9 +2,9 @@
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace OdantDevApp.OdaOverride;
+namespace NativeMethods;
 
-internal static class NativeMethods
+internal static class OdaServerApi
 {
     public delegate void OnUpdate_CALLBACK(int Type, IntPtr Params);
     [DllImport("odaClient.dll", EntryPoint = "ODAItem_set_on_update", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]

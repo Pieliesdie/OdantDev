@@ -20,6 +20,8 @@ using OdantDevApp.Common;
 using SharedOdantDev.Common;
 using SharedOdantDev.Model;
 
+using NativeMethods;
+
 namespace OdantDev;
 
 public partial class ConnectionModel : ObservableObject, IDisposable
@@ -362,6 +364,6 @@ public partial class ConnectionModel : ObservableObject, IDisposable
             Connection.ServerItem?.Dispose();
             Connection.Dispose();
         }
-        ServerAssemblies.ForEach(x => WinApi.FreeLibrary(x));
+        ServerAssemblies.ForEach(x => NativeMethods.WinApi.FreeLibrary(x));
     }
 }

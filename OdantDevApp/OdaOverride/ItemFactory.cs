@@ -5,7 +5,6 @@ using Microsoft.Extensions.Caching.Memory;
 using odaCore.Views;
 
 using OdantDev;
-using OdantDevApp.OdaOverride;
 using odaServer;
 
 namespace oda.OdaOverride;
@@ -37,7 +36,7 @@ public static class ItemFactory
         {
             throw new NullReferenceException("Can't get remote domain");
         }
-        var newDomain = StructureItemEx.CreateByType(NativeMethods._Create_Domain(remoteDomain.GetIntPtr(), name, type));
+        var newDomain = StructureItemEx.CreateByType(NativeMethods.OdaServerApi._Create_Domain(remoteDomain.GetIntPtr(), name, type));
         if (newDomain == null) return null;
         if (string.IsNullOrEmpty(newDomain.error).Not() || !newDomain.Validate)
         {

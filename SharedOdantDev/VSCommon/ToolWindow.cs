@@ -5,14 +5,12 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Threading;
+
+using NativeMethods;
 
 using Task = System.Threading.Tasks.Task;
 
@@ -46,24 +44,27 @@ public class ToolWindow : ToolWindowPane
             var args = new CommandLineArgs() { ProcessId = currentProcess.Id };
             var appPath = OutOfProcessPath;
             var process = ChildProcess = await StartProcessAsync(appPath, args).ConfigureAwait(true);
-            //Move our app to visual studio
-            WinApi.SetParent(process.MainWindowHandle, HostHandle);
+            var processHandle = process.MainWindowHandle;
             //Remove border and whatnot
-            WinApi.SetWindowLong(process.MainWindowHandle, WinApi.GWL_STYLE, WinApi.WS_VISIBLE);
+            WinApi.SetWindowLong(processHandle, WindowLongFlags.GWL_STYLE,
+             WindowStyles.WS_CHILD | WindowStyles.WS_BORDER | WindowStyles.WS_VISIBLE);
+
+            //Move our app to visual studio
+            WinApi.SetParent(processHandle, HostHandle);
+
             //Initial size
-            WinApi.MoveWindow(process.MainWindowHandle, 0, 0, (Host.Child.Width), (Host.Child.Height), false);
+            WinApi.MoveWindow(processHandle, 0, 0, (Host.Child.Width), (Host.Child.Height), true);
 
             RestartIfFail(process);
             if (!restart)
             {
                 SubscribeToSizeChanging(Host);
-                SubscribeToVisibilityChanging(Host);
             }
         }
         catch (Exception ex)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            Host.Child = new Label() { Text = ex.ToString() };
+            Host.Child = new System.Windows.Forms.Label() { Text = ex.ToString() };
         }
     }
 
@@ -86,7 +87,7 @@ public class ToolWindow : ToolWindowPane
                 break;
             default:
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                Host.Child = new Label() { Text = $"Unexpected exit code: {process.ExitCode}" };
+                Host.Child = new System.Windows.Forms.Label() { Text = $"Unexpected exit code: {process.ExitCode}" };
                 break;
         }
     }
@@ -94,21 +95,21 @@ public class ToolWindow : ToolWindowPane
     {
         var imgPath = Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "Spinner.gif");
         var bitmap = new Bitmap(imgPath);
-        var pb = new PictureBox()
+        var pb = new System.Windows.Forms.PictureBox()
         {
             Image = bitmap,
-            Dock = DockStyle.Fill,
-            SizeMode = PictureBoxSizeMode.AutoSize,
-            Anchor = AnchorStyles.None
+            Dock = System.Windows.Forms.DockStyle.Fill,
+            SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize,
+            Anchor = System.Windows.Forms.AnchorStyles.None
         };
 
         WindowsFormsHost host = new()
         {
             HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
-            Child = new Panel()
+            Child = new System.Windows.Forms.Panel()
             {
-                Dock = DockStyle.Fill
+                Dock = System.Windows.Forms.DockStyle.Fill
             }
         };
         host.Child.Controls.Add(pb);
@@ -123,7 +124,8 @@ public class ToolWindow : ToolWindowPane
                 WorkingDirectory = OutOfProcessFolder,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = true
+                UseShellExecute = true,
+                
             };
             var process = Process.Start(psi);
 
@@ -139,7 +141,6 @@ public class ToolWindow : ToolWindowPane
                 process.Close();
                 throw;
             }
-            WinApi.ShowWindow(process.MainWindowHandle, WinApi.SW_HIDE);
             return process;
         });
     }
@@ -150,12 +151,6 @@ public class ToolWindow : ToolWindowPane
         // Move the window to overlay it on this window
 
         WinApi.MoveWindow(ChildProcess.MainWindowHandle, 0, 0, ((Host.Child).Width), (Host.Child.Height), false);
-    }
-    private void SubscribeToVisibilityChanging(WindowsFormsHost host) => host.IsVisibleChanged += Host_IsVisibleChanged;
-    private void Host_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-    {
-        if ((bool)e.NewValue == false) return;
-        Host.InvalidateVisual();
     }
 
     /// <summary>

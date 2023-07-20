@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 
 using Microsoft.Win32;
+using NativeMethods;
 
 namespace OdantDev;
 
@@ -20,7 +21,7 @@ public static class VsixExtension
         var output = new List<IntPtr>();
         foreach (var path in libPaths)
         {
-            var assembly = WinApi.LoadLibraryEx(Path.Combine(serverPath, path), IntPtr.Zero, 8U);
+            var assembly = NativeMethods.WinApi.LoadLibraryEx(Path.Combine(serverPath, path), IntPtr.Zero, 8U);
             output.Add(assembly);
         }
         return output;
