@@ -27,7 +27,7 @@ using File = System.IO.File;
 using Task = System.Threading.Tasks.Task;
 
 namespace OdantDev.Model;
-public partial class VisualStudioIntegration
+public sealed partial class VisualStudioIntegration
 {
     #region Private Variables
     private bool IsLastBuildSuccess { get; set; } = true;
@@ -56,6 +56,7 @@ public partial class VisualStudioIntegration
             return false;
         }
     }
+
 
     public VisualStudioIntegration(AddinSettings addinSettings, DTE2 DTE, ILogger logger = null)
     {
@@ -119,7 +120,7 @@ public partial class VisualStudioIntegration
         IsLastBuildSuccess = Success;
     }
 
-    public void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
+    private void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
     {
         if ((Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll)) { return; }
         if (!IsLastBuildSuccess)
@@ -132,7 +133,7 @@ public partial class VisualStudioIntegration
         }
     }
 
-    public void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
+    private void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
     {
         if (Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll) { return; }
         foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).OfType<Project>())
@@ -146,7 +147,7 @@ public partial class VisualStudioIntegration
     #endregion
 
     #region Common Methods for Project item
-    public bool CopyToOdaBin(Project project)
+    private bool CopyToOdaBin(Project project)
     {
         try
         {
@@ -223,7 +224,7 @@ public partial class VisualStudioIntegration
         }
     }
 
-    public bool IncreaseVersion(Project project)
+    private bool IncreaseVersion(Project project)
     {
         try
         {

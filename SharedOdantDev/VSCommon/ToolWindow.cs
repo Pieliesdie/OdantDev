@@ -30,7 +30,7 @@ namespace OdantDev;
 [Guid("e477ca93-32f7-4a68-ab0d-7472ff3e7964")]
 public class ToolWindow : ToolWindowPane
 {
-    private bool OutOfProcess => true;
+    private bool OutOfProcess => false;
     private string OutOfProcessFolder => Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "app");
     private string OutOfProcessPath => Path.Combine(OutOfProcessFolder, "OdantDevApp.exe");
     private Process ChildProcess { get; set; }

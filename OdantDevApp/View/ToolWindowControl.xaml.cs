@@ -6,13 +6,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using EnvDTE80;
+
+using GitLabApiClient.Models.Groups.Responses;
+using GitLabApiClient.Models.Projects.Responses;
 
 using MaterialDesignColors;
 
@@ -39,6 +41,7 @@ using SharedOdantDev.Common;
 using SharedOdantDev.Model;
 
 using File = System.IO.File;
+using GroupItem = SharedOdantDev.Model.GroupItem;
 
 namespace OdantDev;
 
@@ -392,10 +395,10 @@ public partial class ToolWindow1Control : UserControl
         var selectedItem = RepoTree?.SelectedItem as RepoBaseViewModel;
         if (selectedItem?.Item is ProjectItem project)
         {
-            _ = InitRepositoryAsync(project.Object as GitLabApiClient.Models.Projects.Responses.Project);
+            _ = InitRepositoryAsync(project.Object as Project);
         }
     }
-    public async Task InitRepositoryAsync(GitLabApiClient.Models.Projects.Responses.Project project)
+    public async Task InitRepositoryAsync(Project project)
     {
         GitLabApiClient.Models.Files.Responses.File file = await GitClient.FindTopOclFileAsync(project);
         if (file == null)
@@ -752,9 +755,15 @@ public partial class ToolWindow1Control : UserControl
         {
             var selectedGroup = DialogRepoGroupTree?.SelectedItem as RepoBaseViewModel;
             string name = DialogTextBoxRepoName?.Text;
-            if (OdaTree?.SelectedItem is StructureItemViewModel<StructureItem> selectedItem && selectedItem.Item != null && !string.IsNullOrWhiteSpace(name))
+            if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> selectedItem || selectedItem.Item == null || string.IsNullOrWhiteSpace(name))
             {
-                _ = await CreateGitLabProjectAsync(selectedItem.Item, selectedGroup?.Item?.FullPath, name);
+                return;
+            }
+            var group = (selectedGroup?.Item as GroupItem)?.Object as Group;
+            var createdProject = await GitClient.CreateProjectAsync(selectedItem.Item, group, name);
+            if (createdProject != null)
+            {
+                logger?.Info("Repository was created");
             }
         }
         catch (Exception ex)
@@ -762,25 +771,10 @@ public partial class ToolWindow1Control : UserControl
             logger?.Error(ex.Message);
         }
     }
-    private async Task<GitLabApiClient.Models.Projects.Responses.Project> CreateGitLabProjectAsync(StructureItem item, string groupPath, string name)
-    {
-        string modulePath = item.Dir.RemoteFolder.LoadFolder();
-        modulePath = DevHelpers.ClearDomainAndClassInPath(modulePath);
 
-        GitLabApiClient.Models.Projects.Responses.Project project = await GitClient.CreateProjectAsync(modulePath, groupPath, name);
-
-        if (project != null)
-        {
-            item.Root.SetAttribute(GitClient.GIT_REPO_FIELD_NAME, project.SshUrlToRepo);
-            item.Root.SetAttribute(GitClient.GIT_PROJECT_ID_FIELD_NAME, project.Id);
-            item.Save();
-        }
-        return project;
-    }
     private void DeleteRepo_OnClick(object sender, RoutedEventArgs e)
     {
-        var selectedItem = OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>;
-        if (selectedItem == null)
+        if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> selectedItem)
             return;
 
         bool? isDeleteLink = DialogCheckBoxDeleteLink?.IsChecked;
@@ -791,7 +785,7 @@ public partial class ToolWindow1Control : UserControl
         {
             string modulePath = selectedItem.Item.Dir.RemoteFolder.LoadFolder();
             modulePath = DevHelpers.ClearDomainAndClassInPath(modulePath);
-            var directoryInfo = new DirectoryInfo(System.IO.Path.Combine(modulePath, ".git"));
+            var directoryInfo = new DirectoryInfo(Path.Combine(modulePath, ".git"));
             if (directoryInfo.Exists)
             {
                 DevHelpers.SetAttributesNormal(directoryInfo);
@@ -801,7 +795,7 @@ public partial class ToolWindow1Control : UserControl
 
         if (isDeleteRemoteRepo.HasValue && isDeleteRemoteRepo.Value)
         {
-            string projectId = selectedItem.Item.Root.GetAttribute(GitClient.GIT_PROJECT_ID_FIELD_NAME);
+            string projectId = selectedItem.Item.Root.GetAttribute(GitClientFieldName.GIT_PROJECT_ID);
             if (!string.IsNullOrWhiteSpace(projectId))
             {
                 _ = GitClient.DeleteProjectAsync(projectId);
@@ -810,8 +804,8 @@ public partial class ToolWindow1Control : UserControl
 
         if (isDeleteLink.HasValue && isDeleteLink.Value)
         {
-            selectedItem.Item.Root.RemoveAttribute(GitClient.GIT_REPO_FIELD_NAME);
-            selectedItem.Item.Root.RemoveAttribute(GitClient.GIT_PROJECT_ID_FIELD_NAME);
+            selectedItem.Item.Root.RemoveAttribute(GitClientFieldName.GIT_REPO_SSH);
+            selectedItem.Item.Root.RemoveAttribute(GitClientFieldName.GIT_PROJECT_ID);
             selectedItem.Item.Save();
         }
     }

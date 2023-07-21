@@ -36,12 +36,12 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
             await this.RefreshAsync();
             if (Parent != null)
             {
-                await this.Parent.RefreshAsync();
+                await this.Parent.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(10));
             }
         }
         else if (type < 6)
         {
-            await this.RefreshAsync();
+            await this.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(10));
         }
         OnUpdate?.Invoke(type, Params == IntPtr.Zero ? String.Empty : Marshal.PtrToStringUni(Params));
     }

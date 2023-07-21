@@ -6,19 +6,32 @@ using System.Threading.Tasks;
 
 using GitLabApiClient;
 using GitLabApiClient.Internal.Paths;
+using GitLabApiClient.Models.Groups.Responses;
+using GitLabApiClient.Models.Projects.Requests;
 using GitLabApiClient.Models.Trees.Responses;
 using GitLabApiClient.Models.Users.Responses;
 
+using oda;
+
+using OdantDev;
+
+using SharedOdantDev.Common;
+
+using File = System.IO.File;
 using Process = System.Diagnostics.Process;
 using Project = GitLabApiClient.Models.Projects.Responses.Project;
 
 namespace SharedOdantDev.Model;
+public static class GitClientFieldName
+{
+    public static string GIT_REPO_HTTP => "GitLabRepositoryUrl";
+    public static string GIT_REPO_SSH => "GitLabRepository";
+    public static string GIT_PROJECT_ID => "GitLabRepositoryID";
+}
+
 public static class GitClient
 {
-    public const string GIT_REPO_FIELD_NAME = "GitLabRepository";
-    public const string GIT_PROJECT_ID_FIELD_NAME = "GitLabRepositoryID";
     public static GitLabClient Client { get; set; }
-
     public static Session Session { get; set; }
 
     public async static Task CreateClientAsync(string apiPath, string apiKey)
@@ -35,16 +48,32 @@ public static class GitClient
         Session = await Client.Users.GetCurrentSessionAsync();
     }
 
-    public static async Task<Project> CreateProjectAsync(string modulePath, string groupPath, string name)
+    public static async Task<Project> CreateProjectAsync(StructureItem item, Group group, string name)
     {
-        string gitPath = new Uri(Client.HostUrl).Host;
-        string projectPath = string.IsNullOrWhiteSpace(groupPath) ? $"{Session.Username}/{name}" : $"{groupPath}/{name}";
-        var fillPath = $"git@{gitPath}:{projectPath}.git";
+        var itemPath = item.Dir.RemoteFolder.LoadFolder();
+        var moduleFolder = DevHelpers.ClearDomainAndClassInPath(itemPath);
 
-        RunCmdCommand($@"git init && git remote add origin {fillPath} && git add . && git commit -m ""Initial commit"" && git push -u origin master", modulePath);
+        if (!Directory.Exists(moduleFolder))
+            throw new Exception("Can't load remote folder");
 
-        Project project = await Client.Projects.GetAsync(System.Net.WebUtility.UrlEncode(projectPath));
+        var request = CreateProjectRequest.FromName(name);
+        request.NamespaceId = group?.Id;
+        var project = await Client.Projects.CreateAsync(request);
+        if (project != null)
+        {
+            item.Root.SetAttribute(GitClientFieldName.GIT_PROJECT_ID, project.Id);
+            item.Root.SetAttribute(GitClientFieldName.GIT_REPO_SSH, project.SshUrlToRepo);
+            item.Root.SetAttribute(GitClientFieldName.GIT_REPO_HTTP, project.HttpUrlToRepo);
+            item.Save();
 
+            var gitignore = Path.Combine(VsixExtension.VSIXPath.FullName, ".gitignore");
+            File.Copy(gitignore, Path.Combine(moduleFolder, ".gitignore"));
+            RunCmdCommand($"git init " +
+                 $"&& git remote add origin {project.HttpUrlToRepo} " +
+                 $"&& git add . " +
+                 $"&& git commit -m \"Initial commit\" " +
+                 $"&& git push -u origin master", moduleFolder);
+        }
         return project;
     }
 
@@ -109,7 +138,7 @@ public static class GitClient
         proc.WaitForExit();
 
         var ex = proc.StandardError.ReadToEnd();
-        if(!string.IsNullOrEmpty(ex))
+        if (!string.IsNullOrEmpty(ex))
         {
             throw new Exception(ex);
         }

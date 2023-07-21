@@ -6,9 +6,11 @@ using EnvDTE;
 
 using EnvDTE80;
 
-namespace OdantDev.Model
+namespace OdantDev.Model;
+
+public sealed partial class VisualStudioIntegration
 {
-    internal class ModuleDir
+    class ModuleDir
     {
         public string Name { get; }
         public FileInfo BinInfo { get; }
