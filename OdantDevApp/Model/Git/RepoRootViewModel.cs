@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,8 +10,8 @@ namespace SharedOdantDev.Model;
 public class RepoRootViewModel : RepoGroupViewModel
 {
     public override bool HasModule => false;
-    public RepoRootViewModel(BaseGitItem item, bool loadProjects, ILogger logger = null) 
-        : base(item, null, loadProjects, logger) {    }
+    public RepoRootViewModel(RootItem item, bool loadProjects, ILogger logger = null)
+        : base(null, null, loadProjects, logger) { this.Item = item; }
 
     public override async Task<IEnumerable<RepoBaseViewModel>> GetChildrenAsync()
     {
@@ -23,7 +22,7 @@ public class RepoRootViewModel : RepoGroupViewModel
 
         if (groups != null)
         {
-            foreach (Group group in groups.Where(x=> x.ParentId != null))
+            foreach (Group group in groups.Where(x => x.ParentId != null))
             {
                 var newItem = new GroupItem(group);
 

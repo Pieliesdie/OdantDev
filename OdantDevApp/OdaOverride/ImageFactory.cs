@@ -47,7 +47,7 @@ public static class ImageFactory
         return await Task.Run(async () =>
         {
             var ImageIndex = await GetImageIndex(item);
-            if(_cache.TryGetValue<BitmapImage>(ImageIndex, out var cacheimg))
+            if (_cache.TryGetValue<BitmapImage>(ImageIndex, out var cacheimg))
             {
                 return cacheimg;
             }

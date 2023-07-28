@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using oda;
+
 using odaServer;
 
 using SharedOdanDev.OdaOverride;
@@ -22,32 +23,47 @@ namespace OdantDev.Model;
 public partial class StructureItemViewModel<T> : ObservableObject where T : StructureItem
 {
     static readonly IEnumerable<StructureItemViewModel<T>> dummyList = new List<StructureItemViewModel<T>>() { new StructureItemViewModel<T>() { Name = "Loading...", Icon = Images.GetImage(Images.GetImageIndex(Icons.Clock)).ConvertToBitmapImage() } };
-    ILogger logger;
-    ConnectionModel connection;
+    readonly ILogger logger;
+    readonly ConnectionModel connection;
     bool isLoaded;
 
     delegate void Update(int Type, string Params);
     event Update OnUpdate;
-    NativeMethods.OdaServerApi.OnUpdate_CALLBACK Update_CALLBACK;
+    readonly NativeMethods.OdaServerApi.OnUpdate_CALLBACK Update_CALLBACK;
     async void Updated(int type, IntPtr Params)
     {
-        if (type == 2)
+        try
         {
-            await this.RefreshAsync();
-            if (Parent != null)
+            if (type == 3)
             {
-                await this.Parent.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(10));
+                if (Parent != null)
+                {
+                    await this.Parent.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(15));
+                }
             }
+            else if (type == 2)
+            {
+                await this.RefreshAsync();
+                if (Parent != null)
+                {
+                    await this.Parent.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(15));
+                }
+            }
+            else if (type < 6)
+            {
+                await this.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(15));
+            }
+            OnUpdate?.Invoke(type, Params == IntPtr.Zero ? String.Empty : Marshal.PtrToStringUni(Params));
         }
-        else if (type < 6)
+        catch (TimeoutException) { }
+        catch (Exception ex)
         {
-            await this.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(10));
+            logger?.Info(ex.Message);
         }
-        OnUpdate?.Invoke(type, Params == IntPtr.Zero ? String.Empty : Marshal.PtrToStringUni(Params));
     }
 
     ODAItem RemoteItem => this.Item?.RemoteItem;
-    public bool IsPinned => this is StructureItemViewModel<StructureItem> item && (connection?.PinnedItems?.Contains(item) ?? false); 
+    public bool IsPinned => this is StructureItemViewModel<StructureItem> item && (connection?.PinnedItems?.Contains(item) ?? false);
     public bool HasRepository => !string.IsNullOrWhiteSpace(Item?.Root?.GetAttribute("GitLabRepository"));
     public bool CanCreateModule => Item is Class && !HasModule && IsLocal;
     public bool IsLocal => Item?.Host?.IsLocal ?? false;
@@ -169,7 +185,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
             Children = await Task.Run(() => GetChildren(item, this, logger, connection).ToArray())
                 .WithTimeout(TimeSpan.FromSeconds(10));
         }
-        catch(TimeoutException)
+        catch (TimeoutException)
         {
             logger?.Info($"Timeout when getting children for {this}");
             Children = null;
@@ -219,18 +235,16 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         if (item.ItemType == ItemType.Organization)
         {
             var emptyGroupedChildren = children.ToLookup(x => string.IsNullOrWhiteSpace(x.Item.Category));
-
-            foreach (var groupedItem in ApplyCategories(emptyGroupedChildren[false]))
+            foreach (var groupedItem in StructureItemViewModel<T>.ApplyCategories(emptyGroupedChildren[false]))
                 yield return groupedItem;
             children = emptyGroupedChildren[true];
         }
-
         //hide inner class in domain
         foreach (var child in children)
         {
             if (child.RemoteItem.Id == item.RemoteItem.Id)
             {
-                var rootItems = GetChildren(child.Item as T, parent, logger, connection);
+                var rootItems = GetChildren(child.Item, parent, logger, connection);
                 foreach (var rootItem in rootItems)
                 {
                     yield return rootItem;
@@ -241,7 +255,8 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         }
     }
 
-    IEnumerable<StructureItemViewModel<T>> ApplyCategories(IEnumerable<StructureItemViewModel<T>> structureItems, string subGroupParent = "")
+    private static IEnumerable<StructureItemViewModel<T>> ApplyCategories
+        (IEnumerable<StructureItemViewModel<T>> structureItems, string subGroupParent = "")
     {
         var groups = structureItems
             .GroupBy(x => x.Item.Category.SubstringAfter(subGroupParent).SubstringBefore("/"))
@@ -253,7 +268,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
             {
                 Name = group.Key,
                 Icon = ImageFactory.FolderImage,
-                Children = ApplyCategories(rootItems[false], $"{group.Key}/").Concat(rootItems[true])
+                Children = StructureItemViewModel<T>.ApplyCategories(rootItems[false], $"{group.Key}/").Concat(rootItems[true])
             };
         }
     }

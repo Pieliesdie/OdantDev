@@ -228,25 +228,22 @@
                                             <!--<TextBlock VerticalAlignment="Center"  Visibility="Hidden">Open</TextBlock>-->
                                         </StackPanel>
                                     </Button>
-                                    <materialDesign:DialogHost>
+                                    <materialDesign:DialogHost CloseOnClickAway="False" >
                                         <materialDesign:DialogHost.DialogContent>
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="400" />
                                                 </Grid.ColumnDefinitions>
                                                 <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto" />
-                                                    <RowDefinition Height="600" />
-                                                    <RowDefinition Height="Auto" />
-                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*" />
+                                                    <RowDefinition Height="500" />
+                                                    <RowDefinition Height="auto" />
+                                                    <RowDefinition Height="*" />
                                                 </Grid.RowDefinitions>
-                                                <TextBlock Margin="10" Text="Repository group" />
-                                                <TreeView x:Name="DialogRepoGroupTree"
-                                                          Grid.Row="1"
+                                                <TextBlock Grid.Column="0" Grid.Row="0" Margin="10" Text="Repository group" />
+                                                <TreeView x:Name="DialogRepoGroupTree" Grid.Row="1" Grid.Column="0"
                                                           Margin="10" HorizontalContentAlignment="Stretch"
-                                                          ItemsSource="{Binding Groups, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}"
-                                                          ScrollViewer.IsDeferredScrollingEnabled="True" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.IsVirtualizing="True"
-                                                          VirtualizingPanel.IsVirtualizingWhenGrouping="True" VirtualizingPanel.ScrollUnit="Item" VirtualizingPanel.VirtualizationMode="Recycling">
+                                                          ItemsSource="{Binding Groups, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}">
                                                     <TreeView.Resources>
                                                         <Style BasedOn="{StaticResource MaterialDesignTreeViewItem}" TargetType="TreeViewItem">
                                                             <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18" />
@@ -265,15 +262,45 @@
                                                         </HierarchicalDataTemplate>
                                                     </TreeView.ItemTemplate>
                                                 </TreeView>
-                                                <StackPanel Grid.Row="2" Margin="16">
-                                                    <TextBlock Text="Repository name" />
+                                                <StackPanel Grid.Column="0" Grid.Row="2" Margin="16">
                                                     <TextBox Name="DialogTextBoxRepoName"
-                                                             Margin="0,8,0,0" HorizontalAlignment="Stretch" />
+                                                             Margin="0,8,0,0" 
+                                                             HorizontalAlignment="Stretch"
+                                                             materialDesign:HintAssist.HelperTextFontSize="11" 
+                                                             materialDesign:HintAssist.Hint="Repository name"
+                                                             materialDesign:HintAssist.IsFloating="True"
+                                                             materialDesign:TextFieldAssist.HasClearButton="True"
+                                                             materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
+                                                             FontSize="16"
+                                                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
+                                                    <TextBox Name="DialogTextBoxRepoLabel"                                                              
+                                                             Margin="0,8,0,8"
+                                                             HorizontalAlignment="Stretch"
+                                                             materialDesign:HintAssist.HelperTextFontSize="11" 
+                                                             materialDesign:HintAssist.Hint="Repository label"
+                                                             materialDesign:HintAssist.IsFloating="True"
+                                                             materialDesign:TextFieldAssist.HasClearButton="True"
+                                                             materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
+                                                             FontSize="16"
+                                                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
+                                                    <TextBox Name ="DialogTextBoxRepoDescription"
+                                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                             Margin="0,15,0,25"                                                             
+                                                             VerticalAlignment="Top"
+                                                             TextWrapping="Wrap"
+                                                             MaxLength="250"
+                                                             AcceptsReturn="True"
+                                                             HorizontalAlignment="Stretch"
+                                                             Height="150"
+                                                             FontSize="16"
+                                                             materialDesign:TextFieldAssist.CharacterCounterVisibility="Visible"
+                                                             VerticalScrollBarVisibility="Auto"
+                                                             materialDesign:HintAssist.Hint="Description (optional)" />
                                                     <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
                                                         <Button Margin="0,8,8,0"
                                                                 Click="CreateRepo_OnClick"
                                                                 Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                Content="Accept" IsDefault="True" />
+                                                                Content="Accept" IsDefault="True"/>
                                                         <Button Margin="0,8,8,0"
                                                                 Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
                                                                 Content="Cancel" IsCancel="True" />

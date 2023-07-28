@@ -20,8 +20,6 @@ using OdantDevApp.Common;
 using SharedOdantDev.Common;
 using SharedOdantDev.Model;
 
-using NativeMethods;
-
 namespace OdantDev;
 
 public partial class ConnectionModel : ObservableObject, IDisposable
@@ -183,11 +181,11 @@ public partial class ConnectionModel : ObservableObject, IDisposable
 
             var _localHost = Localhost = hosts.FirstOrDefault(x => x.IsLocal);
 
-           await Retry.RetryAsync(
-                () => { _localHost.Reset(); return _localHost.HostState; },
-                (e) => e == HostStates.On,
-                TimeSpan.FromMilliseconds(300),
-                TimeSpan.FromSeconds(10));
+            await Retry.RetryAsync(
+                 () => { _localHost.Reset(); return _localHost.HostState; },
+                 (e) => e == HostStates.On,
+                 TimeSpan.FromMilliseconds(300),
+                 TimeSpan.FromSeconds(10));
 
             return hosts
                 .OrderBy(x => x.SortIndex)

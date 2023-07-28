@@ -124,8 +124,8 @@ public class ToolWindow : ToolWindowPane
                 WorkingDirectory = OutOfProcessFolder,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = true,
-                
+                UseShellExecute = false,
+
             };
             var process = Process.Start(psi);
 

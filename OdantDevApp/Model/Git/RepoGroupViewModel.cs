@@ -11,7 +11,8 @@ using OdantDev.Model;
 namespace SharedOdantDev.Model;
 public class RepoGroupViewModel : RepoBaseViewModel
 {
-    public RepoGroupViewModel(BaseGitItem item, BaseGitItem parent, bool loadProjects, ILogger logger = null) : base(item, parent, logger)
+    public RepoGroupViewModel(GroupItem item, BaseGitItem parent, bool loadProjects, ILogger logger = null)
+        : base(item, parent, logger)
     {
         LoadProjects = loadProjects;
     }
@@ -56,7 +57,7 @@ public class RepoGroupViewModel : RepoBaseViewModel
 
             return children;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             return Enumerable.Empty<RepoBaseViewModel>();
         }

@@ -4,8 +4,17 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
+
+/* Unmerged change from project 'OdantDevApp (net472)'
+Before:
 using Microsoft.Win32;
 using NativeMethods;
+After:
+using Microsoft.Win32;
+
+using NativeMethods;
+*/
+using Microsoft.Win32;
 
 namespace OdantDev;
 

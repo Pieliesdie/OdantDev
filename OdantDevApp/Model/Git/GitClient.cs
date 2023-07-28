@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -18,7 +17,6 @@ using OdantDev;
 using SharedOdantDev.Common;
 
 using File = System.IO.File;
-using Process = System.Diagnostics.Process;
 using Project = GitLabApiClient.Models.Projects.Responses.Project;
 
 namespace SharedOdantDev.Model;
@@ -27,6 +25,15 @@ public static class GitClientFieldName
     public static string GIT_REPO_HTTP => "GitLabRepositoryUrl";
     public static string GIT_REPO_SSH => "GitLabRepository";
     public static string GIT_PROJECT_ID => "GitLabRepositoryID";
+}
+
+public class CreateProjectOptions
+{
+    public required StructureItem Item { get; init; }
+    public Group? Group { get; init; }
+    public required string Name { get; init; }
+    public string Label { get; init; }
+    public string Description { get; init; }
 }
 
 public static class GitClient
@@ -48,32 +55,40 @@ public static class GitClient
         Session = await Client.Users.GetCurrentSessionAsync();
     }
 
-    public static async Task<Project> CreateProjectAsync(StructureItem item, Group group, string name)
+    public static async Task<Project> CreateProjectAsync(CreateProjectOptions options)
     {
+        var item = options.Item;
         var itemPath = item.Dir.RemoteFolder.LoadFolder();
         var moduleFolder = DevHelpers.ClearDomainAndClassInPath(itemPath);
 
         if (!Directory.Exists(moduleFolder))
             throw new Exception("Can't load remote folder");
 
-        var request = CreateProjectRequest.FromName(name);
-        request.NamespaceId = group?.Id;
-        var project = await Client.Projects.CreateAsync(request);
-        if (project != null)
-        {
-            item.Root.SetAttribute(GitClientFieldName.GIT_PROJECT_ID, project.Id);
-            item.Root.SetAttribute(GitClientFieldName.GIT_REPO_SSH, project.SshUrlToRepo);
-            item.Root.SetAttribute(GitClientFieldName.GIT_REPO_HTTP, project.HttpUrlToRepo);
-            item.Save();
+        var request = CreateProjectRequest.FromPath(options.Name);
+        request.NamespaceId = options.Group?.Id;
+        request.Description = options.Description;
+        var project = await Client.Projects.CreateAsync(request) ?? throw new Exception("Unknown error from gitlab");
 
-            var gitignore = Path.Combine(VsixExtension.VSIXPath.FullName, ".gitignore");
-            File.Copy(gitignore, Path.Combine(moduleFolder, ".gitignore"));
-            RunCmdCommand($"git init " +
-                 $"&& git remote add origin {project.HttpUrlToRepo} " +
-                 $"&& git add . " +
-                 $"&& git commit -m \"Initial commit\" " +
-                 $"&& git push -u origin master", moduleFolder);
+        project = await Client.Projects.UpdateAsync(project.Id, new UpdateProjectRequest(options.Label));
+
+        item.Root.SetAttribute(GitClientFieldName.GIT_PROJECT_ID, project.Id);
+        item.Root.SetAttribute(GitClientFieldName.GIT_REPO_SSH, project.SshUrlToRepo);
+        item.Root.SetAttribute(GitClientFieldName.GIT_REPO_HTTP, project.HttpUrlToRepo);
+        item.Save();
+
+        var sourceGitignorePath = Path.Combine(VsixExtension.VSIXPath.FullName, ".gitignore");
+        var destinationGitignorePath = Path.Combine(moduleFolder, ".gitignore");
+        if (!File.Exists(destinationGitignorePath))
+        {
+            File.Copy(sourceGitignorePath, destinationGitignorePath);
         }
+        await DevHelpers.InvokeCmdCommandAsync(
+            $"git config core.safecrlf false" +
+            $"&& git init" +
+            $"&& git remote add origin {project.HttpUrlToRepo} " +
+            $"&& git add . " +
+            $"&& git commit -m \"Initial commit\" " +
+            $"&& git push -u origin master", moduleFolder);
         return project;
     }
 
@@ -110,37 +125,13 @@ public static class GitClient
 
             DirectoryInfo moduleDir = domainFolder.CreateSubdirectory(moduleDirName);
 
-            RunCmdCommand($"git clone {project.SshUrlToRepo} .", moduleDir.FullName);
+            DevHelpers.InvokeCmdCommand($"git clone {project.SshUrlToRepo} .", moduleDir.FullName);
 
             return moduleDir.FullName;
         }
         catch
         {
             throw;
-        }
-    }
-
-    private static void RunCmdCommand(string command, string workingDirectory)
-    {
-        var procStartInfo = new ProcessStartInfo("cmd", $"/c {command}")
-        {
-            RedirectStandardError = true,
-            WorkingDirectory = workingDirectory,
-            UseShellExecute = false
-        };
-
-        var proc = new Process
-        {
-            StartInfo = procStartInfo
-        };
-
-        proc.Start();
-        proc.WaitForExit();
-
-        var ex = proc.StandardError.ReadToEnd();
-        if (!string.IsNullOrEmpty(ex))
-        {
-            throw new Exception(ex);
         }
     }
 

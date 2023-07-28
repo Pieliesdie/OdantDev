@@ -19,7 +19,7 @@ public static class TaskEx
     //     System.TimeoutException if timeout elapses first.
     public static async Task WithTimeout(this Task task, TimeSpan timeout)
     {
-        if(task == null) throw new ArgumentNullException(nameof(task));
+        if (task == null) throw new ArgumentNullException(nameof(task));
 
         using CancellationTokenSource timerCancellation = new CancellationTokenSource();
         Task timeoutTask = Task.Delay(timeout, timerCancellation.Token);

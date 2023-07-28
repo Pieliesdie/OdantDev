@@ -1,8 +1,4 @@
-﻿using System;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-
-using GitLabApiClient.Models.Projects.Responses;
+﻿using GitLabApiClient.Models.Projects.Responses;
 
 namespace SharedOdantDev.Model;
 public class ProjectItem : BaseGitItem

@@ -38,19 +38,36 @@ public class DevHelpers
     {
         await InvokeCmdCommandAsync($"Xcopy \"{from}\" \"{to}\" /E /H /C /I /y");
     }
-
-    public static async Task InvokeCmdCommandAsync(string command)
+    public static async Task InvokeCmdCommandAsync(string command, string workingDirectory = "")
     {
-        System.Diagnostics.Process process = new System.Diagnostics.Process();
-        System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
-        startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
-        startInfo.Verb = "runas";
-        startInfo.FileName = "cmd.exe";
-        startInfo.Arguments = $"/C {command}";
-        process.StartInfo = startInfo;
-        process.Start();
-        await Task.Run(process.WaitForExit);
+        await Task.Run(() => InvokeCmdCommand(command, workingDirectory));
     }
+    public static void InvokeCmdCommand(string command, string workingDirectory = "")
+    {
+        System.Diagnostics.ProcessStartInfo startInfo = new()
+        {
+            WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal,
+            Verb = "runas",
+            FileName = "cmd.exe",
+            Arguments = $"/C {command}",
+            WorkingDirectory = workingDirectory,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+        var process = new System.Diagnostics.Process
+        {
+            StartInfo = startInfo
+        };
+        process.Start();
+        process.WaitForExit();
+
+        var ex = process.StandardError.ReadToEnd();
+        if (!string.IsNullOrEmpty(ex))
+        {
+            throw new Exception(ex);
+        }
+    }
+
     public static async Task DownloadAndCopyFrameworkGenericAsync(string netVersion, string folder, string nugetVersion, ILogger logger = null)
     {
         logger?.Info($"Start loading .Net {folder}");

@@ -12,9 +12,6 @@ using EnvDTE;
 
 using EnvDTE80;
 
-using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.Shell.Interop;
-
 using MoreLinq;
 
 using oda;

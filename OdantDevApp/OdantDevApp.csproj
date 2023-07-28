@@ -74,6 +74,10 @@
 		<PackageReference Include="morelinq">
 			<Version>3.4.2</Version>
 		</PackageReference>
+		<PackageReference Include="PolySharp" Version="1.13.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="mkdir &quot;$(SolutionDir)artifacts&quot;&#xD;&#xA;rmdir &quot;$(SolutionDir)artifacts\app&quot;&#xD;&#xA;mkdir &quot;$(SolutionDir)artifacts\app&quot;&#xD;&#xA;xcopy &quot;$(TargetDir)&quot; &quot;$(SolutionDir)artifacts\app&quot; /s /e /y /q" />

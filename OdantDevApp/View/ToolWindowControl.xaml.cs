@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -184,7 +185,7 @@ public partial class ToolWindow1Control : UserControl
             return;
         }
 
-        if (CheckDllsInFolder(odaPath).Not())
+        if (ToolWindow1Control.CheckDllsInFolder(odaPath).Not())
         {
             string msg = $"Can't find oda DLLs in {AddinSettings.SelectedOdaFolder}\nRun app with admin rights before start addin or repair default oda folder";
             logger.Info(msg);
@@ -208,12 +209,13 @@ public partial class ToolWindow1Control : UserControl
         visualStudioIntegration = new VisualStudioIntegration(AddinSettings, DTE2, logger);
         await AddinSettings.SaveAsync();
     }
-    private bool CheckDllsInFolder(string folder)
+    private static bool CheckDllsInFolder(string folder)
     {
         return ConnectionModel.OdaClientLibraries.ToList().TrueForAll(x => File.Exists(Path.Combine(folder, x)));
     }
     private async Task<(bool Success, string Error)> LoadModelAsync()
     {
+        Utils.MainSynchronizationContext = SynchronizationContext.Current;
         var connection = CommonEx.Connection = new Connection();
         OdaModel = new ConnectionModel(connection, AddinSettings, logger);
         var GetDataResult = await OdaModel.LoadAsync();
@@ -452,25 +454,25 @@ public partial class ToolWindow1Control : UserControl
     {
         OpenModuleDialog.IsOpen = false;
 
-        var item = OpenModuleDialog?.DataContext as StructureItem;
-        if (item != null)
+        if (OpenModuleDialog?.DataContext is not StructureItem item)
         {
-            switch (item.ItemType)
-            {
-                case ItemType.Class:
+            return;
+        }
+        switch (item.ItemType)
+        {
+            case ItemType.Class:
+                {
+                    await OpenModule(item);
+                    break;
+                }
+            case ItemType.Module:
+                {
+                    foreach (Class child in item.getChilds(ItemType.Class, Deep.Near))
                     {
-                        await OpenModule(item);
-                        break;
+                        await OpenModule(child);
                     }
-                case ItemType.Module:
-                    {
-                        foreach (Class child in item.getChilds(ItemType.Class, Deep.Near))
-                        {
-                            await OpenModule(child);
-                        }
-                        break;
-                    }
-            }
+                    break;
+                }
         }
     }
     private async void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
@@ -703,7 +705,7 @@ public partial class ToolWindow1Control : UserControl
     }
     private void DialogAddOdaLibraryClick(object sender, RoutedEventArgs e)
     {
-        if (CheckDllsInFolder(DialogAddOdaLibrary.Text).Not())
+        if (ToolWindow1Control.CheckDllsInFolder(DialogAddOdaLibrary.Text).Not())
         {
             logger?.Info($"No oda libraries in {DialogAddOdaLibrary.Text}");
             return;
@@ -753,14 +755,29 @@ public partial class ToolWindow1Control : UserControl
     {
         try
         {
-            var selectedGroup = DialogRepoGroupTree?.SelectedItem as RepoBaseViewModel;
-            string name = DialogTextBoxRepoName?.Text;
-            if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> selectedItem || selectedItem.Item == null || string.IsNullOrWhiteSpace(name))
+            if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> selectedItem || selectedItem.Item == null)
             {
                 return;
             }
+            string name = DialogTextBoxRepoName?.Text;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                logger?.Error("Name can't be empty");
+                return;
+            }
+            string label = DialogTextBoxRepoLabel?.Text ?? name;
+            string description = DialogTextBoxRepoDescription.Text;
+            var selectedGroup = DialogRepoGroupTree?.SelectedItem as RepoBaseViewModel;
             var group = (selectedGroup?.Item as GroupItem)?.Object as Group;
-            var createdProject = await GitClient.CreateProjectAsync(selectedItem.Item, group, name);
+            var options = new CreateProjectOptions()
+            {
+                Name = name,
+                Item = selectedItem.Item,
+                Group = group,
+                Label = label,
+                Description = description
+            };
+            var createdProject = await GitClient.CreateProjectAsync(options);
             if (createdProject != null)
             {
                 logger?.Info("Repository was created");
