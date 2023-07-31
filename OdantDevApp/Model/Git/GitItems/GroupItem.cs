@@ -21,11 +21,5 @@ public class GroupItem : BaseGitItem
 
     public override bool HasModule => false;
 
-    public override ImageSource Icon
-    {
-        get
-        {
-            return PredefinedImages.FolderImage;
-        }
-    }
+    public override ImageSource Icon => PredefinedImages.FolderImage;
 }

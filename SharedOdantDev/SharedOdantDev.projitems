@@ -11,8 +11,8 @@
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)..\artifacts\app\**\*">
       <Link>app\%(RecursiveDir)/%(FileName)%(Extension)</Link>
-        <IncludeInVSIX>true</IncludeInVSIX> 
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
@@ -24,10 +24,13 @@
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)dxtoolbox.v18.1.pkgdef" />
     <VSCTCompile Include="$(MSBuildThisFileDirectory)OdantDevPackage.vsct">
-		<ResourceName>Menus.ctmenu</ResourceName>
-	</VSCTCompile>
+      <ResourceName>Menus.ctmenu</ResourceName>
+    </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)Icon.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Icon.png">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>

@@ -14,13 +14,7 @@ public abstract class BaseGitItem
 
     public virtual string FullPath { get; protected set; }
 
-    public virtual ImageSource Icon
-    {
-        get
-        {
-            return PredefinedImages.FolderImage;
-        }
-    }
+    public virtual ImageSource Icon => PredefinedImages.FolderImage;
 
     public virtual bool HasModule { get; set; }
 }
