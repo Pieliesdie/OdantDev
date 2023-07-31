@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-
-using MaterialDesignThemes.Wpf;
 
 using MaterialDesignExtensions.Commands.Internal;
 using MaterialDesignExtensions.Controllers;
 using MaterialDesignExtensions.Converters;
 using MaterialDesignExtensions.Model;
+
+using MaterialDesignThemes.Wpf;
 
 // use Pri.LongPath classes instead of System.IO for the MaterialDesignExtensions.LongPath build to support long file system paths on older Windows and .NET versions
 #if LONG_PATH

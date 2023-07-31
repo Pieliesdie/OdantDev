@@ -1,10 +1,11 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:controls="clr-namespace:MaterialDesignExtensions.Controls"
-                    xmlns:converters="clr-namespace:MaterialDesignExtensions.Converters"
-                    xmlns:local="clr-namespace:MaterialDesignExtensions.Themes"
-                    xmlns:localization="clr-namespace:MaterialDesignExtensions.Localization"
-                    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes">
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:MaterialDesignExtensions.Controls"
+    xmlns:converters="clr-namespace:MaterialDesignExtensions.Converters"
+    xmlns:local="clr-namespace:MaterialDesignExtensions.Themes"
+    xmlns:localization="clr-namespace:MaterialDesignExtensions.Localization"
+    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes">
 
     <converters:NotNullToVisibilityConverter x:Key="notNullToVisibilityConverter" NullValue="Collapsed" />
     <converters:WindowTitleBarIconVisibilityConverter x:Key="windowTitleBarIconVisibilityConverter" />
@@ -23,9 +24,10 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid>
-                        <Border HorizontalAlignment="Stretch"
-                                VerticalAlignment="Stretch"
-                                Background="{TemplateBinding Foreground}">
+                        <Border
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Background="{TemplateBinding Foreground}">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Style.Triggers>
@@ -39,14 +41,16 @@
                                 </Style>
                             </Border.Style>
                         </Border>
-                        <Border Padding="{TemplateBinding Padding}"
-                                VerticalAlignment="Stretch"
-                                Background="{TemplateBinding Background}">
+                        <Border
+                            Padding="{TemplateBinding Padding}"
+                            VerticalAlignment="Stretch"
+                            Background="{TemplateBinding Background}">
                             <AdornerDecorator>
-                                <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"
-                                                  Content="{TemplateBinding Content}"
-                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                <ContentPresenter
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Content="{TemplateBinding Content}"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}" />
                             </AdornerDecorator>
                         </Border>
                     </Grid>
@@ -63,9 +67,10 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="WindowMinimizeButtonStyle"
-           BasedOn="{StaticResource WindowButtonStyle}"
-           TargetType="{x:Type Button}">
+    <Style
+        x:Key="WindowMinimizeButtonStyle"
+        BasedOn="{StaticResource WindowButtonStyle}"
+        TargetType="{x:Type Button}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=ResizeMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="NoResize">
                 <Setter Property="Visibility" Value="Collapsed" />
@@ -86,9 +91,10 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="WindowMaximizeRestoreButtonStyle"
-           BasedOn="{StaticResource WindowButtonStyle}"
-           TargetType="{x:Type Button}">
+    <Style
+        x:Key="WindowMaximizeRestoreButtonStyle"
+        BasedOn="{StaticResource WindowButtonStyle}"
+        TargetType="{x:Type Button}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding Path=ResizeMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="NoResize">
                 <Setter Property="Visibility" Value="Collapsed" />
@@ -115,9 +121,10 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="WindowCloseButtonStyle"
-           BasedOn="{StaticResource WindowButtonStyle}"
-           TargetType="{x:Type Button}">
+    <Style
+        x:Key="WindowCloseButtonStyle"
+        BasedOn="{StaticResource WindowButtonStyle}"
+        TargetType="{x:Type Button}">
         <Setter Property="Visibility" Value="Visible" />
         <Setter Property="IsEnabled" Value="True" />
     </Style>
@@ -146,10 +153,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ResizeGrip}">
-                    <Grid Width="18"
-                          Height="18"
-                          Background="{TemplateBinding Background}"
-                          SnapsToDevicePixels="True">
+                    <Grid
+                        Width="18"
+                        Height="18"
+                        Background="{TemplateBinding Background}"
+                        SnapsToDevicePixels="True">
                         <Grid.Resources>
                             <Style TargetType="Rectangle">
                                 <Setter Property="Height" Value="2" />
@@ -194,9 +202,10 @@
         <Setter Property="TitleTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <TextBlock Margin="8,0,0,0"
-                               Style="{StaticResource WindowTitleTextBlockStyle}"
-                               Text="{Binding Path=Title, RelativeSource={RelativeSource AncestorType={x:Type controls:MaterialWindow}}}" />
+                    <TextBlock
+                        Margin="8,0,0,0"
+                        Style="{StaticResource WindowTitleTextBlockStyle}"
+                        Text="{Binding Path=Title, RelativeSource={RelativeSource AncestorType={x:Type controls:MaterialWindow}}}" />
                 </DataTemplate>
             </Setter.Value>
         </Setter>
@@ -205,20 +214,22 @@
                 <ControlTemplate TargetType="{x:Type controls:MaterialWindow}">
                     <ControlTemplate.Resources>
                         <Storyboard x:Key="OpacityInStoryboard">
-                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                             From="0.75"
-                                             To="1"
-                                             Duration="0:0:0.2">
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="Opacity"
+                                From="0.75"
+                                To="1"
+                                Duration="0:0:0.2">
                                 <DoubleAnimation.EasingFunction>
                                     <SineEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
                         </Storyboard>
                         <Storyboard x:Key="OpacityOutStoryboard">
-                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                             From="1"
-                                             To="0.75"
-                                             Duration="0:0:0.2">
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0.75"
+                                Duration="0:0:0.2">
                                 <DoubleAnimation.EasingFunction>
                                     <SineEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
@@ -238,12 +249,14 @@
                                 </Style.Triggers>
                             </Style>
                         </Border.Style>
-                        <Border Grid.Row="1" Grid.Column="1"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Stretch"
-                                Background="{TemplateBinding BorderBackgroundBrush}"
-                                BorderBrush="{TemplateBinding BorderBackgroundBrush}"
-                                ClipToBounds="True">
+                        <Border
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Background="{TemplateBinding BorderBackgroundBrush}"
+                            BorderBrush="{TemplateBinding BorderBackgroundBrush}"
+                            ClipToBounds="True">
                             <Border.Style>
                                 <Style TargetType="{x:Type Border}">
                                     <Style.Triggers>
@@ -268,12 +281,13 @@
                                 </Grid.RowDefinitions>
 
                                 <!--  window icon  -->
-                                <Image Width="24"
-                                       Height="24"
-                                       Margin="8,0,8,0"
-                                       VerticalAlignment="Center"
-                                       Panel.ZIndex="2048"
-                                       Source="{TemplateBinding TitleBarIcon}">
+                                <Image
+                                    Width="24"
+                                    Height="24"
+                                    Margin="8,0,8,0"
+                                    VerticalAlignment="Center"
+                                    Panel.ZIndex="2048"
+                                    Source="{TemplateBinding TitleBarIcon}">
                                     <Image.Visibility>
                                         <MultiBinding Converter="{StaticResource windowTitleBarIconVisibilityConverter}">
                                             <Binding Path="TitleBarIcon" RelativeSource="{RelativeSource TemplatedParent}" />
@@ -283,11 +297,12 @@
                                 </Image>
 
                                 <!--  window title  -->
-                                <Border Grid.Column="1"
-                                        Height="32"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch"
-                                        Panel.ZIndex="2048">
+                                <Border
+                                    Grid.Column="1"
+                                    Height="32"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Panel.ZIndex="2048">
                                     <Border.Visibility>
                                         <MultiBinding Converter="{StaticResource windowTitleVisibilityConverter}">
                                             <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
@@ -311,39 +326,44 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
-                                    <ContentControl HorizontalAlignment="Stretch"
-                                                    VerticalAlignment="Stretch"
-                                                    ContentTemplate="{TemplateBinding TitleTemplate}" />
+                                    <ContentControl
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        ContentTemplate="{TemplateBinding TitleTemplate}" />
                                 </Border>
 
                                 <!--  caption buttons  -->
-                                <StackPanel Grid.Column="2"
-                                            Height="32"
-                                            VerticalAlignment="Stretch"
-                                            Panel.ZIndex="2048"
-                                            Orientation="Horizontal">
+                                <StackPanel
+                                    Grid.Column="2"
+                                    Height="32"
+                                    VerticalAlignment="Stretch"
+                                    Panel.ZIndex="2048"
+                                    Orientation="Horizontal">
                                     <StackPanel.Visibility>
                                         <MultiBinding Converter="{StaticResource windowTitleVisibilityConverter}">
                                             <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
                                         </MultiBinding>
                                     </StackPanel.Visibility>
-                                    <Button x:Name="minimizeButton"
-                                            Style="{StaticResource WindowMinimizeButtonStyle}"
-                                            ToolTip="{x:Static localization:Strings.Minimize}">
+                                    <Button
+                                        x:Name="minimizeButton"
+                                        Style="{StaticResource WindowMinimizeButtonStyle}"
+                                        ToolTip="{x:Static localization:Strings.Minimize}">
                                         <Button.Visibility>
                                             <MultiBinding Converter="{StaticResource windowCaptionButtonVisibilityConverter}">
-                                                <Binding Mode="OneTime"
-                                                         Path="MinimizeButtonName"
-                                                         Source="{StaticResource windowCaptionButtonVisibilityConverter}" />
+                                                <Binding
+                                                    Mode="OneTime"
+                                                    Path="MinimizeButtonName"
+                                                    Source="{StaticResource windowCaptionButtonVisibilityConverter}" />
                                                 <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
                                                 <Binding Path="ResizeMode" RelativeSource="{RelativeSource TemplatedParent}" />
                                             </MultiBinding>
                                         </Button.Visibility>
                                         <Button.IsEnabled>
                                             <MultiBinding Converter="{StaticResource windowCaptionButtonEnabledConverter}">
-                                                <Binding Mode="OneTime"
-                                                         Path="MinimizeButtonName"
-                                                         Source="{StaticResource windowCaptionButtonEnabledConverter}" />
+                                                <Binding
+                                                    Mode="OneTime"
+                                                    Path="MinimizeButtonName"
+                                                    Source="{StaticResource windowCaptionButtonEnabledConverter}" />
                                                 <Binding Path="ResizeMode" RelativeSource="{RelativeSource TemplatedParent}" />
                                             </MultiBinding>
                                         </Button.IsEnabled>
@@ -352,18 +372,20 @@
                                     <Button x:Name="maximizeRestoreButton" Style="{StaticResource WindowMaximizeRestoreButtonStyle}">
                                         <Button.Visibility>
                                             <MultiBinding Converter="{StaticResource windowCaptionButtonVisibilityConverter}">
-                                                <Binding Mode="OneTime"
-                                                         Path="MaximizeRestoreButtonName"
-                                                         Source="{StaticResource windowCaptionButtonVisibilityConverter}" />
+                                                <Binding
+                                                    Mode="OneTime"
+                                                    Path="MaximizeRestoreButtonName"
+                                                    Source="{StaticResource windowCaptionButtonVisibilityConverter}" />
                                                 <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
                                                 <Binding Path="ResizeMode" RelativeSource="{RelativeSource TemplatedParent}" />
                                             </MultiBinding>
                                         </Button.Visibility>
                                         <Button.IsEnabled>
                                             <MultiBinding Converter="{StaticResource windowCaptionButtonEnabledConverter}">
-                                                <Binding Mode="OneTime"
-                                                         Path="MaximizeRestoreButtonName"
-                                                         Source="{StaticResource windowCaptionButtonEnabledConverter}" />
+                                                <Binding
+                                                    Mode="OneTime"
+                                                    Path="MaximizeRestoreButtonName"
+                                                    Source="{StaticResource windowCaptionButtonEnabledConverter}" />
                                                 <Binding Path="ResizeMode" RelativeSource="{RelativeSource TemplatedParent}" />
                                             </MultiBinding>
                                         </Button.IsEnabled>
@@ -382,23 +404,26 @@
                                             </md:PackIcon.Style>
                                         </md:PackIcon>
                                     </Button>
-                                    <Button x:Name="closeButton"
-                                            Style="{StaticResource WindowCloseButtonStyle}"
-                                            ToolTip="{x:Static localization:Strings.Close}">
+                                    <Button
+                                        x:Name="closeButton"
+                                        Style="{StaticResource WindowCloseButtonStyle}"
+                                        ToolTip="{x:Static localization:Strings.Close}">
                                         <Button.Visibility>
                                             <MultiBinding Converter="{StaticResource windowCaptionButtonVisibilityConverter}">
-                                                <Binding Mode="OneTime"
-                                                         Path="CloseButtonName"
-                                                         Source="{StaticResource windowCaptionButtonVisibilityConverter}" />
+                                                <Binding
+                                                    Mode="OneTime"
+                                                    Path="CloseButtonName"
+                                                    Source="{StaticResource windowCaptionButtonVisibilityConverter}" />
                                                 <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
                                                 <Binding Path="ResizeMode" RelativeSource="{RelativeSource TemplatedParent}" />
                                             </MultiBinding>
                                         </Button.Visibility>
                                         <Button.IsEnabled>
                                             <MultiBinding Converter="{StaticResource windowCaptionButtonEnabledConverter}">
-                                                <Binding Mode="OneTime"
-                                                         Path="CloseButtonName"
-                                                         Source="{StaticResource windowCaptionButtonEnabledConverter}" />
+                                                <Binding
+                                                    Mode="OneTime"
+                                                    Path="CloseButtonName"
+                                                    Source="{StaticResource windowCaptionButtonEnabledConverter}" />
                                                 <Binding Path="ResizeMode" RelativeSource="{RelativeSource TemplatedParent}" />
                                             </MultiBinding>
                                         </Button.IsEnabled>
@@ -407,11 +432,13 @@
                                 </StackPanel>
 
                                 <!--  window content  -->
-                                <Border Grid.Row="1" Grid.ColumnSpan="3"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch"
-                                        Panel.ZIndex="2047"
-                                        Background="{TemplateBinding Background}">
+                                <Border
+                                    Grid.Row="1"
+                                    Grid.ColumnSpan="3"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Panel.ZIndex="2047"
+                                    Background="{TemplateBinding Background}">
                                     <AdornerDecorator>
                                         <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}">
                                             <ContentPresenter.Style>
@@ -437,9 +464,12 @@
                                 </Border>
 
                                 <!--  resize grip  -->
-                                <ResizeGrip x:Name="resizeGrip" Grid.Row="1" Grid.Column="2"
-                                            Panel.ZIndex="2048"
-                                            Style="{StaticResource ResizeGripStyle}" />
+                                <ResizeGrip
+                                    x:Name="resizeGrip"
+                                    Grid.Row="1"
+                                    Grid.Column="2"
+                                    Panel.ZIndex="2048"
+                                    Style="{StaticResource ResizeGripStyle}" />
                             </Grid>
                         </Border>
                     </Border>
@@ -450,27 +480,30 @@
             <Trigger Property="WindowState" Value="Normal">
                 <Setter Property="WindowChrome.WindowChrome">
                     <Setter.Value>
-                        <WindowChrome CaptionHeight="28"
-                                      ResizeBorderThickness="4"
-                                      UseAeroCaptionButtons="False" />
+                        <WindowChrome
+                            CaptionHeight="28"
+                            ResizeBorderThickness="4"
+                            UseAeroCaptionButtons="False" />
                     </Setter.Value>
                 </Setter>
             </Trigger>
             <Trigger Property="WindowState" Value="Maximized">
                 <Setter Property="WindowChrome.WindowChrome">
                     <Setter.Value>
-                        <WindowChrome CaptionHeight="40"
-                                      ResizeBorderThickness="0"
-                                      UseAeroCaptionButtons="False" />
+                        <WindowChrome
+                            CaptionHeight="40"
+                            ResizeBorderThickness="0"
+                            UseAeroCaptionButtons="False" />
                     </Setter.Value>
                 </Setter>
             </Trigger>
             <Trigger Property="ResizeMode" Value="CanResizeWithGrip">
                 <Setter Property="WindowChrome.WindowChrome">
                     <Setter.Value>
-                        <WindowChrome CaptionHeight="28"
-                                      ResizeBorderThickness="4,4,18,18"
-                                      UseAeroCaptionButtons="False" />
+                        <WindowChrome
+                            CaptionHeight="28"
+                            ResizeBorderThickness="4,4,18,18"
+                            UseAeroCaptionButtons="False" />
                     </Setter.Value>
                 </Setter>
             </Trigger>
@@ -490,10 +523,11 @@
         <Setter Property="TitleTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <TextBlock Margin="8,0,0,0"
-                               HorizontalAlignment="Center"
-                               Style="{StaticResource WindowTitleTextBlockStyle}"
-                               Text="{Binding Path=Title, RelativeSource={RelativeSource AncestorType={x:Type controls:MaterialNavigationWindow}}}" />
+                    <TextBlock
+                        Margin="8,0,0,0"
+                        HorizontalAlignment="Center"
+                        Style="{StaticResource WindowTitleTextBlockStyle}"
+                        Text="{Binding Path=Title, RelativeSource={RelativeSource AncestorType={x:Type controls:MaterialNavigationWindow}}}" />
                 </DataTemplate>
             </Setter.Value>
         </Setter>
@@ -502,20 +536,22 @@
                 <ControlTemplate TargetType="{x:Type controls:MaterialNavigationWindow}">
                     <ControlTemplate.Resources>
                         <Storyboard x:Key="OpacityInStoryboard">
-                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                             From="0.75"
-                                             To="1"
-                                             Duration="0:0:0.2">
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="Opacity"
+                                From="0.75"
+                                To="1"
+                                Duration="0:0:0.2">
                                 <DoubleAnimation.EasingFunction>
                                     <SineEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
                         </Storyboard>
                         <Storyboard x:Key="OpacityOutStoryboard">
-                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                             From="1"
-                                             To="0.75"
-                                             Duration="0:0:0.2">
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="Opacity"
+                                From="1"
+                                To="0.75"
+                                Duration="0:0:0.2">
                                 <DoubleAnimation.EasingFunction>
                                     <SineEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
@@ -536,12 +572,14 @@
                                 </Style.Triggers>
                             </Style>
                         </Border.Style>
-                        <Border Grid.Row="1" Grid.Column="1"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Stretch"
-                                Background="{TemplateBinding BorderBackgroundBrush}"
-                                BorderBrush="{TemplateBinding BorderBackgroundBrush}"
-                                ClipToBounds="True">
+                        <Border
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Background="{TemplateBinding BorderBackgroundBrush}"
+                            BorderBrush="{TemplateBinding BorderBackgroundBrush}"
+                            ClipToBounds="True">
                             <Border.Style>
                                 <Style TargetType="{x:Type Border}">
                                     <Style.Triggers>
@@ -566,14 +604,16 @@
                                 </Grid.RowDefinitions>
 
                                 <!--  navigation and window icon  -->
-                                <StackPanel Margin="8,0,0,0"
-                                            VerticalAlignment="Stretch"
-                                            Panel.ZIndex="2048"
-                                            Orientation="Horizontal">
-                                    <Image Width="24"
-                                           Height="24"
-                                           VerticalAlignment="Center"
-                                           Source="{TemplateBinding TitleBarIcon}">
+                                <StackPanel
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Stretch"
+                                    Panel.ZIndex="2048"
+                                    Orientation="Horizontal">
+                                    <Image
+                                        Width="24"
+                                        Height="24"
+                                        VerticalAlignment="Center"
+                                        Source="{TemplateBinding TitleBarIcon}">
                                         <Image.Visibility>
                                             <MultiBinding Converter="{StaticResource windowTitleBarIconVisibilityConverter}">
                                                 <Binding Path="TitleBarIcon" RelativeSource="{RelativeSource TemplatedParent}" />
@@ -581,11 +621,12 @@
                                             </MultiBinding>
                                         </Image.Visibility>
                                     </Image>
-                                    <Border Width="1"
-                                            Margin="8,4"
-                                            VerticalAlignment="Stretch"
-                                            Background="{Binding Path=BorderForegroundBrush, RelativeSource={RelativeSource AncestorType=Window}}"
-                                            SnapsToDevicePixels="True">
+                                    <Border
+                                        Width="1"
+                                        Margin="8,4"
+                                        VerticalAlignment="Stretch"
+                                        Background="{Binding Path=BorderForegroundBrush, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        SnapsToDevicePixels="True">
                                         <Border.Visibility>
                                             <MultiBinding Converter="{StaticResource windowTitleBarIconVisibilityConverter}">
                                                 <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
@@ -598,28 +639,32 @@
                                     <Button Command="NavigationCommands.BrowseForward" Style="{StaticResource WindowButtonStyle}">
                                         <md:PackIcon Kind="ArrowRight" Style="{StaticResource WindowButtonIconStyle}" />
                                     </Button>
-                                    <md:PopupBox Padding="0"
-                                                 VerticalAlignment="Stretch"
-                                                 Background="Transparent"
-                                                 Foreground="{Binding Path=BorderForegroundBrush, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                 WindowChrome.IsHitTestVisibleInChrome="True">
+                                    <md:PopupBox
+                                        Padding="0"
+                                        VerticalAlignment="Stretch"
+                                        Background="Transparent"
+                                        Foreground="{Binding Path=BorderForegroundBrush, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        WindowChrome.IsHitTestVisibleInChrome="True">
                                         <md:PopupBox.ToggleContent>
-                                            <md:PackIcon Width="24"
-                                                         Height="24"
-                                                         Foreground="{Binding Path=BorderForegroundBrush, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                         Kind="ChevronDown" />
+                                            <md:PackIcon
+                                                Width="24"
+                                                Height="24"
+                                                Foreground="{Binding Path=BorderForegroundBrush, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                Kind="ChevronDown" />
                                         </md:PopupBox.ToggleContent>
-                                        <Border Width="256"
-                                                MaxHeight="512"
-                                                Padding="0">
-                                            <ItemsControl Margin="0,8"
-                                                          HorizontalAlignment="Stretch"
-                                                          VerticalAlignment="Stretch"
-                                                          ScrollViewer.CanContentScroll="True"
-                                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                                          VirtualizingStackPanel.IsVirtualizing="True"
-                                                          VirtualizingStackPanel.ScrollUnit="Pixel">
+                                        <Border
+                                            Width="256"
+                                            MaxHeight="512"
+                                            Padding="0">
+                                            <ItemsControl
+                                                Margin="0,8"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                ScrollViewer.CanContentScroll="True"
+                                                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                VirtualizingStackPanel.IsVirtualizing="True"
+                                                VirtualizingStackPanel.ScrollUnit="Pixel">
                                                 <ItemsControl.ItemsSource>
                                                     <MultiBinding Converter="{StaticResource JournalEntryUnifiedViewConverter}">
                                                         <Binding Path="BackStack" RelativeSource="{RelativeSource TemplatedParent}" />
@@ -642,25 +687,28 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Grid x:Name="baseGrid"
-                                                              Height="56"
-                                                              HorizontalAlignment="Stretch"
-                                                              Background="Transparent">
-                                                            <Button x:Name="itemButton"
-                                                                    Padding="0,8"
-                                                                    HorizontalAlignment="Stretch"
-                                                                    VerticalAlignment="Stretch"
-                                                                    HorizontalContentAlignment="Stretch"
-                                                                    VerticalContentAlignment="Center"
-                                                                    Command="NavigationCommands.NavigateJournal"
-                                                                    CommandParameter="{Binding RelativeSource={RelativeSource Self}}"
-                                                                    Content="{Binding}">
+                                                        <Grid
+                                                            x:Name="baseGrid"
+                                                            Height="56"
+                                                            HorizontalAlignment="Stretch"
+                                                            Background="Transparent">
+                                                            <Button
+                                                                x:Name="itemButton"
+                                                                Padding="0,8"
+                                                                HorizontalAlignment="Stretch"
+                                                                VerticalAlignment="Stretch"
+                                                                HorizontalContentAlignment="Stretch"
+                                                                VerticalContentAlignment="Center"
+                                                                Command="NavigationCommands.NavigateJournal"
+                                                                CommandParameter="{Binding RelativeSource={RelativeSource Self}}"
+                                                                Content="{Binding}">
                                                                 <Button.ContentTemplate>
                                                                     <DataTemplate>
-                                                                        <Grid HorizontalAlignment="Stretch"
-                                                                              VerticalAlignment="Stretch"
-                                                                              Background="Transparent"
-                                                                              SnapsToDevicePixels="True">
+                                                                        <Grid
+                                                                            HorizontalAlignment="Stretch"
+                                                                            VerticalAlignment="Stretch"
+                                                                            Background="Transparent"
+                                                                            SnapsToDevicePixels="True">
                                                                             <Grid.ColumnDefinitions>
                                                                                 <ColumnDefinition Width="Auto" />
                                                                                 <ColumnDefinition Width="100*" />
@@ -682,9 +730,10 @@
                                                                                         <Setter Property="Template">
                                                                                             <Setter.Value>
                                                                                                 <ControlTemplate TargetType="md:PackIcon">
-                                                                                                    <Border Background="{TemplateBinding Background}"
-                                                                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                                                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                                                                                    <Border
+                                                                                                        Background="{TemplateBinding Background}"
+                                                                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                                                                        BorderThickness="{TemplateBinding BorderThickness}">
                                                                                                         <Viewbox FlowDirection="{TemplateBinding FlowDirection}">
                                                                                                             <Canvas Width="24" Height="24">
                                                                                                                 <Path Data="{Binding Data, RelativeSource={RelativeSource TemplatedParent}}" Fill="{TemplateBinding Foreground}" />
@@ -712,11 +761,12 @@
                                                                                     </Style>
                                                                                 </md:PackIcon.Style>
                                                                             </md:PackIcon>
-                                                                            <TextBlock Grid.Column="1"
-                                                                                       Margin="0"
-                                                                                       VerticalAlignment="Center"
-                                                                                       FontSize="15"
-                                                                                       Text="{Binding (JournalEntry.Name)}" />
+                                                                            <TextBlock
+                                                                                Grid.Column="1"
+                                                                                Margin="0"
+                                                                                VerticalAlignment="Center"
+                                                                                FontSize="15"
+                                                                                Text="{Binding (JournalEntry.Name)}" />
                                                                         </Grid>
                                                                     </DataTemplate>
                                                                 </Button.ContentTemplate>
@@ -730,11 +780,12 @@
                                 </StackPanel>
 
                                 <!--  window title  -->
-                                <Border Grid.Column="1"
-                                        Height="32"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch"
-                                        Panel.ZIndex="2048">
+                                <Border
+                                    Grid.Column="1"
+                                    Height="32"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Panel.ZIndex="2048">
                                     <Border.Visibility>
                                         <MultiBinding Converter="{StaticResource windowTitleVisibilityConverter}">
                                             <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
@@ -758,39 +809,44 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
-                                    <ContentControl HorizontalAlignment="Stretch"
-                                                    VerticalAlignment="Stretch"
-                                                    ContentTemplate="{TemplateBinding TitleTemplate}" />
+                                    <ContentControl
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        ContentTemplate="{TemplateBinding TitleTemplate}" />
                                 </Border>
 
                                 <!--  caption buttons  -->
-                                <StackPanel Grid.Column="2"
-                                            Height="32"
-                                            VerticalAlignment="Stretch"
-                                            Panel.ZIndex="2048"
-                                            Orientation="Horizontal">
+                                <StackPanel
+                                    Grid.Column="2"
+                                    Height="32"
+                                    VerticalAlignment="Stretch"
+                                    Panel.ZIndex="2048"
+                                    Orientation="Horizontal">
                                     <StackPanel.Visibility>
                                         <MultiBinding Converter="{StaticResource windowTitleVisibilityConverter}">
                                             <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
                                         </MultiBinding>
                                     </StackPanel.Visibility>
-                                    <Button x:Name="minimizeButton"
-                                            Style="{StaticResource WindowMinimizeButtonStyle}"
-                                            ToolTip="{x:Static localization:Strings.Minimize}">
+                                    <Button
+                                        x:Name="minimizeButton"
+                                        Style="{StaticResource WindowMinimizeButtonStyle}"
+                                        ToolTip="{x:Static localization:Strings.Minimize}">
                                         <Button.Visibility>
                                             <MultiBinding Converter="{StaticResource windowCaptionButtonVisibilityConverter}">
-                                                <Binding Mode="OneTime"
-                                                         Path="MinimizeButtonName"
-                                                         Source="{StaticResource windowCaptionButtonVisibilityConverter}" />
+                                                <Binding
+                                                    Mode="OneTime"
+                                                    Path="MinimizeButtonName"
+                                                    Source="{StaticResource windowCaptionButtonVisibilityConverter}" />
                                                 <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
                                                 <Binding Path="ResizeMode" RelativeSource="{RelativeSource TemplatedParent}" />
                                             </MultiBinding>
                                         </Button.Visibility>
                                         <Button.IsEnabled>
                                             <MultiBinding Converter="{StaticResource windowCaptionButtonEnabledConverter}">
-                                                <Binding Mode="OneTime"
-                                                         Path="MinimizeButtonName"
-                                                         Source="{StaticResource windowCaptionButtonEnabledConverter}" />
+                                                <Binding
+                                                    Mode="OneTime"
+                                                    Path="MinimizeButtonName"
+                                                    Source="{StaticResource windowCaptionButtonEnabledConverter}" />
                                                 <Binding Path="ResizeMode" RelativeSource="{RelativeSource TemplatedParent}" />
                                             </MultiBinding>
                                         </Button.IsEnabled>
@@ -799,18 +855,20 @@
                                     <Button x:Name="maximizeRestoreButton" Style="{StaticResource WindowMaximizeRestoreButtonStyle}">
                                         <Button.Visibility>
                                             <MultiBinding Converter="{StaticResource windowCaptionButtonVisibilityConverter}">
-                                                <Binding Mode="OneTime"
-                                                         Path="MaximizeRestoreButtonName"
-                                                         Source="{StaticResource windowCaptionButtonVisibilityConverter}" />
+                                                <Binding
+                                                    Mode="OneTime"
+                                                    Path="MaximizeRestoreButtonName"
+                                                    Source="{StaticResource windowCaptionButtonVisibilityConverter}" />
                                                 <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
                                                 <Binding Path="ResizeMode" RelativeSource="{RelativeSource TemplatedParent}" />
                                             </MultiBinding>
                                         </Button.Visibility>
                                         <Button.IsEnabled>
                                             <MultiBinding Converter="{StaticResource windowCaptionButtonEnabledConverter}">
-                                                <Binding Mode="OneTime"
-                                                         Path="MaximizeRestoreButtonName"
-                                                         Source="{StaticResource windowCaptionButtonEnabledConverter}" />
+                                                <Binding
+                                                    Mode="OneTime"
+                                                    Path="MaximizeRestoreButtonName"
+                                                    Source="{StaticResource windowCaptionButtonEnabledConverter}" />
                                                 <Binding Path="ResizeMode" RelativeSource="{RelativeSource TemplatedParent}" />
                                             </MultiBinding>
                                         </Button.IsEnabled>
@@ -829,23 +887,26 @@
                                             </md:PackIcon.Style>
                                         </md:PackIcon>
                                     </Button>
-                                    <Button x:Name="closeButton"
-                                            Style="{StaticResource WindowCloseButtonStyle}"
-                                            ToolTip="{x:Static localization:Strings.Close}">
+                                    <Button
+                                        x:Name="closeButton"
+                                        Style="{StaticResource WindowCloseButtonStyle}"
+                                        ToolTip="{x:Static localization:Strings.Close}">
                                         <Button.Visibility>
                                             <MultiBinding Converter="{StaticResource windowCaptionButtonVisibilityConverter}">
-                                                <Binding Mode="OneTime"
-                                                         Path="CloseButtonName"
-                                                         Source="{StaticResource windowCaptionButtonVisibilityConverter}" />
+                                                <Binding
+                                                    Mode="OneTime"
+                                                    Path="CloseButtonName"
+                                                    Source="{StaticResource windowCaptionButtonVisibilityConverter}" />
                                                 <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
                                                 <Binding Path="ResizeMode" RelativeSource="{RelativeSource TemplatedParent}" />
                                             </MultiBinding>
                                         </Button.Visibility>
                                         <Button.IsEnabled>
                                             <MultiBinding Converter="{StaticResource windowCaptionButtonEnabledConverter}">
-                                                <Binding Mode="OneTime"
-                                                         Path="CloseButtonName"
-                                                         Source="{StaticResource windowCaptionButtonEnabledConverter}" />
+                                                <Binding
+                                                    Mode="OneTime"
+                                                    Path="CloseButtonName"
+                                                    Source="{StaticResource windowCaptionButtonEnabledConverter}" />
                                                 <Binding Path="ResizeMode" RelativeSource="{RelativeSource TemplatedParent}" />
                                             </MultiBinding>
                                         </Button.IsEnabled>
@@ -854,11 +915,13 @@
                                 </StackPanel>
 
                                 <!--  window content  -->
-                                <Border Grid.Row="1" Grid.ColumnSpan="3"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch"
-                                        Panel.ZIndex="2047"
-                                        Background="{TemplateBinding Background}">
+                                <Border
+                                    Grid.Row="1"
+                                    Grid.ColumnSpan="3"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Panel.ZIndex="2047"
+                                    Background="{TemplateBinding Background}">
                                     <AdornerDecorator>
                                         <ContentPresenter x:Name="PART_NavWinCP">
                                             <ContentPresenter.Style>
@@ -884,9 +947,12 @@
                                 </Border>
 
                                 <!--  resize grip  -->
-                                <ResizeGrip x:Name="resizeGrip" Grid.Row="1" Grid.Column="2"
-                                            Panel.ZIndex="2048"
-                                            Style="{StaticResource ResizeGripStyle}" />
+                                <ResizeGrip
+                                    x:Name="resizeGrip"
+                                    Grid.Row="1"
+                                    Grid.Column="2"
+                                    Panel.ZIndex="2048"
+                                    Style="{StaticResource ResizeGripStyle}" />
                             </Grid>
                         </Border>
                     </Border>
@@ -897,27 +963,30 @@
             <Trigger Property="WindowState" Value="Normal">
                 <Setter Property="WindowChrome.WindowChrome">
                     <Setter.Value>
-                        <WindowChrome CaptionHeight="28"
-                                      ResizeBorderThickness="4"
-                                      UseAeroCaptionButtons="False" />
+                        <WindowChrome
+                            CaptionHeight="28"
+                            ResizeBorderThickness="4"
+                            UseAeroCaptionButtons="False" />
                     </Setter.Value>
                 </Setter>
             </Trigger>
             <Trigger Property="WindowState" Value="Maximized">
                 <Setter Property="WindowChrome.WindowChrome">
                     <Setter.Value>
-                        <WindowChrome CaptionHeight="40"
-                                      ResizeBorderThickness="0"
-                                      UseAeroCaptionButtons="False" />
+                        <WindowChrome
+                            CaptionHeight="40"
+                            ResizeBorderThickness="0"
+                            UseAeroCaptionButtons="False" />
                     </Setter.Value>
                 </Setter>
             </Trigger>
             <Trigger Property="ResizeMode" Value="CanResizeWithGrip">
                 <Setter Property="WindowChrome.WindowChrome">
                     <Setter.Value>
-                        <WindowChrome CaptionHeight="28"
-                                      ResizeBorderThickness="4,4,18,18"
-                                      UseAeroCaptionButtons="False" />
+                        <WindowChrome
+                            CaptionHeight="28"
+                            ResizeBorderThickness="4,4,18,18"
+                            UseAeroCaptionButtons="False" />
                     </Setter.Value>
                 </Setter>
             </Trigger>

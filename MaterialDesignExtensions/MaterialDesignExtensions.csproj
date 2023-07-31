@@ -2,8 +2,10 @@
 <Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   
   <PropertyGroup>
-    <TargetFrameworks>net48</TargetFrameworks>
+	<AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+    <TargetFrameworks>net472;net48</TargetFrameworks>
     <UseWPF>true</UseWPF>
+	<LangVersion>latest</LangVersion>
     <AssemblyTitle>Material Design Extensions</AssemblyTitle>
     <Summary>Material Design Extensions is based on Material Design in XAML Toolkit to provide additional controls and features for WPF apps. The controls might not be specified in the Material Design specification or would crash the scope of Material Design in XAML Toolkit.</Summary>
     <Description>Material Design Extensions is based on Material Design in XAML Toolkit to provide additional controls and features for WPF apps. The controls might not be specified in the Material Design specification or would crash the scope of Material Design in XAML Toolkit.
@@ -33,8 +35,8 @@ Important notice: The configuration for version 2.6.0 changed. See the release n
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="MaterialDesignColors" Version="2.1.3" />
-    <PackageReference Include="MaterialDesignThemes" Version="4.8.1" />
+    <PackageReference Include="MaterialDesignColors" Version="2.1.4" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
   </ItemGroup>
 
   <ItemGroup>

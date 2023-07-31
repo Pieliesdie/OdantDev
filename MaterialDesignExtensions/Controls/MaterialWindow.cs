@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -142,7 +137,20 @@ namespace MaterialDesignExtensions.Controls
         /// <summary>
         /// Creates a new <see cref="MaterialWindow" />.
         /// </summary>
-        public MaterialWindow() : base() { }
+        public MaterialWindow() : base()
+        {
+            UseLayoutRounding = true;
+            ContentRendered += (_, _) =>
+            {
+                if (SizeToContent != SizeToContent.Manual)
+                {
+                    // force a SizeToContent change so that WPF/MDE can correctly layout the window to fit the content
+                    var sizeToContent = SizeToContent;
+                    SizeToContent = SizeToContent.Manual;
+                    SizeToContent = sizeToContent;
+                }
+            };
+        }
 
         public override void OnApplyTemplate()
         {
@@ -199,5 +207,7 @@ namespace MaterialDesignExtensions.Controls
         {
             WindowState = WindowState.Minimized;
         }
+
+        public new bool? ShowDialog() => base.ShowDialog();
     }
 }

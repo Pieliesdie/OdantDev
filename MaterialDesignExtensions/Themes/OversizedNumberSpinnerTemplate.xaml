@@ -1,8 +1,9 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:controls="clr-namespace:MaterialDesignExtensions.Controls"
-                    xmlns:internalCommands="clr-namespace:MaterialDesignExtensions.Commands.Internal"
-                    xmlns:wpf="http://materialdesigninxaml.net/winfx/xaml/themes">
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:MaterialDesignExtensions.Controls"
+    xmlns:internalCommands="clr-namespace:MaterialDesignExtensions.Commands.Internal"
+    xmlns:wpf="http://materialdesigninxaml.net/winfx/xaml/themes">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
@@ -14,11 +15,12 @@
         <Setter Property="Control.Template">
             <Setter.Value>
                 <ControlTemplate>
-                    <Rectangle Margin="2"
-                               SnapsToDevicePixels="true"
-                               Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
-                               StrokeDashArray="1 2"
-                               StrokeThickness="1" />
+                    <Rectangle
+                        Margin="2"
+                        SnapsToDevicePixels="true"
+                        Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                        StrokeDashArray="1 2"
+                        StrokeThickness="1" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -34,42 +36,46 @@
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
     </Style>
 
-    <Style x:Key="MaterialDesignOverSizedNumberSpinnerPlusButton"
-           BasedOn="{StaticResource MaterialDesignOverSizedNumberSpinnerButton}"
-           TargetType="{x:Type Button}">
+    <Style
+        x:Key="MaterialDesignOverSizedNumberSpinnerPlusButton"
+        BasedOn="{StaticResource MaterialDesignOverSizedNumberSpinnerButton}"
+        TargetType="{x:Type Button}">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border Background="{TemplateBinding Background}" CornerRadius="5,5,0,0">
-                        <wpf:Ripple Padding="{TemplateBinding Padding}"
-                                    HorizontalContentAlignment="Center"
-                                    VerticalContentAlignment="Top"
-                                    Content="{TemplateBinding Content}"
-                                    ContentTemplate="{TemplateBinding ContentTemplate}"
-                                    Feedback="White"
-                                    Focusable="False"
-                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        <wpf:Ripple
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Top"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Feedback="White"
+                            Focusable="False"
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <Style x:Key="MaterialDesignOverSizedNumberSpinnerMinusButton"
-           BasedOn="{StaticResource MaterialDesignOverSizedNumberSpinnerButton}"
-           TargetType="{x:Type Button}">
+    <Style
+        x:Key="MaterialDesignOverSizedNumberSpinnerMinusButton"
+        BasedOn="{StaticResource MaterialDesignOverSizedNumberSpinnerButton}"
+        TargetType="{x:Type Button}">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Border Background="{TemplateBinding Background}" CornerRadius="0,0,5,5">
-                        <wpf:Ripple Padding="{TemplateBinding Padding}"
-                                    HorizontalContentAlignment="Center"
-                                    VerticalContentAlignment="Bottom"
-                                    Content="{TemplateBinding Content}"
-                                    ContentTemplate="{TemplateBinding ContentTemplate}"
-                                    Feedback="White"
-                                    Focusable="False"
-                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        <wpf:Ripple
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Bottom"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Feedback="White"
+                            Focusable="False"
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -138,41 +144,50 @@
                             <RowDefinition Height="25*" />
                             <RowDefinition Height="25*" />
                         </Grid.RowDefinitions>
-                        <Border Grid.Row="2"
-                                Height="1"
-                                HorizontalAlignment="Stretch"
-                                Background="{DynamicResource MaterialDesignSeperator}"
-                                SnapsToDevicePixels="True" />
-                        <Button Grid.RowSpan="2"
-                                Background="{TemplateBinding Background}"
-                                Command="{x:Static internalCommands:OversizedNumberSpinnerCommands.PlusCommand}"
-                                Style="{StaticResource MaterialDesignOverSizedNumberSpinnerPlusButton}">
-                            <wpf:PackIcon Width="30"
-                                          Height="30"
-                                          Foreground="{TemplateBinding Foreground}"
-                                          Kind="ChevronUp" />
+                        <Border
+                            Grid.Row="2"
+                            Height="1"
+                            HorizontalAlignment="Stretch"
+                            Background="{DynamicResource MaterialDesignSeperator}"
+                            SnapsToDevicePixels="True" />
+                        <Button
+                            Grid.RowSpan="2"
+                            Background="{TemplateBinding Background}"
+                            Command="{x:Static internalCommands:OversizedNumberSpinnerCommands.PlusCommand}"
+                            Style="{StaticResource MaterialDesignOverSizedNumberSpinnerPlusButton}">
+                            <wpf:PackIcon
+                                Width="30"
+                                Height="30"
+                                Foreground="{TemplateBinding Foreground}"
+                                Kind="ChevronUp" />
                             <Button.Triggers>
                                 <EventTrigger RoutedEvent="Button.Click">
                                     <BeginStoryboard Storyboard="{StaticResource PlusAnimation}" />
                                 </EventTrigger>
                             </Button.Triggers>
                         </Button>
-                        <Button x:Name="PlusButton" Grid.Row="3" Grid.RowSpan="2"
-                                Background="{TemplateBinding Background}"
-                                Command="{x:Static internalCommands:OversizedNumberSpinnerCommands.MinusCommand}"
-                                Style="{StaticResource MaterialDesignOverSizedNumberSpinnerMinusButton}">
-                            <wpf:PackIcon Width="30"
-                                          Height="30"
-                                          Foreground="{TemplateBinding Foreground}"
-                                          Kind="ChevronDown" />
+                        <Button
+                            x:Name="PlusButton"
+                            Grid.Row="3"
+                            Grid.RowSpan="2"
+                            Background="{TemplateBinding Background}"
+                            Command="{x:Static internalCommands:OversizedNumberSpinnerCommands.MinusCommand}"
+                            Style="{StaticResource MaterialDesignOverSizedNumberSpinnerMinusButton}">
+                            <wpf:PackIcon
+                                Width="30"
+                                Height="30"
+                                Foreground="{TemplateBinding Foreground}"
+                                Kind="ChevronDown" />
                             <Button.Triggers>
                                 <EventTrigger RoutedEvent="Button.Click">
                                     <BeginStoryboard Storyboard="{StaticResource MinusAnimation}" />
                                 </EventTrigger>
                             </Button.Triggers>
                         </Button>
-                        <Button Grid.Row="1" Grid.RowSpan="3"
-                                Command="{x:Static internalCommands:OversizedNumberSpinnerCommands.EditValueCommand}">
+                        <Button
+                            Grid.Row="1"
+                            Grid.RowSpan="3"
+                            Command="{x:Static internalCommands:OversizedNumberSpinnerCommands.EditValueCommand}">
                             <Button.Style>
                                 <Style BasedOn="{StaticResource MaterialDesignOverSizedNumberSpinnerValueButton}" TargetType="{x:Type Button}">
                                     <Style.Triggers>
@@ -185,20 +200,23 @@
                                     </Style.Triggers>
                                 </Style>
                             </Button.Style>
-                            <TextBlock x:Name="ValueTextBlock"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       FontSize="20"
-                                       Foreground="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"
-                                       Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Value}" />
-                        </Button>
-                        <Border Grid.Row="1" Grid.RowSpan="3"
-                                Margin="4,0,4,0"
-                                Padding="4,2,4,2"
+                            <TextBlock
+                                x:Name="ValueTextBlock"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                Background="White"
-                                CornerRadius="2">
+                                FontSize="20"
+                                Foreground="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Foreground}"
+                                Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Value}" />
+                        </Button>
+                        <Border
+                            Grid.Row="1"
+                            Grid.RowSpan="3"
+                            Margin="4,0,4,0"
+                            Padding="4,2,4,2"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Background="White"
+                            CornerRadius="2">
                             <Border.Style>
                                 <Style TargetType="{x:Type Border}">
                                     <Style.Triggers>
@@ -211,12 +229,13 @@
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
-                            <TextBox x:Name="ValueTextBox"
-                                     MinWidth="10"
-                                     HorizontalAlignment="Stretch"
-                                     VerticalAlignment="Center"
-                                     Foreground="Black"
-                                     Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                            <TextBox
+                                x:Name="ValueTextBox"
+                                MinWidth="10"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                Foreground="Black"
+                                Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Value, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                         </Border>
                     </Grid>
                 </ControlTemplate>

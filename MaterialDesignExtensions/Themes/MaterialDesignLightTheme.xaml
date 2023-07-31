@@ -1,6 +1,7 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options">
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options">
 
     <ResourceDictionary.MergedDictionaries>
         <!--  theme from MaterialDesignInXAML  -->
@@ -12,30 +13,36 @@
 
         <!--  additional resources  -->
         <ResourceDictionary>
-            <SolidColorBrush x:Key="MaterialDesignNavigationItemIcon"
-                             po:Freeze="True"
-                             Color="#8A000000" />
+            <SolidColorBrush
+                x:Key="MaterialDesignNavigationItemIcon"
+                po:Freeze="True"
+                Color="#8A000000" />
             <!--  54% black  -->
-            <SolidColorBrush x:Key="MaterialDesignNavigationItemText"
-                             po:Freeze="True"
-                             Color="#DE000000" />
+            <SolidColorBrush
+                x:Key="MaterialDesignNavigationItemText"
+                po:Freeze="True"
+                Color="#DE000000" />
             <!--  87% black  -->
-            <SolidColorBrush x:Key="MaterialDesignNavigationItemSubheader"
-                             po:Freeze="True"
-                             Color="#8A000000" />
+            <SolidColorBrush
+                x:Key="MaterialDesignNavigationItemSubheader"
+                po:Freeze="True"
+                Color="#8A000000" />
             <!--  54% black  -->
 
-            <SolidColorBrush x:Key="MaterialDesignStepperInactiveStep"
-                             po:Freeze="True"
-                             Color="#61000000" />
+            <SolidColorBrush
+                x:Key="MaterialDesignStepperInactiveStep"
+                po:Freeze="True"
+                Color="#61000000" />
             <!--  38% black  -->
-            <SolidColorBrush x:Key="MaterialDesignStepperActiveStep"
-                             po:Freeze="True"
-                             Color="#DD000000" />
+            <SolidColorBrush
+                x:Key="MaterialDesignStepperActiveStep"
+                po:Freeze="True"
+                Color="#DD000000" />
             <!--  87% black  -->
-            <SolidColorBrush x:Key="MaterialDesignStepperSeparator"
-                             po:Freeze="True"
-                             Color="#1F000000" />
+            <SolidColorBrush
+                x:Key="MaterialDesignStepperSeparator"
+                po:Freeze="True"
+                Color="#1F000000" />
             <!--  12% black  -->
         </ResourceDictionary>
     </ResourceDictionary.MergedDictionaries>

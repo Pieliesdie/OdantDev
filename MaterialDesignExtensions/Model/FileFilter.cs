@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using MaterialDesignExtensions.Controllers;
 
@@ -98,7 +96,7 @@ namespace MaterialDesignExtensions.Model
                 return m_regularExpressions;
             }
         }
-        
+
         private FileFilter(string label, string filters, IEnumerable<string> regularExpressions)
         {
             m_label = label;

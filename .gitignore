@@ -36,3 +36,5 @@ packages/
 */obj/*
 /UpgradeLog.htm
 /vsix
+.artifacts/*
+artifacts

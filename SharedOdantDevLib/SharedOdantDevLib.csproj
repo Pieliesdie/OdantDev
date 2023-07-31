@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<OutputType>Library</OutputType>
+		<RootNamespace>SharedOdantDevLib</RootNamespace>
+		<AssemblyName>SharedOdantDevLib</AssemblyName>
+		<LangVersion>latest</LangVersion>
+		<AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json">
+			<Version>13.0.3</Version>
+		</PackageReference>
+	</ItemGroup>
+</Project>

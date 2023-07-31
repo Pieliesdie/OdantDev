@@ -16,6 +16,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OdantDevApp", "OdantDevApp\OdantDevApp.csproj", "{CF75790B-DC2C-4FE4-BA65-2C002E7D6314}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedOdantDevLib", "SharedOdantDevLib\SharedOdantDevLib.csproj", "{5B6D1F87-2805-42E9-90ED-40A37B0344FD}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedFiles", "SharedFiles\SharedFiles.shproj", "{71B65BF2-8BA1-49B0-98C5-FA6BE828FAD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +54,22 @@ Global
 		{FEF0688F-DB99-496B-8429-E5B64332D8D0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FEF0688F-DB99-496B-8429-E5B64332D8D0}.Release|x86.ActiveCfg = Release|x86
 		{FEF0688F-DB99-496B-8429-E5B64332D8D0}.Release|x86.Build.0 = Release|x86
+		{CF75790B-DC2C-4FE4-BA65-2C002E7D6314}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF75790B-DC2C-4FE4-BA65-2C002E7D6314}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF75790B-DC2C-4FE4-BA65-2C002E7D6314}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CF75790B-DC2C-4FE4-BA65-2C002E7D6314}.Debug|x86.Build.0 = Debug|Any CPU
+		{CF75790B-DC2C-4FE4-BA65-2C002E7D6314}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF75790B-DC2C-4FE4-BA65-2C002E7D6314}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF75790B-DC2C-4FE4-BA65-2C002E7D6314}.Release|x86.ActiveCfg = Release|Any CPU
+		{CF75790B-DC2C-4FE4-BA65-2C002E7D6314}.Release|x86.Build.0 = Release|Any CPU
+		{5B6D1F87-2805-42E9-90ED-40A37B0344FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B6D1F87-2805-42E9-90ED-40A37B0344FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B6D1F87-2805-42E9-90ED-40A37B0344FD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5B6D1F87-2805-42E9-90ED-40A37B0344FD}.Debug|x86.Build.0 = Debug|Any CPU
+		{5B6D1F87-2805-42E9-90ED-40A37B0344FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B6D1F87-2805-42E9-90ED-40A37B0344FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B6D1F87-2805-42E9-90ED-40A37B0344FD}.Release|x86.ActiveCfg = Release|Any CPU
+		{5B6D1F87-2805-42E9-90ED-40A37B0344FD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,8 +78,12 @@ Global
 		SolutionGuid = {11B420B8-8D5A-4A8C-BB7A-2307AF7B7952}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		SharedFiles\SharedFiles.projitems*{71b65bf2-8ba1-49b0-98c5-fa6be828fad6}*SharedItemsImports = 13
+		SharedFiles\SharedFiles.projitems*{ac6b1c3b-13d4-46f6-95ac-04583649963d}*SharedItemsImports = 4
 		SharedOdantDev\SharedOdantDev.projitems*{ac6b1c3b-13d4-46f6-95ac-04583649963d}*SharedItemsImports = 4
 		SharedOdantDev\SharedOdantDev.projitems*{bce37951-5744-4b02-ba49-25ee4c57ac5a}*SharedItemsImports = 13
+		SharedFiles\SharedFiles.projitems*{cf75790b-dc2c-4fe4-ba65-2c002e7d6314}*SharedItemsImports = 5
+		SharedFiles\SharedFiles.projitems*{fef0688f-db99-496b-8429-e5b64332d8d0}*SharedItemsImports = 4
 		SharedOdantDev\SharedOdantDev.projitems*{fef0688f-db99-496b-8429-e5b64332d8d0}*SharedItemsImports = 4
 	EndGlobalSection
 EndGlobal

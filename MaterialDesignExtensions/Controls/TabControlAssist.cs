@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 
 namespace MaterialDesignExtensions.Controls
@@ -261,7 +256,7 @@ namespace MaterialDesignExtensions.Controls
             "TabHeaderMargin",
             typeof(Thickness),
             typeof(TabControlAssist),
-            new FrameworkPropertyMetadata(new Thickness(24,12,24,12), FrameworkPropertyMetadataOptions.Inherits, null)
+            new FrameworkPropertyMetadata(new Thickness(24, 12, 24, 12), FrameworkPropertyMetadataOptions.Inherits, null)
         );
 
         /// <summary>

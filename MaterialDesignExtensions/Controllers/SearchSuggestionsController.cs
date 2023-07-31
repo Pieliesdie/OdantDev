@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using MaterialDesignExtensions.Model;
@@ -72,7 +70,8 @@ namespace MaterialDesignExtensions.Controllers
         /// <summary>
         /// Creates a new <see cref="SearchSuggestionsController" />.
         /// </summary>
-        public SearchSuggestionsController() {
+        public SearchSuggestionsController()
+        {
             m_searchSuggestionsSource = null;
 
             m_lastId = null;

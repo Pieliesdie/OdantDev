@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-    <Metadata>
-        <Identity Id="OdantDev.e52cd637-63b6-4219-a90f-fd8231cd4c0f" Version="1.2" Language="en-US" Publisher="Pieliesdie" />
-        <DisplayName>OdantDev(VS2019)</DisplayName>
-        <Description xml:space="preserve">Addin for odant modules</Description>
+	<Metadata>
+		<Identity Id="OdantDev.e52cd637-63b6-4219-a90f-fd8231cd4c0f" Version="1.2.0.12" Language="en-US" Publisher="Pieliesdie" />
+		<DisplayName>OdantDev(VS2019)</DisplayName>
+		<Description xml:space="preserve">Addin for odant modules</Description>
 		<MoreInfo>https://github.com/Pieliesdie/OdantDev</MoreInfo>
-        <Icon>Icon.png</Icon>
-        <Preview>true</Preview>
-    </Metadata>
-    <Installation>
-        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)">
-        </InstallationTarget>
-        <InstallationTarget Version="[16.0,17.0)" Id="Microsoft.VisualStudio.Enterprise">
-        </InstallationTarget>
-        <InstallationTarget Version="[16.0,17.0)" Id="Microsoft.VisualStudio.Pro">
-        </InstallationTarget>
-    </Installation>
-    <Dependencies>
-        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.8,)" />
-    </Dependencies>
-    <Prerequisites>
-        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,17.0)" DisplayName="Visual Studio core editor" />
-    </Prerequisites>
-    <Assets>
-        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="File" Path="dxtoolbox.v18.1.pkgdef" />
-    </Assets>
+		<Icon>Icon.png</Icon>
+		<PreviewImage>Icon.png</PreviewImage>
+		<Preview>true</Preview>
+	</Metadata>
+	<Installation>
+		<InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)">
+		</InstallationTarget>
+		<InstallationTarget Version="[16.0,17.0)" Id="Microsoft.VisualStudio.Enterprise">
+		</InstallationTarget>
+		<InstallationTarget Version="[16.0,17.0)" Id="Microsoft.VisualStudio.Pro">
+		</InstallationTarget>
+	</Installation>
+	<Dependencies>
+		<Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.8,)" />
+	</Dependencies>
+	<Prerequisites>
+		<Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,17.0)" DisplayName="Visual Studio core editor" />
+	</Prerequisites>
+	<Assets>
+		<Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+		<Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="File" Path="dxtoolbox.v18.1.pkgdef" />
+	</Assets>
 </PackageManifest>
