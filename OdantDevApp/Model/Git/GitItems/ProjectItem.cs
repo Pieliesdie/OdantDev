@@ -1,4 +1,15 @@
-﻿using GitLabApiClient.Models.Projects.Responses;
+﻿using System;
+using System.Windows.Media;
+
+using GitLabApiClient.Models.Projects.Responses;
+
+using MaterialDesignThemes.Wpf;
+
+using oda;
+
+using OdantDev;
+
+using SharedOdanDev.OdaOverride;
 
 namespace SharedOdantDev.Model;
 public class ProjectItem : BaseGitItem
@@ -16,5 +27,5 @@ public class ProjectItem : BaseGitItem
 
     public override bool HasModule => true;
 
-    protected override string ImageCode => "M17,18L12,15.82L7,18V5H17M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z";
+    public override ImageSource Icon => PredefinedImages.GitProject;
 }

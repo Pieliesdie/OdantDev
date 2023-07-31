@@ -22,7 +22,8 @@ using SharedOdantDev.Common;
 namespace OdantDev.Model;
 public partial class StructureItemViewModel<T> : ObservableObject where T : StructureItem
 {
-    static readonly IEnumerable<StructureItemViewModel<T>> dummyList = new List<StructureItemViewModel<T>>() { new StructureItemViewModel<T>() { Name = "Loading...", Icon = Images.GetImage(Images.GetImageIndex(Icons.Clock)).ConvertToBitmapImage() } };
+    static readonly IEnumerable<StructureItemViewModel<T>> dummyList = new List<StructureItemViewModel<T>>() 
+    { new StructureItemViewModel<T>() { Name = "Loading...", Icon = PredefinedImages.LoadImage } };
     readonly ILogger logger;
     readonly ConnectionModel connection;
     bool isLoaded;
@@ -175,7 +176,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     {
         if (Item is not null)
         {
-            Icon = await Item.GetImageSource();
+            Icon = await Item.GetImageSourceAsync();
         }
     }
     async Task SetChildrenAsync(T item, ILogger logger = null, ConnectionModel connection = null)
@@ -215,7 +216,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
             var workplace = new StructureItemViewModel<T>()
             {
                 Name = "Workplaces",
-                Icon = ImageFactory.WorkplaceImage,
+                Icon = PredefinedImages.WorkplaceImage,
                 Children = workplaces.Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))
             };
             yield return workplace;
@@ -225,7 +226,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
             var module = new StructureItemViewModel<T>()
             {
                 Name = "Modules",
-                Icon = ImageFactory.ModuleImage,
+                Icon = PredefinedImages.ModuleImage,
                 Children = modules.Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))
             };
             yield return module;
@@ -267,7 +268,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
             yield return new StructureItemViewModel<T>()
             {
                 Name = group.Key,
-                Icon = ImageFactory.FolderImage,
+                Icon = PredefinedImages.FolderImage,
                 Children = StructureItemViewModel<T>.ApplyCategories(rootItems[false], $"{group.Key}/").Concat(rootItems[true])
             };
         }

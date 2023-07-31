@@ -552,7 +552,7 @@ public partial class ToolWindow1Control : UserControl
 
         AddinSettings.LastProjects = new AsyncObservableCollection<AddinSettings.Project>(
             AddinSettings.LastProjects.Except(AddinSettings.LastProjects.Where(x => x.FullId == item.FullId)));
-        var icon = await item.GetImageSource();
+        var icon = await item.GetImageSourceAsync();
         AddinSettings.LastProjects.Add(new AddinSettings.Project(item.Name, item.FullId, item.Host.Name, DateTime.Now, icon));
         AddinSettings.LastProjects = new AsyncObservableCollection<AddinSettings.Project>(
             AddinSettings

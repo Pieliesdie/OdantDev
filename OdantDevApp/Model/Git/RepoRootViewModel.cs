@@ -22,7 +22,7 @@ public class RepoRootViewModel : RepoGroupViewModel
 
         if (groups != null)
         {
-            foreach (Group group in groups.Where(x => x.ParentId != null))
+            foreach (Group group in groups.Where(x => x.ParentId == null))
             {
                 var newItem = new GroupItem(group);
 

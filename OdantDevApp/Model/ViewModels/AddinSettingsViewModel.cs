@@ -118,7 +118,7 @@ public partial class AddinSettings : ObservableObject
     public struct Project
     {
         private ImageSource _icon;
-        public Project(string name, string fullId, string domainName, DateTime openTime, BitmapImage icon = null)
+        public Project(string name, string fullId, string domainName, DateTime openTime, BitmapSource icon = null)
         {
             Name = name;
             FullId = fullId;
