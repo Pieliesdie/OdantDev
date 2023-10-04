@@ -3,7 +3,7 @@
   
   <PropertyGroup>
 	<AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
-    <TargetFrameworks>net472;net48</TargetFrameworks>
+    <TargetFrameworks>net472;net48;</TargetFrameworks>
     <UseWPF>true</UseWPF>
 	<LangVersion>latest</LangVersion>
     <AssemblyTitle>Material Design Extensions</AssemblyTitle>

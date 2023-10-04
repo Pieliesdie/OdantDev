@@ -16,6 +16,8 @@ using MoreLinq;
 
 using oda;
 
+using OdantDevApp.VSCommon;
+
 using VSLangProj;
 
 using VSLangProj80;
@@ -120,10 +122,12 @@ public sealed partial class VisualStudioIntegration
     private void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
     {
         if ((Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll)) { return; }
-        if (!IsLastBuildSuccess)
-        {
-            return;
-        }
+        if (!IsLastBuildSuccess) { return; }
+
+        // Register the IOleMessageFilter to handle any threading 
+        // errors.     
+        using var messageFilterOff = MessageFilter.MessageFilterRegister();
+
         foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).Cast<Project>())
         {
             CopyToOdaBin(project);
@@ -133,6 +137,11 @@ public sealed partial class VisualStudioIntegration
     private void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
     {
         if (Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll) { return; }
+
+        // Register the IOleMessageFilter to handle any threading 
+        // errors.     
+        using var messageFilterOff = MessageFilter.MessageFilterRegister();
+
         foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).OfType<Project>())
         {
             if (IncreaseVersion(project).Not())
@@ -274,6 +283,10 @@ public sealed partial class VisualStudioIntegration
     #region Download and init  logic for Module
     public async Task<bool> OpenModuleAsync(StructureItem item)
     {
+        // Register the IOleMessageFilter to handle any threading 
+        // errors.     
+        using var messageFilterOff = MessageFilter.MessageFilterRegister();
+
         if (BuildEvents is null)
         {
             SubscribeToStudioEvents();
@@ -284,7 +297,6 @@ public sealed partial class VisualStudioIntegration
             _ = item ?? throw new NullReferenceException("Item was null");
             var module = DownloadModule(item);
             var csProj = module.csProj ?? throw new DirectoryNotFoundException("Module csproj file not found");
-
             if (EnvDTE.Solution.IsOpen.Not())
             {
                 EnvDTE.Solution.Create(TempFiles.TempPath.ToUpper(), item.Host.Name);
