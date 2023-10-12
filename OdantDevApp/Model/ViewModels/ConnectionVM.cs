@@ -39,13 +39,13 @@ public partial class ConnectionModel : ObservableObject, IDisposable
     Host localhost;
 
     [ObservableProperty]
-    AsyncObservableCollection<StructureItemViewModel<StructureItem>> hosts;
+    AsyncObservableCollection<StructureItemVM<StructureItem>> hosts;
 
     [ObservableProperty]
-    AsyncObservableCollection<StructureItemViewModel<StructureItem>> pinnedItems;
+    AsyncObservableCollection<StructureItemVM<StructureItem>> pinnedItems;
 
     [ObservableProperty]
-    ConcatenatedCollection<AsyncObservableCollection<StructureItemViewModel<StructureItem>>, StructureItemViewModel<StructureItem>> items;
+    ConcatenatedCollection<AsyncObservableCollection<StructureItemVM<StructureItem>>, StructureItemVM<StructureItem>> items;
 
     [ObservableProperty]
     List<RepoBaseViewModel> _repos;
@@ -85,8 +85,8 @@ public partial class ConnectionModel : ObservableObject, IDisposable
                 return (false, "Can't connect to oda");
 
             AutoLogin = Connection.AutoLogin;
-            Hosts = new AsyncObservableCollection<StructureItemViewModel<StructureItem>>(await HostsListAsync());
-            PinnedItems = new AsyncObservableCollection<StructureItemViewModel<StructureItem>>(await PinnedListAsync());
+            Hosts = new AsyncObservableCollection<StructureItemVM<StructureItem>>(await HostsListAsync());
+            PinnedItems = new AsyncObservableCollection<StructureItemVM<StructureItem>>(await PinnedListAsync());
             Developers = await DevelopListAsync();
 
             if (AddinSettings.SelectedDevelopeDomain is null)
@@ -115,7 +115,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
             stopWatch?.Stop();
         }
     }
-    private async Task<IEnumerable<StructureItemViewModel<StructureItem>>> PinnedListAsync()
+    private async Task<IEnumerable<StructureItemVM<StructureItem>>> PinnedListAsync()
     {
         return await Task.Run(() =>
         {
@@ -123,7 +123,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
             .PinnedItems
             .Select(x => StructureItemEx.FindItem(Connection, x))
             .Where(x => x != null)
-            .Select(x => new StructureItemViewModel<StructureItem>(x, null, logger, this));
+            .Select(x => new StructureItemVM<StructureItem>(x, null, logger, this));
         });
     }
 
@@ -173,7 +173,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         });
     }
 
-    private async Task<IEnumerable<StructureItemViewModel<StructureItem>>> HostsListAsync()
+    private async Task<IEnumerable<StructureItemVM<StructureItem>>> HostsListAsync()
     {
         return await Task.Run(async () =>
         {
@@ -190,7 +190,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
             return hosts
                 .OrderBy(x => x.SortIndex)
                 .ThenBy(x => x.Label)
-                .Select(host => new StructureItemViewModel<StructureItem>(host, logger: logger, connection: this));
+                .Select(host => new StructureItemVM<StructureItem>(host, logger: logger, connection: this));
         });
     }
 

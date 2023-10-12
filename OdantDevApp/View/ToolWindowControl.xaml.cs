@@ -66,12 +66,12 @@ public partial class ToolWindowControl : UserControl
     private AddinSettings addinSettings;
 
     [ObservableProperty]
-    private ConnectionModel odaModel;
+    private ConnectionModel? odaModel;
     public bool IsDarkTheme
     {
         get => isDarkTheme;
         set
-        {
+        {          
             ITheme theme = this.Resources.GetTheme();
             theme.SetBaseTheme(value ? Theme.Dark : Theme.Light);
             this.Resources.SetTheme(theme);
@@ -256,7 +256,7 @@ public partial class ToolWindowControl : UserControl
     #region ui button logic
     public async void RefreshItem(object sender, RoutedEventArgs e)
     {
-        if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> item)
+        if (OdaTree?.SelectedItem is not StructureItemVM<StructureItem> item)
         {
             return;
         }
@@ -264,7 +264,7 @@ public partial class ToolWindowControl : UserControl
     }
     public void CreateDomainClick(object sender, RoutedEventArgs e)
     {
-        if ((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is not Domain domain)
+        if ((OdaTree?.SelectedItem as StructureItemVM<StructureItem>)?.Item is not Domain domain)
         {
             logger?.Info("Domain can be created only from another domain");
             return;
@@ -285,7 +285,7 @@ public partial class ToolWindowControl : UserControl
     }
     public async void CreateClassClick(object sender, RoutedEventArgs e)
     {
-        var selectedItem = OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>;
+        var selectedItem = OdaTree?.SelectedItem as StructureItemVM<StructureItem>;
         var innerItem = selectedItem?.Item;
         if (selectedItem is null || innerItem is null)
         {
@@ -312,7 +312,7 @@ public partial class ToolWindowControl : UserControl
     }
     public async void RemoveItemClick(object sender, RoutedEventArgs e)
     {
-        if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> { Item: { } structureItem } odaTreeSelectedItem)
+        if (OdaTree?.SelectedItem is not StructureItemVM<StructureItem> { Item: { } structureItem } odaTreeSelectedItem)
             return;
 
         try
@@ -323,7 +323,7 @@ public partial class ToolWindowControl : UserControl
 
             structureItem.Remove();
             //TODO: Подумать как обработать ситуацию с доменом модуля, тк. фактически мы не подписываемся на изменения внутреннего класса домена
-            if (odaTreeSelectedItem is StructureItemViewModel<StructureItem> { Parent: not null })
+            if (odaTreeSelectedItem is StructureItemVM<StructureItem> { Parent: not null })
             {
                 await odaTreeSelectedItem.RefreshAsync(true);
             }
@@ -361,7 +361,7 @@ public partial class ToolWindowControl : UserControl
     }
     private async void CreateModuleButton_Click(object sender, RoutedEventArgs e)
     {
-        if ((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is not Class cls)
+        if ((OdaTree?.SelectedItem as StructureItemVM<StructureItem>)?.Item is not Class cls)
         {
             logger?.Info("Can't create module here");
             return;
@@ -473,7 +473,7 @@ public partial class ToolWindowControl : UserControl
     }
     private async void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
     {
-        if ((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is not Class cls)
+        if ((OdaTree?.SelectedItem as StructureItemVM<StructureItem>)?.Item is not Class cls)
         {
             logger?.Info("Selected item is not a class");
             return;
@@ -516,7 +516,7 @@ public partial class ToolWindowControl : UserControl
     }
     private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
     {
-        var selectedItem = OdaTree.SelectedItem as StructureItemViewModel<StructureItem>;
+        var selectedItem = OdaTree.SelectedItem as StructureItemVM<StructureItem>;
         StructureItem structureItem = selectedItem?.Item;
         if (structureItem == null || selectedItem == null)
         {
@@ -533,7 +533,7 @@ public partial class ToolWindowControl : UserControl
                 }
             case ItemType.Module:
                 {
-                    foreach (StructureItemViewModel<StructureItem> child in selectedItem.Children)
+                    foreach (StructureItemVM<StructureItem> child in selectedItem.Children)
                     {
                         if (child.Item is Class { HasModule: true })
                             await OpenModule(child.Item);
@@ -762,7 +762,7 @@ public partial class ToolWindowControl : UserControl
     {
         try
         {
-            if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> selectedItem || selectedItem.Item == null)
+            if (OdaTree?.SelectedItem is not StructureItemVM<StructureItem> selectedItem || selectedItem.Item == null)
             {
                 return;
             }
@@ -798,7 +798,7 @@ public partial class ToolWindowControl : UserControl
 
     private void DeleteRepo_OnClick(object sender, RoutedEventArgs e)
     {
-        if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> selectedItem)
+        if (OdaTree?.SelectedItem is not StructureItemVM<StructureItem> selectedItem)
             return;
 
         bool? isDeleteLink = DialogCheckBoxDeleteLink?.IsChecked;

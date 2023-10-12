@@ -20,40 +20,45 @@ using SharedOdanDev.OdaOverride;
 using SharedOdantDev.Common;
 
 namespace OdantDev.Model;
-public partial class StructureItemViewModel<T> : ObservableObject where T : StructureItem
+public partial class StructureItemVM<T> : ObservableObject where T : StructureItem
 {
-    static readonly IEnumerable<StructureItemViewModel<T>> dummyList = new List<StructureItemViewModel<T>>() 
-    { new StructureItemViewModel<T>() { Name = "Loading...", Icon = PredefinedImages.LoadImage } };
-    readonly ILogger logger;
-    readonly ConnectionModel connection;
-    bool isLoaded;
+    private static readonly IEnumerable<StructureItemVM<T>> dummyList = new List<StructureItemVM<T>>() { new() { Name = "Loading...", Icon = PredefinedImages.LoadImage } };
+    private readonly ILogger logger;
+    private readonly ConnectionModel connection;
+    private bool isLoaded;
+    private readonly NativeMethods.OdaServerApi.OnUpdate_CALLBACK Update_CALLBACK;
 
-    delegate void Update(int Type, string Params);
-    event Update OnUpdate;
-    readonly NativeMethods.OdaServerApi.OnUpdate_CALLBACK Update_CALLBACK;
-    async void Updated(int type, IntPtr Params)
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<Pending>")]
+    private async void Updated(int type, IntPtr Params)
     {
         try
         {
-            if (type == 3)
+            switch (type)
             {
-                if (Parent != null)
+                case 3:
                 {
-                    await this.Parent.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(15));
+                    if (Parent != null)
+                    {
+                        await this.Parent.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(15));
+                    }
+
+                    break;
                 }
-            }
-            else if (type == 2)
-            {
-                await this.RefreshAsync();
-                if (Parent != null)
+                case 2:
                 {
-                    await this.Parent.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(15));
+                    await this.RefreshAsync();
+                    if (Parent != null)
+                    {
+                        await this.Parent.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(15));
+                    }
+
+                    break;
                 }
+                case < 6:
+                    await this.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(15));
+                    break;
             }
-            else if (type < 6)
-            {
-                await this.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(15));
-            }
+
             OnUpdate?.Invoke(type, Params == IntPtr.Zero ? String.Empty : Marshal.PtrToStringUni(Params));
         }
         catch (TimeoutException) { }
@@ -63,41 +68,35 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         }
     }
 
-    ODAItem RemoteItem => this.Item?.RemoteItem;
-    public bool IsPinned => this is StructureItemViewModel<StructureItem> item && (connection?.PinnedItems?.Contains(item) ?? false);
+    private ODAItem RemoteItem => this.Item?.RemoteItem;
+    public delegate void Update(int Type, string Params);
+    public event Update OnUpdate;
+    public bool IsPinned => this is StructureItemVM<StructureItem> item && (connection?.PinnedItems?.Contains(item) ?? false);
     public bool HasRepository => !string.IsNullOrWhiteSpace(Item?.Root?.GetAttribute("GitLabRepository"));
     public bool CanCreateModule => Item is Class && !HasModule && IsLocal;
     public bool IsLocal => Item?.Host?.IsLocal ?? false;
     public bool IsItemAvailable => Item != null;
     public ItemType ItemType { get; private set; }
 
-    [ObservableProperty]
-    string name;
+    [ObservableProperty] private string name;
 
-    [ObservableProperty]
-    T item;
+    [ObservableProperty] private T? item;
 
-    [ObservableProperty]
-    StructureItemViewModel<T> parent;
+    [ObservableProperty] private StructureItemVM<T>? parent;
 
-    [ObservableProperty]
-    ImageSource icon;
+    [ObservableProperty] private ImageSource? icon;
 
-    [ObservableProperty]
-    IEnumerable<StructureItemViewModel<T>> children;
+    [ObservableProperty] private IEnumerable<StructureItemVM<T>>? children;
 
-    [ObservableProperty]
-    bool isExpanded;
+    [ObservableProperty] private bool isExpanded;
 
     async partial void OnIsExpandedChanged(bool value)
     {
-        if (value && !isLoaded)
+        if (!value || isLoaded) return;
+        isLoaded = true;
+        if (Children is null || Children == dummyList)
         {
-            isLoaded = true;
-            if (Children is null || Children == dummyList)
-            {
-                await SetChildrenAsync(Item, logger, connection);
-            }
+            await SetChildrenAsync(Item, logger, connection);
         }
     }
     public bool HasModule
@@ -110,10 +109,10 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
                     return (Item as Class)?.HasModule ?? false;
                 case ItemType.Module:
                     {
-                        if (Children == dummyList || Children is null)
+                        if (Equals(Children, dummyList) || Children is null)
                             Children = GetChildren(Item, this, logger, connection);
 
-                        return Children?.OfType<StructureItemViewModel<T>>().Any(x => x.HasModule) ?? false;
+                        return Children?.OfType<StructureItemVM<T>>().Any(x => x.HasModule) ?? false;
                     }
             }
             return false;
@@ -124,7 +123,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     {
         get
         {
-            if (Item is Host || Item is null)
+            if (Item is Host or null)
             {
                 return true;
             }
@@ -136,8 +135,8 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
             return hasChildren;
         }
     }
-    public StructureItemViewModel() { }
-    public StructureItemViewModel(T item, StructureItemViewModel<T> parent = null, ILogger logger = null, ConnectionModel connection = null) : this()
+    public StructureItemVM() { }
+    public StructureItemVM(T item, StructureItemVM<T> parent = null, ILogger logger = null, ConnectionModel connection = null) : this()
     {
         this.logger = logger;
         this.connection = connection;
@@ -151,7 +150,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         _ = SetExpanderAsync();
         _ = SetIconAsync();
     }
-    ~StructureItemViewModel()
+    ~StructureItemVM()
     {
         if (Item?.RemoteItem != null)
         {
@@ -162,7 +161,8 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
             GC.ReRegisterForFinalize(Update_CALLBACK);
         }
     }
-    async Task SetExpanderAsync()
+
+    private async Task SetExpanderAsync()
     {
         await Task.Run(() =>
         {
@@ -172,14 +172,16 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
             }
         });
     }
-    async Task SetIconAsync()
+
+    private async Task SetIconAsync()
     {
         if (Item is not null)
         {
             Icon = await Item.GetImageSourceAsync();
         }
     }
-    async Task SetChildrenAsync(T item, ILogger logger = null, ConnectionModel connection = null)
+
+    private async Task SetChildrenAsync(T item, ILogger logger = null, ConnectionModel connection = null)
     {
         try
         {
@@ -199,12 +201,12 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         }
     }
 
-    IEnumerable<StructureItemViewModel<T>> GetChildren(T item, StructureItemViewModel<T> parent = null, ILogger logger = null, ConnectionModel connection = null)
+    private IEnumerable<StructureItemVM<T>> GetChildren(T item, StructureItemVM<T> parent = null, ILogger logger = null, ConnectionModel connection = null)
     {
         var items = item.FindConfigItems().OrderBy(x => x.Name).ToLookup(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution);
 
-        IEnumerable<StructureItemViewModel<T>> children = items[true]
-            .Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))
+        IEnumerable<StructureItemVM<T>> children = items[true]
+            .Select(child => new StructureItemVM<T>(child as T, parent, logger, connection))
             .OrderBy(x => x.Item.SortIndex)
             .ThenBy(x => x.Name);
 
@@ -213,21 +215,21 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         var workplaces = items[false].OfType<DomainSolution>();
         if (workplaces.Any())
         {
-            var workplace = new StructureItemViewModel<T>()
+            var workplace = new StructureItemVM<T>()
             {
                 Name = "Workplaces",
                 Icon = PredefinedImages.WorkplaceImage,
-                Children = workplaces.Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))
+                Children = workplaces.Select(child => new StructureItemVM<T>(child as T, parent, logger, connection))
             };
             yield return workplace;
         }
         if (modules.Any())
         {
-            var module = new StructureItemViewModel<T>()
+            var module = new StructureItemVM<T>()
             {
                 Name = "Modules",
                 Icon = PredefinedImages.ModuleImage,
-                Children = modules.Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))
+                Children = modules.Select(child => new StructureItemVM<T>(child as T, parent, logger, connection))
             };
             yield return module;
         }
@@ -236,7 +238,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         if (item.ItemType == ItemType.Organization)
         {
             var emptyGroupedChildren = children.ToLookup(x => string.IsNullOrWhiteSpace(x.Item.Category));
-            foreach (var groupedItem in StructureItemViewModel<T>.ApplyCategories(emptyGroupedChildren[false]))
+            foreach (var groupedItem in StructureItemVM<T>.ApplyCategories(emptyGroupedChildren[false]))
                 yield return groupedItem;
             children = emptyGroupedChildren[true];
         }
@@ -256,20 +258,20 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         }
     }
 
-    private static IEnumerable<StructureItemViewModel<T>> ApplyCategories
-        (IEnumerable<StructureItemViewModel<T>> structureItems, string subGroupParent = "")
+    private static IEnumerable<StructureItemVM<T>> ApplyCategories
+        (IEnumerable<StructureItemVM<T>> structureItems, string subGroupParent = "")
     {
         var groups = structureItems
-            .GroupBy(x => x.Item.Category.SubstringAfter(subGroupParent).SubstringBefore("/"))
+            .GroupBy(x => x.Item?.Category.SubstringAfter(subGroupParent).SubstringBefore("/"))
             .OrderBy(x => x.Key);
         foreach (var group in groups)
         {
-            var rootItems = group.ToLookup(x => group.Key == x.Item.Category.SubstringAfter(subGroupParent));
-            yield return new StructureItemViewModel<T>()
+            var rootItems = group.ToLookup(x => group.Key == x.Item?.Category.SubstringAfter(subGroupParent));
+            yield return new StructureItemVM<T>()
             {
                 Name = group.Key,
                 Icon = PredefinedImages.FolderImage,
-                Children = StructureItemViewModel<T>.ApplyCategories(rootItems[false], $"{group.Key}/").Concat(rootItems[true])
+                Children = ApplyCategories(rootItems[false], $"{group.Key}/").Concat(rootItems[true])
             };
         }
     }
@@ -304,7 +306,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     {
         try
         {
-            if (Item.Dir is null)
+            if (Item?.Dir is null)
             {
                 logger.Info($"{Item} has no directory");
                 return;
@@ -331,7 +333,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     {
         if (!IsPinned)
         {
-            var copy = new StructureItemViewModel<StructureItem>(Item, Parent as StructureItemViewModel<StructureItem>, logger, connection);
+            var copy = new StructureItemVM<StructureItem>(Item, Parent as StructureItemVM<StructureItem>, logger, connection);
             connection.PinnedItems.Add(copy);
             connection.AddinSettings.PinnedItems.Add(copy.Item.FullId);
         }

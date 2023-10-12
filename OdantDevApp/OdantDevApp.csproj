@@ -85,6 +85,9 @@
 	<Import Project="..\SharedFiles\SharedFiles.projitems" Label="Shared" />
 	<ItemGroup>
 	  <Content Remove="Common\BitmapEx.cs" />
+	  <Content Remove="Model\ViewModels\AddinSettingsVM.cs" />
+	  <Content Remove="Model\ViewModels\ConnectionVM.cs" />
+	  <Content Remove="Model\ViewModels\StructureItemVM.cs" />
 	  <Content Remove="OdaOverride\OdaServerApi.cs" />
 	</ItemGroup>
 </Project>

@@ -197,7 +197,7 @@ public sealed partial class VisualStudioIntegration
         }
         projectItem.Save();
     }
-    private void SetProperties(Properties properties, IReadOnlyDictionary<string, object> values)
+    private static void SetProperties(Properties properties, IReadOnlyDictionary<string, object> values)
     {
         var valueCount = values.Count;
         var iterationCount = 0;
@@ -452,14 +452,14 @@ public sealed partial class VisualStudioIntegration
             { "StartProgram", Path.Combine(OdaFolder.FullName, startProgram) },
             { "StartArguments", "debug" }
         };
-        SetProperties(project.ConfigurationManager.ActiveConfiguration.Properties, configurationAttributes);
+        VisualStudioIntegration.SetProperties(project.ConfigurationManager.ActiveConfiguration.Properties, configurationAttributes);
 
         Dictionary<string, object> projectAttributes = new()
         {
             { "AssemblyName", project.Name },
             { "ReferencePath", OdaFolder.FullName }
         };
-        SetProperties(project.Properties, projectAttributes);
+        VisualStudioIntegration.SetProperties(project.Properties, projectAttributes);
 
         var assemblyInfo = FindProjectItem(project, "AssemblyInfo.cs");
         if (assemblyInfo == null || File.Exists(assemblyFile).Not())

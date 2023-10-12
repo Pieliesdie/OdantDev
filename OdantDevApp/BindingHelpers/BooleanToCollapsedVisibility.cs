@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Data;
 
@@ -8,20 +9,12 @@ public class BooleanToCollapsedVisibility : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
     {
-        if (value is Boolean && (bool)value)
-        {
-            return Visibility.Visible;
-        }
-        return Visibility.Collapsed;
+        return value is true ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
     {
-        if (value is Visibility && (Visibility)value == Visibility.Visible)
-        {
-            return true;
-        }
-        return false;
+        return value is Visibility.Visible;
     }
 }
 
@@ -29,19 +22,11 @@ public class InverseBooleanToCollapsedVisibility : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
     {
-        if (!(value is Boolean && (bool)value))
-        {
-            return Visibility.Visible;
-        }
-        return Visibility.Collapsed;
+        return value is not true ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
     {
-        if (value is Visibility && (Visibility)value == Visibility.Visible)
-        {
-            return false;
-        }
-        return true;
+        return value is not Visibility.Visible;
     }
 }
