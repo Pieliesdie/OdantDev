@@ -6,6 +6,9 @@ namespace NativeMethods;
 public static partial class WinApi
 {
     [DllImport("ole32")]
+    public static extern int CoRegisterMessageFilter(IOleMessageFilter newFilter, out IOleMessageFilter oldFilter);
+
+    [DllImport("ole32")]
     public static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
 
     [DllImport("kernel32", SetLastError = true)]

@@ -79,8 +79,7 @@
                         VerticalAlignment="Stretch"
                         Background="{TemplateBinding Background}"
                         SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
-                        <ContentControl
-                            x:Name="ContentControl1"
+                        <ContentControl x:Name="ContentControl1"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             Panel.ZIndex="1"
@@ -92,8 +91,7 @@
                                 </TransformGroup>
                             </ContentControl.RenderTransform>
                         </ContentControl>
-                        <ContentControl
-                            x:Name="ContentControl2"
+                        <ContentControl x:Name="ContentControl2"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             Panel.ZIndex="0"

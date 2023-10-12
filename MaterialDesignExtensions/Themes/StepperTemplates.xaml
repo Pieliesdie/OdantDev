@@ -46,8 +46,7 @@
                             <AdornerDecorator.CacheMode>
                                 <BitmapCache EnableClearType="True" SnapsToDevicePixels="True" />
                             </AdornerDecorator.CacheMode>
-                            <Border
-                                x:Name="border"
+                            <Border x:Name="border"
                                 Background="Transparent"
                                 BorderThickness="0"
                                 Effect="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(md:ShadowAssist.ShadowDepth), Converter={x:Static md:ShadowConverter.Instance}}" />
@@ -491,8 +490,7 @@
                                 </Border>
                                 <!--  content  -->
                                 <!--  removed the ScrollViewer due to strange behaviour after switching the steps  -->
-                                <ContentControl
-                                    x:Name="PART_horizontalContent"
+                                <ContentControl x:Name="PART_horizontalContent"
                                     Grid.Row="1"
                                     Margin="0,24,0,0"
                                     HorizontalAlignment="Stretch"
@@ -633,8 +631,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
-                                                <ContentControl
-                                                    x:Name="PART_verticalContent"
+                                                <ContentControl x:Name="PART_verticalContent"
                                                     HorizontalAlignment="Stretch"
                                                     Content="{Binding Path=Step.Content}"
                                                     Focusable="False"
@@ -923,8 +920,7 @@
                                 </Border>
                                 <!--  content  -->
                                 <!--  removed the ScrollViewer due to strange behaviour after switching the steps  -->
-                                <ContentControl
-                                    x:Name="PART_horizontalContent"
+                                <ContentControl x:Name="PART_horizontalContent"
                                     Grid.Row="1"
                                     Margin="0,24,0,0"
                                     HorizontalAlignment="Stretch"
@@ -1065,8 +1061,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
-                                                <ContentControl
-                                                    x:Name="PART_verticalContent"
+                                                <ContentControl x:Name="PART_verticalContent"
                                                     HorizontalAlignment="Stretch"
                                                     Content="{Binding Path=Step.Content}"
                                                     Focusable="False"

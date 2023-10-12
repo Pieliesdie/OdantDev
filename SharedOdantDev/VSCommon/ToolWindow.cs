@@ -31,9 +31,9 @@ namespace OdantDev;
 public class ToolWindow : ToolWindowPane
 {
 #if DEBUG
-    private bool OutOfProcess => true;
+    private static bool OutOfProcess => true;
 #else
-    private bool OutOfProcess => true;
+    private static bool OutOfProcess => true;
 #endif
     private string OutOfProcessFolder => Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "app");
     private string OutOfProcessPath => Path.Combine(OutOfProcessFolder, "OdantDevApp.exe");
@@ -128,11 +128,15 @@ public class ToolWindow : ToolWindowPane
                 WorkingDirectory = OutOfProcessFolder,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = false,
-
+                UseShellExecute = false
             };
-            var process = Process.Start(psi);
 
+            //Для hot-reload дебаггера
+#if DEBUG
+            psi.EnvironmentVariables["COMPLUS_ForceENC"] = "1";
+#endif           
+            var process = Process.Start(psi);
+            if (process is null) throw new Exception($"Can't start addin process {path}");
             try
             {
                 while (process.MainWindowHandle == IntPtr.Zero)
@@ -160,7 +164,7 @@ public class ToolWindow : ToolWindowPane
     /// <summary>
     /// Initializes a new instance of the <see cref="ToolWindow"/> class.
     /// </summary>
-    public ToolWindow() : base()
+    public ToolWindow()
     {
         this.Caption = "ODANT Dev";
         if (OutOfProcess)
@@ -170,7 +174,7 @@ public class ToolWindow : ToolWindowPane
         }
         else
         {
-            this.Content = new ToolWindow1Control(OdantDevPackage.Env_DTE);
+            this.Content = new ToolWindowControl(OdantDevPackage.EnvDte);
         }
     }
     public override void OnToolWindowCreated()

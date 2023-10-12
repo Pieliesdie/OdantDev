@@ -65,8 +65,7 @@
                                 Content="{TemplateBinding CustomContent}"
                                 ContentTemplate="{TemplateBinding CustomContentTemplate}"
                                 Visibility="{Binding Path=CustomContent, Converter={StaticResource notNullToVisibileConverter}, RelativeSource={RelativeSource TemplatedParent}}" />
-                            <Button
-                                x:Name="okButton"
+                            <Button x:Name="okButton"
                                 Margin="8,36,8,8"
                                 HorizontalAlignment="Right"
                                 Content="{TemplateBinding OkButtonLabel}"

@@ -7,8 +7,8 @@ namespace OdantDevApp.Model;
 
 public static class CommandLine
 {
-    private static CommandLineArgs _args;
-    private static CommandLineArgs Args()
+    private static CommandLineArgs? _args;
+    private static CommandLineArgs? Args()
     {
         try
         {
@@ -23,15 +23,15 @@ public static class CommandLine
 
     public static bool IsOutOfProcess => Args() != null;
 
-    public static System.Diagnostics.Process TryGetParentProcess()
+    public static System.Diagnostics.Process? TryGetParentProcess()
     {
         try
         {
             var args = Args();
             if (args == null) return null;
-            var VSId = Args().ProcessId;
-            var VSProcess = System.Diagnostics.Process.GetProcessById(VSId);
-            return VSProcess;
+            var vsId = args.ProcessId;
+            var vsProcess = System.Diagnostics.Process.GetProcessById(vsId);
+            return vsProcess;
         }
         catch
         {

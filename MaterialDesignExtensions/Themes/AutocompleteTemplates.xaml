@@ -42,8 +42,7 @@
                         Height="{TemplateBinding Height}"
                         HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
                         VerticalAlignment="{TemplateBinding VerticalAlignment}">
-                        <Border
-                            x:Name="rootBorder"
+                        <Border x:Name="rootBorder"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             Background="{TemplateBinding Background}"
@@ -88,8 +87,7 @@
                                     <ColumnDefinition Width="100*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBox
-                                    x:Name="searchTextBox"
+                                <TextBox x:Name="searchTextBox"
                                     Margin="0,0,8,0"
                                     HorizontalAlignment="Stretch"
                                     VerticalAlignment="Center"
@@ -107,8 +105,7 @@
                                     ContentTemplate="{TemplateBinding ItemTemplate}"
                                     Visibility="{TemplateBinding SelectedItem,
                                                                  Converter={StaticResource notNullToVisibleConverter}}" />
-                                <Button
-                                    x:Name="clearButton"
+                                <Button x:Name="clearButton"
                                     Grid.Column="1"
                                     MaxHeight="52"
                                     Margin="16,0,0,0"
@@ -152,8 +149,7 @@
                                         VerticalAlignment="Center"
                                         Kind="Close" />
                                 </Button>
-                                <controls:AutocompletePopup
-                                    x:Name="autocompleteItemsPopup"
+                                <controls:AutocompletePopup x:Name="autocompleteItemsPopup"
                                     Width="{Binding Path=ActualWidth, ElementName=rootBorder}"
                                     MaxHeight="300"
                                     AllowsTransparency="True"
@@ -184,8 +180,7 @@
                                             BorderThickness="1,0,1,1"
                                             CornerRadius="0,0,2,2"
                                             SnapsToDevicePixels="True">
-                                            <ItemsControl
-                                                x:Name="autocompleteItemsControl"
+                                            <ItemsControl x:Name="autocompleteItemsControl"
                                                 Margin="0,4,0,4"
                                                 HorizontalAlignment="Stretch"
                                                 VerticalAlignment="Stretch"
@@ -243,8 +238,7 @@
                                                                     </Style>
                                                                 </Border.Style>
                                                             </Border>
-                                                            <Button
-                                                                x:Name="itemButton"
+                                                            <Button x:Name="itemButton"
                                                                 Padding="16,8,16,8"
                                                                 Command="{x:Static internalCommands:AutocompleteCommands.SelectAutocompleteItemCommand}"
                                                                 CommandParameter="{Binding}"

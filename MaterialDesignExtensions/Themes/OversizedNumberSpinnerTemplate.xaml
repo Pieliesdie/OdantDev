@@ -166,8 +166,7 @@
                                 </EventTrigger>
                             </Button.Triggers>
                         </Button>
-                        <Button
-                            x:Name="PlusButton"
+                        <Button x:Name="PlusButton"
                             Grid.Row="3"
                             Grid.RowSpan="2"
                             Background="{TemplateBinding Background}"
@@ -200,8 +199,7 @@
                                     </Style.Triggers>
                                 </Style>
                             </Button.Style>
-                            <TextBlock
-                                x:Name="ValueTextBlock"
+                            <TextBlock x:Name="ValueTextBlock"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 FontSize="20"
@@ -229,8 +227,7 @@
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
-                            <TextBox
-                                x:Name="ValueTextBox"
+                            <TextBox x:Name="ValueTextBox"
                                 MinWidth="10"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Center"

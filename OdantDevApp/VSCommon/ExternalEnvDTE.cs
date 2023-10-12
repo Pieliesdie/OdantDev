@@ -13,16 +13,16 @@ namespace OdantDevApp.VSCommon;
 
 public static class ExternalEnvDTE
 {
-    public static DTE2 Instance { get { Init(); return instance; } set => instance = value; }
+    public static DTE2? Instance { get { Init(); return _instance; } set => _instance = value; }
 
-    private static DTE2 instance;
+    private static DTE2? _instance;
 
     private static void Init()
     {
-        if (instance != null) { return; }
-        if (instance == null && CommandLine.TryGetParentProcess() is System.Diagnostics.Process parentProcess)
+        if (_instance != null) { return; }
+        if (_instance == null && CommandLine.TryGetParentProcess() is { } parentProcess)
         {
-            instance = GetDTE(parentProcess.Id, 5) as DTE2;
+            _instance = GetDTE(parentProcess.Id, 5);
         }
     }
 
@@ -39,9 +39,9 @@ public static class ExternalEnvDTE
     /// 
     /// Retrieved DTE object or  if not found.
     /// 
-    private static DTE GetDTE(int processId, int timeout)
+    private static DTE2? GetDTE(int processId, int timeout)
     {
-        DTE res = null;
+        DTE2 res = null;
         DateTime startTime = DateTime.Now;
 
         while (res == null && DateTime.Now.Subtract(startTime).Seconds < timeout)
@@ -60,7 +60,7 @@ public static class ExternalEnvDTE
     /// 
     /// Retrieved DTE object or  if not found.
     /// 
-    private static DTE GetDTE(int processId)
+    private static DTE2? GetDTE(int processId)
     {
         object runningObject = null;
 
@@ -118,7 +118,7 @@ public static class ExternalEnvDTE
             }
         }
 
-        return runningObject as DTE;
+        return runningObject as DTE2;
     }
     #endregion
 }

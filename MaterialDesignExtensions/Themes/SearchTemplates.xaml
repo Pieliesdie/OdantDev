@@ -65,8 +65,7 @@
                                 </Style>
                             </Border.Style>
                         </Border>
-                        <Border
-                            x:Name="rootBorder"
+                        <Border x:Name="rootBorder"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             Background="Transparent">
@@ -102,8 +101,7 @@
                                         </MultiBinding>
                                     </ContentControl.Visibility>
                                 </ContentControl>
-                                <Button
-                                    x:Name="cancelButton"
+                                <Button x:Name="cancelButton"
                                     Margin="8,0,8,0"
                                     VerticalAlignment="Center"
                                     Style="{DynamicResource MaterialDesignToolForegroundButton}">
@@ -121,8 +119,7 @@
                                         Height="{TemplateBinding IconSize}"
                                         Kind="{TemplateBinding CancelIcon}" />
                                 </Button>
-                                <TextBox
-                                    x:Name="searchTextBox"
+                                <TextBox x:Name="searchTextBox"
                                     Grid.Column="1"
                                     Margin="{TemplateBinding Padding}"
                                     HorizontalAlignment="Stretch"
@@ -131,8 +128,7 @@
                                     BorderBrush="Transparent"
                                     FontSize="{TemplateBinding FontSize}"
                                     Text="{Binding Path=SearchTerm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource TemplatedParent}}" />
-                                <Button
-                                    x:Name="clearButton"
+                                <Button x:Name="clearButton"
                                     Grid.Column="2"
                                     Margin="8,0,8,0"
                                     VerticalAlignment="Center"
@@ -151,8 +147,7 @@
                                         Height="{TemplateBinding IconSize}"
                                         Kind="{TemplateBinding ClearIcon}" />
                                 </Button>
-                                <controls:AutocompletePopup
-                                    x:Name="searchSuggestionsPopup"
+                                <controls:AutocompletePopup x:Name="searchSuggestionsPopup"
                                     Width="{Binding Path=ActualWidth, ElementName=rootBorder}"
                                     MaxHeight="300"
                                     AllowsTransparency="True"
@@ -183,8 +178,7 @@
                                             CornerRadius="0,0,2,2"
                                             SnapsToDevicePixels="True">
                                             <!--  Effect="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(md:ShadowAssist.ShadowDepth), Converter={x:Static md:ShadowConverter.Instance}}"  -->
-                                            <ItemsControl
-                                                x:Name="searchSuggestionsItemsControl"
+                                            <ItemsControl x:Name="searchSuggestionsItemsControl"
                                                 Margin="0,4,0,4"
                                                 HorizontalAlignment="Stretch"
                                                 VerticalAlignment="Stretch"
@@ -243,8 +237,7 @@
                                                                     </Style>
                                                                 </Border.Style>
                                                             </Border>
-                                                            <Button
-                                                                x:Name="itemButton"
+                                                            <Button x:Name="itemButton"
                                                                 Command="{x:Static internalCommands:SearchControlCommands.SelectSearchSuggestionCommand}"
                                                                 CommandParameter="{Binding Path=Suggestion}">
                                                                 <Button.Style>

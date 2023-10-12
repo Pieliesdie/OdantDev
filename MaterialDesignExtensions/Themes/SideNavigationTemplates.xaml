@@ -270,8 +270,7 @@
                             VerticalAlignment="Stretch"
                             HorizontalScrollBarVisibility="Disabled"
                             VerticalScrollBarVisibility="Auto">
-                            <ItemsControl
-                                x:Name="navigationItemsControl"
+                            <ItemsControl x:Name="navigationItemsControl"
                                 Focusable="False"
                                 ItemTemplateSelector="{StaticResource navigationItemKindTemplateSelector}">
                                 <ItemsControl.ItemsPanel>
@@ -327,8 +326,7 @@
                         VerticalAlignment="Stretch"
                         Background="{TemplateBinding Background}"
                         Focusable="False">
-                        <ItemsControl
-                            x:Name="navigationItemsControl"
+                        <ItemsControl x:Name="navigationItemsControl"
                             HorizontalAlignment="Stretch"
                             Focusable="False"
                             ItemTemplateSelector="{StaticResource navigationItemKindTemplateSelector}">

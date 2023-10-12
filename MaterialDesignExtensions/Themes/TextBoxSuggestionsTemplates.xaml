@@ -27,15 +27,13 @@
                 <ControlTemplate TargetType="{x:Type controls:TextBoxSuggestions}">
                     <Grid Background="Transparent">
                         <Border x:Name="rootBorder">
-                            <ContentControl
-                                x:Name="textBoxContentControl"
+                            <ContentControl x:Name="textBoxContentControl"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Top"
                                 Content="{TemplateBinding TextBox}"
                                 Focusable="False" />
                         </Border>
-                        <controls:AutocompletePopup
-                            x:Name="suggestionItemsPopup"
+                        <controls:AutocompletePopup x:Name="suggestionItemsPopup"
                             Width="{Binding Path=ActualWidth, ElementName=rootBorder}"
                             MaxHeight="300"
                             AllowsTransparency="True"
@@ -69,8 +67,7 @@
                                     BorderThickness="1"
                                     CornerRadius="2"
                                     SnapsToDevicePixels="True">
-                                    <ItemsControl
-                                        x:Name="suggestionItemsControl"
+                                    <ItemsControl x:Name="suggestionItemsControl"
                                         Margin="0,4,0,4"
                                         HorizontalAlignment="Stretch"
                                         VerticalAlignment="Stretch"
@@ -128,8 +125,7 @@
                                                             </Style>
                                                         </Border.Style>
                                                     </Border>
-                                                    <Button
-                                                        x:Name="itemButton"
+                                                    <Button x:Name="itemButton"
                                                         Padding="16,8,16,8"
                                                         Command="{x:Static internalCommands:TextBoxSuggestionsCommands.SelectSuggestionItemCommand}"
                                                         CommandParameter="{Binding}">

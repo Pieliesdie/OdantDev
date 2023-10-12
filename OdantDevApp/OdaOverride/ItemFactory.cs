@@ -1,7 +1,8 @@
 ﻿using System;
 
 using Microsoft.Extensions.Caching.Memory;
-
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using odaCore.Views;
 
 using OdantDev;
@@ -10,14 +11,16 @@ using odaServer;
 
 namespace oda.OdaOverride;
 
+
 public static class ItemFactory
 {
-    static Connection _connection = null;
-    static readonly MemoryCache _cache = new(new MemoryCacheOptions
-    {
-        SizeLimit = 500,
-    });
-    static readonly MemoryCacheEntryOptions _defaultCacheOptions = new MemoryCacheEntryOptions().SetSize(1);
+    private static Connection? _connection;
+
+    private static readonly MemoryCache Cache = new(new MemoryCacheOptions());
+
+    private static readonly MemoryCacheEntryOptions DefaultCacheOptions = new MemoryCacheEntryOptions()
+        .SetSize(1)
+        .SetPriority(CacheItemPriority.NeverRemove);
 
     public static Connection Connection
     {
@@ -50,18 +53,18 @@ public static class ItemFactory
     {
         if (item == null) { return null; }
 
-        _cache.TryGetValue<StructureItem>(item.FullId, out var structureItem);
-        if (structureItem != null && structureItem.IsDisposed)
-        {
-            _cache.Remove(structureItem);
-            structureItem = null;
-        }
+        var structureItem = Cache.GetOrCreate(item.FullId, (entry) => 
+            {
+                entry.SetOptions(DefaultCacheOptions);
+                return CreateItem(item);
+            }
+        );
+        if (structureItem is not { IsDisposed: true }) 
+            return structureItem;
 
-        if (structureItem == null)
-        {
-            structureItem = CreateItem(item);
-            _cache.Set(item.FullId, structureItem, _defaultCacheOptions);
-        }
+        Cache.Remove(structureItem);
+        structureItem = CreateItem(item);
+        Cache.Set(item.FullId, structureItem, DefaultCacheOptions);
 
         return structureItem;
     }
@@ -74,7 +77,7 @@ public static class ItemFactory
         switch (item.Type)
         {
             case ODAItem.ItemType.DOMAIN_ITEM:
-                structureItem = createDomain(item, item2);
+                structureItem = CreateDomain(item, item2);
                 break;
             case ODAItem.ItemType.CLASS_ITEM:
                 if (item2 != null && item.Owner != null && item.Owner.Id != item.Id && (item2.ItemType == ItemType.Solution || item2.ItemType == ItemType.ClassView))
@@ -100,7 +103,7 @@ public static class ItemFactory
         }
         return structureItem;
     }
-    private static Domain createDomain(ODAItem item, Item owner)
+    private static Domain CreateDomain(ODAItem item, Item owner)
     {
         switch (item.SubType.ToLower())
         {
@@ -149,14 +152,14 @@ public static class ItemFactory
     {
         context.InvokePrivateMethod("RegisterItem", item);
     }
-    private static Item RegisterLink(Item _link, StructureItem owner)
+    private static Item RegisterLink(Item link, StructureItem owner)
     {
-        if (_link == null)
+        if (link == null)
         {
             return null;
         }
 
-        if (owner.TryGetItem(_link.FullId, out var item))
+        if (owner.TryGetItem(link.FullId, out var item))
         {
             if (!item.IsDisposed)
             {
@@ -167,9 +170,9 @@ public static class ItemFactory
         }
         else
         {
-            owner.RegisterItem(_link);
+            owner.RegisterItem(link);
         }
 
-        return _link;
+        return link;
     }
 }

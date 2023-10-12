@@ -1,5 +1,5 @@
-﻿<UserControl
-    x:Class="OdantDev.ToolWindow1Control"
+﻿<UserControl Name="MyToolWindow"
+    x:Class="OdantDev.ToolWindowControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -8,7 +8,6 @@
     xmlns:oda="clr-namespace:oda;assembly=odaCore"
     xmlns:odantdev="clr-namespace:OdantDev"
     xmlns:odantdevModel="clr-namespace:OdantDev.Model"
-    Name="MyToolWindow"
     Background="{DynamicResource MaterialDesignPaper}"
     FontFamily="{DynamicResource MaterialDesignFont}"
     TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -17,17 +16,15 @@
         <ResourceDictionary>
             <odantdev:BooleanToCollapsedVisibility x:Key="BooleanToCollapsedVisibility" />
             <odantdev:InverseBooleanToCollapsedVisibility x:Key="InverseBooleanToCollapsedVisibility" />
-            <Style
+            <Style x:Name="defaultTree"
                 x:Key="defaultTree"
-                x:Name="defaultTree"
                 BasedOn="{StaticResource MaterialDesignTreeViewItem}"
                 TargetType="TreeViewItem">
                 <Setter Property="materialDesign:TreeViewAssist.ExpanderSize" Value="18" />
                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
             </Style>
-            <Style
+            <Style x:Name="simpleTree"
                 x:Key="simpleTree"
-                x:Name="simpleTree"
                 TargetType="TreeViewItem">
                 <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
@@ -53,8 +50,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <mde:BusyOverlay
-                Name="BusyOverlayControl"
+            <mde:BusyOverlay Name="BusyOverlayControl"
                 Grid.Row="0"
                 FontSize="18"
                 IsBusy="{Binding IsBusy}"
@@ -82,8 +78,7 @@
                     HorizontalAlignment="Right"
                     DockPanel.Dock="Top"
                     Orientation="Horizontal" />
-                <Grid
-                    x:Name="DBGrid"
+                <Grid x:Name="DBGrid"
                     Grid.Row="1"
                     Grid.Column="0"
                     Margin="12,5,5,5"
@@ -98,16 +93,14 @@
                         Height="20"
                         Margin="0,3,0,0"
                         Kind="Database" />
-                    <ComboBox
-                        Name="FoldersComboBox"
+                    <ComboBox Name="FoldersComboBox"
                         Grid.Row="0"
                         Grid.Column="0"
                         Margin="25,0,10,0"
                         materialDesign:HintAssist.Hint="Run app with admin rights before start addin"
                         ItemsSource="{Binding AddinSettings.OdaFolders}"
                         SelectedItem="{Binding AddinSettings.SelectedOdaFolder, Mode=TwoWay}" />
-                    <Button
-                        Name="ExitButton"
+                    <Button Name="ExitButton"
                         Grid.Column="1"
                         Width="32"
                         Height="25"
@@ -129,8 +122,7 @@
                     </Button>
                 </Grid>
 
-                <StackPanel
-                    x:Name="spConnect"
+                <StackPanel x:Name="spConnect"
                     Grid.Row="3"
                     Grid.Column="0"
                     HorizontalAlignment="Center"
@@ -138,24 +130,21 @@
                     DockPanel.Dock="Top"
                     Orientation="Vertical"
                     Visibility="Visible">
-                    <Button
-                        Name="ConnectButton"
+                    <Button Name="ConnectButton"
                         Width="120"
                         Height="31"
                         Margin="10,100,10,10"
                         Click="Connect"
                         Content="Connect"
                         Style="{StaticResource MaterialDesignFlatMidBgButton}" />
-                    <StackPanel
-                        x:Name="ErrorSp"
+                    <StackPanel x:Name="ErrorSp"
                         Orientation="Horizontal"
                         Visibility="Hidden">
                         <materialDesign:PackIcon
                             Width="25"
                             Height="25"
                             Kind="ExclamationThick" />
-                        <TextBlock
-                            x:Name="ErrorTb"
+                        <TextBlock x:Name="ErrorTb"
                             MaxWidth="350"
                             Padding="0,0,0,0"
                             TextWrapping="Wrap">
@@ -164,8 +153,7 @@
                     </StackPanel>
                 </StackPanel>
 
-                <TabControl
-                    x:Name="MainTabControl"
+                <TabControl x:Name="MainTabControl"
                     Grid.Row="5"
                     Grid.Column="0"
                     materialDesign:ColorZoneAssist.Mode="Standard"
@@ -177,8 +165,7 @@
                     Style="{StaticResource MaterialDesignNavigatilRailTabControl}"
                     TabStripPlacement="Left"
                     Visibility="Collapsed">
-                    <TabItem
-                        Name="TreeTab"
+                    <TabItem Name="TreeTab"
                         HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Stretch"
                         VerticalContentAlignment="Stretch">
@@ -193,8 +180,7 @@
                                 <TextBlock HorizontalAlignment="Center" Text="Hosts" />
                             </StackPanel>
                         </TabItem.Header>
-                        <Grid
-                            x:Name="OdaTreeGrid"
+                        <Grid x:Name="OdaTreeGrid"
                             Grid.Row="0"
                             HorizontalAlignment="Stretch">
                             <Grid.ColumnDefinitions>
@@ -204,16 +190,14 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <StackPanel
-                                x:Name="CommonButtons"
+                            <StackPanel x:Name="CommonButtons"
                                 Grid.Row="0"
                                 Grid.Column="0"
                                 materialDesign:ThemeAssist.Theme="Inherit"
                                 DockPanel.Dock="Top"
                                 Visibility="Visible">
                                 <WrapPanel Orientation="Horizontal">
-                                    <Button
-                                        Name="RefreshTreeButton"
+                                    <Button Name="RefreshTreeButton"
                                         Width="32"
                                         Height="25"
                                         Margin="3"
@@ -234,8 +218,7 @@
                                             <!--<TextBlock VerticalAlignment="Center" Visibility="Hidden">Refresh</TextBlock>-->
                                         </StackPanel>
                                     </Button>
-                                    <Button
-                                        Name="CreateModuleButton"
+                                    <Button Name="CreateModuleButton"
                                         Width="32"
                                         Height="25"
                                         Margin="3"
@@ -261,8 +244,7 @@
                                             <!--<TextBlock VerticalAlignment="Center"  Visibility="Hidden">Create</TextBlock>-->
                                         </StackPanel>
                                     </Button>
-                                    <Button
-                                        Name="DownloadModuleButton"
+                                    <Button Name="DownloadModuleButton"
                                         Width="32"
                                         Height="25"
                                         Margin="3"
@@ -295,8 +277,7 @@
                                             <!--<TextBlock VerticalAlignment="Center" Visibility="Hidden">Download</TextBlock>-->
                                         </StackPanel>
                                     </Button>
-                                    <Button
-                                        Name="OpenModuleButton"
+                                    <Button Name="OpenModuleButton"
                                         Width="32"
                                         Height="25"
                                         Margin="3"
@@ -345,8 +326,7 @@
                                                     Grid.Column="0"
                                                     Margin="10"
                                                     Text="Repository group" />
-                                                <TreeView
-                                                    x:Name="DialogRepoGroupTree"
+                                                <TreeView x:Name="DialogRepoGroupTree"
                                                     Grid.Row="1"
                                                     Grid.Column="0"
                                                     Margin="10"
@@ -375,8 +355,7 @@
                                                     Grid.Row="2"
                                                     Grid.Column="0"
                                                     Margin="16">
-                                                    <TextBox
-                                                        Name="DialogTextBoxRepoName"
+                                                    <TextBox Name="DialogTextBoxRepoName"
                                                         Margin="0,8,0,0"
                                                         HorizontalAlignment="Stretch"
                                                         materialDesign:HintAssist.HelperTextFontSize="11"
@@ -386,8 +365,7 @@
                                                         materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
                                                         FontSize="16"
                                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
-                                                    <TextBox
-                                                        Name="DialogTextBoxRepoLabel"
+                                                    <TextBox Name="DialogTextBoxRepoLabel"
                                                         Margin="0,8,0,8"
                                                         HorizontalAlignment="Stretch"
                                                         materialDesign:HintAssist.HelperTextFontSize="11"
@@ -397,8 +375,7 @@
                                                         materialDesign:TextFieldAssist.UnderlineBrush="{DynamicResource SecondaryHueMidBrush}"
                                                         FontSize="16"
                                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
-                                                    <TextBox
-                                                        Name="DialogTextBoxRepoDescription"
+                                                    <TextBox Name="DialogTextBoxRepoDescription"
                                                         Height="150"
                                                         Margin="0,15,0,25"
                                                         HorizontalAlignment="Stretch"
@@ -427,8 +404,7 @@
                                                 </StackPanel>
                                             </Grid>
                                         </materialDesign:DialogHost.DialogContent>
-                                        <Button
-                                            Name="CreateRepoButton"
+                                        <Button Name="CreateRepoButton"
                                             Width="32"
                                             Height="25"
                                             Margin="3"
@@ -479,18 +455,15 @@
                                                 </Grid.RowDefinitions>
                                                 <StackPanel Grid.Row="0" Margin="16">
                                                     <TextBlock Text="Delete repository?" />
-                                                    <CheckBox
-                                                        Name="DialogCheckBoxDeleteLink"
+                                                    <CheckBox Name="DialogCheckBoxDeleteLink"
                                                         Margin="0,8,0,0"
                                                         HorizontalAlignment="Stretch"
                                                         Content="Link in class" />
-                                                    <CheckBox
-                                                        Name="DialogCheckBoxDeleteLocalRepo"
+                                                    <CheckBox Name="DialogCheckBoxDeleteLocalRepo"
                                                         Margin="0,8,0,0"
                                                         HorizontalAlignment="Stretch"
                                                         Content="Local repo (.git folder)" />
-                                                    <CheckBox
-                                                        Name="DialogCheckBoxDeleteRemoteRepo"
+                                                    <CheckBox Name="DialogCheckBoxDeleteRemoteRepo"
                                                         Margin="0,8,0,0"
                                                         HorizontalAlignment="Stretch"
                                                         Content="Remote repository" />
@@ -510,8 +483,7 @@
                                                 </StackPanel>
                                             </Grid>
                                         </materialDesign:DialogHost.DialogContent>
-                                        <Button
-                                            Name="DeleteRepoButton"
+                                        <Button Name="DeleteRepoButton"
                                             Width="32"
                                             Height="25"
                                             Margin="3"
@@ -545,8 +517,7 @@
                                     </materialDesign:DialogHost>
                                 </WrapPanel>
                             </StackPanel>
-                            <TreeView
-                                x:Name="OdaTree"
+                            <TreeView x:Name="OdaTree"
                                 Grid.Row="1"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Stretch"
@@ -576,8 +547,7 @@
                                             </Grid.ColumnDefinitions>
                                             <Grid.ContextMenu>
                                                 <ContextMenu Visibility="{Binding Path=IsItemAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                    <MenuItem
-                                                        x:Name="MenuItemOpenModule"
+                                                    <MenuItem x:Name="MenuItemOpenModule"
                                                         Click="OpenModuleButton_Click"
                                                         Header="Open module"
                                                         Visibility="{Binding HasModule, Converter={StaticResource BooleanToCollapsedVisibility}}">
@@ -611,24 +581,21 @@
                                                         <MenuItem.Icon>
                                                             <materialDesign:PackIcon Foreground="MediumSeaGreen" Kind="DatabasePlus" />
                                                         </MenuItem.Icon>
-                                                        <MenuItem
-                                                            x:Name="MenuItemCreateClass"
+                                                        <MenuItem x:Name="MenuItemCreateClass"
                                                             Click="CreateClassClick"
                                                             Header="Class">
                                                             <MenuItem.Icon>
                                                                 <materialDesign:PackIcon Foreground="MediumSeaGreen" Kind="Class" />
                                                             </MenuItem.Icon>
                                                         </MenuItem>
-                                                        <MenuItem
-                                                            x:Name="MenuItemCreateDomainModule"
+                                                        <MenuItem x:Name="MenuItemCreateDomainModule"
                                                             Click="CreateDomainClick"
                                                             Header="Module domain">
                                                             <MenuItem.Icon>
                                                                 <materialDesign:PackIcon Foreground="MediumSeaGreen" Kind="Domain" />
                                                             </MenuItem.Icon>
                                                         </MenuItem>
-                                                        <MenuItem
-                                                            x:Name="MenuItemCreateCSharpModule"
+                                                        <MenuItem x:Name="MenuItemCreateCSharpModule"
                                                             Click="CreateModuleButton_Click"
                                                             Header="Module project"
                                                             Visibility="{Binding CanCreateModule, Converter={StaticResource BooleanToCollapsedVisibility}}">
@@ -637,16 +604,14 @@
                                                             </MenuItem.Icon>
                                                         </MenuItem>
                                                     </MenuItem>
-                                                    <MenuItem
-                                                        x:Name="MenuItemRemoveItem"
+                                                    <MenuItem x:Name="MenuItemRemoveItem"
                                                         Click="RemoveItemClick"
                                                         Header="Remove item">
                                                         <MenuItem.Icon>
                                                             <materialDesign:PackIcon Foreground="PaleVioletRed" Kind="Remove" />
                                                         </MenuItem.Icon>
                                                     </MenuItem>
-                                                    <MenuItem
-                                                        Name="MenuItemRefresh"
+                                                    <MenuItem Name="MenuItemRefresh"
                                                         Click="RefreshItem"
                                                         Command="{Binding RefreshCommand}"
                                                         Header="Refresh">
@@ -654,16 +619,14 @@
                                                             <materialDesign:PackIcon Foreground="CornflowerBlue" Kind="Refresh" />
                                                         </MenuItem.Icon>
                                                     </MenuItem>
-                                                    <MenuItem
-                                                        Name="MenuItemInfo"
+                                                    <MenuItem Name="MenuItemInfo"
                                                         Command="{Binding InfoCommand}"
                                                         Header="Info">
                                                         <MenuItem.Icon>
                                                             <materialDesign:PackIcon Foreground="ForestGreen" Kind="InformationCircleOutline" />
                                                         </MenuItem.Icon>
                                                     </MenuItem>
-                                                    <MenuItem
-                                                        Name="MenuItemOpenDir"
+                                                    <MenuItem Name="MenuItemOpenDir"
                                                         Command="{Binding OpenDirCommand}"
                                                         Header="Open folder">
                                                         <MenuItem.Icon>
@@ -706,8 +669,7 @@
                             </TreeView>
                         </Grid>
                     </TabItem>
-                    <TabItem
-                        Name="RepoTreeTab"
+                    <TabItem Name="RepoTreeTab"
                         HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Stretch"
                         VerticalContentAlignment="Stretch">
@@ -730,16 +692,14 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <StackPanel
-                                x:Name="RepoCommonButtons"
+                            <StackPanel x:Name="RepoCommonButtons"
                                 Grid.Row="0"
                                 Grid.Column="0"
                                 materialDesign:ThemeAssist.Theme="Inherit"
                                 DockPanel.Dock="Top"
                                 Visibility="Visible">
                                 <WrapPanel Orientation="Horizontal">
-                                    <Button
-                                        Name="RefreshRepoTreeButton"
+                                    <Button Name="RefreshRepoTreeButton"
                                         Width="32"
                                         Height="25"
                                         Margin="3"
@@ -777,8 +737,7 @@
                                                 </StackPanel>
                                             </StackPanel>
                                         </materialDesign:DialogHost.DialogContent>
-                                        <Button
-                                            Name="DownloadRepoButton"
+                                        <Button Name="DownloadRepoButton"
                                             Width="32"
                                             Height="25"
                                             Margin="3"
@@ -806,8 +765,7 @@
                                     </materialDesign:DialogHost>
                                 </WrapPanel>
                             </StackPanel>
-                            <TreeView
-                                x:Name="RepoTree"
+                            <TreeView x:Name="RepoTree"
                                 Grid.Row="1"
                                 HorizontalContentAlignment="Stretch"
                                 ItemsSource="{Binding OdaModel.Repos, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, IsAsync=True}"
@@ -862,16 +820,14 @@
                                 <TextBlock HorizontalAlignment="Center" Text="Recently" />
                             </StackPanel>
                         </TabItem.Header>
-                        <materialDesign:DialogHost>
+                        <materialDesign:DialogHost x:Name="CardClickDialogHost">
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <ItemsControl
-                                    Name="RecentlyProjectsItemsControl"
+                                <ItemsControl Name="RecentlyProjectsItemsControl"
                                     Margin="5,0,5,0"
                                     ItemsSource="{Binding AddinSettings.LastProjects}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Button
-                                                Name="ProjectCard"
+                                            <Button Name="ProjectCard"
                                                 Width="170"
                                                 Height="90"
                                                 Margin="5"
@@ -887,7 +843,7 @@
                                                             Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                                                             TextAlignment="Center"
                                                             TextWrapping="Wrap">
-                                                            Do you want to open this project?
+                                                            Open project?
                                                         </TextBlock>
                                                         <DockPanel>
                                                             <Button
@@ -961,8 +917,7 @@
                                                                 Text="{Binding HostName}"
                                                                 TextTrimming="WordEllipsis" />
                                                         </StackPanel>
-                                                        <Button
-                                                            Name="DeleteRecentlyProject"
+                                                        <Button Name="DeleteRecentlyProject"
                                                             Width="15"
                                                             Height="15"
                                                             Margin="0,3,0,0"
@@ -1035,8 +990,7 @@
                                     <RowDefinition Height="auto" />
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0">
-                                    <ComboBox
-                                        x:Name="DeveloperCb"
+                                    <ComboBox x:Name="DeveloperCb"
                                         Margin="0,0,0,20"
                                         materialDesign:HintAssist.HelperText="Please select developer domain on localhost"
                                         materialDesign:HintAssist.HelperTextFontSize="11"
@@ -1067,8 +1021,7 @@
                                     FontSize="16"
                                     IsChecked="{Binding OdaModel.AutoLogin}"
                                     ToolTip="Enable/disable oda login window" />
-                                <GroupBox
-                                    Name="UISettingsGroupBox"
+                                <GroupBox Name="UISettingsGroupBox"
                                     Grid.Row="3"
                                     materialDesign:ColorZoneAssist.Mode="PrimaryMid"
                                     materialDesign:ElevationAssist.Elevation="Dp3"
@@ -1087,8 +1040,7 @@
                                             <RowDefinition Height="auto" />
                                             <RowDefinition Height="auto" />
                                         </Grid.RowDefinitions>
-                                        <CheckBox
-                                            x:Name="ThemeCheckBox"
+                                        <CheckBox x:Name="ThemeCheckBox"
                                             Grid.Row="0"
                                             Margin="5"
                                             materialDesign:CheckBoxAssist.CheckBoxSize="22"
@@ -1098,8 +1050,7 @@
                                             IsChecked="{x:Null}"
                                             ToolTip="Change color theme"
                                             Unchecked="CheckBox_Checked" />
-                                        <CheckBox
-                                            x:Name="IsSimpleThemeCheckBox"
+                                        <CheckBox x:Name="IsSimpleThemeCheckBox"
                                             Grid.Row="1"
                                             Margin="5"
                                             VerticalContentAlignment="Top"
@@ -1111,8 +1062,7 @@
                                             Unchecked="IsSimpleThemeCheckBox_Checked">
                                             <TextBlock VerticalAlignment="Center">Simple hosts tree</TextBlock>
                                         </CheckBox>
-                                        <CheckBox
-                                            x:Name="IsVirtualizingTreeView"
+                                        <CheckBox x:Name="IsVirtualizingTreeView"
                                             Grid.Row="2"
                                             Margin="5"
                                             VerticalContentAlignment="Top"
@@ -1152,8 +1102,7 @@
                                                 <RowDefinition Height="auto" />
                                                 <RowDefinition Height="*" />
                                             </Grid.RowDefinitions>
-                                            <ListBox
-                                                Name="LibrariesList"
+                                            <ListBox Name="LibrariesList"
                                                 Grid.Row="1"
                                                 ItemsSource="{Binding AddinSettings.UpdateReferenceLibraries}"
                                                 SelectionMode="Extended" />
@@ -1183,8 +1132,7 @@
                                                         <materialDesign:PackIcon Kind="Plus" />
                                                         <Button.CommandParameter>
                                                             <StackPanel Margin="16">
-                                                                <TextBox
-                                                                    Name="DialogAddLibrary"
+                                                                <TextBox Name="DialogAddLibrary"
                                                                     VerticalAlignment="Center"
                                                                     materialDesign:HintAssist.Hint="DLL name"
                                                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}" />
@@ -1246,8 +1194,7 @@
                                                 <RowDefinition Height="40" />
                                                 <RowDefinition Height="*" />
                                             </Grid.RowDefinitions>
-                                            <ListBox
-                                                Name="OdaFoldersList"
+                                            <ListBox Name="OdaFoldersList"
                                                 Grid.Row="1"
                                                 ItemsSource="{Binding AddinSettings.OdaFolders}"
                                                 SelectionMode="Extended" />
@@ -1276,8 +1223,7 @@
                                                     <Button Command="{x:Static materialDesign:DialogHost.OpenDialogCommand}" ToolTip="Add an item">
                                                         <Button.CommandParameter>
                                                             <StackPanel Margin="16">
-                                                                <TextBox
-                                                                    Name="DialogAddOdaLibraryName"
+                                                                <TextBox Name="DialogAddOdaLibraryName"
                                                                     MinWidth="250"
                                                                     MaxWidth="250"
                                                                     VerticalAlignment="Center"
@@ -1288,8 +1234,7 @@
                                                                     Panel.ZIndex="100"
                                                                     DialogTheme="Inherit">
                                                                     <materialDesign:DialogHost.DialogContent>
-                                                                        <mde:OpenDirectoryControl
-                                                                            x:Name="OpenDirectoryControl"
+                                                                        <mde:OpenDirectoryControl x:Name="OpenDirectoryControl"
                                                                             Grid.Row="3"
                                                                             Background="{DynamicResource MaterialDesignPaper}"
                                                                             CancelCommand="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
@@ -1304,8 +1249,7 @@
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="auto" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBox
-                                                                            Name="DialogAddOdaLibrary"
+                                                                        <TextBox Name="DialogAddOdaLibrary"
                                                                             Grid.Column="0"
                                                                             MinWidth="215"
                                                                             MaxWidth="215"
@@ -1380,8 +1324,7 @@
                                             <RowDefinition Height="auto" />
                                             <RowDefinition Height="auto" />
                                         </Grid.RowDefinitions>
-                                        <Button
-                                            Name="RepairToolboxButton"
+                                        <Button Name="RepairToolboxButton"
                                             Grid.Row="1"
                                             Margin="5"
                                             materialDesign:ColorZoneAssist.Mode="PrimaryMid"
@@ -1390,8 +1333,7 @@
                                             FontWeight="Regular"
                                             ToolTip="Add DevExpress controls to toolbox"
                                             Visibility="Collapsed" />
-                                        <Button
-                                            Name="DownloadNet4_0"
+                                        <Button Name="DownloadNet4_0"
                                             Grid.Row="2"
                                             Margin="5"
                                             materialDesign:ColorZoneAssist.Mode="PrimaryMid"
@@ -1399,8 +1341,7 @@
                                             Content="Install .Net Framework 4.0"
                                             FontWeight="Regular"
                                             ToolTip="If you need to open old projects" />
-                                        <Button
-                                            Name="DownloadNet4_5"
+                                        <Button Name="DownloadNet4_5"
                                             Grid.Row="3"
                                             Margin="5"
                                             materialDesign:ColorZoneAssist.Mode="PrimaryMid"
@@ -1426,8 +1367,7 @@
                                             <RowDefinition Height="auto" />
                                             <RowDefinition Height="auto" />
                                         </Grid.RowDefinitions>
-                                        <TextBox
-                                            x:Name="GitLabAPIPathTb"
+                                        <TextBox x:Name="GitLabAPIPathTb"
                                             Grid.Row="0"
                                             Margin="0,0,0,20"
                                             materialDesign:HintAssist.HelperText="Enter gitlab api path"
@@ -1440,8 +1380,7 @@
                                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                             Text="{Binding OdaModel.AddinSettings.GitLabApiPath}"
                                             ToolTip="Enter gitlab api path" />
-                                        <TextBox
-                                            x:Name="GitLabAPIKeyTb"
+                                        <TextBox x:Name="GitLabAPIKeyTb"
                                             Grid.Row="1"
                                             Margin="0,0,0,20"
                                             materialDesign:HintAssist.HelperText="Enter gitlab api key"
@@ -1456,8 +1395,7 @@
                                             ToolTip="Enter gitlab api key" />
                                     </Grid>
                                 </GroupBox>
-                                <Button
-                                    Name="SaveSettingsButton"
+                                <Button Name="SaveSettingsButton"
                                     Grid.Row="8"
                                     Margin="0,20,0,0"
                                     materialDesign:ColorZoneAssist.Mode="PrimaryMid"
@@ -1480,8 +1418,7 @@
                                 <TextBlock HorizontalAlignment="Center" Text="Readme" />
                             </StackPanel>
                         </TabItem.Header>
-                        <mdxam:MarkdownScrollViewer
-                            x:Name="MarkdownHelpViewer"
+                        <mdxam:MarkdownScrollViewer x:Name="MarkdownHelpViewer"
                             Margin="10"
                             xml:space="preserve"
                             HereMarkdown="{odantdev:Text Readme.md}"
@@ -1493,8 +1430,7 @@
                     Grid.Column="0"
                     HorizontalAlignment="Center"
                     Orientation="Horizontal">
-                    <materialDesign:Snackbar
-                        x:Name="MessageContainer"
+                    <materialDesign:Snackbar x:Name="MessageContainer"
                         Width="{Binding ElementName=MainGrid, Path=ActualWidth, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                         HorizontalAlignment="Stretch"
                         ActionButtonPlacement="Inline"

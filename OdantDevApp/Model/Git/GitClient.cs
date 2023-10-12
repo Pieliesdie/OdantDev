@@ -135,7 +135,7 @@ public static class GitClient
         }
     }
 
-    public static async Task<GitLabApiClient.Models.Files.Responses.File> FindTopOclFileAsync(Project project, string path = "")
+    public static async Task<GitLabApiClient.Models.Files.Responses.File?> FindTopOclFileAsync(Project project, string path = "")
     {
         if (project.DefaultBranch == null)
             return null;

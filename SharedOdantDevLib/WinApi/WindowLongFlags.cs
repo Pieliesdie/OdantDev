@@ -1,5 +1,6 @@
 ﻿namespace NativeMethods;
 
+[Flags]
 public enum WindowLongFlags : int
 {
     GWL_EXSTYLE = -20,

@@ -36,8 +36,7 @@
                     </ControlTemplate.Resources>
                     <Grid Background="Transparent">
                         <Border x:Name="MouseOverBorder" />
-                        <Border
-                            x:Name="SelectedBorder"
+                        <Border x:Name="SelectedBorder"
                             Background="{DynamicResource MaterialDesignFlatButtonClick}"
                             Opacity="0"
                             RenderTransformOrigin="0.5,0.5">

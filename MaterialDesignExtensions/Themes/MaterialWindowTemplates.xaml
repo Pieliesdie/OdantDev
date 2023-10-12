@@ -344,8 +344,7 @@
                                             <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
                                         </MultiBinding>
                                     </StackPanel.Visibility>
-                                    <Button
-                                        x:Name="minimizeButton"
+                                    <Button x:Name="minimizeButton"
                                         Style="{StaticResource WindowMinimizeButtonStyle}"
                                         ToolTip="{x:Static localization:Strings.Minimize}">
                                         <Button.Visibility>
@@ -404,8 +403,7 @@
                                             </md:PackIcon.Style>
                                         </md:PackIcon>
                                     </Button>
-                                    <Button
-                                        x:Name="closeButton"
+                                    <Button x:Name="closeButton"
                                         Style="{StaticResource WindowCloseButtonStyle}"
                                         ToolTip="{x:Static localization:Strings.Close}">
                                         <Button.Visibility>
@@ -464,8 +462,7 @@
                                 </Border>
 
                                 <!--  resize grip  -->
-                                <ResizeGrip
-                                    x:Name="resizeGrip"
+                                <ResizeGrip x:Name="resizeGrip"
                                     Grid.Row="1"
                                     Grid.Column="2"
                                     Panel.ZIndex="2048"
@@ -687,13 +684,11 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Grid
-                                                            x:Name="baseGrid"
+                                                        <Grid x:Name="baseGrid"
                                                             Height="56"
                                                             HorizontalAlignment="Stretch"
                                                             Background="Transparent">
-                                                            <Button
-                                                                x:Name="itemButton"
+                                                            <Button x:Name="itemButton"
                                                                 Padding="0,8"
                                                                 HorizontalAlignment="Stretch"
                                                                 VerticalAlignment="Stretch"
@@ -827,8 +822,7 @@
                                             <Binding Path="WindowStyle" RelativeSource="{RelativeSource TemplatedParent}" />
                                         </MultiBinding>
                                     </StackPanel.Visibility>
-                                    <Button
-                                        x:Name="minimizeButton"
+                                    <Button x:Name="minimizeButton"
                                         Style="{StaticResource WindowMinimizeButtonStyle}"
                                         ToolTip="{x:Static localization:Strings.Minimize}">
                                         <Button.Visibility>
@@ -887,8 +881,7 @@
                                             </md:PackIcon.Style>
                                         </md:PackIcon>
                                     </Button>
-                                    <Button
-                                        x:Name="closeButton"
+                                    <Button x:Name="closeButton"
                                         Style="{StaticResource WindowCloseButtonStyle}"
                                         ToolTip="{x:Static localization:Strings.Close}">
                                         <Button.Visibility>
@@ -947,8 +940,7 @@
                                 </Border>
 
                                 <!--  resize grip  -->
-                                <ResizeGrip
-                                    x:Name="resizeGrip"
+                                <ResizeGrip x:Name="resizeGrip"
                                     Grid.Row="1"
                                     Grid.Column="2"
                                     Panel.ZIndex="2048"

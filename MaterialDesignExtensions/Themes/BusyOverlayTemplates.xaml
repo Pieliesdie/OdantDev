@@ -42,14 +42,13 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:BusyOverlay}">
-                    <Grid
-                        x:Name="BaseGrid"
+                    <Grid x:Name="BaseGrid"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch">
                         <Border
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
-                            Background="{TemplateBinding Background}"
+                            Background="{DynamicResource MaterialDesignPaper}"
                             Opacity="0.9" />
                         <ContentControl
                             Content="{TemplateBinding Content}"

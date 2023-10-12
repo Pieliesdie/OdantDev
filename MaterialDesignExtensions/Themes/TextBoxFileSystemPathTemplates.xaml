@@ -73,8 +73,7 @@
                             IsEnabled="{TemplateBinding IsEnabled}"
                             Style="{TemplateBinding TextBoxStyle}"
                             Text="{Binding Path=Directory, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type controls:TextBoxOpenDirectory}}}" />
-                        <Button
-                            x:Name="showButtonDialog"
+                        <Button x:Name="showButtonDialog"
                             Grid.Column="1"
                             IsEnabled="{TemplateBinding IsEnabled}"
                             Style="{StaticResource showButtonDialogStyle}">
@@ -105,8 +104,7 @@
                             IsEnabled="{TemplateBinding IsEnabled}"
                             Style="{TemplateBinding TextBoxStyle}"
                             Text="{Binding Path=File, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type controls:TextBoxOpenFile}}}" />
-                        <Button
-                            x:Name="showButtonDialog"
+                        <Button x:Name="showButtonDialog"
                             Grid.Column="1"
                             IsEnabled="{TemplateBinding IsEnabled}"
                             Style="{StaticResource showButtonDialogStyle}">
@@ -137,8 +135,7 @@
                             IsEnabled="{TemplateBinding IsEnabled}"
                             Style="{TemplateBinding TextBoxStyle}"
                             Text="{Binding Path=File, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type controls:TextBoxSaveFile}}}" />
-                        <Button
-                            x:Name="showButtonDialog"
+                        <Button x:Name="showButtonDialog"
                             Grid.Column="1"
                             IsEnabled="{TemplateBinding IsEnabled}"
                             Style="{StaticResource showButtonDialogStyle}">

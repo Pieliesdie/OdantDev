@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
@@ -12,10 +14,14 @@ using EnvDTE;
 
 using EnvDTE80;
 
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Threading;
+
 using MoreLinq;
 
 using oda;
 
+using OdantDevApp.Common;
 using OdantDevApp.VSCommon;
 
 using VSLangProj;
@@ -26,20 +32,22 @@ using File = System.IO.File;
 using Task = System.Threading.Tasks.Task;
 
 namespace OdantDev.Model;
+
 public sealed partial class VisualStudioIntegration
 {
     #region Private Variables
     private bool IsLastBuildSuccess { get; set; } = true;
-    private BuildEvents BuildEvents { get; set; }
-    private SolutionEvents SolutionEvents { get; set; }
-    private DTE2 EnvDTE { get; }
+    private BuildEvents? BuildEvents { get; set; }
+    private SolutionEvents? SolutionEvents { get; set; }
+    private DTE2 EnvDte { get; }
     private ConcurrentDictionary<string, BuildInfo> LoadedModules { get; } = new();
     private AddinSettings AddinSettings { get; }
     private DirectoryInfo OdaFolder => new DirectoryInfo(AddinSettings.SelectedOdaFolder.Path);
-    private ILogger Logger { get; }
+    private ILogger? Logger { get; }
+    private Project[] ActiveSolutionProjects => ((EnvDte.ActiveSolutionProjects as object[]) ?? Array.Empty<object>()).Cast<Project>().ToArray();
     #endregion
 
-    public static bool IsVisualStudioDark(DTE2 dte)
+    public static bool IsVisualStudioDark(DTE2? dte)
     {
         try
         {
@@ -56,43 +64,70 @@ public sealed partial class VisualStudioIntegration
         }
     }
 
-
-    public VisualStudioIntegration(AddinSettings addinSettings, DTE2 DTE, ILogger logger = null)
+    public VisualStudioIntegration(AddinSettings addinSettings, DTE2 dte, ILogger logger = null)
     {
         this.Logger = logger;
         this.AddinSettings = addinSettings;
 
-        EnvDTE = DTE
+        EnvDte = dte
             ?? throw new NullReferenceException("Can't get EnvDTE2 from visual studio");
 
-        if (EnvDTE.Solution.IsOpen)
+        try
         {
-            EnvDTE.Solution.Close();
+            using var retryComCallsfilter = MessageFilter.MessageFilterRegister();
+            if (EnvDte.Solution.IsOpen)
+            {
+                EnvDte.Solution.Close();
+            }
         }
+        catch { }
     }
 
     #region Visual studio events
+
     private void SubscribeToStudioEvents()
     {
-        SolutionEvents = EnvDTE.Events.SolutionEvents;
-        SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;
-        SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
+        UnsubscribeToStudioEvents();
+        SolutionEvents = EnvDte.Events.SolutionEvents;
+        if (SolutionEvents != null)
+        {
+            SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;
+            SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
+        }
+        else
+        {
+            Logger?.Info("Can't initialize EnvDTE.Events.SolutionEvents");
+        }
 
-        BuildEvents = EnvDTE.Events.BuildEvents;
-        BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
-        BuildEvents.OnBuildDone += BuildEvents_OnBuildDone;
-        BuildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
+        BuildEvents = EnvDte.Events.BuildEvents;
+        if (BuildEvents != null)
+        {
+            BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
+            BuildEvents.OnBuildDone += BuildEvents_OnBuildDone;
+            BuildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
+        }
+        else
+        {
+            Logger?.Info("Can't initialize EnvDTE.Events.BuildEvents");
+        }
     }
 
     private void UnsubscribeToStudioEvents()
     {
-        SolutionEvents.ProjectRemoved -= SolutionEvents_ProjectRemoved;
-        SolutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
-        SolutionEvents = null;
-        BuildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
-        BuildEvents.OnBuildDone -= BuildEvents_OnBuildDone;
-        BuildEvents.OnBuildProjConfigDone -= BuildEvents_OnBuildProjConfigDone;
-        BuildEvents = null;
+        if (SolutionEvents != null)
+        {
+            SolutionEvents.ProjectRemoved -= SolutionEvents_ProjectRemoved;
+            SolutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
+            SolutionEvents = null;
+        }
+
+        if (BuildEvents != null)
+        {
+            BuildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
+            BuildEvents.OnBuildDone -= BuildEvents_OnBuildDone;
+            BuildEvents.OnBuildProjConfigDone -= BuildEvents_OnBuildProjConfigDone;
+            BuildEvents = null;
+        }
     }
 
     // Если закрыть Solution и потом открыть модуль он попадает в коллекцию, после этого открывается Solution и событие очищает коллекцию модулей
@@ -105,69 +140,96 @@ public sealed partial class VisualStudioIntegration
         oda.OdaOverride.INI.DebugINI.Save();
     }
 
-    private void SolutionEvents_ProjectRemoved(Project Project)
+    private void SolutionEvents_ProjectRemoved(Project project)
     {
-        var guid = GetProjectGuid(Project);
-        if (LoadedModules.TryGetValue(guid, out var loadedModules))
+        var guid = GetProjectGuid(project);
+        if (LoadedModules.TryGetValue(guid, out _))
         {
             LoadedModules.TryRemove(guid, out _);
         }
     }
 
-    private void BuildEvents_OnBuildProjConfigDone(string Project, string ProjectConfig, string Platform, string SolutionConfig, bool Success)
+    private void BuildEvents_OnBuildProjConfigDone(string project, string projectConfig, string platform, string solutionConfig, bool success)
     {
-        IsLastBuildSuccess = Success;
+        IsLastBuildSuccess = success;
     }
 
-    private void BuildEvents_OnBuildDone(vsBuildScope Scope, vsBuildAction Action)
+    private void BuildEvents_OnBuildDone(vsBuildScope scope, vsBuildAction action)
     {
-        if ((Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll)) { return; }
+        if ((action != vsBuildAction.vsBuildActionBuild && action != vsBuildAction.vsBuildActionRebuildAll)) { return; }
         if (!IsLastBuildSuccess) { return; }
 
-        // Register the IOleMessageFilter to handle any threading 
-        // errors.     
-        using var messageFilterOff = MessageFilter.MessageFilterRegister();
-
-        foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).Cast<Project>())
+        foreach (var project in ActiveSolutionProjects)
         {
             CopyToOdaBin(project);
         }
     }
 
-    private void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
+    private void BuildEvents_OnBuildBegin(vsBuildScope scope, vsBuildAction action)
     {
-        if (Action != vsBuildAction.vsBuildActionBuild && Action != vsBuildAction.vsBuildActionRebuildAll) { return; }
+        if (action != vsBuildAction.vsBuildActionBuild && action != vsBuildAction.vsBuildActionRebuildAll) { return; }
 
-        // Register the IOleMessageFilter to handle any threading 
-        // errors.     
-        using var messageFilterOff = MessageFilter.MessageFilterRegister();
-
-        foreach (Project project in (EnvDTE.ActiveSolutionProjects as object[]).OfType<Project>())
+        foreach (var project in ActiveSolutionProjects)
         {
             if (IncreaseVersion(project).Not())
             {
-                EnvDTE.ExecuteCommand("Build.Cancel");
+                EnvDte.ExecuteCommand("Build.Cancel");
+                return;
             }
         }
     }
     #endregion
 
     #region Common Methods for Project item
+    private static ProjectItem? FindProjectItem(Project project, string name)
+    {
+        return project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == name);
+    }
+    private static CodeAttribute2? FindCodeAttribute(ProjectItem projectItem, string name)
+    {
+        return projectItem.FileCodeModel.CodeElements.OfType<CodeAttribute2>().FirstOrDefault(x => x.Name == name);
+    }
+    private static void SaveProjectItem(ProjectItem projectItem)
+    {
+        if (projectItem.IsOpen.Not())
+        {
+            projectItem.Open();
+        }
+        projectItem.Save();
+    }
+    private void SetProperties(Properties properties, IReadOnlyDictionary<string, object> values)
+    {
+        var valueCount = values.Count;
+        var iterationCount = 0;
+        foreach (Property property in properties)
+        {
+            if (values.TryGetValue(property.Name, out var value))
+            {
+                property.Value = value;
+            }
+            iterationCount++;
+
+            if (iterationCount == valueCount)
+                break;
+        }
+    }
     private bool CopyToOdaBin(Project project)
     {
         try
         {
             var currentDirectory = new FileInfo(project.FullName).Directory;
-            var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs")
+            var assemblyInfo = FindProjectItem(project, "AssemblyInfo.cs")
                 ?? throw new NullReferenceException($"Missing AssemblyInfo.cs in {project.Name}");
-            var version = new Version(
-                assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>().FirstOrDefault(x => x.Name == "AssemblyVersion")?.Value?.Replace("\"", string.Empty)
-                ?? throw new NullReferenceException(@$"Missing AssemblyVersion in {currentDirectory}\AssemblyInfo.cs"));
-            var versionPath = @$"{version.Major}.{version.Minor}\{version.Build}\{version.Revision}";
 
-            var outDirParent = new FileInfo(project.FullName).Directory.Parent;
+            var version = new Version(VisualStudioIntegration.FindCodeAttribute(assemblyInfo, "AssemblyVersion")?.Value?.Replace("\"", string.Empty)
+                ?? throw new NullReferenceException(@$"Missing AssemblyVersion in {currentDirectory}\AssemblyInfo.cs"));
+
+            var outDirParent = new FileInfo(project.FullName).Directory?.Parent
+                ?? throw new DirectoryNotFoundException(project.FullName);
+
             outDirParent.CreateSubdirectory("bin").TryDeleteDirectory();
             var outputDir = outDirParent.CreateSubdirectory("bin");
+            var versionPath = @$"{version.Major}.{version.Minor}\{version.Build}\{version.Revision}";
             var outputBinDir = outputDir.CreateSubdirectory(versionPath);
             var moduleDir = new ModuleDir(project);
             var clientBinDir = OdaFolder.CreateSubdirectory(Path.Combine("bin", versionPath, moduleDir.Name));
@@ -183,8 +245,6 @@ public sealed partial class VisualStudioIntegration
             var remoteBinDir = buildInfo.RemoteDir.Class.Dir.OpenOrCreateFolder("bin");
             var remoteVersionDir = remoteBinDir.OpenOrCreateFolder(versionPath);
 
-            var isCopyBinToServerSuccess = remoteVersionDir.SaveFile(moduleDir.BinInfo.FullName);
-
             if ((remoteVersionDir.SaveFile(moduleDir.BinInfo.FullName) && remoteVersionDir.SaveFile(moduleDir.PdbInfo.FullName)).Not())
             {
                 throw new OdaException("Can't copy bin to server", remoteVersionDir);
@@ -198,19 +258,19 @@ public sealed partial class VisualStudioIntegration
                 moduleDir.Refs.ToList().ForEach(x =>
                 {
                     x.CopyToDir(refDir);
-                    if (x is FileInfo fileInfo && x.Extension == ".dll")
-                    {
-                        var isValidVersion = Version.TryParse(FileVersionInfo.GetVersionInfo(x.FullName).FileVersion, out var FileVersion);
-                        x.CopyToDir(isValidVersion ? clientRefDir.CreateSubdirectory(FileVersion.ToString()) : clientRefDir);
-                        remoteRefDir.SaveFile(x.FullName);
-                    }
+                    if (x is not FileInfo || x.Extension != ".dll") return;
+
+                    var isValidVersion = Version.TryParse(FileVersionInfo.GetVersionInfo(x.FullName).FileVersion, out var fileVersion);
+                    x.CopyToDir(isValidVersion ? clientRefDir.CreateSubdirectory(fileVersion.ToString()) : clientRefDir);
+                    remoteRefDir.SaveFile(x.FullName);
                 });
             }
             CopyModuleDirToServer(buildInfo);
         }
         catch (Exception ex)
         {
-            Logger?.Error($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
+            Logger?.Error($"Error in Method: {MethodBase.GetCurrentMethod()?.Name}. Message: {ex.Message}");
+            return false;
         }
         return true;
     }
@@ -234,9 +294,10 @@ public sealed partial class VisualStudioIntegration
     {
         try
         {
-            var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs")
+            var assemblyInfo = FindProjectItem(project, "AssemblyInfo.cs")
                 ?? throw new NullReferenceException($"Missing AssemblyInfo.cs in {project.Name}");
-            var version = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>().FirstOrDefault(x => x.Name == "AssemblyVersion");
+
+            var version = FindCodeAttribute(assemblyInfo, "AssemblyVersion");
             if (version == null)
             {
                 assemblyInfo.FileCodeModel.AddAttribute("AssemblyVersion", $"\"{Utils.Version}\"");
@@ -247,16 +308,12 @@ public sealed partial class VisualStudioIntegration
                 var currentOdantVersion = Version.Parse(Utils.Version);
                 version.Value = $"\"{Utils.MajorVersion}.{Utils.ShortVersion}.{Math.Max(currentOdantVersion.Revision, currentVersion.Revision + 1)}\"";
             }
-            if (assemblyInfo.IsOpen.Not())
-            {
-                assemblyInfo.Open();
-            }
-            assemblyInfo.Save();
+            SaveProjectItem(assemblyInfo);
             return true;
         }
         catch (Exception ex)
         {
-            Logger?.Error($"Error in Method: {MethodBase.GetCurrentMethod().Name}. Message: {ex.Message}");
+            Logger?.Error($"Error in Method: {MethodBase.GetCurrentMethod()?.Name}. Message: {ex.Message}");
             return false;
         }
     }
@@ -266,12 +323,12 @@ public sealed partial class VisualStudioIntegration
         return project?.UniqueName;
     }
 
-    private static void SetAttributeToProjectItem(IDictionary<string, CodeAttribute2> codeAttributes, ProjectItem projectItem, string name, string value)
+    private static void SetAttributeToProjectItem(ProjectItem projectItem, string name, string value)
     {
-        codeAttributes.TryGetValue(name, out var attribute);
+        var attribute = projectItem.FileCodeModel?.CodeElements?.OfType<CodeAttribute2>()?.FirstOrDefault(x => x.Name == name);
         if (attribute == null)
         {
-            projectItem.FileCodeModel.AddAttribute(name, $"\"{value}\"");
+            projectItem.FileCodeModel?.AddAttribute(name, $"\"{value}\"");
         }
         else
         {
@@ -281,48 +338,90 @@ public sealed partial class VisualStudioIntegration
     #endregion
 
     #region Download and init  logic for Module
+    
     public async Task<bool> OpenModuleAsync(StructureItem item)
     {
-        // Register the IOleMessageFilter to handle any threading 
-        // errors.     
-        using var messageFilterOff = MessageFilter.MessageFilterRegister();
+        bool result = false;
+        System.Threading.Thread staThread = new System.Threading.Thread(() => result = OpenModule(item));
+        staThread.SetApartmentState(ApartmentState.STA); // Set the apartment state to STA
+        staThread.Start();
+        await Task.Run(() => staThread.Join());
+        return result;
+    }
 
+    private bool OpenModule(StructureItem item)
+    {     
+        using var retryComCallsfilter = MessageFilter.MessageFilterRegister();
         if (BuildEvents is null)
         {
             SubscribeToStudioEvents();
         }
+
         Project project = null;
         try
         {
             _ = item ?? throw new NullReferenceException("Item was null");
             var module = DownloadModule(item);
-            var csProj = module.csProj ?? throw new DirectoryNotFoundException("Module csproj file not found");
-            if (EnvDTE.Solution.IsOpen.Not())
+            var csProj = module.csProj
+                ?? throw new DirectoryNotFoundException("Module csproj file not found");
+
+            if (EnvDte.Solution.IsOpen.Not())
             {
-                EnvDTE.Solution.Create(TempFiles.TempPath.ToUpper(), item.Host.Name);
+                EnvDte.Solution.Create(TempFiles.TempPath.ToUpper(), item.Host.Name);
+            }
+            try
+            {
+                project = EnvDte.Solution.AddFromFile(csProj.FullName);
+            }
+            catch
+            {
+                Logger?.Info("Can't add this project to solution");
+                return false;
+            }
+            if (project.Object is not VSProject vsProject)
+            {
+                Logger?.Error($"{csProj.FullName} isn't a VSProject");
+                return false;
+            }
+            InitProject(project, item);
+            UpdateAssemblyReferences(vsProject, AddinSettings.OdaLibraries);
+            UpdateAssemblyReferences(vsProject, AddinSettings.UpdateReferenceLibraries);
+
+            if (!IncreaseVersion(project))
+            {
+                return false;
             }
 
-            project = EnvDTE.Solution.AddFromFile(csProj.FullName);
-            await InitProject(project, item);
-            UpdateAssemblyReferences(project.Object as VSProject, AddinSettings.OdaLibraries);
-            UpdateAssemblyReferences(project.Object as VSProject, AddinSettings.UpdateReferenceLibraries);
+            project.Save();
+            var projectId = GetProjectGuid(project);
+
             oda.OdaOverride.INI.DebugINI.Write("DEBUG", item.FullId, true);
-            if (!await oda.OdaOverride.INI.DebugINI.SaveAsync())
+            if (!oda.OdaOverride.INI.DebugINI.Save())
             {
                 throw new Exception("Can't save debug INI");
             }
-            IncreaseVersion(project);
-            project.Save();
-            LoadedModules.TryAdd(GetProjectGuid(project), new BuildInfo(project.UniqueName, module.remoteDir, module.localDir));
+
+            var moduleBuildInfo = new BuildInfo(project.UniqueName, module.remoteDir, module.localDir);
+            LoadedModules.TryAdd(projectId, moduleBuildInfo);
+        }
+        catch (COMException ex)
+        {
+            if (ex.Message.Contains("E_FAIL"))
+            {
+                Logger?.Error("Visual studio returns error");
+                return false;
+            }
+            Logger?.Error("Project was not initialized, Visual studio too busy");
+            return false;
         }
         catch (Exception ex)
         {
             if (project != null)
             {
-                EnvDTE.Solution.Remove(project);
+                EnvDte.Solution.Remove(project);
             }
+
             Logger?.Error($"Error while load project from item {item.Name}: {ex.Message}");
-            //await EnvDTE.ShowError($"Error while load project from item {item.Name}: {ex.Message}");
             return false;
         }
         return true;
@@ -338,19 +437,31 @@ public sealed partial class VisualStudioIntegration
             .FirstOrDefault(), item.Dir, localDir);
     }
 
-    private Task InitProject(Project project, StructureItem sourceItem)
+    private void InitProject(Project project, StructureItem sourceItem)
     {
         if (project == null) { throw new NullReferenceException(nameof(project)); }
+
+        var startProgram = VsixExtension.Platform == Bitness.x64 ? "ODA.exe" : "oda.wrapper32.exe";
+        var assemblyFile = (@$"{new FileInfo(project.FullName).Directory}\AssemblyInfo.cs");
+
         project.Name = $"{sourceItem.Name}-{sourceItem.Id}";
 
-        project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartAction").Value = prjStartAction.prjStartActionProgram;
-        var startProgram = VsixExtension.Platform == Bitness.x64 ? "ODA.exe" : "oda.wrapper32.exe";
-        project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartProgram").Value = Path.Combine(OdaFolder.FullName, startProgram);
-        project.ConfigurationManager.ActiveConfiguration.Properties.Item("StartArguments").Value = "debug";
-        project.Properties.Item("AssemblyName").Value = project.Name;
-        project.Properties.Item("ReferencePath").Value = OdaFolder.FullName;
-        var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs");
-        var assemblyFile = (@$"{new FileInfo(project.FullName).Directory}\AssemblyInfo.cs");
+        Dictionary<string, object> configurationAttributes = new()
+        {
+            { "StartAction", prjStartAction.prjStartActionProgram },
+            { "StartProgram", Path.Combine(OdaFolder.FullName, startProgram) },
+            { "StartArguments", "debug" }
+        };
+        SetProperties(project.ConfigurationManager.ActiveConfiguration.Properties, configurationAttributes);
+
+        Dictionary<string, object> projectAttributes = new()
+        {
+            { "AssemblyName", project.Name },
+            { "ReferencePath", OdaFolder.FullName }
+        };
+        SetProperties(project.Properties, projectAttributes);
+
+        var assemblyInfo = FindProjectItem(project, "AssemblyInfo.cs");
         if (assemblyInfo == null || File.Exists(assemblyFile).Not())
         {
             if (File.Exists(assemblyFile))
@@ -359,27 +470,23 @@ public sealed partial class VisualStudioIntegration
             }
             assemblyInfo = project.ProjectItems.AddFromFileCopy(Path.Combine(VsixExtension.VSIXPath.FullName, @"Templates\AssemblyInfo.cs"));
         }
-        var attributes = assemblyInfo.FileCodeModel?.CodeElements?.OfType<CodeAttribute2>()?.ToDictionary(x => x.Name);
-        if (attributes != null)
-        {
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyTitle", $"{sourceItem.Name}-{sourceItem.Id}");
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyDescription", sourceItem.Hint ?? string.Empty);
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyCopyright", $"ООО «Инфостандарт» © 2012 — {DateTime.Now.Year}");
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyDefaultAlias", $"{sourceItem.Name}");
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyCompany", $"Infostandart");
-            SetAttributeToProjectItem(attributes, assemblyInfo, "AssemblyTrademark", $"www.infostandart.com");
-        }
-        if (assemblyInfo.IsOpen.Not()) { assemblyInfo.Open(); }
-        assemblyInfo.Save();
-        return Task.CompletedTask;
+
+        SetAttributeToProjectItem(assemblyInfo, "AssemblyTitle", $"{sourceItem.Name}-{sourceItem.Id}");
+        SetAttributeToProjectItem(assemblyInfo, "AssemblyDescription", sourceItem.Hint ?? string.Empty);
+        SetAttributeToProjectItem(assemblyInfo, "AssemblyCopyright", $"ООО «Инфостандарт» © 2012 — {DateTime.Now.Year}");
+        SetAttributeToProjectItem(assemblyInfo, "AssemblyDefaultAlias", $"{sourceItem.Name}");
+        SetAttributeToProjectItem(assemblyInfo, "AssemblyCompany", $"Infostandart");
+        SetAttributeToProjectItem(assemblyInfo, "AssemblyTrademark", $"www.infostandart.com");
+
+        SaveProjectItem(assemblyInfo);
     }
 
-    private bool UpdateAssemblyReferences(VSProject VSProj, IEnumerable<string> references)
+    private bool UpdateAssemblyReferences(VSProject vsProj, IEnumerable<string> references)
     {
         try
         {
             List<string> deletedDlls = new();
-            foreach (Reference reference in VSProj.References)
+            foreach (Reference reference in vsProj.References)
             {
                 var assemblyName = new AssemblyName(GetFullName(reference));
                 var newPath = Path.Combine(OdaFolder.FullName, $"{assemblyName.Name}.dll");
@@ -396,7 +503,7 @@ public sealed partial class VisualStudioIntegration
             foreach (var dll in references)
             {
                 if (deletedDlls.Contains(dll).Not()) { continue; }
-                var reference = (Reference3)VSProj.References.Add(Path.Combine(OdaFolder.FullName, dll));
+                var reference = (Reference3)vsProj.References.Add(Path.Combine(OdaFolder.FullName, dll));
                 reference.CopyLocal = false;
                 reference.SpecificVersion = false;
                 Logger?.Info($"{dll} updated");
@@ -409,7 +516,7 @@ public sealed partial class VisualStudioIntegration
         }
     }
 
-    public static string GetFileVersion(string path)
+    public static string GetFileVersion(string? path)
     {
         if (path == null) return string.Empty;
 
@@ -419,11 +526,8 @@ public sealed partial class VisualStudioIntegration
 
     public static string GetFullName(Reference reference)
     {
-        return string.Format(@"{0}, Version={1}.{2}.{3}.{4}, Culture={5}, PublicKeyToken={6}",
-            reference.Name,
-            reference.MajorVersion, reference.MinorVersion, reference.BuildNumber, reference.RevisionNumber,
-            reference.Culture.Or("neutral"),
-            reference.PublicKeyToken.Or("null"));
+        return
+            $@"{reference.Name}, Version={reference.MajorVersion}.{reference.MinorVersion}.{reference.BuildNumber}.{reference.RevisionNumber}, Culture={reference.Culture.Or("neutral")}, PublicKeyToken={reference.PublicKeyToken.Or("null")}";
     }
 
     #endregion

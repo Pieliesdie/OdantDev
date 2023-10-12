@@ -74,10 +74,10 @@ public sealed class OdantDevPackage : AsyncPackage
     protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
     {
         await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-        Env_DTE = await this.GetServiceAsync<DTE, DTE2>();
+        EnvDte = await this.GetServiceAsync<DTE, DTE2>();
         await ToolWindowCommand.InitializeAsync(this);
     }
-    public static DTE2 Env_DTE { get; set; }
+    public static DTE2 EnvDte { get; set; }
     public static IServiceProvider ServiceProvider { get; set; }
     #endregion
 }
