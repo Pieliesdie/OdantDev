@@ -37,7 +37,7 @@ public static class StructureItemEx
         return ReadList<Host>(configItemsIntPtr);
     }
 
-    public static StructureItem FindItem(this Item item, string path)
+    public static StructureItem? FindItem(this Item item, string path)
     {
         if (item.RemoteItem == null) { return null; }
 

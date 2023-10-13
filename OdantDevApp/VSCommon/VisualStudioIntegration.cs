@@ -14,14 +14,8 @@ using EnvDTE;
 
 using EnvDTE80;
 
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Threading;
-
-using MoreLinq;
-
 using oda;
 
-using OdantDevApp.Common;
 using OdantDevApp.VSCommon;
 
 using VSLangProj;
@@ -41,10 +35,10 @@ public sealed partial class VisualStudioIntegration
     private SolutionEvents? SolutionEvents { get; set; }
     private DTE2 EnvDte { get; }
     private ConcurrentDictionary<string, BuildInfo> LoadedModules { get; } = new();
-    private AddinSettings AddinSettings { get; }
-    private DirectoryInfo OdaFolder => new DirectoryInfo(AddinSettings.SelectedOdaFolder.Path);
+    private OdantDevApp.Model.ViewModels.AddinSettings AddinSettings { get; }
+    private DirectoryInfo OdaFolder => new(AddinSettings.SelectedOdaFolder.Path);
     private ILogger? Logger { get; }
-    private Project[] ActiveSolutionProjects => ((EnvDte.ActiveSolutionProjects as object[]) ?? Array.Empty<object>()).Cast<Project>().ToArray();
+    private Project[] ActiveSolutionProjects => ((EnvDte.ActiveSolutionProjects as object[]) ?? Array.Empty<Project>()).Cast<Project>().ToArray();
     #endregion
 
     public static bool IsVisualStudioDark(DTE2? dte)
@@ -64,7 +58,7 @@ public sealed partial class VisualStudioIntegration
         }
     }
 
-    public VisualStudioIntegration(AddinSettings addinSettings, DTE2 dte, ILogger logger = null)
+    public VisualStudioIntegration(OdantDevApp.Model.ViewModels.AddinSettings addinSettings, DTE2 dte, ILogger logger = null)
     {
         this.Logger = logger;
         this.AddinSettings = addinSettings;
@@ -343,9 +337,9 @@ public sealed partial class VisualStudioIntegration
     {
         bool result = false;
         System.Threading.Thread staThread = new System.Threading.Thread(() => result = OpenModule(item));
-        staThread.SetApartmentState(ApartmentState.STA); // Set the apartment state to STA
+        staThread.SetApartmentState(ApartmentState.STA); //COM needs STA
         staThread.Start();
-        await Task.Run(() => staThread.Join());
+        await Task.Run(staThread.Join);
         return result;
     }
 
@@ -384,7 +378,7 @@ public sealed partial class VisualStudioIntegration
                 return false;
             }
             InitProject(project, item);
-            UpdateAssemblyReferences(vsProject, AddinSettings.OdaLibraries);
+            UpdateAssemblyReferences(vsProject, OdantDevApp.Model.ViewModels.AddinSettings.OdaLibraries);
             UpdateAssemblyReferences(vsProject, AddinSettings.UpdateReferenceLibraries);
 
             if (!IncreaseVersion(project))
@@ -437,7 +431,7 @@ public sealed partial class VisualStudioIntegration
             .FirstOrDefault(), item.Dir, localDir);
     }
 
-    private void InitProject(Project project, StructureItem sourceItem)
+    private void InitProject(Project project, Item sourceItem)
     {
         if (project == null) { throw new NullReferenceException(nameof(project)); }
 
@@ -486,12 +480,13 @@ public sealed partial class VisualStudioIntegration
         try
         {
             List<string> deletedDlls = new();
+            var refs = references.ToList();
             foreach (Reference reference in vsProj.References)
             {
                 var assemblyName = new AssemblyName(GetFullName(reference));
                 var newPath = Path.Combine(OdaFolder.FullName, $"{assemblyName.Name}.dll");
                 var notExist = File.Exists(reference.Path).Not();
-                var isInUpdateList = references.Contains($"{assemblyName.Name}.dll");
+                var isInUpdateList = refs.Contains($"{assemblyName.Name}.dll");
 
                 if (isInUpdateList &&
                     (notExist || GetFileVersion(newPath) != GetFileVersion(reference.Path) || AddinSettings.ForceUpdateReferences))
@@ -500,7 +495,7 @@ public sealed partial class VisualStudioIntegration
                     deletedDlls.Add($"{assemblyName.Name}.dll");
                 }
             }
-            foreach (var dll in references)
+            foreach (var dll in refs)
             {
                 if (deletedDlls.Contains(dll).Not()) { continue; }
                 var reference = (Reference3)vsProj.References.Add(Path.Combine(OdaFolder.FullName, dll));

@@ -1,16 +1,10 @@
 ﻿using System.Windows.Media;
-
 using SharedOdanDev.OdaOverride;
 
-namespace SharedOdantDev.Model;
-public class RootItem : BaseGitItem
+namespace OdantDevApp.Model.Git.GitItems;
+public class RootItem(string name) : BaseGitItem
 {
-    public RootItem(string name)
-    {
-        Name = name;
-    }
-
-    public override string Name { get; }
+    public override string Name { get; } = name;
 
     public override object Object { get; }
 

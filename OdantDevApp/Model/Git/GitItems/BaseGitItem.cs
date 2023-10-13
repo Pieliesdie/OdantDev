@@ -1,11 +1,7 @@
-﻿using System.Collections.Concurrent;
-using System.Globalization;
-using System.Windows.Data;
-using System.Windows.Media;
-
+﻿using System.Windows.Media;
 using SharedOdanDev.OdaOverride;
 
-namespace SharedOdantDev.Model;
+namespace OdantDevApp.Model.Git.GitItems;
 public abstract class BaseGitItem
 {
     public abstract string Name { get; }

@@ -1,10 +1,9 @@
 ﻿using System.Windows.Media;
-
 using SharedOdanDev.OdaOverride;
 
-namespace SharedOdantDev.Model;
+namespace OdantDevApp.Model.Git;
 
-public class RepoLoadingViewModel : RepoBaseViewModel
+public class RepoLoadingViewModel : OdantDevApp.Model.Git.RepoBaseViewModel
 {
     public RepoLoadingViewModel() : base(null, null, null) { }
     public override string Name => "Loading...";

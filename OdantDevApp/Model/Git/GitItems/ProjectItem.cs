@@ -1,29 +1,13 @@
-﻿using System;
-using System.Windows.Media;
-
+﻿using System.Windows.Media;
 using GitLabApiClient.Models.Projects.Responses;
-
-using MaterialDesignThemes.Wpf;
-
-using oda;
-
-using OdantDev;
-
 using SharedOdanDev.OdaOverride;
 
-namespace SharedOdantDev.Model;
-public class ProjectItem : BaseGitItem
+namespace OdantDevApp.Model.Git.GitItems;
+public class ProjectItem(Project project) : BaseGitItem
 {
-    private readonly Project _project;
+    public override string Name => $"{project.Name} ({project.Path})";
 
-    public ProjectItem(Project project)
-    {
-        _project = project;
-    }
-
-    public override string Name => $"{_project.Name} ({_project.Path})";
-
-    public override object Object => _project;
+    public override object Object => project;
 
     public override bool HasModule => true;
 

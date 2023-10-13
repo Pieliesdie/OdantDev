@@ -1,30 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-
 using GitLabApiClient;
 using GitLabApiClient.Internal.Paths;
 using GitLabApiClient.Models.Groups.Responses;
 using GitLabApiClient.Models.Projects.Requests;
-using GitLabApiClient.Models.Trees.Responses;
 using GitLabApiClient.Models.Users.Responses;
-
 using oda;
-
 using OdantDev;
-
 using SharedOdantDev.Common;
-
 using File = System.IO.File;
 using Project = GitLabApiClient.Models.Projects.Responses.Project;
 
-namespace SharedOdantDev.Model;
+namespace OdantDevApp.Model.Git;
 public static class GitClientFieldName
 {
-    public static string GIT_REPO_HTTP => "GitLabRepositoryUrl";
-    public static string GIT_REPO_SSH => "GitLabRepository";
-    public static string GIT_PROJECT_ID => "GitLabRepositoryID";
+    public const string GIT_REPO_HTTP = "GitLabRepositoryUrl";
+    public const string GIT_REPO_SSH = "GitLabRepository";
+    public const string GIT_PROJECT_ID = "GitLabRepositoryID";
 }
 
 public class CreateProjectOptions
@@ -32,31 +25,34 @@ public class CreateProjectOptions
     public required StructureItem Item { get; init; }
     public Group? Group { get; init; }
     public required string Name { get; init; }
-    public string Label { get; init; }
-    public string Description { get; init; }
+    public string Label { get; init; } = string.Empty;
+    public string Description { get; init; } = string.Empty;
 }
 
 public static class GitClient
 {
-    public static GitLabClient Client { get; set; }
-    public static Session Session { get; set; }
+    public static GitLabClient? Client { get; set; }
+    public static Session? Session { get; set; }
 
-    public async static Task CreateClientAsync(string apiPath, string apiKey)
+    public static async Task CreateClientAsync(string apiPath, string apiKey)
     {
         if (string.IsNullOrEmpty(apiPath) || string.IsNullOrEmpty(apiKey))
             return;
 
         Client = new GitLabClient(apiPath, apiKey);
-        await LoadSessionAsync();
+        await LoadSessionAsync(Client);
     }
 
-    public static async Task LoadSessionAsync()
+    public static async Task LoadSessionAsync(GitLabClient client)
     {
-        Session = await Client.Users.GetCurrentSessionAsync();
+        Session = await client.Users.GetCurrentSessionAsync();
     }
 
-    public static async Task<Project> CreateProjectAsync(CreateProjectOptions options)
+    public static async Task<Project?> CreateProjectAsync(CreateProjectOptions options)
     {
+        if (Client == null)
+            return null;
+
         var item = options.Item;
         var itemPath = item.Dir.RemoteFolder.LoadFolder();
         var moduleFolder = DevHelpers.ClearDomainAndClassInPath(itemPath);
@@ -94,73 +90,64 @@ public static class GitClient
 
     public static string CloneProject(Project project, string domainFolderPath, bool isDomainModule)
     {
-        try
+        if (string.IsNullOrEmpty(domainFolderPath))
         {
-            if (string.IsNullOrEmpty(domainFolderPath))
-            {
-                return string.Empty;
-            }
-
-            var domainFolder = new DirectoryInfo(domainFolderPath);
-
-            string defaultDirName = isDomainModule ? $"d.{project.Name}" : project.Name;
-            string moduleDirName = defaultDirName;
-            bool isSuccess = false;
-
-            for (int i = 0; i < 100; i++)
-            {
-                if (!Directory.Exists(Path.Combine(domainFolder.FullName, moduleDirName)))
-                {
-                    isSuccess = true;
-                    break;
-                }
-
-                moduleDirName = $"{defaultDirName}_{i}";
-            }
-
-            if (!isSuccess)
-            {
-                return string.Empty;
-            }
-
-            DirectoryInfo moduleDir = domainFolder.CreateSubdirectory(moduleDirName);
-
-            DevHelpers.InvokeCmdCommand($"git clone {project.SshUrlToRepo} .", moduleDir.FullName);
-
-            return moduleDir.FullName;
+            return string.Empty;
         }
-        catch
+
+        var domainFolder = new DirectoryInfo(domainFolderPath);
+
+        var defaultDirName = isDomainModule ? $"d.{project.Name}" : project.Name;
+        var moduleDirName = defaultDirName;
+        var isSuccess = false;
+
+        for (var i = 0; i < 100; i++)
         {
-            throw;
+            if (!Directory.Exists(Path.Combine(domainFolder.FullName, moduleDirName)))
+            {
+                isSuccess = true;
+                break;
+            }
+
+            moduleDirName = $"{defaultDirName}_{i}";
         }
+
+        if (!isSuccess)
+        {
+            return string.Empty;
+        }
+
+        var moduleDir = domainFolder.CreateSubdirectory(moduleDirName);
+
+        DevHelpers.InvokeCmdCommand($"git clone {project.SshUrlToRepo} .", moduleDir.FullName);
+
+        return moduleDir.FullName;
     }
 
     public static async Task<GitLabApiClient.Models.Files.Responses.File?> FindTopOclFileAsync(Project project, string path = "")
     {
-        if (project.DefaultBranch == null)
+        if (project.DefaultBranch == null || Client == null)
             return null;
 
         try
         {
-            IList<Tree> collection = await Client.Trees.GetAsync(project.Id, x =>
+            var collection = await Client.Trees.GetAsync(project.Id, x =>
             {
                 x.Path = path;
             });
 
-            foreach (Tree tree in collection)
+            foreach (var tree in collection)
             {
-                if (tree.Name is "DOMAIN" or "CLASS")
+                switch (tree.Name)
                 {
-                    return await FindTopOclFileAsync(project, tree.Path);
-                }
-
-                if (tree.Name == "class.ocl")
-                {
-                    return await Client.Files.GetAsync(project.Id, tree.Path);
+                    case "DOMAIN" or "CLASS":
+                        return await FindTopOclFileAsync(project, tree.Path);
+                    case "class.ocl":
+                        return await Client.Files.GetAsync(project.Id, tree.Path);
                 }
             }
         }
-        catch (Exception)
+        catch
         {
         }
 
@@ -169,6 +156,7 @@ public static class GitClient
 
     public static async Task DeleteProjectAsync(ProjectId projectId)
     {
+        if (Client == null) return;
         await Client.Projects.DeleteAsync(projectId);
     }
 }

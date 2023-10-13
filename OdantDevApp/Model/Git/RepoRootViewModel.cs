@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using GitLabApiClient.Models.Groups.Responses;
-
 using OdantDev.Model;
+using OdantDevApp.Model.Git.GitItems;
 
-namespace SharedOdantDev.Model;
+namespace OdantDevApp.Model.Git;
 public class RepoRootViewModel : RepoGroupViewModel
 {
     public override bool HasModule => false;
@@ -18,16 +16,15 @@ public class RepoRootViewModel : RepoGroupViewModel
         if (GitClient.Client == null) { return Enumerable.Empty<RepoBaseViewModel>(); }
 
         var children = new List<RepoBaseViewModel>();
-        IList<Group> groups = await GitClient.Client.Groups.GetAsync();
+        var groups = await GitClient.Client.Groups.GetAsync();
 
         if (groups != null)
         {
-            foreach (Group group in groups.Where(x => x.ParentId == null))
-            {
-                var newItem = new GroupItem(group);
-
-                children.Add(new RepoGroupViewModel(newItem, Item, LoadProjects, logger));
-            }
+            var groupChildren = groups
+                .Where(x => x.ParentId == null)
+                .Select(group => new GroupItem(group))
+                .Select(newItem => new RepoGroupViewModel(newItem, Item, LoadProjects, Logger));
+            children.AddRange(groupChildren);
         }
 
         if (!LoadProjects) { return children; }
@@ -35,11 +32,13 @@ public class RepoRootViewModel : RepoGroupViewModel
         var projects = await GitClient.Client.Projects.GetAsync();
         if (projects == null) { return children; }
 
-        foreach (var project in projects.Where(x => x.Namespace.Kind != "group"))
-        {
-            var newItem = new ProjectItem(project);
-            children.Add(new RepoProjectViewModel(newItem, Item, logger));
-        }
+        var notGroupChildren = 
+            projects
+            .Where(x => x.Namespace.Kind != "group")
+            .Select(project => new ProjectItem(project))
+            .Select(newItem => new RepoProjectViewModel(newItem, Item, Logger));
+
+        children.AddRange(notGroupChildren);
         return children;
     }
 }

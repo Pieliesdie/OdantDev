@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 using GitLabApiClient.Models.Groups.Responses;
-using GitLabApiClient.Models.Projects.Responses;
 
 using OdantDev.Model;
+using OdantDevApp.Model.Git.GitItems;
 
-namespace SharedOdantDev.Model;
+namespace OdantDevApp.Model.Git;
 public class RepoGroupViewModel : RepoBaseViewModel
 {
-    public RepoGroupViewModel(GroupItem item, BaseGitItem parent, bool loadProjects, ILogger logger = null)
+    public RepoGroupViewModel(GroupItem item, BaseGitItem parent, bool loadProjects, ILogger? logger = null)
         : base(item, parent, logger)
     {
         LoadProjects = loadProjects;
@@ -21,7 +20,7 @@ public class RepoGroupViewModel : RepoBaseViewModel
 
     public override async Task<IEnumerable<RepoBaseViewModel>> GetChildrenAsync()
     {
-        if (GitClient.Client == null)
+        if (GitClient.Client == null || Item == null)
         {
             return Enumerable.Empty<RepoBaseViewModel>();
         }
@@ -29,15 +28,14 @@ public class RepoGroupViewModel : RepoBaseViewModel
         try
         {
             var children = new List<RepoBaseViewModel>();
-            int id = ((Group)Item.Object).Id;
-            IList<Group> groups = await GitClient.Client.Groups.GetSubgroupsAsync(id);
+            var id = ((Group)Item.Object).Id;
+            var groups = await GitClient.Client.Groups.GetSubgroupsAsync(id);
             if (groups != null)
             {
-                foreach (Group innerGroup in groups)
-                {
-                    var newItem = new GroupItem(innerGroup);
-                    children.Add(new RepoGroupViewModel(newItem, Item, LoadProjects, logger));
-                }
+                var innerGroupChildren = groups
+                    .Select(innerGroup => new GroupItem(innerGroup))
+                    .Select(newItem => new RepoGroupViewModel(newItem, Item, LoadProjects, Logger));
+                children.AddRange(innerGroupChildren);
             }
 
             if (!LoadProjects)
@@ -45,19 +43,19 @@ public class RepoGroupViewModel : RepoBaseViewModel
                 return children;
             }
 
-            IList<Project> projects = await GitClient.Client.Groups.GetProjectsAsync(id);
+            var projects = await GitClient.Client.Groups.GetProjectsAsync(id);
 
             if (projects == null) { return children; }
 
-            foreach (Project project in projects)
-            {
-                var newItem = new ProjectItem(project);
-                children.Add(new RepoProjectViewModel(newItem, Item, logger));
-            }
+            var projectChildren = projects
+                .Select(project => new ProjectItem(project))
+                .Select(newItem => new RepoProjectViewModel(newItem, Item, Logger));
+
+            children.AddRange(projectChildren);
 
             return children;
         }
-        catch (Exception ex)
+        catch
         {
             return Enumerable.Empty<RepoBaseViewModel>();
         }

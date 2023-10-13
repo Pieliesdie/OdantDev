@@ -9,63 +9,51 @@ using System.Xml.Serialization;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using OdantDev;
+using OdantDev.Model;
+
 using OdantDevApp.Common;
 
-namespace OdantDev.Model;
+namespace OdantDevApp.Model.ViewModels;
 
 public partial class AddinSettings : ObservableObject
 {
     private const string FILE_NAME = "AddinSettings.xml";
     private const string TEMPLATES_FOLDER_NAME = "Templates";
 
-    private static readonly string TemplatePath = Path.Combine(VsixExtension.VSIXPath.FullName, TEMPLATES_FOLDER_NAME, FILE_NAME);
-    private static readonly XmlSerializer Serializer = new(typeof(AddinSettings));
+    private static readonly string templatePath = Path.Combine(VsixExtension.VSIXPath.FullName, TEMPLATES_FOLDER_NAME, FILE_NAME);
+    private static readonly XmlSerializer serializer = new(typeof(AddinSettings));
     public static readonly string[] OdaLibraries = new[] { "odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll" };
 
     public AddinSettings() { }
 
-    [ObservableProperty]
-    bool isVirtualizeTreeView;
+    [ObservableProperty] bool isVirtualizeTreeView;
 
-    [ObservableProperty]
-    AsyncObservableCollection<string> pinnedItems;
+    [ObservableProperty] AsyncObservableCollection<string> pinnedItems;
 
-    [ObservableProperty]
-    AsyncObservableCollection<Project> lastProjects;
+    [ObservableProperty] AsyncObservableCollection<Project> lastProjects;
     partial void OnLastProjectsChanging(AsyncObservableCollection<Project> value)
     {
         value = new AsyncObservableCollection<Project>(value.OrderByDescending(x => x.OpenTime).Take(15));
     }
 
-    [ObservableProperty]
-    bool forceUpdateReferences = true;
+    [ObservableProperty] bool forceUpdateReferences = true;
 
-    [ObservableProperty]
-    AsyncObservableCollection<string> updateReferenceLibraries;
+    [ObservableProperty] AsyncObservableCollection<string> updateReferenceLibraries;
 
-    //[ObservableProperty]
-    //bool isDarkTheme;
+    [ObservableProperty] bool isSimpleTheme;
 
-    [ObservableProperty]
-    bool isSimpleTheme;
+    [ObservableProperty] string? selectedDevelopeDomain;
 
-    [ObservableProperty]
-    string selectedDevelopeDomain;
+    [ObservableProperty] AsyncObservableCollection<string> lastOdaFolders;
 
-    [ObservableProperty]
-    AsyncObservableCollection<string> lastOdaFolders;
+    [ObservableProperty] AsyncObservableCollection<PathInfo> odaFolders;
 
-    [ObservableProperty]
-    AsyncObservableCollection<PathInfo> odaFolders;
+    [ObservableProperty] PathInfo selectedOdaFolder;
 
-    [ObservableProperty]
-    PathInfo selectedOdaFolder;
+    [ObservableProperty] string gitLabApiKey;
 
-    [ObservableProperty]
-    string gitLabApiKey;
-
-    [ObservableProperty]
-    string gitLabApiPath;
+    [ObservableProperty] string gitLabApiPath;
 
     [XmlIgnore]
     public string AddinSettingsPath { get; private set; }
@@ -73,23 +61,25 @@ public partial class AddinSettings : ObservableObject
     public static AddinSettings Create(DirectoryInfo folder)
     {
         AddinSettings settings;
-        string path = Path.Combine(folder.FullName, FILE_NAME);
+        var path = Path.Combine(folder.FullName, FILE_NAME);
         try
         {
             string loadPath = path;
             if (File.Exists(loadPath).Not())
             {
-                loadPath = TemplatePath;
+                loadPath = templatePath;
             }
             using var fs = new FileStream(loadPath, FileMode.Open, FileAccess.Read);
-            settings = Serializer.Deserialize(fs) as AddinSettings;
-            settings?.OdaFolders.Remove(x => x.Name == "Last run");
+            settings = serializer.Deserialize(fs) as AddinSettings;
+            (settings?.OdaFolders).Remove(x => x.Name == "Last run");
         }
         catch
         {
-            using var fs = new FileStream(TemplatePath, FileMode.Open, FileAccess.Read);
-            settings = Serializer.Deserialize(fs) as AddinSettings;
+            using var fs = new FileStream(templatePath, FileMode.Open, FileAccess.Read);
+            settings = serializer.Deserialize(fs) as AddinSettings;
         }
+        if(settings == null)
+            throw new Exception("Can't create settings file");
         settings.AddinSettingsPath = path;
         settings.OdaFolders.Insert(0, new PathInfo("Last run", VsixExtension.LastOdaFolder.FullName));
         return settings;
@@ -101,7 +91,7 @@ public partial class AddinSettings : ObservableObject
         {
             File.Delete(AddinSettingsPath);
             using var fs = new FileStream(AddinSettingsPath, FileMode.OpenOrCreate);
-            Serializer.Serialize(fs, this);
+            serializer.Serialize(fs, this);
             return true;
         }
         catch
@@ -115,25 +105,16 @@ public partial class AddinSettings : ObservableObject
         return await Task.Run(Save);
     }
 
-    public struct Project
+    public struct Project(string name, string fullId, string domainName, DateTime openTime, BitmapSource? icon = null)
     {
-        private ImageSource _icon;
-        public Project(string name, string fullId, string domainName, DateTime openTime, BitmapSource icon = null)
-        {
-            Name = name;
-            FullId = fullId;
-            HostName = domainName;
-            OpenTime = openTime;
-            IconBase64 = icon.ToBase64String();
-        }
-
-        public string IconBase64 { get; set; }
-        public ImageSource Icon => _icon ??= IconBase64?.FromBase64String();
+        private ImageSource? icon;
+        public string? IconBase64 { get; set; } = icon?.ToBase64String();
+        public ImageSource? Icon => icon ??= IconBase64?.FromBase64String();
         public bool HasIcon => Icon is not null;
-        public string Name { get; set; }
-        public string FullId { get; set; }
-        public string HostName { get; set; }
-        public DateTime OpenTime { get; set; }
+        public string Name { get; set; } = name;
+        public string FullId { get; set; } = fullId;
+        public string HostName { get; set; } = domainName;
+        public DateTime OpenTime { get; set; } = openTime;
 
         public override bool Equals(object obj)
         {
