@@ -196,17 +196,9 @@
                                             Width="32" Height="25"
                                             Margin="3"
                                             Click="DownloadModuleButton_Click" FontSize="12"
+                                            IsEnabled="{Binding CanOpenModule}"
                                             Style="{StaticResource MaterialDesignFlatMidBgButton}"
                                             ToolTip="Download module to selected local developer domain" ToolTipService.ShowOnDisabled="True">
-                                        <Button.IsEnabled>
-                                            <MultiBinding Converter="{StaticResource BooleanAllConverter}">
-                                                <Binding ElementName="OdaTree" FallbackValue="false"
-                                                         Path="SelectedItem.HasModule" TargetNullValue="false" />
-                                                <Binding Converter="{StaticResource InvertBooleanConverter}"
-                                                         ElementName="OdaTree" FallbackValue="false"
-                                                         Path="SelectedItem.IsLocal" TargetNullValue="false" />
-                                            </MultiBinding>
-                                        </Button.IsEnabled>
                                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                                             <materialDesign:PackIcon Width="18" Height="18"
                                                                      Margin="-10,0,-10,0"
@@ -421,7 +413,7 @@
                                                 <ContextMenu Visibility="{Binding Path=IsItemAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                     <MenuItem x:Name="MenuItemOpenModule"
                                                               Click="OpenModuleButton_Click" Header="Open module"
-                                                              Visibility="{Binding HasModule, Converter={StaticResource BooleanToCollapsedVisibility}}">
+                                                              Visibility="{Binding CanOpenModule, Converter={StaticResource BooleanToCollapsedVisibility}}">
                                                         <MenuItem.Icon>
                                                             <materialDesign:PackIcon Foreground="BlueViolet" Kind="LanguageCsharp" />
                                                         </MenuItem.Icon>

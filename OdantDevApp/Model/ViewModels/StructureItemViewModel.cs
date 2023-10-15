@@ -77,6 +77,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     public bool IsPinned => this is StructureItemViewModel<StructureItem> item && (connection?.PinnedItems?.Contains(item) ?? false);
     public bool HasRepository => !string.IsNullOrWhiteSpace(Item?.Root?.GetAttribute("GitLabRepository"));
     public bool CanCreateModule => Item is Class && !HasModule && IsLocal;
+    public bool CanOpenModule => Item is Class && HasModule && IsLocal;
     public bool IsLocal => Item?.Host?.IsLocal ?? false;
     public bool IsItemAvailable => Item != null;
     public ItemType ItemType { get; private set; }
