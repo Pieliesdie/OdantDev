@@ -77,7 +77,8 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     public bool IsPinned => this is StructureItemViewModel<StructureItem> item && (connection?.PinnedItems?.Contains(item) ?? false);
     public bool HasRepository => !string.IsNullOrWhiteSpace(Item?.Root?.GetAttribute("GitLabRepository"));
     public bool CanCreateModule => Item is Class && !HasModule && IsLocal;
-    public bool CanOpenModule => Item is Class && HasModule && IsLocal;
+    public bool CanOpenModule => HasModule && IsLocal;
+    public bool CanDownloadModule => Item is Class && HasModule && !IsLocal;
     public bool IsLocal => Item?.Host?.IsLocal ?? false;
     public bool IsItemAvailable => Item != null;
     public ItemType ItemType { get; private set; }
@@ -107,6 +108,8 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     {
         get
         {
+            if (Item is null) 
+                return false;
             switch (ItemType)
             {
                 case ItemType.Class:
@@ -116,7 +119,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
                         if (Children == dummyList || Children is null)
                             Children = GetChildren(Item, this, logger, connection);
 
-                        return Children?.OfType<StructureItemViewModel<T>>().Any(x => x.HasModule) ?? false;
+                        return Children?.Any(x => x.HasModule) ?? false;
                     }
                 default:
                     return false;
@@ -200,7 +203,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         }
         catch
         {
-            logger?.Info($"Unhandled exepction for {this}");
+            logger?.Info($"Unhandled exception for {this}");
             Children = null;
             throw;
         }
@@ -336,29 +339,36 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     [RelayCommand]
     public void Pin()
     {
-        if (Item is null)
+        try
         {
-            logger?.Info("Can't pin this item");
-            return;
-        }
-        if (!IsPinned)
-        {
-            var copy = new StructureItemViewModel<StructureItem>(Item, Parent as StructureItemViewModel<StructureItem>, logger, connection);
-            if (connection is null)
+            if (Item is null)
+            {
+                logger?.Info("Can't pin this item");
                 return;
-            connection.PinnedItems.Add(copy);
-            connection.AddinSettings.PinnedItems.Add(copy.Item.FullId);
+            }
+            if (!IsPinned)
+            {
+                var copy = new StructureItemViewModel<StructureItem>(Item, Parent as StructureItemViewModel<StructureItem>, logger, connection);
+                if (copy.Item?.FullId is null || connection is null)
+                    return;
+                connection.PinnedItems.Add(copy);
+                connection.AddinSettings.PinnedItems.Add(copy.Item.FullId);
 
+            }
+            else
+            {
+                if (connection is null)
+                    return;
+                connection.PinnedItems.Remove(x => x.Item?.FullId == Item.FullId);
+                connection.AddinSettings.PinnedItems.Remove(Item.FullId);
+            }
+            _ = connection.AddinSettings.SaveAsync();
+            OnPropertyChanged(nameof(IsPinned));
         }
-        else
+        catch(Exception ex)
         {
-            if (connection is null)
-                return;
-            connection.PinnedItems.Remove(x => x.Item?.FullId == Item.FullId);
-            connection.AddinSettings.PinnedItems.Remove(Item.FullId);
+            logger?.Info(ex.ToString());
         }
-        _ = connection.AddinSettings.SaveAsync();
-        OnPropertyChanged(nameof(IsPinned));
     }
 
     public override string ToString() => Name;
