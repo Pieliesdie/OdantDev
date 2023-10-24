@@ -31,6 +31,7 @@ public sealed partial class VisualStudioIntegration
 {
     #region Private Variables
     private bool IsLastBuildSuccess { get; set; } = true;
+    private bool FireEvents { get; set; } = false;
     private BuildEvents? BuildEvents { get; set; }
     private SolutionEvents? SolutionEvents { get; set; }
     private DTE2 EnvDte { get; }
@@ -81,7 +82,6 @@ public sealed partial class VisualStudioIntegration
 
     private void SubscribeToStudioEvents()
     {
-        UnsubscribeToStudioEvents();
         SolutionEvents = EnvDte.Events.SolutionEvents;
         if (SolutionEvents != null)
         {
@@ -108,34 +108,23 @@ public sealed partial class VisualStudioIntegration
 
     private void UnsubscribeToStudioEvents()
     {
-        if (SolutionEvents != null)
-        {
-            SolutionEvents.ProjectRemoved -= SolutionEvents_ProjectRemoved;
-            SolutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
-            SolutionEvents = null;
-        }
-
-        if (BuildEvents != null)
-        {
-            BuildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
-            BuildEvents.OnBuildDone -= BuildEvents_OnBuildDone;
-            BuildEvents.OnBuildProjConfigDone -= BuildEvents_OnBuildProjConfigDone;
-            BuildEvents = null;
-        }
+        FireEvents = false;
     }
 
     // Если закрыть Solution и потом открыть модуль он попадает в коллекцию, после этого открывается Solution и событие очищает коллекцию модулей
     // добавил эвент SolutionEvents_AfterClosing, думаю в таком случае будет правильнее там очищать
     private void SolutionEvents_AfterClosing()
     {
+        if (!FireEvents) return;
         LoadedModules.Clear();
-        UnsubscribeToStudioEvents();
         oda.OdaOverride.INI.DebugINI.Clear();
         oda.OdaOverride.INI.DebugINI.Save();
+        UnsubscribeToStudioEvents();
     }
 
     private void SolutionEvents_ProjectRemoved(Project project)
     {
+        if (!FireEvents) return;
         var guid = GetProjectGuid(project);
         if (LoadedModules.TryGetValue(guid, out _))
         {
@@ -145,26 +134,33 @@ public sealed partial class VisualStudioIntegration
 
     private void BuildEvents_OnBuildProjConfigDone(string project, string projectConfig, string platform, string solutionConfig, bool success)
     {
+        if (!FireEvents) return;
         IsLastBuildSuccess = success;
     }
 
     private void BuildEvents_OnBuildDone(vsBuildScope scope, vsBuildAction action)
     {
+        if (!FireEvents) return;
         if ((action != vsBuildAction.vsBuildActionBuild && action != vsBuildAction.vsBuildActionRebuildAll)) { return; }
         if (!IsLastBuildSuccess) { return; }
 
         foreach (var project in ActiveSolutionProjects)
         {
+            if (LoadedModules.TryGetValue(GetProjectGuid(project), out _)) { continue; }
+
             CopyToOdaBin(project);
         }
     }
 
     private void BuildEvents_OnBuildBegin(vsBuildScope scope, vsBuildAction action)
     {
+        if (!FireEvents) return;
         if (action != vsBuildAction.vsBuildActionBuild && action != vsBuildAction.vsBuildActionRebuildAll) { return; }
 
         foreach (var project in ActiveSolutionProjects)
         {
+            if (LoadedModules.TryGetValue(GetProjectGuid(project), out _)) { continue; }
+
             if (IncreaseVersion(project).Not())
             {
                 EnvDte.ExecuteCommand("Build.Cancel");
@@ -332,7 +328,7 @@ public sealed partial class VisualStudioIntegration
     #endregion
 
     #region Download and init  logic for Module
-    
+
     public async Task<bool> OpenModuleAsync(StructureItem item)
     {
         bool result = false;
@@ -344,13 +340,12 @@ public sealed partial class VisualStudioIntegration
     }
 
     private bool OpenModule(StructureItem item)
-    {     
+    {
         using var retryComCallsfilter = MessageFilter.MessageFilterRegister();
         if (BuildEvents is null)
         {
             SubscribeToStudioEvents();
         }
-
         Project project = null;
         try
         {
@@ -397,6 +392,7 @@ public sealed partial class VisualStudioIntegration
 
             var moduleBuildInfo = new BuildInfo(project.UniqueName, module.remoteDir, module.localDir);
             LoadedModules.TryAdd(projectId, moduleBuildInfo);
+            FireEvents = true;
         }
         catch (COMException ex)
         {
@@ -418,6 +414,7 @@ public sealed partial class VisualStudioIntegration
             Logger?.Error($"Error while load project from item {item.Name}: {ex.Message}");
             return false;
         }
+
         return true;
     }
 
