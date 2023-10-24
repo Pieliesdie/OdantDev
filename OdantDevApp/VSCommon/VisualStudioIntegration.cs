@@ -82,27 +82,33 @@ public sealed partial class VisualStudioIntegration
 
     private void SubscribeToStudioEvents()
     {
-        SolutionEvents = EnvDte.Events.SolutionEvents;
-        if (SolutionEvents != null)
+        FireEvents = true;
+        if (SolutionEvents is null)
         {
-            SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;
-            SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
+            SolutionEvents = EnvDte.Events.SolutionEvents;
+            if (SolutionEvents != null)
+            {
+                SolutionEvents.ProjectRemoved += SolutionEvents_ProjectRemoved;
+                SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
+            }
+            else
+            {
+                Logger?.Info("Can't initialize EnvDTE.Events.SolutionEvents");
+            }
         }
-        else
+        if (BuildEvents is null)
         {
-            Logger?.Info("Can't initialize EnvDTE.Events.SolutionEvents");
-        }
-
-        BuildEvents = EnvDte.Events.BuildEvents;
-        if (BuildEvents != null)
-        {
-            BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
-            BuildEvents.OnBuildDone += BuildEvents_OnBuildDone;
-            BuildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
-        }
-        else
-        {
-            Logger?.Info("Can't initialize EnvDTE.Events.BuildEvents");
+            BuildEvents = EnvDte.Events.BuildEvents;
+            if (BuildEvents != null)
+            {
+                BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
+                BuildEvents.OnBuildDone += BuildEvents_OnBuildDone;
+                BuildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
+            }
+            else
+            {
+                Logger?.Info("Can't initialize EnvDTE.Events.BuildEvents");
+            }
         }
     }
 
@@ -146,7 +152,7 @@ public sealed partial class VisualStudioIntegration
 
         foreach (var project in ActiveSolutionProjects)
         {
-            if (LoadedModules.TryGetValue(GetProjectGuid(project), out _)) { continue; }
+            if (!LoadedModules.TryGetValue(GetProjectGuid(project), out _)) { continue; }
 
             CopyToOdaBin(project);
         }
@@ -159,7 +165,7 @@ public sealed partial class VisualStudioIntegration
 
         foreach (var project in ActiveSolutionProjects)
         {
-            if (LoadedModules.TryGetValue(GetProjectGuid(project), out _)) { continue; }
+            if (!LoadedModules.TryGetValue(GetProjectGuid(project), out _)) { continue; }
 
             if (IncreaseVersion(project).Not())
             {
@@ -342,10 +348,8 @@ public sealed partial class VisualStudioIntegration
     private bool OpenModule(StructureItem item)
     {
         using var retryComCallsfilter = MessageFilter.MessageFilterRegister();
-        if (BuildEvents is null)
-        {
-            SubscribeToStudioEvents();
-        }
+
+        SubscribeToStudioEvents();
         Project project = null;
         try
         {
@@ -392,7 +396,6 @@ public sealed partial class VisualStudioIntegration
 
             var moduleBuildInfo = new BuildInfo(project.UniqueName, module.remoteDir, module.localDir);
             LoadedModules.TryAdd(projectId, moduleBuildInfo);
-            FireEvents = true;
         }
         catch (COMException ex)
         {
