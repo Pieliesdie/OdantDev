@@ -1,8 +1,11 @@
 ﻿namespace OdantDev.Model;
-public struct PathInfo
+public class PathInfo
 {
+    public PathInfo()
+    {
+
+    }
     public PathInfo(string name, string path)
-        : this()
     {
         Name = name;
         Path = path;
