@@ -23,6 +23,7 @@ using SharedOdanDev.OdaOverride;
 using SharedOdantDev.Common;
 
 namespace OdantDevApp.Model.ViewModels;
+
 public partial class StructureItemViewModel<T> : ObservableObject where T : StructureItem
 {
     private static readonly IEnumerable<StructureItemViewModel<T>> dummyList = new List<StructureItemViewModel<T>>() { new() { Name = "Loading...", Icon = PredefinedImages.LoadImage } };
@@ -36,33 +37,22 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     {
         try
         {
-            switch (type)
+            switch ((StructureItemEvent)type)
             {
-                case 3:
+                case StructureItemEvent.Update:
+                case StructureItemEvent.Delete:
                     {
                         if (Parent != null)
                         {
                             await Parent.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(15));
                         }
-
                         break;
                     }
-                case 2:
-                    {
-                        await this.RefreshAsync();
-                        if (Parent != null)
-                        {
-                            await Parent.RefreshAsync().WithTimeout(TimeSpan.FromSeconds(15));
-                        }
-
-                        break;
-                    }
-                case < 6:
+                case StructureItemEvent.None:
+                case StructureItemEvent.Create:
                     await RefreshAsync().WithTimeout(TimeSpan.FromSeconds(15));
                     break;
             }
-
-            OnUpdate?.Invoke(type, @params == IntPtr.Zero ? string.Empty : Marshal.PtrToStringUni(@params));
         }
         catch (TimeoutException) { }
         catch (Exception ex)
@@ -72,15 +62,13 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     }
 
     private ODAItem? RemoteItem => this.Item?.RemoteItem;
-    public delegate void Update(int type, string? @params);
-    public event Update OnUpdate;
     public bool IsPinned => this is StructureItemViewModel<StructureItem> item && (connection?.PinnedItems?.Contains(item) ?? false);
     public bool HasRepository => !string.IsNullOrWhiteSpace(Item?.Root?.GetAttribute("GitLabRepository"));
     public bool CanCreateModule => Item is Class && !HasModule && IsLocal;
     public bool CanOpenModule => HasModule && IsLocal;
     public bool CanDownloadModule => Item is Class && HasModule && !IsLocal;
     public bool IsLocal => Item?.Host?.IsLocal ?? false;
-    public bool IsItemAvailable => Item != null;
+    public bool IsItemAvailable => Item is { IsDisposed: false };
     public ItemType ItemType { get; private set; }
 
     [ObservableProperty] private string name;
@@ -108,7 +96,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     {
         get
         {
-            if (Item is null) 
+            if (Item is null)
                 return false;
             switch (ItemType)
             {
@@ -117,7 +105,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
                 case ItemType.Module:
                     {
                         if (Children == dummyList || Children is null)
-                            Children = GetChildren(Item, this, logger, connection);
+                            Children = GetChildren(Item, this, logger, connection).ToArray();
 
                         return Children?.Any(x => x.HasModule) ?? false;
                     }
@@ -153,21 +141,9 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         ItemType = Item.ItemType;
         Name = $"{RemoteItem?.Label ?? RemoteItem?.Name}";
         updateCallback = Updated;
-        GC.SuppressFinalize(updateCallback);
-        NativeMethods.OdaServerApi._SetOnUpdate(Item.RemoteItem.GetIntPtr(), updateCallback);
+        NativeMethods.OdaServerApi.SetOnUpdate(Item.RemoteItem.GetIntPtr(), updateCallback);
         _ = SetExpanderAsync();
         _ = SetIconAsync();
-    }
-    ~StructureItemViewModel()
-    {
-        if (Item?.RemoteItem != null)
-        {
-            NativeMethods.OdaServerApi._SetOnUpdate(Item.RemoteItem.GetIntPtr(), null);
-        }
-        if (updateCallback != null)
-        {
-            GC.ReRegisterForFinalize(updateCallback);
-        }
     }
 
     private async Task SetExpanderAsync()
@@ -242,20 +218,18 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
             yield return module;
         }
 
-        //create folders for categories
-        if (item.ItemType == ItemType.Organization)
-        {
-            var emptyGroupedChildren = children.ToLookup(x => string.IsNullOrWhiteSpace(x.Item.Category));
-            foreach (var groupedItem in ApplyCategories(emptyGroupedChildren[false]))
-                yield return groupedItem;
-            children = emptyGroupedChildren[true];
-        }
         //hide inner class in domain
         foreach (var child in children)
         {
-            if (child.RemoteItem?.Id == item.RemoteItem.Id)
+            if (child?.RemoteItem?.Id == item.RemoteItem.Id)
             {
+                NativeMethods.OdaServerApi.SetOnUpdate(child.RemoteItem.GetIntPtr(), parent.updateCallback);
                 var rootItems = GetChildren(child.Item, parent, logger, connection);
+                //create folders for categories
+                if (item.ItemType == ItemType.Organization)
+                {
+                    rootItems = ApplyCategories(rootItems);
+                }
                 foreach (var rootItem in rootItems)
                 {
                     yield return rootItem;
@@ -269,7 +243,9 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     private static IEnumerable<StructureItemViewModel<T>> ApplyCategories
         (IEnumerable<StructureItemViewModel<T>> structureItems, string subGroupParent = "")
     {
-        var groups = structureItems
+        var emptyGroupedChildren = structureItems.ToLookup(x => string.IsNullOrWhiteSpace(x.Item?.Category));
+
+        var groups = emptyGroupedChildren[false]
             .GroupBy(x => x.Item?.Category.SubstringAfter(subGroupParent).SubstringBefore("/"))
             .OrderBy(x => x.Key);
         foreach (var group in groups)
@@ -281,6 +257,11 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
                 Icon = PredefinedImages.FolderImage,
                 Children = ApplyCategories(rootItems[false], $"{group.Key}/").Concat(rootItems[true])
             };
+        }
+
+        foreach (var item in emptyGroupedChildren[true])
+        {
+            yield return item;
         }
     }
 
@@ -294,82 +275,14 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         {
             await SetChildrenAsync(this.Item, logger, connection);
         }
+        else
+        {
+            await SetExpanderAsync();
+        }
         await SetIconAsync();
         Name = $"{RemoteItem?.Label ?? RemoteItem?.Name}";
         OnPropertyChanged(nameof(Item));
         OnPropertyChanged(nameof(HasModule));
     }
-
-    [RelayCommand]
-    public void Info()
-    {
-        if (Item == null) { return; }
-        Clipboard.Clear();
-        Clipboard.SetText(Item.FullId);
-        logger?.Info($"FullId copied to clipboard!");
-    }
-
-    [RelayCommand]
-    public async Task OpenDirAsync()
-    {
-        try
-        {
-            if (Item?.Dir is null)
-            {
-                logger?.Info($"{Item} has no directory");
-                return;
-            }
-
-            var dirPath = await Task.Run(Item.Dir.RemoteFolder.LoadFolder).ConfigureAwait(true);
-
-            if (Directory.Exists(dirPath).Not())
-            {
-                logger?.Info($"Folder {dirPath} doesn't exist for {Item}");
-                return;
-            }
-
-            Process.Start("explorer", DevHelpers.ClearDomainAndClassInPath(dirPath));
-        }
-        catch (Exception ex)
-        {
-            logger?.Info(ex.ToString());
-        }
-    }
-
-    [RelayCommand]
-    public void Pin()
-    {
-        try
-        {
-            if (Item is null)
-            {
-                logger?.Info("Can't pin this item");
-                return;
-            }
-            if (!IsPinned)
-            {
-                var copy = new StructureItemViewModel<StructureItem>(Item, Parent as StructureItemViewModel<StructureItem>, logger, connection);
-                if (copy.Item?.FullId is null || connection is null)
-                    return;
-                connection.PinnedItems.Add(copy);
-                connection.AddinSettings.PinnedItems.Add(copy.Item.FullId);
-
-            }
-            else
-            {
-                if (connection is null)
-                    return;
-                connection.PinnedItems.Remove(x => x.Item?.FullId == Item.FullId);
-                connection.AddinSettings.PinnedItems.Remove(Item.FullId);
-            }
-            _ = connection.AddinSettings.SaveAsync();
-            OnPropertyChanged(nameof(IsPinned));
-        }
-        catch(Exception ex)
-        {
-            logger?.Info(ex.ToString());
-        }
-    }
-
     public override string ToString() => Name;
 }

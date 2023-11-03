@@ -5,6 +5,7 @@
              xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml" xmlns:oda="clr-namespace:oda;assembly=odaCore"
              xmlns:odantdev="clr-namespace:OdantDev" xmlns:odantdevModel="clr-namespace:OdantDev.Model"
              Background="{DynamicResource MaterialDesignPaper}"
+             DataContext="{Binding RelativeSource={RelativeSource Self}}"
              FontFamily="{DynamicResource MaterialDesignFont}"
              TextElement.Foreground="{DynamicResource MaterialDesignBody}"
              TextOptions.TextRenderingMode="Auto">
@@ -64,6 +65,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" Grid.Column="0"
@@ -769,6 +771,8 @@
                                         <RowDefinition Height="auto" />
                                         <RowDefinition Height="auto" />
                                         <RowDefinition Height="auto" />
+
+                                        <RowDefinition Height="auto" />
                                     </Grid.RowDefinitions>
                                     <StackPanel Grid.Row="0">
                                         <ComboBox x:Name="DeveloperCb"
@@ -795,12 +799,17 @@
                                               FontSize="16"
                                               IsChecked="{Binding OdaModel.AutoLogin}"
                                               ToolTip="Enable/disable oda login window" />
-                                    <GroupBox Name="UISettingsGroupBox"
+                                    <Expander Name="UISettingsGroupBox"
                                               Grid.Row="3"
+                                              Margin="0,10,0,0"
                                               materialDesign:ColorZoneAssist.Mode="PrimaryMid" materialDesign:ElevationAssist.Elevation="Dp3"
-                                              BorderThickness="0.8" FontSize="14"
-                                              Header="UI Settings" SnapsToDevicePixels="True"
-                                              ToolTip="UI settings" ToolTipService.Placement="Mouse">
+                                              BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                                              BorderThickness="0.9" FontSize="14"
+                                              SnapsToDevicePixels="True" ToolTip="UI settings"
+                                              ToolTipService.Placement="Mouse">
+                                        <Expander.Header>
+                                            <TextBlock Text="UI Settings" />
+                                        </Expander.Header>
                                         <Grid Margin="5">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="auto" />
@@ -813,10 +822,10 @@
                                             <CheckBox x:Name="ThemeCheckBox"
                                                       Grid.Row="0"
                                                       Margin="5"
-                                                      materialDesign:CheckBoxAssist.CheckBoxSize="22" Checked="CheckBox_Checked"
-                                                      Content="Dark theme" FontSize="16"
-                                                      IsChecked="{x:Null}"
-                                                      ToolTip="Change color theme" Unchecked="CheckBox_Checked" />
+                                                      materialDesign:CheckBoxAssist.CheckBoxSize="22" Content="Dark theme"
+                                                      FontSize="16"
+                                                      IsChecked="{Binding IsDarkTheme, Mode=TwoWay}"
+                                                      IsThreeState="True" ToolTip="Change color theme" />
                                             <CheckBox x:Name="IsSimpleThemeCheckBox"
                                                       Grid.Row="1"
                                                       Margin="5" VerticalContentAlignment="Top"
@@ -835,7 +844,7 @@
                                                 <TextBlock VerticalAlignment="Center">[Experimental] Enable tree view virtualization</TextBlock>
                                             </CheckBox>
                                         </Grid>
-                                    </GroupBox>
+                                    </Expander>
                                     <materialDesign:DialogHost Grid.Row="4" Margin="0,10,0,0">
                                         <materialDesign:DialogHost.DialogContent>
                                             <StackPanel Margin="16">
@@ -1097,12 +1106,31 @@
 
                                 </Grid>
                             </ScrollViewer>
-                            <Button Name="SaveSettingsButton"
-                                    Grid.Row="1"
-                                    Margin="5,5,5,5"
-                                    materialDesign:ColorZoneAssist.Mode="PrimaryMid" Click="SaveSettingsButton_Click"
-                                    Content="Save" FontSize="18"
-                                    ToolTip="Save settings to file" />
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Button Name="SaveSettingsButton"
+                                        Grid.Column="1"
+                                        Margin="5,5,5,5"
+                                        materialDesign:ColorZoneAssist.Mode="PrimaryMid" Click="SaveSettingsButton_Click"
+                                        Content="Save" FontSize="18"
+                                        ToolTip="Save settings to file" />
+                                <Button Name="RawEditConfigButton"
+                                        Grid.Column="0"
+                                        Width="32"
+                                        Margin="5,5,0,5" HorizontalContentAlignment="Center"
+                                        Command="{Binding AddinSettings.OpenCommand}"
+                                        FontSize="12"
+                                        Style="{StaticResource MaterialDesignFlatMidBgButton}"
+                                        ToolTip="Raw edit config">
+                                    <materialDesign:PackIcon Width="18" Height="18"
+                                                             Margin="-10,0,-10,0"
+                                                             Kind="CodeJson" />
+                                </Button>
+                            </Grid>
+
                         </Grid>
                     </TabItem>
                     <TabItem x:Name="ReadmeTab" Visibility="Visible">
@@ -1121,7 +1149,7 @@
                                                     VerticalScrollBarVisibility="Auto" />
                     </TabItem>
                 </TabControl>
-                <StackPanel Grid.Row="7" Grid.Column="0"
+                <StackPanel Grid.Row="6" Grid.Column="0"
                             HorizontalAlignment="Center"
                             Orientation="Horizontal">
                     <materialDesign:Snackbar x:Name="MessageContainer"

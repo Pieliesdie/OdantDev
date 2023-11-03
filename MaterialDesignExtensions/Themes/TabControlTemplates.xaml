@@ -1,7 +1,5 @@
-﻿<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="clr-namespace:MaterialDesignExtensions.Controls">
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:MaterialDesignExtensions.Controls">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
@@ -59,16 +57,13 @@
                                             </Storyboard>
                                         </ControlTemplate.Resources>
                                         <Grid x:Name="ItemContent"
-                                            MinWidth="90"
-                                            MinHeight="48"
-                                            HorizontalAlignment="Stretch"
-                                            VerticalAlignment="Stretch"
-                                            Background="{TemplateBinding Background}">
+                                              MinWidth="90" MinHeight="48"
+                                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                              Background="{TemplateBinding Background}">
 
                                             <Border x:Name="clickBorder"
-                                                Background="{Binding Path=(controls:TabControlAssist.TabHeaderHighlightBrush), RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TabControl}}}"
-                                                Opacity="0"
-                                                RenderTransformOrigin="0.5,0.5">
+                                                    Background="{Binding Path=(controls:TabControlAssist.TabHeaderHighlightBrush), RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TabControl}}}"
+                                                    Opacity="0" RenderTransformOrigin="0.5,0.5">
                                                 <Border.RenderTransform>
                                                     <TransformGroup>
                                                         <ScaleTransform ScaleX="0" />
@@ -79,14 +74,12 @@
                                                 </Border.RenderTransform>
                                             </Border>
                                             <ContentPresenter x:Name="headerContent"
-                                                Margin="{Binding Path=(controls:TabControlAssist.TabHeaderMargin), RelativeSource={RelativeSource TemplatedParent}}"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                                ContentSource="Header"
-                                                RecognizesAccessKey="True"
-                                                TextBlock.FontSize="{Binding Path=(controls:TabControlAssist.TabHeaderFontSize), RelativeSource={RelativeSource TemplatedParent}}"
-                                                TextBlock.FontWeight="{Binding Path=(controls:TabControlAssist.TabHeaderFontWeight), RelativeSource={RelativeSource TemplatedParent}}"
-                                                TextBlock.Foreground="{Binding Path=(controls:TabControlAssist.TabHeaderForeground), RelativeSource={RelativeSource TemplatedParent}}">
+                                                              Margin="{Binding Path=(controls:TabControlAssist.TabHeaderMargin), RelativeSource={RelativeSource TemplatedParent}}"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              ContentSource="Header" RecognizesAccessKey="True"
+                                                              TextBlock.FontSize="{Binding Path=(controls:TabControlAssist.TabHeaderFontSize), RelativeSource={RelativeSource TemplatedParent}}"
+                                                              TextBlock.FontWeight="{Binding Path=(controls:TabControlAssist.TabHeaderFontWeight), RelativeSource={RelativeSource TemplatedParent}}"
+                                                              TextBlock.Foreground="{Binding Path=(controls:TabControlAssist.TabHeaderForeground), RelativeSource={RelativeSource TemplatedParent}}">
                                                 <ContentPresenter.Style>
                                                     <Style TargetType="ContentPresenter">
                                                         <Style.Triggers>
@@ -101,12 +94,11 @@
                                                 </ContentPresenter.Style>
                                             </ContentPresenter>
                                             <Border x:Name="border"
-                                                Height="2"
-                                                Padding="8"
-                                                HorizontalAlignment="Stretch"
-                                                VerticalAlignment="Bottom"
-                                                Background="{Binding Path=(controls:TabControlAssist.TabHeaderHighlightBrush), RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TabControl}}}"
-                                                RenderTransformOrigin="0.5,0.5">
+                                                    Height="2"
+                                                    Padding="8" HorizontalAlignment="Stretch"
+                                                    VerticalAlignment="Bottom"
+                                                    Background="{Binding Path=(controls:TabControlAssist.TabHeaderHighlightBrush), RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TabControl}}}"
+                                                    RenderTransformOrigin="0.5,0.5">
                                                 <Border.RenderTransform>
                                                     <TransformGroup>
                                                         <ScaleTransform ScaleX="0" />
@@ -165,34 +157,29 @@
                             <RowDefinition x:Name="RowDefinition0" Height="Auto" />
                             <RowDefinition x:Name="RowDefinition1" Height="*" />
                         </Grid.RowDefinitions>
-                        <Border
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            Background="{TemplateBinding Background}" />
+                        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                Background="{TemplateBinding Background}" />
 
                         <Border x:Name="HeaderSeparatorBorder"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            Background="Transparent"
-                            BorderBrush="{Binding Path=(controls:TabControlAssist.TabHeaderInactiveBrush), RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TabControl}}}"
-                            BorderThickness="0,0,0,1"
-                            Opacity="0.12" />
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                Background="Transparent"
+                                BorderBrush="{Binding Path=(controls:TabControlAssist.TabHeaderInactiveBrush), RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TabControl}}}"
+                                BorderThickness="0,0,0,1" Opacity="0.12" />
 
                         <Border x:Name="HeaderPanelBorder"
-                            HorizontalAlignment="Stretch"
-                            Background="Transparent">
+                                HorizontalAlignment="Stretch"
+                                Background="Transparent">
                             <!--<TabPanel x:Name="HeaderPanel" Panel.ZIndex="1" Margin="0,0,4,-1" IsItemsHost="True" KeyboardNavigation.TabIndex="1" Background="Transparent"
                                       HorizontalAlignment="{Binding Path=(controls:TabControlAssist.TabHeaderHorizontalAlignment), RelativeSource={RelativeSource TemplatedParent}}" />-->
                             <!--  do not use a TabPanel because its behavior is different to the Material Design specs  -->
                             <UniformGrid x:Name="HeaderPanel"
-                                HorizontalAlignment="{Binding Path=(controls:TabControlAssist.TabHeaderHorizontalAlignment), RelativeSource={RelativeSource TemplatedParent}}"
-                                VerticalAlignment="{Binding Path=(controls:TabControlAssist.TabHeaderVerticalAlignment), RelativeSource={RelativeSource TemplatedParent}}"
-                                Panel.ZIndex="1"
-                                Background="Transparent"
-                                FlowDirection="{TemplateBinding FlowDirection}"
-                                IsItemsHost="True"
-                                KeyboardNavigation.TabIndex="1"
-                                Rows="1" />
+                                         HorizontalAlignment="{Binding Path=(controls:TabControlAssist.TabHeaderHorizontalAlignment), RelativeSource={RelativeSource TemplatedParent}}"
+                                         VerticalAlignment="{Binding Path=(controls:TabControlAssist.TabHeaderVerticalAlignment), RelativeSource={RelativeSource TemplatedParent}}"
+                                         Panel.ZIndex="1"
+                                         Background="Transparent"
+                                         FlowDirection="{TemplateBinding FlowDirection}"
+                                         IsItemsHost="True" KeyboardNavigation.TabIndex="1"
+                                         Rows="1" />
                         </Border>
 
                         <Border x:Name="PART_SelectedContentHostBorder" Grid.Row="1">
@@ -249,20 +236,18 @@
     <!--  do not apply as default style, to prevent side effects with styles of other libraries  -->
     <!--<Style TargetType="{x:Type TabControl}" BasedOn="{StaticResource MaterialDesignTabControl}"></Style>-->
 
-    <Style
-        x:Key="MaterialDesignAppBarTabControl"
-        BasedOn="{StaticResource MaterialDesignTabControl}"
-        TargetType="{x:Type TabControl}">
+    <Style x:Key="MaterialDesignAppBarTabControl"
+           BasedOn="{StaticResource MaterialDesignTabControl}"
+           TargetType="{x:Type TabControl}">
         <Setter Property="controls:TabControlAssist.TabHeaderHighlightBrush" Value="{DynamicResource PrimaryHueMidForegroundBrush}" />
         <Setter Property="controls:TabControlAssist.TabHeaderInactiveBrush" Value="{DynamicResource PrimaryHueMidForegroundBrush}" />
         <Setter Property="controls:TabControlAssist.TabHeaderInactiveOpacity" Value="0.8" />
         <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}" />
     </Style>
 
-    <Style
-        x:Key="MaterialDesignAppBarAccentTabControl"
-        BasedOn="{StaticResource MaterialDesignTabControl}"
-        TargetType="{x:Type TabControl}">
+    <Style x:Key="MaterialDesignAppBarAccentTabControl"
+           BasedOn="{StaticResource MaterialDesignTabControl}"
+           TargetType="{x:Type TabControl}">
         <Setter Property="controls:TabControlAssist.TabHeaderHighlightBrush" Value="{DynamicResource SecondaryHueMidBrush}" />
         <Setter Property="controls:TabControlAssist.TabHeaderInactiveBrush" Value="{DynamicResource SecondaryHueMidBrush}" />
         <Setter Property="controls:TabControlAssist.TabHeaderInactiveOpacity" Value="0.8" />

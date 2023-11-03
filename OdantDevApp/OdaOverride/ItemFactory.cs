@@ -40,7 +40,7 @@ public static class ItemFactory
         {
             throw new NullReferenceException("Can't get remote domain");
         }
-        var newDomain = StructureItemEx.CreateByType(NativeMethods.OdaServerApi._Create_Domain(remoteDomain.GetIntPtr(), name, type));
+        var newDomain = StructureItemEx.CreateByType(NativeMethods.OdaServerApi.Create_Domain(remoteDomain.GetIntPtr(), name, type));
         if (newDomain == null) return null;
         if (string.IsNullOrEmpty(newDomain.error).Not() || !newDomain.Validate)
         {

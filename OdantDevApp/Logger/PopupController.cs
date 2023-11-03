@@ -7,9 +7,9 @@ using OdantDevApp.Common;
 using OdantDevApp.Dialogs;
 
 namespace OdantDev.Model;
-internal class PopupController : ILogger
+internal class PopupController(Snackbar snackbar) : ILogger
 {
-    private readonly Snackbar _snackbar;
+    private readonly Snackbar _snackbar = snackbar ?? throw new NullReferenceException(nameof(snackbar));
     private readonly Action<string> _copyAction = (s) =>  { Clipboard.Clear(); Clipboard.SetText(s); };
     public void Info(string message)
     {
@@ -36,10 +36,5 @@ internal class PopupController : ILogger
                 _copyAction,
                 ex.ToString()));
         _snackbar.SaveInvoke(enqueueAction);
-    }
-
-    public PopupController(Snackbar snackbar)
-    {
-        this._snackbar = snackbar ?? throw new NullReferenceException(nameof(snackbar));
     }
 }

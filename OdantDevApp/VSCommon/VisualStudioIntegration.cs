@@ -17,7 +17,7 @@ using EnvDTE80;
 using oda;
 
 using OdantDevApp.VSCommon;
-
+using SharedOdantDevLib.WinApi;
 using VSLangProj;
 
 using VSLangProj80;
@@ -69,7 +69,7 @@ public sealed partial class VisualStudioIntegration
 
         try
         {
-            using var retryComCallsfilter = MessageFilter.MessageFilterRegister();
+            using var retryComCallsfilter = OleMessageFilter.MessageFilterRegister();
             if (EnvDte.Solution.IsOpen)
             {
                 EnvDte.Solution.Close();
@@ -195,18 +195,9 @@ public sealed partial class VisualStudioIntegration
     }
     private static void SetProperties(Properties properties, IReadOnlyDictionary<string, object> values)
     {
-        var valueCount = values.Count;
-        var iterationCount = 0;
-        foreach (Property property in properties)
+        foreach(var value in values)
         {
-            if (values.TryGetValue(property.Name, out var value))
-            {
-                property.Value = value;
-            }
-            iterationCount++;
-
-            if (iterationCount == valueCount)
-                break;
+            properties.Item(value.Key).Value = value.Value;
         }
     }
     private bool CopyToOdaBin(Project project)
@@ -347,7 +338,7 @@ public sealed partial class VisualStudioIntegration
 
     private bool OpenModule(StructureItem item)
     {
-        using var retryComCallsfilter = MessageFilter.MessageFilterRegister();
+        using var retryComCallsfilter = OleMessageFilter.MessageFilterRegister();
 
         SubscribeToStudioEvents();
         Project project = null;
@@ -446,14 +437,14 @@ public sealed partial class VisualStudioIntegration
             { "StartProgram", Path.Combine(OdaFolder.FullName, startProgram) },
             { "StartArguments", "debug" }
         };
-        VisualStudioIntegration.SetProperties(project.ConfigurationManager.ActiveConfiguration.Properties, configurationAttributes);
+        SetProperties(project.ConfigurationManager.ActiveConfiguration.Properties, configurationAttributes);
 
         Dictionary<string, object> projectAttributes = new()
         {
             { "AssemblyName", project.Name },
             { "ReferencePath", OdaFolder.FullName }
         };
-        VisualStudioIntegration.SetProperties(project.Properties, projectAttributes);
+        SetProperties(project.Properties, projectAttributes);
 
         var assemblyInfo = FindProjectItem(project, "AssemblyInfo.cs");
         if (assemblyInfo == null || File.Exists(assemblyFile).Not())

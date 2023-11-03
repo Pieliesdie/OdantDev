@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-
-using NativeMethods;
-
+﻿using NativeMethods;
 using OdantDev;
 
-namespace OdantDevApp.VSCommon;
-
-internal class MessageFilter : IOleMessageFilter
+namespace SharedOdantDevLib.WinApi;
+public class OleMessageFilter : IOleMessageFilter
 {
     public static IDisposable MessageFilterRegister()
     {
@@ -24,19 +15,19 @@ internal class MessageFilter : IOleMessageFilter
 
     public static void Register()
     {
-        IOleMessageFilter newFilter = new MessageFilter();
+        IOleMessageFilter newFilter = new OleMessageFilter();
         IOleMessageFilter oldFilter = null;
-        WinApi.CoRegisterMessageFilter(newFilter, out oldFilter);
+        NativeMethods.WinApi.CoRegisterMessageFilter(newFilter, out oldFilter);
     }
 
     // Done with the filter, close it.
     public static void Revoke()
     {
         IOleMessageFilter oldFilter = null;
-        WinApi.CoRegisterMessageFilter(null, out oldFilter);
+        NativeMethods.WinApi.CoRegisterMessageFilter(null, out oldFilter);
     }
 
-    private MessageFilter() { }
+    private OleMessageFilter() { }
 
     // IOleMessageFilter functions.
     // Handle incoming thread requests.
