@@ -44,7 +44,7 @@ public partial class AddinSettings : ObservableObject
 
     [ObservableProperty] AsyncObservableCollection<PathInfo>? odaFolders;
 
-    [ObservableProperty] PathInfo? selectedOdaFolder;
+    [ObservableProperty] PathInfo selectedOdaFolder;
 
     [ObservableProperty] string? gitLabApiKey;
 
@@ -63,8 +63,8 @@ public partial class AddinSettings : ObservableObject
         {
             try
             {
-                settings = LoadFromPath(templatePath);         
-                settings.AddinSettingsPath = path;  
+                settings = LoadFromPath(templatePath);
+                settings.AddinSettingsPath = path;
                 settings.Save();
             }
             catch { }
@@ -79,7 +79,12 @@ public partial class AddinSettings : ObservableObject
         settings.OdaFolders.Remove(x => x.Name == "Last run");
         settings.OdaFolders?.Insert(0,  new PathInfo("Last run", VsixExtension.LastOdaFolder.FullName));
         settings.AddinSettingsPath = path;
-        settings.SelectedOdaFolder ??= settings.OdaFolders?.FirstOrDefault();
+        if (settings.OdaFolders?.FirstOrDefault() is { } pathInfo 
+            && string.IsNullOrEmpty(settings.SelectedOdaFolder.Path)
+            && !string.IsNullOrEmpty(pathInfo.Path))
+        {
+            settings.SelectedOdaFolder = pathInfo;
+        }
         return settings;
     }
 

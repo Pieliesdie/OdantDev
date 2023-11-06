@@ -323,7 +323,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         }
     }
 
-    private StructureItem? CreateItem(Item rootItem, string oclFilePath, ItemType itemType)
+    private static StructureItem? CreateItem(Item rootItem, string oclFilePath, ItemType itemType)
     {
         string xml = System.IO.File.ReadAllText(oclFilePath);
 

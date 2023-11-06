@@ -88,7 +88,7 @@
                               Margin="25,0,10,0"
                               materialDesign:HintAssist.Hint="Run app with admin rights before start addin"
                               ItemsSource="{Binding AddinSettings.OdaFolders}"
-                              SelectedItem="{Binding AddinSettings.SelectedOdaFolder, Mode=TwoWay}" />
+                              SelectedItem="{Binding AddinSettings.SelectedOdaFolder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <Button Name="ExitButton"
                             Grid.Column="1"
                             Width="32" Height="25"

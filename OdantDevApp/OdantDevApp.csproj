@@ -61,6 +61,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+		<PackageReference Include="Gemini.Modules.PropertyGrid" Version="0.7.0" />
 		<PackageReference Include="GitLabApiClient" Version="1.8.0" />
 		<PackageReference Include="MaterialDesignColors" Version="2.1.4" />
 		<PackageReference Include="MaterialDesignThemes" Version="4.9.0" />

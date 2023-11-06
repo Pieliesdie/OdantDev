@@ -86,6 +86,7 @@ public partial class ToolWindowControl : UserControl
     public ToolWindowControl() : this(OdantDevApp.VSCommon.ExternalEnvDTE.Instance) { }
     public ToolWindowControl(DTE2 dte)
     {
+        //while (!Debugger.IsAttached) { }
         InitializeMaterialDesign();
         InitializeComponent();
         DTE2 = dte;
@@ -93,7 +94,6 @@ public partial class ToolWindowControl : UserControl
         AddinSettings = AddinSettings.Create(addinSettingsFolder);
         logger = new PopupController(this.MessageContainer);
         OnIsDarkThemeChanging(AddinSettings.IsDarkTheme);
-        //this.DataContext = this;
         Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
     }
     private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

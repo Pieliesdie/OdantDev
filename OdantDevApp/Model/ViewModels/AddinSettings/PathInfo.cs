@@ -1,16 +1,14 @@
-﻿namespace OdantDev.Model;
-public class PathInfo
-{
-    public PathInfo()
-    {
+﻿using System;
 
-    }
-    public PathInfo(string name, string path)
+namespace OdantDev.Model;
+public struct PathInfo
+{
+    public PathInfo() { }
+    public PathInfo(string name, string path):this()
     {
         Name = name;
         Path = path;
     }
-
     public string Path { get; set; }
 
     public string Name { get; set; }
