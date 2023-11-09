@@ -169,6 +169,8 @@ public class ToolWindow : ToolWindowPane
     public ToolWindow()
     {
         this.Caption = "ODANT Dev";
+
+        BitmapImageMoniker = Microsoft.VisualStudio.Imaging.KnownMonikers.AbstractCube;
         if (OutOfProcess)
         {
             this.Content = Host = CreateHost();
