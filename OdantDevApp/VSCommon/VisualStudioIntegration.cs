@@ -16,6 +16,7 @@ using EnvDTE80;
 
 using oda;
 
+using OdantDevApp.Model.ViewModels.Settings;
 using OdantDevApp.VSCommon;
 using SharedOdantDevLib.WinApi;
 using VSLangProj;
@@ -36,7 +37,7 @@ public sealed partial class VisualStudioIntegration
     private SolutionEvents? SolutionEvents { get; set; }
     private DTE2 EnvDte { get; }
     private ConcurrentDictionary<string, BuildInfo> LoadedModules { get; } = new();
-    private OdantDevApp.Model.ViewModels.AddinSettings AddinSettings { get; }
+    private AddinSettings AddinSettings { get; }
     private DirectoryInfo OdaFolder => new(AddinSettings.SelectedOdaFolder.Path);
     private ILogger? Logger { get; }
     private Project[] ActiveSolutionProjects => ((EnvDte.ActiveSolutionProjects as object[]) ?? Array.Empty<Project>()).Cast<Project>().ToArray();
@@ -59,7 +60,7 @@ public sealed partial class VisualStudioIntegration
         }
     }
 
-    public VisualStudioIntegration(OdantDevApp.Model.ViewModels.AddinSettings addinSettings, DTE2 dte, ILogger logger = null)
+    public VisualStudioIntegration(AddinSettings addinSettings, DTE2 dte, ILogger logger = null)
     {
         this.Logger = logger;
         this.AddinSettings = addinSettings;
@@ -368,7 +369,7 @@ public sealed partial class VisualStudioIntegration
                 return false;
             }
             InitProject(project, item);
-            UpdateAssemblyReferences(vsProject, OdantDevApp.Model.ViewModels.AddinSettings.OdaLibraries);
+            UpdateAssemblyReferences(vsProject, AddinSettings.OdaLibraries);
             UpdateAssemblyReferences(vsProject, AddinSettings.UpdateReferenceLibraries);
 
             if (!IncreaseVersion(project))

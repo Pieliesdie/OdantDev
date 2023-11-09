@@ -4,6 +4,29 @@ namespace OdantDev;
 public static class Reflection
 {
     /// <summary>
+    /// Extension method to map properties from an object to a new instance of type T.
+    /// </summary>
+    /// <typeparam name="T">The target type to map to.</typeparam>
+    /// <param name="source">The source object to map properties from.</param>
+    /// <returns>A new instance of type T with properties mapped from the source object.</returns>
+    public static T Map<T>(this object source)
+    {
+        var output = Activator.CreateInstance(typeof(T));
+        var sourceType = source.GetType();
+
+        foreach (var outputProperty in typeof(T).GetProperties())
+        {
+            if (sourceType.GetProperty(outputProperty.Name) is PropertyInfo sourceProperty)
+            {
+                var value = sourceProperty.GetValue(source);
+                outputProperty.SetValue(output, value);
+            }
+        }
+
+        return (T)output;
+    }
+
+    /// <summary>
     /// Returns a _private_ Property Value from a given Object. Uses Reflection.
     /// Throws a ArgumentOutOfRangeException if the Property is not found.
     /// </summary>

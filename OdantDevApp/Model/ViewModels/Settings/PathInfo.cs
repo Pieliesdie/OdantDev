@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace OdantDev.Model;
+﻿namespace OdantDevApp.Model.ViewModels.Settings;
 public struct PathInfo
 {
     public PathInfo() { }
-    public PathInfo(string name, string path):this()
+    public PathInfo(string name, string path) : this()
     {
         Name = name;
         Path = path;
@@ -13,8 +11,5 @@ public struct PathInfo
 
     public string Name { get; set; }
 
-    public override string ToString()
-    {
-        return $"{Name} ({Path})";
-    }
+    public override string ToString() => $"{Name} ({Path})";
 }

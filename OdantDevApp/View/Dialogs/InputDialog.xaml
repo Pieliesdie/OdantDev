@@ -1,8 +1,8 @@
-﻿<mde:MaterialWindow x:Class="OdantDev.Dialogs.ConfirmDialog"
+﻿<mde:MaterialWindow x:Class="OdantDev.Dialogs.InputDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:mde="https://spiegelp.github.io/MaterialDesignExtensions/winfx/xaml"
         Title="Input"
-        
+        Height="200" Width="200"
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
         ResizeMode="NoResize" SizeToContent="WidthAndHeight"
@@ -11,9 +11,6 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <materialDesign:BundledTheme BaseTheme="Dark"
-                                             ColorAdjustment="{materialDesign:ColorAdjustment}"
-                                             PrimaryColor="DeepPurple" SecondaryColor="Purple" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/Generic.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/MaterialDesignLightTheme.xaml" />
@@ -36,13 +33,20 @@
         </Grid.RowDefinitions>
 
         <materialDesign:PackIcon Width="30" Height="30"
-                                 Kind="QuestionMarkCircleOutline" />
+                                 Kind="Input" />
 
         <Label Name="lblQuestion"
                Grid.Column="1"
                FontSize="16" FontWeight="DemiBold">
             Question:
         </Label>
+        <TextBox Name="txtAnswer"
+                 Grid.Row="1" Grid.Column="1"
+                 MinWidth="250"
+                 FontSize="16">
+            Answer
+        </TextBox>
+
         <WrapPanel Grid.Row="2" Grid.ColumnSpan="2"
                    Margin="0,15,0,0" HorizontalAlignment="Right">
             <Button Name="btnDialogOk"

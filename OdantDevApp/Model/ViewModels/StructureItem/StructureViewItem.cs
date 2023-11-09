@@ -16,6 +16,8 @@ using oda;
 using OdantDev;
 using OdantDev.Model;
 
+using OdantDevApp.Model.ViewModels.Settings;
+
 using odaServer;
 
 using SharedOdanDev.OdaOverride;
@@ -24,9 +26,9 @@ using SharedOdantDev.Common;
 
 namespace OdantDevApp.Model.ViewModels;
 
-public partial class StructureItemViewModel<T> : ObservableObject where T : StructureItem
+public partial class StructureViewItem<T> : ObservableObject where T : StructureItem
 {
-    private static readonly IEnumerable<StructureItemViewModel<T>> dummyList = new List<StructureItemViewModel<T>>() { new() { Name = "Loading...", Icon = PredefinedImages.LoadImage } };
+    private static readonly IEnumerable<StructureViewItem<T>> dummyList = new List<StructureViewItem<T>>() { new() { Name = "Loading...", Icon = PredefinedImages.LoadImage } };
     private readonly ILogger? logger;
     private readonly ConnectionModel? connection;
     private bool isLoaded;
@@ -62,7 +64,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
     }
 
     private ODAItem? RemoteItem => this.Item?.RemoteItem;
-    public bool IsPinned => this is StructureItemViewModel<StructureItem> item && (connection?.PinnedItems?.Contains(item) ?? false);
+    public bool IsPinned => this is StructureViewItem<StructureItem> item && (connection?.PinnedItems?.Contains(item) ?? false);
     public bool HasRepository => !string.IsNullOrWhiteSpace(Item?.Root?.GetAttribute("GitLabRepository"));
     public bool CanCreateModule => Item is Class && !HasModule && IsLocal;
     public bool CanOpenModule => HasModule && IsLocal;
@@ -75,11 +77,11 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
 
     [ObservableProperty] private T? item;
 
-    [ObservableProperty] private StructureItemViewModel<T>? parent;
+    [ObservableProperty] private StructureViewItem<T>? parent;
 
     [ObservableProperty] private ImageSource? icon;
 
-    [ObservableProperty] private IEnumerable<StructureItemViewModel<T>>? children;
+    [ObservableProperty] private IEnumerable<StructureViewItem<T>>? children;
 
     [ObservableProperty] private bool isExpanded;
 
@@ -131,8 +133,8 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
             return hasChildren;
         }
     }
-    public StructureItemViewModel() { }
-    public StructureItemViewModel(T item, StructureItemViewModel<T>? parent = null, ILogger? logger = null, ConnectionModel? connection = null) : this()
+    public StructureViewItem() { }
+    public StructureViewItem(T item, StructureViewItem<T>? parent = null, ILogger? logger = null, ConnectionModel? connection = null) : this()
     {
         this.logger = logger;
         this.connection = connection;
@@ -170,27 +172,30 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         try
         {
             Children = await Task.Run(() => GetChildren(item, this, logger, connection).ToArray())
-                .WithTimeout(TimeSpan.FromSeconds(10));
+                .WithTimeout(TimeSpan.FromSeconds(AddinSettings.Instance.StructureItemTimeout));
         }
         catch (TimeoutException)
         {
             logger?.Info($"Timeout when getting children for {this}");
-            Children = null;
         }
         catch
         {
             logger?.Info($"Unhandled exception for {this}");
-            Children = null;
             throw;
+        }
+        finally
+        {
+            Children = null;
+            await SetExpanderAsync();
         }
     }
 
-    private static IEnumerable<StructureItemViewModel<T>> GetChildren(T item, StructureItemViewModel<T>? parent = null, ILogger? logger = null, ConnectionModel? connection = null)
+    private static IEnumerable<StructureViewItem<T>> GetChildren(T item, StructureViewItem<T>? parent = null, ILogger? logger = null, ConnectionModel? connection = null)
     {
         var items = item.FindConfigItems().OrderBy(x => x.Name).ToLookup(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution);
 
-        IEnumerable<StructureItemViewModel<T>> children = items[true]
-            .Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))
+        IEnumerable<StructureViewItem<T>> children = items[true]
+            .Select(child => new StructureViewItem<T>(child as T, parent, logger, connection))
             .OrderBy(x => x.Item?.SortIndex)
             .ThenBy(x => x.Name);
 
@@ -199,21 +204,21 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         var workplaces = items[false].OfType<DomainSolution>();
         if (workplaces.Any())
         {
-            var workplace = new StructureItemViewModel<T>()
+            var workplace = new StructureViewItem<T>()
             {
                 Name = "Workplaces",
                 Icon = PredefinedImages.WorkplaceImage,
-                Children = workplaces.Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))
+                Children = workplaces.Select(child => new StructureViewItem<T>(child as T, parent, logger, connection))
             };
             yield return workplace;
         }
         if (modules.Any())
         {
-            var module = new StructureItemViewModel<T>()
+            var module = new StructureViewItem<T>()
             {
                 Name = "Modules",
                 Icon = PredefinedImages.ModuleImage,
-                Children = modules.Select(child => new StructureItemViewModel<T>(child as T, parent, logger, connection))
+                Children = modules.Select(child => new StructureViewItem<T>(child as T, parent, logger, connection))
             };
             yield return module;
         }
@@ -240,8 +245,8 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         }
     }
 
-    private static IEnumerable<StructureItemViewModel<T>> ApplyCategories
-        (IEnumerable<StructureItemViewModel<T>> structureItems, string subGroupParent = "")
+    private static IEnumerable<StructureViewItem<T>> ApplyCategories
+        (IEnumerable<StructureViewItem<T>> structureItems, string subGroupParent = "")
     {
         var emptyGroupedChildren = structureItems.ToLookup(x => string.IsNullOrWhiteSpace(x.Item?.Category));
 
@@ -251,7 +256,7 @@ public partial class StructureItemViewModel<T> : ObservableObject where T : Stru
         foreach (var group in groups)
         {
             var rootItems = group.ToLookup(x => group.Key == x.Item?.Category.SubstringAfter(subGroupParent));
-            yield return new StructureItemViewModel<T>()
+            yield return new StructureViewItem<T>()
             {
                 Name = group.Key,
                 Icon = PredefinedImages.FolderImage,

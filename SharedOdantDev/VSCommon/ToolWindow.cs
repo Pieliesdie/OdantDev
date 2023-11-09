@@ -12,6 +12,8 @@ using Microsoft.VisualStudio.Threading;
 
 using NativeMethods;
 
+using OdantDevApp.Common;
+
 using Task = System.Threading.Tasks.Task;
 
 namespace OdantDev;
@@ -174,7 +176,8 @@ public class ToolWindow : ToolWindowPane
         }
         else
         {
-            this.Content = new ToolWindowControl(OdantDevPackage.EnvDte);
+            OdantDevApp.VSCommon.EnvDTE.Instance = OdantDevPackage.EnvDte;
+            this.Content = new ToolWindowControl();
         }
     }
     public override void OnToolWindowCreated()

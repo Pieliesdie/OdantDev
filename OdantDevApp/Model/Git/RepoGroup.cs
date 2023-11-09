@@ -8,9 +8,9 @@ using OdantDev.Model;
 using OdantDevApp.Model.Git.GitItems;
 
 namespace OdantDevApp.Model.Git;
-public class RepoGroupViewModel : RepoBaseViewModel
+public class RepoGroup : RepoBase
 {
-    public RepoGroupViewModel(GroupItem item, BaseGitItem parent, bool loadProjects, ILogger? logger = null)
+    public RepoGroup(GroupItem item, BaseGitItem parent, bool loadProjects, ILogger? logger = null)
         : base(item, parent, logger)
     {
         LoadProjects = loadProjects;
@@ -18,23 +18,23 @@ public class RepoGroupViewModel : RepoBaseViewModel
     public override bool HasModule => false;
     public virtual bool LoadProjects { get; set; }
 
-    public override async Task<IEnumerable<RepoBaseViewModel>> GetChildrenAsync()
+    public override async Task<IEnumerable<RepoBase>> GetChildrenAsync()
     {
         if (GitClient.Client == null || Item == null)
         {
-            return Enumerable.Empty<RepoBaseViewModel>();
+            return Enumerable.Empty<RepoBase>();
         }
 
         try
         {
-            var children = new List<RepoBaseViewModel>();
+            var children = new List<RepoBase>();
             var id = ((Group)Item.Object).Id;
             var groups = await GitClient.Client.Groups.GetSubgroupsAsync(id);
             if (groups != null)
             {
                 var innerGroupChildren = groups
                     .Select(innerGroup => new GroupItem(innerGroup))
-                    .Select(newItem => new RepoGroupViewModel(newItem, Item, LoadProjects, Logger));
+                    .Select(newItem => new RepoGroup(newItem, Item, LoadProjects, Logger));
                 children.AddRange(innerGroupChildren);
             }
 
@@ -49,7 +49,7 @@ public class RepoGroupViewModel : RepoBaseViewModel
 
             var projectChildren = projects
                 .Select(project => new ProjectItem(project))
-                .Select(newItem => new RepoProjectViewModel(newItem, Item, Logger));
+                .Select(newItem => new RepoProject(newItem, Item, Logger));
 
             children.AddRange(projectChildren);
 
@@ -57,7 +57,7 @@ public class RepoGroupViewModel : RepoBaseViewModel
         }
         catch
         {
-            return Enumerable.Empty<RepoBaseViewModel>();
+            return Enumerable.Empty<RepoBase>();
         }
     }
 }

@@ -2,8 +2,6 @@
 
 using MaterialDesignExtensions.Controls;
 
-using MaterialDesignThemes.Wpf;
-
 using OdantDevApp.Common;
 
 namespace OdantDevApp.Dialogs;
@@ -20,30 +18,15 @@ public partial class MessageDialog : MaterialWindow
     public MessageDialog()
     {
         InitializeComponent();
+        this.ApplyTheming();
     }
-    public MessageDialog(string question, string title = "Information")
+    public MessageDialog(string question, string title = "Information") : this()
     {
-        InitializeComponent();
-        base.Title = title;
+        Title = title;
         lblQuestion.Content = question;
-        IsDarkTheme = AppSettings.DarkTheme;
     }
     private void btnDialogOk_Click(object sender, RoutedEventArgs e)
     {
         base.DialogResult = true;
-    }
-
-
-    bool isDarkTheme;
-    public bool IsDarkTheme
-    {
-        get => isDarkTheme;
-        set
-        {
-            ITheme theme = base.Resources.GetTheme();
-            theme.SetBaseTheme(value ? Theme.Dark : Theme.Light);
-            base.Resources.SetTheme(theme);
-            isDarkTheme = value;
-        }
     }
 }

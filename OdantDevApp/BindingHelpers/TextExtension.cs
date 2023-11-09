@@ -2,15 +2,8 @@ using System;
 using System.IO;
 using System.Windows.Markup;
 namespace OdantDev;
-public class TextExtension : MarkupExtension
+public class TextExtension(string fileName) : MarkupExtension
 {
-    private readonly string fileName;
-
-    public TextExtension(string fileName)
-    {
-        this.fileName = fileName;
-    }
-
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
         try

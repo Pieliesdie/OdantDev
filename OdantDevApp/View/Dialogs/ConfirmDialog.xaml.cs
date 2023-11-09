@@ -2,8 +2,6 @@
 
 using MaterialDesignExtensions.Controls;
 
-using MaterialDesignThemes.Wpf;
-
 using OdantDevApp.Common;
 
 namespace OdantDev.Dialogs;
@@ -22,26 +20,13 @@ public partial class ConfirmDialog : MaterialWindow
     public ConfirmDialog(string question, string title = "Input")
     {
         InitializeComponent();
-        base.Title = title;
-        lblQuestion.Content = question;
-        IsDarkTheme = AppSettings.DarkTheme;
+        Title = title;
+        lblQuestion.Content = question;     
+        this.ApplyTheming();
     }
 
     private void btnDialogOk_Click(object sender, RoutedEventArgs e)
     {
         base.DialogResult = true;
-    }
-
-    bool isDarkTheme;
-    public bool IsDarkTheme
-    {
-        get => isDarkTheme;
-        set
-        {
-            ITheme theme = base.Resources.GetTheme();
-            theme.SetBaseTheme(value ? Theme.Dark : Theme.Light);
-            base.Resources.SetTheme(theme);
-            isDarkTheme = value;
-        }
     }
 }

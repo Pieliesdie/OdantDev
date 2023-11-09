@@ -2,7 +2,7 @@
 
 using CommunityToolkit.Mvvm.Input;
 
-namespace OdantDevApp.Model.ViewModels;
+namespace OdantDevApp.Model.ViewModels.Settings;
 
 public partial class AddinSettings
 {

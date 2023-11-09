@@ -5,17 +5,17 @@ using OdantDev.Model;
 using OdantDevApp.Model.Git.GitItems;
 
 namespace OdantDevApp.Model.Git;
-public class RepoRootViewModel : RepoGroupViewModel
+public class RepoRoot : RepoGroup
 {
     public override bool HasModule => false;
-    public RepoRootViewModel(RootItem item, bool loadProjects, ILogger logger = null)
+    public RepoRoot(RootItem item, bool loadProjects, ILogger logger = null)
         : base(null, null, loadProjects, logger) { this.Item = item; }
 
-    public override async Task<IEnumerable<RepoBaseViewModel>> GetChildrenAsync()
+    public override async Task<IEnumerable<RepoBase>> GetChildrenAsync()
     {
-        if (GitClient.Client == null) { return Enumerable.Empty<RepoBaseViewModel>(); }
+        if (GitClient.Client == null) { return Enumerable.Empty<RepoBase>(); }
 
-        var children = new List<RepoBaseViewModel>();
+        var children = new List<RepoBase>();
         var groups = await GitClient.Client.Groups.GetAsync();
 
         if (groups != null)
@@ -23,7 +23,7 @@ public class RepoRootViewModel : RepoGroupViewModel
             var groupChildren = groups
                 .Where(x => x.ParentId == null)
                 .Select(group => new GroupItem(group))
-                .Select(newItem => new RepoGroupViewModel(newItem, Item, LoadProjects, Logger));
+                .Select(newItem => new RepoGroup(newItem, Item, LoadProjects, Logger));
             children.AddRange(groupChildren);
         }
 
@@ -36,7 +36,7 @@ public class RepoRootViewModel : RepoGroupViewModel
             projects
             .Where(x => x.Namespace.Kind != "group")
             .Select(project => new ProjectItem(project))
-            .Select(newItem => new RepoProjectViewModel(newItem, Item, Logger));
+            .Select(newItem => new RepoProject(newItem, Item, Logger));
 
         children.AddRange(notGroupChildren);
         return children;

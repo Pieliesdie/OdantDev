@@ -6,15 +6,16 @@ using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OdantDev;
 using OdantDevApp.Model.Git.GitItems;
+using OdantDevApp.Model.ViewModels.Settings;
 
 namespace OdantDevApp.Model.Git;
 
-public partial class RepoBaseViewModel : ObservableObject
+public partial class RepoBase : ObservableObject
 {
-    private static readonly IEnumerable<RepoBaseViewModel> dummyList = new[] { new RepoLoadingViewModel() };
-    private IEnumerable<RepoBaseViewModel>? DefaultChildren => CanBeExpanded ? dummyList : null;
+    private static readonly IEnumerable<RepoBase> dummyList = new[] { new RepoLoading() };
+    private IEnumerable<RepoBase>? DefaultChildren => CanBeExpanded ? dummyList : null;
 
-    public RepoBaseViewModel(BaseGitItem? item, BaseGitItem? parent, OdantDev.Model.ILogger? logger = null)
+    public RepoBase(BaseGitItem? item, BaseGitItem? parent, OdantDev.Model.ILogger? logger = null)
     {
         Item = item;
         Parent = parent;
@@ -54,13 +55,13 @@ public partial class RepoBaseViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private IEnumerable<RepoBaseViewModel>? children;
+    private IEnumerable<RepoBase>? children;
 
     private async Task SetChildrenAsync()
     {
         try
         {
-            Children = await Task.Run(GetChildrenAsync).WithTimeout(TimeSpan.FromSeconds(15));
+            Children = await Task.Run(GetChildrenAsync).WithTimeout(TimeSpan.FromSeconds(AddinSettings.Instance.GitlabTimeout));
         }
         catch (TimeoutException)
         {
@@ -82,7 +83,7 @@ public partial class RepoBaseViewModel : ObservableObject
             IsExpanded = false;
         }
     }
-    public virtual Task<IEnumerable<RepoBaseViewModel>> GetChildrenAsync() => Task.FromResult(Enumerable.Empty<RepoBaseViewModel>());
+    public virtual Task<IEnumerable<RepoBase>> GetChildrenAsync() => Task.FromResult(Enumerable.Empty<RepoBase>());
 
     public override string ToString() => Name;
 }

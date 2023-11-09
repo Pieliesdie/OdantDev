@@ -14,7 +14,7 @@ using SharedOdantDev.Common;
 
 namespace OdantDevApp.Model.ViewModels;
 
-public partial class StructureItemViewModel<T>
+public partial class StructureViewItem<T>
 {
     [RelayCommand]
     public void Info()
@@ -64,7 +64,7 @@ public partial class StructureItemViewModel<T>
             }
             if (!IsPinned)
             {
-                var copy = new StructureItemViewModel<StructureItem>(Item, Parent as StructureItemViewModel<StructureItem>, logger, connection);
+                var copy = new StructureViewItem<StructureItem>(Item, Parent as StructureViewItem<StructureItem>, logger, connection);
                 if (copy.Item?.FullId is null || connection is null)
                     return;
                 connection.PinnedItems.Add(copy);

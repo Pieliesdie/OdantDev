@@ -22,9 +22,6 @@
 		<RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
 	</PropertyGroup>
 	<ItemGroup>
-	  <Content Include="Model\ViewModels\AddinSettings\AddinSettingsCommands.cs" />
-	</ItemGroup>
-	<ItemGroup>
 		<Reference Include="odaCore">
 			<HintPath>..\Libraries\OdaLibs\odaCore.dll</HintPath>
 			<SpecificVersion>False</SpecificVersion>
@@ -45,6 +42,9 @@
 			<SpecificVersion>False</SpecificVersion>
 			<Private>False</Private>
 		</Reference>
+		<Reference Include="System.Activities" />
+		<Reference Include="System.Activities.Core.Presentation" />
+		<Reference Include="System.Activities.Presentation" />
 	</ItemGroup>
 	<ItemGroup>
 		<Resource Include="Icon.ico" />
@@ -61,7 +61,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-		<PackageReference Include="Gemini.Modules.PropertyGrid" Version="0.7.0" />
+		<PackageReference Include="Extended.Wpf.Toolkit" Version="3.8.2" />
 		<PackageReference Include="GitLabApiClient" Version="1.8.0" />
 		<PackageReference Include="MaterialDesignColors" Version="2.1.4" />
 		<PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
@@ -84,6 +84,10 @@
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="PropertyTools.Wpf" Version="3.1.0" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="View\Controls\" />
 	</ItemGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="mkdir &quot;$(SolutionDir)artifacts&quot;&#xD;&#xA;rmdir &quot;$(SolutionDir)artifacts\app&quot; /s /q&#xD;&#xA;mkdir &quot;$(SolutionDir)artifacts\app&quot;&#xD;&#xA;xcopy &quot;$(TargetDir)&quot; &quot;$(SolutionDir)artifacts\app&quot; /s /e /y /q" />

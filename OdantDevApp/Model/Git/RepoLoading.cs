@@ -3,9 +3,9 @@ using SharedOdanDev.OdaOverride;
 
 namespace OdantDevApp.Model.Git;
 
-public class RepoLoadingViewModel : OdantDevApp.Model.Git.RepoBaseViewModel
+public class RepoLoading : RepoBase
 {
-    public RepoLoadingViewModel() : base(null, null, null) { }
+    public RepoLoading() : base(null, null, null) { }
     public override string Name => "Loading...";
 
     public override ImageSource Icon => PredefinedImages.LoadImage;

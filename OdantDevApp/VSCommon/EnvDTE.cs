@@ -11,7 +11,7 @@ using OdantDevApp.Model;
 
 namespace OdantDevApp.VSCommon;
 
-public static class ExternalEnvDTE
+public static class EnvDTE
 {
     public static DTE2? Instance { get { Init(); return _instance; } set => _instance = value; }
 

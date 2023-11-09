@@ -3,8 +3,6 @@ using System.Windows;
 
 using MaterialDesignExtensions.Controls;
 
-using MaterialDesignThemes.Wpf;
-
 using OdantDevApp.Common;
 
 namespace OdantDev.Dialogs;
@@ -17,15 +15,15 @@ public partial class InputDialog : MaterialWindow
     public InputDialog(string question, string title = "Input", string defaultAnswer = "")
     {
         InitializeComponent();
-        base.Title = title;
+        Title = title;
         lblQuestion.Content = question;
         txtAnswer.Text = defaultAnswer;
-        IsDarkTheme = AppSettings.DarkTheme;
+        this.ApplyTheming();
     }
 
     private void btnDialogOk_Click(object sender, RoutedEventArgs e)
     {
-        base.DialogResult = true;
+        DialogResult = true;
     }
 
     private void Window_ContentRendered(object sender, EventArgs e)
@@ -37,18 +35,5 @@ public partial class InputDialog : MaterialWindow
     public string Answer
     {
         get { return txtAnswer.Text; }
-    }
-
-    bool isDarkTheme;
-    public bool IsDarkTheme
-    {
-        get => isDarkTheme;
-        set
-        {
-            ITheme theme = base.Resources.GetTheme();
-            theme.SetBaseTheme(value ? Theme.Dark : Theme.Light);
-            base.Resources.SetTheme(theme);
-            isDarkTheme = value;
-        }
     }
 }

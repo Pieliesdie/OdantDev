@@ -15,7 +15,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using EnvDTE80;
 
 using GitLabApiClient.Models.Groups.Responses;
-using GitLabApiClient.Models.Projects.Responses;
 
 using MaterialDesignColors;
 
@@ -34,16 +33,15 @@ using OdantDevApp.Model;
 using OdantDevApp.Model.Git;
 using OdantDevApp.Model.Git.GitItems;
 using OdantDevApp.Model.ViewModels;
+using OdantDevApp.Model.ViewModels.Settings;
 
 using SharedOdanDev.OdaOverride;
 
 using SharedOdantDev.Common;
 
-using AddinSettings = OdantDevApp.Model.ViewModels.AddinSettings;
 using File = System.IO.File;
 using GroupItem = OdantDevApp.Model.Git.GitItems.GroupItem;
-using Project = OdantDevApp.Model.ViewModels.Project;
-using RepoBaseViewModel = OdantDevApp.Model.Git.RepoBaseViewModel;
+using RepoBase = OdantDevApp.Model.Git.RepoBase;
 
 namespace OdantDev;
 
@@ -55,45 +53,27 @@ public partial class ToolWindowControl : UserControl
 {
     private IDisposable StatusCleaner() => Disposable.Create(() => Status = string.Empty);
     private readonly ILogger logger;
-    private VisualStudioIntegration visualStudioIntegration;
+    private VisualStudioIntegration? visualStudioIntegration;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBusy))]
-    private string status;
+    private string status = string.Empty;
     public bool IsBusy => !string.IsNullOrWhiteSpace(Status);
+    public static AddinSettings AddinSettings => AddinSettings.Instance;
 
-    [ObservableProperty] private List<RepoBaseViewModel> groups;
-
-    [ObservableProperty] private AddinSettings addinSettings;
+    [ObservableProperty] private List<RepoBase>? groups;
 
     [ObservableProperty] private ConnectionModel? odaModel;
 
-    [ObservableProperty] private bool? isDarkTheme;
-
-    partial void OnIsDarkThemeChanging(bool? value)
-    {
-        bool val = value ?? VisualStudioIntegration.IsVisualStudioDark(DTE2);
-        ITheme theme = Resources.GetTheme();
-        theme.SetBaseTheme(val ? Theme.Dark : Theme.Light);
-        Resources.SetTheme(theme);
-        AddinSettings.IsDarkTheme = value;
-        AppSettings.DarkTheme = val;
-    }
-    private DTE2 DTE2 { get; }
     /// <summary>
     /// Initializes a new instance of the <see cref="ToolWindowControl"/> class.
     /// </summary>
-    public ToolWindowControl() : this(OdantDevApp.VSCommon.ExternalEnvDTE.Instance) { }
-    public ToolWindowControl(DTE2 dte)
+    public ToolWindowControl()
     {
-        //while (!Debugger.IsAttached) { }
         InitializeMaterialDesign();
         InitializeComponent();
-        DTE2 = dte;
-        var addinSettingsFolder = CommonEx.DefaultSettingsFolder;
-        AddinSettings = AddinSettings.Create(addinSettingsFolder);
-        logger = new PopupController(this.MessageContainer);
-        OnIsDarkThemeChanging(AddinSettings.IsDarkTheme);
+        this.ApplyTheming();
+        logger = new PopupController(MessageContainer);
         Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
     }
     private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
@@ -193,7 +173,7 @@ public partial class ToolWindowControl : UserControl
             ShowException($"Can't initialize oda libraries");
             return;
         }
-        Status = "Geting data from server...";
+        Status = "Getting data from server...";
         var updateModelResult = await LoadModelAsync();
         if (updateModelResult.Success.Not())
         {
@@ -201,7 +181,7 @@ public partial class ToolWindowControl : UserControl
             return;
         }
         await DispatcherEx.SwitchToMainThread();
-        visualStudioIntegration = new VisualStudioIntegration(AddinSettings, DTE2, logger);
+        visualStudioIntegration = new VisualStudioIntegration(AddinSettings, OdantDevApp.VSCommon.EnvDTE.Instance, logger);
         await AddinSettings.SaveAsync();
     }
     private static bool CheckDllsInFolder(string folder)
@@ -253,7 +233,7 @@ public partial class ToolWindowControl : UserControl
     #region ui button logic
     public async void RefreshItem(object sender, RoutedEventArgs e)
     {
-        if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> item)
+        if (OdaTree?.SelectedItem is not StructureViewItem<StructureItem> item)
         {
             return;
         }
@@ -261,7 +241,7 @@ public partial class ToolWindowControl : UserControl
     }
     public void CreateDomainClick(object sender, RoutedEventArgs e)
     {
-        if ((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is not Domain domain)
+        if ((OdaTree?.SelectedItem as StructureViewItem<StructureItem>)?.Item is not Domain domain)
         {
             logger?.Info("Domain can be created only from another domain");
             return;
@@ -282,7 +262,7 @@ public partial class ToolWindowControl : UserControl
     }
     public async void CreateClassClick(object sender, RoutedEventArgs e)
     {
-        var selectedItem = OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>;
+        var selectedItem = OdaTree?.SelectedItem as StructureViewItem<StructureItem>;
         var innerItem = selectedItem?.Item;
         if (selectedItem is null || innerItem is null)
         {
@@ -302,7 +282,7 @@ public partial class ToolWindowControl : UserControl
     }
     public void RemoveItemClick(object sender, RoutedEventArgs e)
     {
-        if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> { Item: { } structureItem })
+        if (OdaTree?.SelectedItem is not StructureViewItem<StructureItem> { Item: { } structureItem })
             return;
 
         try
@@ -318,7 +298,7 @@ public partial class ToolWindowControl : UserControl
     private async void RefreshTreeButton_Click(object sender, RoutedEventArgs e)
     {
         using var statusCleaner = StatusCleaner();
-        Status = "Geting data from server...";
+        Status = "Getting data from server...";
         var updateModelResult = await OdaModel.RefreshAsync();
         if (updateModelResult.Success)
             return;
@@ -330,7 +310,7 @@ public partial class ToolWindowControl : UserControl
         try
         {
             using var statusCleaner = StatusCleaner();
-            Status = "Geting data from server...";
+            Status = "Getting data from server...";
             await OdaModel.InitReposAsync();
         }
         catch (Exception ex)
@@ -342,11 +322,11 @@ public partial class ToolWindowControl : UserControl
     private void CreateRepoButton_Click(object sender, RoutedEventArgs e)
     {
         var item = new RootItem(GitClient.Client.HostUrl);
-        Groups = new List<RepoBaseViewModel> { new RepoRootViewModel(item, false, logger) };
+        Groups = new List<RepoBase> { new RepoRoot(item, false, logger) };
     }
     private async void CreateModuleButton_Click(object sender, RoutedEventArgs e)
     {
-        if ((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is not Class cls)
+        if ((OdaTree?.SelectedItem as StructureViewItem<StructureItem>)?.Item is not Class cls)
         {
             logger?.Info("Can't create module here");
             return;
@@ -375,7 +355,7 @@ public partial class ToolWindowControl : UserControl
     }
     private void DownloadRepoButton_Click(object sender, RoutedEventArgs e)
     {
-        var selectedItem = RepoTree?.SelectedItem as RepoBaseViewModel;
+        var selectedItem = RepoTree?.SelectedItem as RepoBase;
         if (selectedItem?.Item is ProjectItem project)
         {
             _ = InitRepositoryAsync(project.Object as GitLabApiClient.Models.Projects.Responses.Project);
@@ -458,7 +438,7 @@ public partial class ToolWindowControl : UserControl
     }
     private async void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
     {
-        if ((OdaTree?.SelectedItem as StructureItemViewModel<StructureItem>)?.Item is not Class cls)
+        if ((OdaTree?.SelectedItem as StructureViewItem<StructureItem>)?.Item is not Class cls)
         {
             logger?.Info("Selected item is not a class");
             return;
@@ -501,7 +481,7 @@ public partial class ToolWindowControl : UserControl
     }
     private async void OpenModuleButton_Click(object sender, RoutedEventArgs e)
     {
-        var selectedItem = OdaTree.SelectedItem as StructureItemViewModel<StructureItem>;
+        var selectedItem = OdaTree.SelectedItem as StructureViewItem<StructureItem>;
         StructureItem structureItem = selectedItem?.Item;
         if (structureItem == null || selectedItem == null)
         {
@@ -518,7 +498,7 @@ public partial class ToolWindowControl : UserControl
                 }
             case ItemType.Module:
                 {
-                    foreach (StructureItemViewModel<StructureItem> child in selectedItem.Children)
+                    foreach (StructureViewItem<StructureItem> child in selectedItem.Children)
                     {
                         if (child.Item is Class { HasModule: true })
                             await OpenModule(child.Item);
@@ -533,16 +513,16 @@ public partial class ToolWindowControl : UserControl
 
         var icon = await item.GetImageSourceAsync();
 
-        AddinSettings.LastProjects = new AsyncObservableCollection<Project>(
+        AddinSettings.LastProjects = new AsyncObservableCollection<RecentProject>(
             AddinSettings.LastProjects.Except(AddinSettings.LastProjects.Where(x => x.FullId == item.FullId)))
         {
             new(item.Name, item.FullId, item.Host.Name, DateTime.Now, icon)
         };
-        AddinSettings.LastProjects = new AsyncObservableCollection<Project>(
+        AddinSettings.LastProjects = new AsyncObservableCollection<RecentProject>(
             AddinSettings
             .LastProjects
             .OrderByDescending(x => x.OpenTime)
-            .Take(15) ?? new List<Project>());
+            .Take(15) ?? new List<RecentProject>());
         if ((await AddinSettings.SaveAsync()).Not())
         {
             logger.Info("Error while saving settings");
@@ -602,7 +582,7 @@ public partial class ToolWindowControl : UserControl
     private void RepairToolboxButton_Click(object sender, RoutedEventArgs e)
     {
         //OdantDevPackage.ToolboxReseter.ResetToolboxQueue();
-    } 
+    }
     private void RawEditConfigButton_Click(object sender, RoutedEventArgs e)
     {
         //Process.Start(AddinSettings.AddinSettingsPath);
@@ -641,7 +621,7 @@ public partial class ToolWindowControl : UserControl
     }
     private void DeleteRecentlyProject_Click(object sender, RoutedEventArgs e)
     {
-        if ((sender as Button)?.Tag is not Project project)
+        if ((sender as Button)?.Tag is not RecentProject project)
             return;
         var isDeleted = AddinSettings.LastProjects?.Remove(project) ?? false;
         if (!isDeleted)
@@ -655,7 +635,7 @@ public partial class ToolWindowControl : UserControl
     {
         using var clean = StatusCleaner();
         Status = "Opening project";
-        if ((sender as Button)?.Tag is not Project project)
+        if ((sender as Button)?.Tag is not RecentProject project)
         {
             return;
         }
@@ -744,7 +724,7 @@ public partial class ToolWindowControl : UserControl
     {
         try
         {
-            if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> selectedItem || selectedItem.Item == null)
+            if (OdaTree?.SelectedItem is not StructureViewItem<StructureItem> selectedItem || selectedItem.Item == null)
             {
                 return;
             }
@@ -756,7 +736,7 @@ public partial class ToolWindowControl : UserControl
             }
             string label = DialogTextBoxRepoLabel?.Text ?? name;
             string description = DialogTextBoxRepoDescription.Text;
-            var selectedGroup = DialogRepoGroupTree?.SelectedItem as RepoBaseViewModel;
+            var selectedGroup = DialogRepoGroupTree?.SelectedItem as RepoBase;
             var group = (selectedGroup?.Item as GroupItem)?.Object as Group;
             var options = new CreateProjectOptions()
             {
@@ -780,7 +760,7 @@ public partial class ToolWindowControl : UserControl
 
     private void DeleteRepo_OnClick(object sender, RoutedEventArgs e)
     {
-        if (OdaTree?.SelectedItem is not StructureItemViewModel<StructureItem> selectedItem)
+        if (OdaTree?.SelectedItem is not StructureViewItem<StructureItem> selectedItem)
             return;
 
         bool? isDeleteLink = DialogCheckBoxDeleteLink?.IsChecked;

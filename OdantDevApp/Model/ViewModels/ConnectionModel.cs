@@ -19,10 +19,11 @@ using OdantDev.Model;
 using OdantDevApp.Common;
 using OdantDevApp.Model.Git;
 using OdantDevApp.Model.Git.GitItems;
+using OdantDevApp.Model.ViewModels.Settings;
 
 using SharedOdantDev.Common;
 
-using RepoBaseViewModel = OdantDevApp.Model.Git.RepoBaseViewModel;
+using RepoBase = OdantDevApp.Model.Git.RepoBase;
 
 namespace OdantDevApp.Model.ViewModels;
 
@@ -40,14 +41,14 @@ public partial class ConnectionModel : ObservableObject, IDisposable
 
     [ObservableProperty] Host? localhost;
 
-    [ObservableProperty] AsyncObservableCollection<StructureItemViewModel<StructureItem>> hosts;
+    [ObservableProperty] AsyncObservableCollection<StructureViewItem<StructureItem>> hosts;
 
-    [ObservableProperty] AsyncObservableCollection<StructureItemViewModel<StructureItem>> pinnedItems;
+    [ObservableProperty] AsyncObservableCollection<StructureViewItem<StructureItem>> pinnedItems;
 
     [ObservableProperty] 
-    ConcatenatedCollection<AsyncObservableCollection<StructureItemViewModel<StructureItem>>, StructureItemViewModel<StructureItem>> items;
+    ConcatenatedCollection<AsyncObservableCollection<StructureViewItem<StructureItem>>, StructureViewItem<StructureItem>> items;
 
-    [ObservableProperty] List<RepoBaseViewModel> repos;
+    [ObservableProperty] List<RepoBase> repos;
 
     [ObservableProperty] List<DomainDeveloper>? developers;
 
@@ -82,8 +83,8 @@ public partial class ConnectionModel : ObservableObject, IDisposable
                 return (false, "Can't connect to oda");
 
             AutoLogin = Connection.AutoLogin;
-            Hosts = new AsyncObservableCollection<StructureItemViewModel<StructureItem>>(await HostsListAsync());
-            PinnedItems = new AsyncObservableCollection<StructureItemViewModel<StructureItem>>(await PinnedListAsync());
+            Hosts = new AsyncObservableCollection<StructureViewItem<StructureItem>>(await HostsListAsync());
+            PinnedItems = new AsyncObservableCollection<StructureViewItem<StructureItem>>(await PinnedListAsync());
             Developers = await DevelopListAsync();
 
             AddinSettings.SelectedDevelopeDomain ??= Developers?.FirstOrDefault()?.FullId;
@@ -109,7 +110,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
             stopWatch?.Stop();
         }
     }
-    private async Task<IEnumerable<StructureItemViewModel<StructureItem>>> PinnedListAsync()
+    private async Task<IEnumerable<StructureViewItem<StructureItem>>> PinnedListAsync()
     {
         return await Task.Run(() =>
         {
@@ -117,7 +118,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
             .PinnedItems
             .Select(x => StructureItemEx.FindItem(Connection, x))
             .Where(x => x != null)
-            .Select(x => new StructureItemViewModel<StructureItem>(x, null, logger, this));
+            .Select(x => new StructureViewItem<StructureItem>(x, null, logger, this));
         });
     }
 
@@ -149,27 +150,27 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         }
     }
 
-    private async Task<List<RepoBaseViewModel>?> ReposListAsync()
+    private async Task<List<RepoBase>?> ReposListAsync()
     {
         if (string.IsNullOrEmpty(AddinSettings.GitLabApiPath) || string.IsNullOrEmpty(AddinSettings.GitLabApiKey))
             return null;
 
-        return await Task.Run(async () =>
+        return await Task.Run<List<RepoBase>>((Func<Task<List<RepoBase>>>)(async () =>
         {
             await GitClient.CreateClientAsync(AddinSettings.GitLabApiPath, AddinSettings.GitLabApiKey);
             var uriHost = new Uri(GitClient.Client?.HostUrl).Host;
             var item = new RootItem(uriHost);
-            var list = new List<RepoBaseViewModel>
+            var list = new List<Git.RepoBase>
             {
-                new RepoRootViewModel(item, true, logger: logger)
+                new RepoRoot(item, true, logger: logger)
             };
             return list;
-        });
+        }));
     }
 
-    private async Task<IEnumerable<StructureItemViewModel<StructureItem>>> HostsListAsync()
+    private async Task<IEnumerable<StructureViewItem<StructureItem>>> HostsListAsync()
     {
-        return await Task.Run<IEnumerable<StructureItemViewModel<StructureItem>>>(async () =>
+        return await Task.Run<IEnumerable<StructureViewItem<StructureItem>>>(async () =>
         {
             var hosts = Connection.FindHosts().ToList();
 
@@ -184,7 +185,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
             return hosts
                 .OrderBy(x => x.SortIndex)
                 .ThenBy(x => x.Label)
-                .Select(host => new StructureItemViewModel<StructureItem>(host, logger: logger, connection: this));
+                .Select(host => new StructureViewItem<StructureItem>(host, logger: logger, connection: this));
         });
     }
 
