@@ -45,13 +45,12 @@ public partial class AddinSettings : ObservableObject
     [ObservableProperty] bool isSimpleTheme;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(AppTheme))]
     bool? isDarkTheme;
     partial void OnIsDarkThemeChanging(bool? value)
     {
         bool val = value ?? VisualStudioIntegration.IsVisualStudioDark(VSCommon.EnvDTE.Instance);
         AppTheme.SetBaseTheme(val ? Theme.Dark : Theme.Light);
-        OnThemeChanged?.Invoke(AppTheme);
+        OnAppThemeChanging(AppTheme);
     }
 
     [ObservableProperty] string? selectedDevelopeDomain;

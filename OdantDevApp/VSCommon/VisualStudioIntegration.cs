@@ -18,7 +18,9 @@ using oda;
 
 using OdantDevApp.Model.ViewModels.Settings;
 using OdantDevApp.VSCommon;
+
 using SharedOdantDevLib.WinApi;
+
 using VSLangProj;
 
 using VSLangProj80;
@@ -64,9 +66,13 @@ public sealed partial class VisualStudioIntegration
     {
         this.Logger = logger;
         this.AddinSettings = addinSettings;
-
+#if DEBUG
+        EnvDte = dte;
+        return;        
+#else
         EnvDte = dte
             ?? throw new NullReferenceException("Can't get EnvDTE2 from visual studio");
+#endif
 
         try
         {
@@ -196,7 +202,7 @@ public sealed partial class VisualStudioIntegration
     }
     private static void SetProperties(Properties properties, IReadOnlyDictionary<string, object> values)
     {
-        foreach(var value in values)
+        foreach (var value in values)
         {
             properties.Item(value.Key).Value = value.Value;
         }

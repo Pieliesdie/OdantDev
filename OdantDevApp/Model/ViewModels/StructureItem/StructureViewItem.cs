@@ -177,16 +177,14 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         catch (TimeoutException)
         {
             logger?.Info($"Timeout when getting children for {this}");
+            Children = null;
+            await SetExpanderAsync();
         }
         catch
         {
             logger?.Info($"Unhandled exception for {this}");
-            throw;
-        }
-        finally
-        {
             Children = null;
-            await SetExpanderAsync();
+            throw;
         }
     }
 

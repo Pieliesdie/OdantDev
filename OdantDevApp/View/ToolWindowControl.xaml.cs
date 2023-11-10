@@ -12,8 +12,6 @@ using System.Windows.Media;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using EnvDTE80;
-
 using GitLabApiClient.Models.Groups.Responses;
 
 using MaterialDesignColors;
@@ -38,6 +36,8 @@ using OdantDevApp.Model.ViewModels.Settings;
 using SharedOdanDev.OdaOverride;
 
 using SharedOdantDev.Common;
+
+using Vasu.Wpf.Controls;
 
 using File = System.IO.File;
 using GroupItem = OdantDevApp.Model.Git.GitItems.GroupItem;
@@ -88,11 +88,13 @@ public partial class ToolWindowControl : UserControl
         // from this assembly, which causes the MaterialDesign assemblies to be searched
         // relative to this assembly's path. Otherwise, the MaterialDesign assemblies
         // are searched relative to Eclipse's path, so they're not found.
+        //_ = new MaterialWindow();
         _ = new Card();
         _ = new Hue("Dummy", Colors.Black, Colors.White);
         _ = new OpenDirectoryControl();
         _ = new MdXaml.TextToFlowDocumentConverter();
-        _ = new MaterialWindow();
+        _ = new PropertyGrid();
+        _ = new ColorPicker.StandardColorPicker();
     }
     private bool InitializeOdaComponents()
     {
