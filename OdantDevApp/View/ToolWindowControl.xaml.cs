@@ -195,9 +195,9 @@ public partial class ToolWindowControl : UserControl
         Utils.MainSynchronizationContext = SynchronizationContext.Current;
         var connection = CommonEx.Connection = new Connection();
         OdaModel = new ConnectionModel(connection, AddinSettings, logger);
-        var GetDataResult = await OdaModel.LoadAsync();
-        await OdaModel.InitReposAsync();
-        if (GetDataResult.Success)
+        var getDataResult = await OdaModel.LoadAsync();
+        _ = OdaModel.InitReposAsync();
+        if (getDataResult.Success)
         {
             spConnect.Visibility = Visibility.Collapsed;
             FoldersComboBox.IsEnabled = false;
@@ -214,7 +214,7 @@ public partial class ToolWindowControl : UserControl
         }
         else
         {
-            return (false, GetDataResult.Error);
+            return (false, getDataResult.Error);
         }
     }
     private void ShowException(string message)

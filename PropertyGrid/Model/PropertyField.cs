@@ -96,7 +96,7 @@ namespace Vasu.Wpf.Controls
             (PropertyDescriptor == null)
                 ? (PropertyInfo == null || PropertyInfo.Attributes == PropertyAttributes.None)
                     ? string.Empty
-                    : (PropertyInfo.GetCustomAttributes(typeof(DescriptionAttribute), false)[0] as DescriptionAttribute).Description
+                    : (PropertyInfo.GetCustomAttributes(typeof(DescriptionAttribute), false)[0] as DescriptionAttribute)?.Description
                 : PropertyDescriptor.Description;
         public object VisualEditor => (PropertyEditor == null) ? null : PropertyEditor.VisualEditor;
         public PropertyGrid PropertyGrid { get; set; }

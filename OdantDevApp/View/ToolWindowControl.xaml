@@ -854,8 +854,8 @@
                                                     <TextBlock Text="Hosts children timeout" />
                                                 </materialDesign:HintAssist.Hint>
                                             </TextBox>
-
                                             <controls:PropertyGrid Grid.Row="5"
+                                                                   
                                                                    SelectedObject="{Binding AddinSettings}"
                                                                    Visibility="Visible" />
                                         </Grid>

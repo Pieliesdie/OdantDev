@@ -23,26 +23,25 @@ namespace Vasu.Wpf.Controls
 			DefaultStyleKeyProperty.OverrideMetadata(typeof(PropertyItemsControl), new FrameworkPropertyMetadata(typeof(PropertyItemsControl)));
 		}
 
-		#endregion
+        #endregion
 
-		#region Dependency Properties
+        #region Dependency Properties
+        public new PropertyItem SelectedItem
+        {
+			get => (PropertyItem)GetValue(SelectedItemProperty);
+            set => SetValue(SelectedItemProperty, value);
+        }
 
-		public PropertyItem SelectedItem
-		{
-			get { return (PropertyItem)GetValue(SelectedItemProperty); }
-			set { SetValue(SelectedItemProperty, value); }
-		}
-
-		public static readonly DependencyProperty SelectedItemProperty =
+		public new static readonly DependencyProperty SelectedItemProperty =
 			DependencyProperty.Register(nameof(SelectedItem), typeof(PropertyItem), typeof(PropertyItemsControl), new UIPropertyMetadata(null));
 
-		public object SelectedValue
+		public new object SelectedValue
 		{
-			get { return (object)GetValue(SelectedValueProperty); }
-			set { SetValue(SelectedValueProperty, value); }
-		}
+			get => (object)GetValue(SelectedValueProperty);
+            set => SetValue(SelectedValueProperty, value);
+        }
 
-		public static readonly DependencyProperty SelectedValueProperty =
+		public new static readonly DependencyProperty SelectedValueProperty =
 			DependencyProperty.Register(nameof(SelectedValue), typeof(object), typeof(PropertyItemsControl), new UIPropertyMetadata(null));
 
 		#endregion

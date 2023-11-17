@@ -15,163 +15,168 @@ using MaterialDesignThemes.Wpf;
 
 #endregion
 
-namespace Vasu.Wpf.Controls
+namespace Vasu.Wpf.Controls;
+
+/// <summary>
+/// Implements methods to decide visual editor for the <see cref="PropertyField"/>.
+/// </summary>
+internal static class PropertyEditorProvider
 {
-    /// <summary>
-    /// Implements methods to decide visual editor for the <see cref="PropertyField"/>.
-    /// </summary>
-    internal static class PropertyEditorProvider
+    public static PropertyEditor GetFieldEditor(PropertyField field)
     {
-        public static PropertyEditor GetFieldEditor(PropertyField field)
-        {
-            if (field == null) return null;
-            FrameworkElement element;
-            if (!field.PropertyType.IsPrimitiveType())
-            {
-                var root = new StackPanel()
-                {
-                    Orientation = Orientation.Horizontal
-                };
-                var rowEditor = ReadOnlyEditor(field); 
-                rowEditor.HorizontalAlignment = HorizontalAlignment.Stretch;
-                root.Children.Add(rowEditor);
-                var popupEditor =  StringEditor(field);
-                popupEditor.Height = 150;
-                popupEditor.Width = 150;
-                var edit = new PopupBox
-                {
-                    HorizontalAlignment = HorizontalAlignment.Right,
-                    Content = new TextBlock() { Text = "123"}
-                };
-                root.Children.Add(edit);
-                element = root;
-            }
-            else
-            {
-                element = Editor(field);
-            }
+        if (field == null) return null;
+        FrameworkElement element = Editor(field);
+        return new PropertyEditor(element, field);
+    }
 
-            return new PropertyEditor(element, field);
+    private static FrameworkElement Editor(PropertyField field)
+    {
+        var type = Nullable.GetUnderlyingType(field.PropertyType) ?? field.PropertyType;
+        if (!type.IsPrimitiveType())
+        {
+            return NestedEditor(field);
         }
+        if (!field.PropertyInfo.CanWrite)
+        {
+            return ReadOnlyEditor(field);
+        }
+        if (type.IsEnum)
+        {
+            return EnumEditor(field);
+        }
+        if (type == typeof(bool))
+        {
+            return BooleanEditor(field);
+        }
+        if (type == typeof(string))
+        {
+            return StringEditor(field);
+        }
+        if (type.IsNumericType())
+        {
+            return NumericEditor(field);
+        }
+        if (type == typeof(Color))
+        {
+            return ColorEditor(field);
+        }
+        return DefaultEditor(field);
+    }
 
-        private static FrameworkElement Editor(PropertyField field)
+    private static FrameworkElement NestedEditor(PropertyField field)
+    {
+        var root = new Grid()
         {
-            if (!field.PropertyInfo.CanWrite)
+            ColumnDefinitions =
             {
-                return ReadOnlyEditor(field);
+                new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star)  },
+                new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Auto)}
             }
-            if (field.PropertyType.IsEnum)
-            {
-                return EnumEditor(field);
-            }
-            if (field.PropertyType == typeof(bool))
-            {
-                return BooleanEditor(field);
-            }
-            if (field.PropertyType == typeof(string))
-            {
-                return StringEditor(field);
-            }
-            if (field.PropertyType.IsNumericType())
-            {
-                return NumericEditor(field);
-            }
-            if (field.PropertyType == typeof(Color))
-            {
-                return ColorEditor(field);
-            }
-            //if (!field.PropertyType.IsPrimitive)
-            //{
-            //    return new PropertyGrid() { SelectedObject = field.Value };
-            //}
+        };
+        var rowEditor = ReadOnlyEditor(field);
+        rowEditor.HorizontalAlignment = HorizontalAlignment.Stretch;
+        rowEditor.Text = field.PropertyType.ToString();
+        root.Children.Add(rowEditor);
 
-            return DefaultEditor(field);
-        }
-        private static StandardColorPicker ColorEditor(PropertyField field)
+        var edit = new PopupBox
         {
-            var colorEditor = new StandardColorPicker
-            {
-                Foreground = Brushes.Gray,
-                BorderThickness = new Thickness(0)
-            };
-            colorEditor.SetBinding(StandardColorPicker.SelectedColorProperty, GetBinding(field));
-            return colorEditor;
-        }
-        private static TextBox ReadOnlyEditor(PropertyField field)
+            HorizontalAlignment = HorizontalAlignment.Right,
+            PopupContent = new PropertyGrid() { SelectedObject = field.Value },
+            StaysOpen = true
+        };
+        root.Children.Add(edit);
+        Grid.SetColumn(rowEditor, 0);
+        Grid.SetColumn(edit, 1);
+        return root;
+    }
+    private static StandardColorPicker ColorEditor(PropertyField field)
+    {
+        var colorEditor = new StandardColorPicker
         {
-            var textEditor = StringEditor(field);
-            textEditor.IsReadOnly = true;
-            textEditor.Foreground = Brushes.Gray;
-            return textEditor;
-        }
-        private static TextBox StringEditor(PropertyField field)
+            Foreground = Brushes.Gray,
+            BorderThickness = new Thickness(0)
+        };
+        colorEditor.SetBinding(PickerControlBase.SelectedColorProperty, GetBinding(field));
+        return colorEditor;
+    }
+    private static TextBox ReadOnlyEditor(PropertyField field)
+    {
+        var textEditor = StringEditor(field);
+        textEditor.IsReadOnly = true;
+        textEditor.Foreground = Brushes.Gray;
+        return textEditor;
+    }
+    private static TextBox StringEditor(PropertyField field)
+    {
+        var textEditor = new TextBox
         {
-            var textEditor = new TextBox
-            {
-                BorderThickness = new Thickness(0)
-            };
-            textEditor.SetBinding(TextBox.TextProperty, GetBinding(field));
-            return textEditor;
-        }
-        private static TextBox NumericEditor(PropertyField field) => StringEditor(field);
-        private static ComboBox EnumEditor(PropertyField field)
+            BorderThickness = new Thickness(0)
+        };
+        textEditor.SetBinding(TextBox.TextProperty, GetBinding(field));
+        return textEditor;
+    }
+    private static TextBox NumericEditor(PropertyField field) => StringEditor(field);
+    private static ComboBox EnumEditor(PropertyField field)
+    {
+        var comboEditor = new ComboBox
         {
-            var comboEditor = new ComboBox
-            {
-                ItemsSource = Enum.GetValues(field.PropertyType),
-                BorderThickness = new Thickness(0)
-            };
+            ItemsSource = Enum.GetValues(field.PropertyType),
+            BorderThickness = new Thickness(0)
+        };
 
-            comboEditor.SetBinding(ComboBox.SelectedValueProperty, GetBinding(field));
-            return comboEditor;
-        }
-        private static CheckBox BooleanEditor(PropertyField field)
+        comboEditor.SetBinding(ComboBox.SelectedValueProperty, GetBinding(field));
+        return comboEditor;
+    }
+    private static CheckBox BooleanEditor(PropertyField field)
+    {
+        var comboEditor = new CheckBox
         {
-            var comboEditor = new CheckBox();
-            comboEditor.BorderThickness = new Thickness(0);
-            comboEditor.SetBinding(CheckBox.IsCheckedProperty, GetBinding(field));
-            return comboEditor;
-        }
-        private static TextBlock DefaultEditor(PropertyField field)
+            BorderThickness = new Thickness(0),
+            IsThreeState = field.PropertyType == typeof(bool?),
+            HorizontalAlignment = HorizontalAlignment.Center
+        };
+        comboEditor.SetBinding(CheckBox.IsCheckedProperty, GetBinding(field));
+        return comboEditor;
+    }
+    private static TextBlock DefaultEditor(PropertyField field)
+    {
+        var textBlock = new TextBlock
         {
-            var textBlock = new TextBlock
-            {
-                Text = field.Value == null ? string.Empty : field.Value.ToString()
-            };
+            Text = field.Value == null ? string.Empty : field.Value.ToString()
+        };
 
-            return textBlock;
-        }
+        return textBlock;
+    }
 
-        private static Binding GetBinding(PropertyField field)
+    private static Binding GetBinding(PropertyField field)
+    {
+        Binding bnding = new Binding(field.PropertyInfo.Name)
         {
-            Binding bnding = new Binding(field.PropertyInfo.Name)
-            {
-                Source = field.SourceObject,          
-                Mode = field.PropertyDescriptor.IsReadOnly? BindingMode.OneWay : BindingMode.TwoWay
-            };
-            return bnding;
-        }
+            Source = field.SourceObject,
+            Mode = field.PropertyDescriptor.IsReadOnly ? BindingMode.OneWay : BindingMode.TwoWay
+        };
+        return bnding;
+    }
 
-        private static bool IsPrimitiveType(this Type t) => t.IsPrimitive || t.IsValueType || (t == typeof(string));
-        public static bool IsNumericType(this Type o)
-        {   
-            switch (Type.GetTypeCode(o))
-            {
-                case TypeCode.Byte:
-                case TypeCode.SByte:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.Decimal:
-                case TypeCode.Double:
-                case TypeCode.Single:
-                    return true;
-                default:
-                    return false;
-            }
+    private static bool IsPrimitiveType(this Type t) => t.IsPrimitive || t.IsValueType || (t == typeof(string));
+    public static bool IsNumericType(this Type o)
+    {
+        switch (Type.GetTypeCode(o))
+        {
+            case TypeCode.Byte:
+            case TypeCode.SByte:
+            case TypeCode.UInt16:
+            case TypeCode.UInt32:
+            case TypeCode.UInt64:
+            case TypeCode.Int16:
+            case TypeCode.Int32:
+            case TypeCode.Int64:
+            case TypeCode.Decimal:
+            case TypeCode.Double:
+            case TypeCode.Single:
+                return true;
+            default:
+                return false;
         }
     }
 }

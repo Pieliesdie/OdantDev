@@ -29,13 +29,13 @@ namespace OdantDevApp.Model.ViewModels;
 
 public partial class ConnectionModel : ObservableObject, IDisposable
 {
-    public static List<IntPtr> ServerAssemblies { get; set; }
-    public static List<Assembly> ClientAssemblies { get; set; }
+    public static List<IntPtr>? ServerAssemblies { get; set; }
+    public static List<Assembly>? ClientAssemblies { get; set; }
     public static string[] OdaClientLibraries { get; } = { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
     private static string[] OdaServerLibraries { get; } = { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
 
-    private readonly ILogger logger;
-    private Connection? Connection { get; }
+    private readonly ILogger? logger;
+    private Connection Connection { get; }
 
     [ObservableProperty] Domain develope;
 
@@ -45,10 +45,10 @@ public partial class ConnectionModel : ObservableObject, IDisposable
 
     [ObservableProperty] AsyncObservableCollection<StructureViewItem<StructureItem>> pinnedItems;
 
-    [ObservableProperty] 
+    [ObservableProperty]
     ConcatenatedCollection<AsyncObservableCollection<StructureViewItem<StructureItem>>, StructureViewItem<StructureItem>> items;
 
-    [ObservableProperty] List<RepoBase> repos;
+    [ObservableProperty] List<RepoBase>? repos;
 
     [ObservableProperty] List<DomainDeveloper>? developers;
 
@@ -62,13 +62,11 @@ public partial class ConnectionModel : ObservableObject, IDisposable
 
     public ConnectionModel(Connection connection, AddinSettings addinSettings, ILogger? logger = null)
     {
-        this.Connection = connection;
-        this.AddinSettings = addinSettings;
+        Connection = connection ?? throw new NullReferenceException(nameof(connection));
+        AddinSettings = addinSettings ?? throw new NullReferenceException(nameof(addinSettings));
         this.logger = logger;
     }
 
-
-    [HandleProcessCorruptedStateExceptions]
     public async Task<(bool Success, string Error)> LoadAsync()
     {
         Stopwatch stopWatch = null;
@@ -115,10 +113,11 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         return await Task.Run(() =>
         {
             return AddinSettings
-            .PinnedItems
+            .PinnedItems?
             .Select(x => StructureItemEx.FindItem(Connection, x))
             .Where(x => x != null)
-            .Select(x => new StructureViewItem<StructureItem>(x, null, logger, this));
+            .Select(x => new StructureViewItem<StructureItem>(x, null, logger, this)) ?? Enumerable.Empty<StructureViewItem<StructureItem>>()
+            .ToList();
         });
     }
 
@@ -128,7 +127,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         {
             Develope = StructureItemEx.FindDomain(Localhost, "D:DEVELOPE");
 
-            var developList = await Retry.RetryAsync<List<DomainDeveloper>>(
+            var developList = await Retry.RetryAsync(
                 () => Develope?.FindDomains()?.OfType<DomainDeveloper>()?.ToList(),
                 (e) => e != null,
                 TimeSpan.FromMilliseconds(300),
@@ -155,22 +154,22 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         if (string.IsNullOrEmpty(AddinSettings.GitLabApiPath) || string.IsNullOrEmpty(AddinSettings.GitLabApiKey))
             return null;
 
-        return await Task.Run<List<RepoBase>>((Func<Task<List<RepoBase>>>)(async () =>
+        return await Task.Run(async () =>
         {
             await GitClient.CreateClientAsync(AddinSettings.GitLabApiPath, AddinSettings.GitLabApiKey);
             var uriHost = new Uri(GitClient.Client?.HostUrl).Host;
             var item = new RootItem(uriHost);
-            var list = new List<Git.RepoBase>
+            var list = new List<RepoBase>
             {
                 new RepoRoot(item, true, logger: logger)
             };
             return list;
-        }));
+        });
     }
 
     private async Task<IEnumerable<StructureViewItem<StructureItem>>> HostsListAsync()
     {
-        return await Task.Run<IEnumerable<StructureViewItem<StructureItem>>>(async () =>
+        return await Task.Run(async () =>
         {
             var hosts = Connection.FindHosts().ToList();
 
@@ -256,7 +255,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
                 var path = root.Dir.RemoteFolder.LoadFolder();
                 path = DevHelpers.ClearDomainAndClassInPath(path);
 
-                FileSystem.CopyDirectory(rootDir.FullName, System.IO.Path.Combine(path, rootDir.Name), UIOption.OnlyErrorDialogs);
+                FileSystem.CopyDirectory(rootDir.FullName, Path.Combine(path, rootDir.Name), UIOption.OnlyErrorDialogs);
             }
             catch
             {
@@ -277,7 +276,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
                 var path = root.Dir.RemoteFolder.LoadFolder();
                 path = DevHelpers.ClearDomainAndClassInPath(path);
 
-                FileSystem.CopyFile(file.FullName, System.IO.Path.Combine(path, file.Name), UIOption.OnlyErrorDialogs);
+                FileSystem.CopyFile(file.FullName, Path.Combine(path, file.Name), UIOption.OnlyErrorDialogs);
             }
         }
 
@@ -290,21 +289,19 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         StructureItem tempRoot = root;
 
         DirectoryInfo[] domainClassDirs = dir.GetDirectories("CLASS");
-        if (domainClassDirs.Length > 0)
-        {
+        if (domainClassDirs.Length <= 0) 
+            return tempRoot;
 
-            DirectoryInfo classDir = domainClassDirs[0];
-            var oclFiles = classDir.GetFiles("class.ocl");
-            if (oclFiles.Length > 0)
-            {
-                success = true;
+        DirectoryInfo classDir = domainClassDirs[0];
+        var oclFiles = classDir.GetFiles("class.ocl");
+        if (oclFiles.Length <= 0) 
+            return tempRoot;
+        success = true;
 
-                FileInfo oclFile = oclFiles[0];
+        FileInfo oclFile = oclFiles[0];
 
-                tempRoot = CreateItem(tempRoot, oclFile.FullName, itemType);
-                CopyFilesToStructureItem(tempRoot, classDir);
-            }
-        }
+        tempRoot = CreateItem(tempRoot, oclFile.FullName, itemType);
+        CopyFilesToStructureItem(tempRoot, classDir);
 
         return tempRoot;
     }
