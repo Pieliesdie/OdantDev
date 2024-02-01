@@ -1,12 +1,7 @@
-﻿
-#region Namespace Imports
-
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Controls;
 
-#endregion
-
-namespace Vasu.Wpf.Controls
+namespace MaterialDesign.PropertyGrid.Controls
 {
 
     /// <summary>

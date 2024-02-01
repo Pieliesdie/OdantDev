@@ -111,7 +111,7 @@ public class ToolWindow : ToolWindowPane
 
         WindowsFormsHost host = new()
         {
-            HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
             Child = new System.Windows.Forms.Panel()
             {
@@ -137,8 +137,7 @@ public class ToolWindow : ToolWindowPane
 #if DEBUG
             psi.EnvironmentVariables["COMPLUS_ForceENC"] = "1";
 #endif           
-            var process = Process.Start(psi);
-            if (process is null) throw new Exception($"Can't start addin process {path}");
+            var process = Process.Start(psi) ?? throw new Exception($"Can't start addin process {path}");
             try
             {
                 while (process.MainWindowHandle == IntPtr.Zero)

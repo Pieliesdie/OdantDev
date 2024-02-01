@@ -20,24 +20,11 @@ public struct RecentProject(string name, string fullId, string domainName, DateT
     public string HostName { get; set; } = domainName;
     public DateTime OpenTime { get; set; } = openTime;
 
-    public override bool Equals(object obj)
-    {
-        return obj is RecentProject { } project &&
-               FullId == project.FullId;
-    }
+    public override bool Equals(object obj) => obj is RecentProject { } project && FullId == project.FullId;
 
-    public override int GetHashCode()
-    {
-        return -191063783 + EqualityComparer<string>.Default.GetHashCode(FullId);
-    }
+    public override int GetHashCode() => -191063783 + EqualityComparer<string>.Default.GetHashCode(FullId);
 
-    public static bool operator ==(RecentProject left, RecentProject right)
-    {
-        return left.Equals(right);
-    }
+    public static bool operator ==(RecentProject left, RecentProject right) => left.Equals(right);
 
-    public static bool operator !=(RecentProject left, RecentProject right)
-    {
-        return !(left == right);
-    }
+    public static bool operator !=(RecentProject left, RecentProject right) => !(left == right);
 }

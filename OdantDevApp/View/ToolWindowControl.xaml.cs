@@ -37,8 +37,6 @@ using SharedOdanDev.OdaOverride;
 
 using SharedOdantDev.Common;
 
-using Vasu.Wpf.Controls;
-
 using File = System.IO.File;
 using GroupItem = OdantDevApp.Model.Git.GitItems.GroupItem;
 using RepoBase = OdantDevApp.Model.Git.RepoBase;
@@ -59,6 +57,7 @@ public partial class ToolWindowControl : UserControl
     [NotifyPropertyChangedFor(nameof(IsBusy))]
     private string status = string.Empty;
     public bool IsBusy => !string.IsNullOrWhiteSpace(Status);
+    [ObservableProperty] bool isLoadingRepos;
     public static AddinSettings AddinSettings => AddinSettings.Instance;
 
     [ObservableProperty] private List<RepoBase>? groups;
@@ -93,8 +92,6 @@ public partial class ToolWindowControl : UserControl
         _ = new Hue("Dummy", Colors.Black, Colors.White);
         _ = new OpenDirectoryControl();
         _ = new MdXaml.TextToFlowDocumentConverter();
-        _ = new PropertyGrid();
-        _ = new ColorPicker.StandardColorPicker();
     }
     private bool InitializeOdaComponents()
     {
@@ -141,6 +138,9 @@ public partial class ToolWindowControl : UserControl
             }
             catch (Exception ex)
             {
+#if DEBUG
+                throw;
+#endif
                 logger.Info(ex.Message);
             }
         });
@@ -163,7 +163,8 @@ public partial class ToolWindowControl : UserControl
 
         if (CheckDllsInFolder(odaPath).Not())
         {
-            string msg = $"Can't find oda DLLs in {AddinSettings.SelectedOdaFolder}\nRun app with admin rights before start addin or repair default oda folder";
+            string msg = $"Can't find oda DLLs in {AddinSettings.SelectedOdaFolder}\n" +
+                $"Run app with admin rights before start addin or repair default oda folder";
             logger.Info(msg);
             ShowException(msg);
             return;
@@ -196,7 +197,7 @@ public partial class ToolWindowControl : UserControl
         var connection = CommonEx.Connection = new Connection();
         OdaModel = new ConnectionModel(connection, AddinSettings, logger);
         var getDataResult = await OdaModel.LoadAsync();
-        _ = OdaModel.InitReposAsync();
+        _ = LoadReposAsync();
         if (getDataResult.Success)
         {
             spConnect.Visibility = Visibility.Collapsed;
@@ -215,6 +216,17 @@ public partial class ToolWindowControl : UserControl
         else
         {
             return (false, getDataResult.Error);
+        }
+    }
+
+    private async Task LoadReposAsync()
+    {
+        using var statusCleaner = Disposable.Create(() => IsLoadingRepos = false);
+        IsLoadingRepos = true;
+        var res = await OdaModel.InitReposAsync();
+        if (res.Success.Not())
+        {
+            logger?.Info($"Gitlab: {res.Error}");
         }
     }
     private void ShowException(string message)
@@ -307,18 +319,9 @@ public partial class ToolWindowControl : UserControl
 
         ShowException(updateModelResult.Error);
     }
-    private async void RefreshRepoButton_Click(object sender, RoutedEventArgs e)
+    private void RefreshRepoButton_Click(object sender, RoutedEventArgs e)
     {
-        try
-        {
-            using var statusCleaner = StatusCleaner();
-            Status = "Getting data from server...";
-            await OdaModel.InitReposAsync();
-        }
-        catch (Exception ex)
-        {
-            ShowException(ex.Message);
-        }
+        _ = LoadReposAsync();
 
     }
     private void CreateRepoButton_Click(object sender, RoutedEventArgs e)
@@ -348,7 +351,7 @@ public partial class ToolWindowControl : UserControl
             });
 
             logger?.Info("Module created");
-            await OpenModule(cls);
+            await OpenModuleAsync(cls);
         }
         catch (Exception ex)
         {
@@ -398,7 +401,7 @@ public partial class ToolWindowControl : UserControl
             var rootDir = new DirectoryInfo(modulePath);
             if (!string.IsNullOrEmpty(modulePath))
             {
-                item = OdaModel.CreateItemsFromFiles(domain, rootDir);
+                item = ConnectionModel.CreateItemsFromFiles(domain, rootDir);
             }
 
             rootDir.Delete(true);
@@ -425,14 +428,14 @@ public partial class ToolWindowControl : UserControl
         {
             case ItemType.Class:
                 {
-                    await OpenModule(item);
+                    await OpenModuleAsync(item);
                     break;
                 }
             case ItemType.Module:
                 {
                     foreach (Class child in item.getChilds(ItemType.Class, Deep.Near))
                     {
-                        await OpenModule(child);
+                        await OpenModuleAsync(child);
                     }
                     break;
                 }
@@ -474,7 +477,7 @@ public partial class ToolWindowControl : UserControl
                 return;
             }
             logger?.Info("Module created");
-            await OpenModule(createdClass);
+            await OpenModuleAsync(createdClass);
         }
         catch (Exception ex)
         {
@@ -495,7 +498,7 @@ public partial class ToolWindowControl : UserControl
         {
             case ItemType.Class:
                 {
-                    await OpenModule(structureItem);
+                    await OpenModuleAsync(structureItem);
                     break;
                 }
             case ItemType.Module:
@@ -503,32 +506,27 @@ public partial class ToolWindowControl : UserControl
                     foreach (StructureViewItem<StructureItem> child in selectedItem.Children)
                     {
                         if (child.Item is Class { HasModule: true })
-                            await OpenModule(child.Item);
+                            await OpenModuleAsync(child.Item);
                     }
                     break;
                 }
         }
     }
-    private async Task OpenModule(StructureItem item)
+    private async Task OpenModuleAsync(StructureItem item)
     {
         await visualStudioIntegration.OpenModuleAsync(item);
 
         var icon = await item.GetImageSourceAsync();
+        AddinSettings.LastProjects.Remove(x => x.FullId == item.FullId);
+        AddinSettings.LastProjects.Insert(0, new RecentProject(item.Name, item.FullId, item.Host.Name, DateTime.Now, icon));
 
-        AddinSettings.LastProjects = new AsyncObservableCollection<RecentProject>(
-            AddinSettings.LastProjects.Except(AddinSettings.LastProjects.Where(x => x.FullId == item.FullId)))
+        _ = Task.Run(async () =>
         {
-            new(item.Name, item.FullId, item.Host.Name, DateTime.Now, icon)
-        };
-        AddinSettings.LastProjects = new AsyncObservableCollection<RecentProject>(
-            AddinSettings
-            .LastProjects
-            .OrderByDescending(x => x.OpenTime)
-            .Take(15) ?? new List<RecentProject>());
-        if ((await AddinSettings.SaveAsync()).Not())
-        {
-            logger.Info("Error while saving settings");
-        }
+            if ((await AddinSettings.SaveAsync()).Not())
+            {
+                logger.Info("Error while saving settings");
+            }
+        });
     }
 
     private void TreeViewItem_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
@@ -657,7 +655,7 @@ public partial class ToolWindowControl : UserControl
                 logger?.Info("Can't find this project");
                 return;
             }
-            await OpenModule(selectedItem);
+            await OpenModuleAsync(selectedItem);
         });
     }
     private void DialogAddLibraryButton_Click(object sender, RoutedEventArgs e)

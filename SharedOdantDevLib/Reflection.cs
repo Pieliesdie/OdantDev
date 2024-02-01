@@ -16,7 +16,7 @@ public static class Reflection
 
         foreach (var outputProperty in typeof(T).GetProperties())
         {
-            if (sourceType.GetProperty(outputProperty.Name) is PropertyInfo sourceProperty)
+            if (sourceType.GetProperty(outputProperty.Name) is PropertyInfo sourceProperty && sourceProperty.CanWrite)
             {
                 var value = sourceProperty.GetValue(source);
                 outputProperty.SetValue(output, value);

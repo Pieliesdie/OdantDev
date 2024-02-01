@@ -6,7 +6,7 @@
     xmlns:local="clr-namespace:OdantDevApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:odantdev="clr-namespace:OdantDev"
-    Title="MainWindow"
+    Title="Odant dev app"
     Width="1"
     Height="1"
     mc:Ignorable="d">

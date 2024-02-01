@@ -1,7 +1,4 @@
-﻿
-#region Namespace Imports
-
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,13 +6,11 @@ using System.Windows.Media;
 
 using ColorPicker;
 
-using MaterialDesignColors;
+using MaterialDesign.PropertyGrid.Model;
 
 using MaterialDesignThemes.Wpf;
 
-#endregion
-
-namespace Vasu.Wpf.Controls;
+namespace MaterialDesign.PropertyGrid.Implementations;
 
 /// <summary>
 /// Implements methods to decide visual editor for the <see cref="PropertyField"/>.
@@ -81,7 +76,7 @@ internal static class PropertyEditorProvider
         var edit = new PopupBox
         {
             HorizontalAlignment = HorizontalAlignment.Right,
-            PopupContent = new PropertyGrid() { SelectedObject = field.Value },
+            PopupContent = new Controls.PropertyGrid() { SelectedObject = field.Value },
             StaysOpen = true
         };
         root.Children.Add(edit);

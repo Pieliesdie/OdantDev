@@ -14,8 +14,7 @@ internal class PopupController(Snackbar snackbar) : ILogger
     public void Info(string message)
     {
         if (_snackbar.IsVisible.Not()) return;
-        var enqueueAction = new Action(() => _snackbar?.MessageQueue?.Enqueue(message, "Copy", _copyAction, message));
-        _snackbar.SaveInvoke(enqueueAction);
+        _snackbar.SaveInvoke(() => _snackbar?.MessageQueue?.Enqueue(message, "Copy", _copyAction, message));
     }
 
     public void Error(string message)

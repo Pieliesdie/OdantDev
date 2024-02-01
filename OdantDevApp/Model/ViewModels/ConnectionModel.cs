@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -24,15 +23,15 @@ using OdantDevApp.Model.ViewModels.Settings;
 using SharedOdantDev.Common;
 
 using RepoBase = OdantDevApp.Model.Git.RepoBase;
-
+using ViewItem = OdantDevApp.Model.ViewModels.StructureViewItem<oda.StructureItem>;
 namespace OdantDevApp.Model.ViewModels;
 
 public partial class ConnectionModel : ObservableObject, IDisposable
 {
     public static List<IntPtr>? ServerAssemblies { get; set; }
     public static List<Assembly>? ClientAssemblies { get; set; }
-    public static string[] OdaClientLibraries { get; } = { "odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll" };
-    private static string[] OdaServerLibraries { get; } = { "odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll" };
+    public static string[] OdaClientLibraries { get; } = ["odaLib.dll", "odaShare.dll", "odaXML.dll", "odaCore.dll"];
+    private static string[] OdaServerLibraries { get; } = ["odaClient.dll", "fastxmlparser.dll", "ucrtbase.dll"];
 
     private readonly ILogger? logger;
     private Connection Connection { get; }
@@ -41,23 +40,19 @@ public partial class ConnectionModel : ObservableObject, IDisposable
 
     [ObservableProperty] Host? localhost;
 
-    [ObservableProperty] AsyncObservableCollection<StructureViewItem<StructureItem>> hosts;
+    [ObservableProperty] AsyncObservableCollection<ViewItem> hosts;
 
-    [ObservableProperty] AsyncObservableCollection<StructureViewItem<StructureItem>> pinnedItems;
+    [ObservableProperty] AsyncObservableCollection<ViewItem> pinnedItems;
 
-    [ObservableProperty]
-    ConcatenatedCollection<AsyncObservableCollection<StructureViewItem<StructureItem>>, StructureViewItem<StructureItem>> items;
+    [ObservableProperty] ConcatenatedCollection<AsyncObservableCollection<ViewItem>, ViewItem> items;
 
     [ObservableProperty] List<RepoBase>? repos;
 
     [ObservableProperty] List<DomainDeveloper>? developers;
 
     [ObservableProperty] bool autoLogin;
+    partial void OnAutoLoginChanged(bool value) => Connection.AutoLogin = value;
 
-    partial void OnAutoLoginChanged(bool value)
-    {
-        Connection.AutoLogin = value;
-    }
     public AddinSettings AddinSettings { get; }
 
     public ConnectionModel(Connection connection, AddinSettings addinSettings, ILogger? logger = null)
@@ -81,8 +76,8 @@ public partial class ConnectionModel : ObservableObject, IDisposable
                 return (false, "Can't connect to oda");
 
             AutoLogin = Connection.AutoLogin;
-            Hosts = new AsyncObservableCollection<StructureViewItem<StructureItem>>(await HostsListAsync());
-            PinnedItems = new AsyncObservableCollection<StructureViewItem<StructureItem>>(await PinnedListAsync());
+            Hosts = (await HostsListAsync()).ToAsyncObservableCollection();
+            PinnedItems = (await PinnedListAsync()).ToAsyncObservableCollection();
             Developers = await DevelopListAsync();
 
             AddinSettings.SelectedDevelopeDomain ??= Developers?.FirstOrDefault()?.FullId;
@@ -108,7 +103,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
             stopWatch?.Stop();
         }
     }
-    private async Task<IEnumerable<StructureViewItem<StructureItem>>> PinnedListAsync()
+    private async Task<IEnumerable<ViewItem>> PinnedListAsync()
     {
         return await Task.Run(() =>
         {
@@ -116,7 +111,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
             .PinnedItems?
             .Select(x => StructureItemEx.FindItem(Connection, x))
             .Where(x => x != null)
-            .Select(x => new StructureViewItem<StructureItem>(x, null, logger, this)) ?? Enumerable.Empty<StructureViewItem<StructureItem>>()
+            .Select(x => new ViewItem(x, null, logger, this)) ?? Enumerable.Empty<ViewItem>()
             .ToList();
         });
     }
@@ -138,14 +133,16 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         });
     }
 
-    public async Task InitReposAsync()
+    public async Task<(bool Success, string Error)> InitReposAsync()
     {
         try
         {
             Repos = await ReposListAsync();
+            return (true, null);
         }
-        catch
+        catch (Exception ex)
         {
+            return (false, ex.Message ?? ex.ToString());
         }
     }
 
@@ -167,7 +164,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         });
     }
 
-    private async Task<IEnumerable<StructureViewItem<StructureItem>>> HostsListAsync()
+    private async Task<IEnumerable<ViewItem>> HostsListAsync()
     {
         return await Task.Run(async () =>
         {
@@ -184,7 +181,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
             return hosts
                 .OrderBy(x => x.SortIndex)
                 .ThenBy(x => x.Label)
-                .Select(host => new StructureViewItem<StructureItem>(host, logger: logger, connection: this));
+                .Select(host => new ViewItem(host, logger: logger, connection: this));
         });
     }
 
@@ -229,7 +226,7 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         return null;
     }
 
-    public StructureItem CreateItemsFromFiles(StructureItem rootItem, DirectoryInfo rootDir)
+    public static StructureItem CreateItemsFromFiles(StructureItem rootItem, DirectoryInfo rootDir)
     {
         ItemType itemType;
         DirectoryInfo searchDir;
@@ -283,18 +280,18 @@ public partial class ConnectionModel : ObservableObject, IDisposable
         return root;
     }
 
-    private StructureItem CreateItemFromFiles(StructureItem root, DirectoryInfo dir, ItemType itemType, out bool success)
+    private static StructureItem CreateItemFromFiles(StructureItem root, DirectoryInfo dir, ItemType itemType, out bool success)
     {
         success = false;
         StructureItem tempRoot = root;
 
         DirectoryInfo[] domainClassDirs = dir.GetDirectories("CLASS");
-        if (domainClassDirs.Length <= 0) 
+        if (domainClassDirs.Length <= 0)
             return tempRoot;
 
         DirectoryInfo classDir = domainClassDirs[0];
         var oclFiles = classDir.GetFiles("class.ocl");
-        if (oclFiles.Length <= 0) 
+        if (oclFiles.Length <= 0)
             return tempRoot;
         success = true;
 

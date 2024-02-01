@@ -22,7 +22,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedOdantDevLib", "Shared
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedFiles", "SharedFiles\SharedFiles.shproj", "{71B65BF2-8BA1-49B0-98C5-FA6BE828FAD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vasu.Wpf.Controls", "PropertyGrid\Vasu.Wpf.Controls.csproj", "{00991B6E-8470-4B2B-A38A-83A58C0B5835}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaterialDesign.PropertyGrid", "MaterialDesign.PropertyGrid\MaterialDesign.PropertyGrid.csproj", "{00991B6E-8470-4B2B-A38A-83A58C0B5835}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,8 +1,4 @@
-﻿
-#region Namespace Imports
-
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -11,9 +7,10 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 
-#endregion
+using MaterialDesign.PropertyGrid.Model;
 
-namespace Vasu.Wpf.Controls;
+
+namespace MaterialDesign.PropertyGrid.Controls;
 
 /// <summary>
 /// Defines a <see cref="PropertyGrid"/> control.
@@ -38,7 +35,7 @@ public class PropertyGrid : Control
 
     public object SelectedObject
     {
-        get => (object)GetValue(SelectedObjectProperty);
+        get => GetValue(SelectedObjectProperty);
         set => SetValue(SelectedObjectProperty, value);
     }
 
