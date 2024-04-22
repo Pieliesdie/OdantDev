@@ -42,7 +42,7 @@ public class DevHelpers
     {
         await Task.Run(() => InvokeCmdCommand(command, workingDirectory));
     }
-    public static void InvokeCmdCommand(string command, string workingDirectory = "")
+    public static string InvokeCmdCommand(string command, string workingDirectory = "")
     {
         System.Diagnostics.ProcessStartInfo startInfo = new()
         {
@@ -52,7 +52,8 @@ public class DevHelpers
             Arguments = $"/C {command}",
             WorkingDirectory = workingDirectory,
             RedirectStandardError = true,
-            UseShellExecute = false
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
         };
         var process = new System.Diagnostics.Process
         {
@@ -60,12 +61,13 @@ public class DevHelpers
         };
         process.Start();
         process.WaitForExit();
-
         var ex = process.StandardError.ReadToEnd();
         if (!string.IsNullOrEmpty(ex))
         {
             throw new Exception(ex);
         }
+
+        return process.StandardOutput.ReadToEnd();
     }
 
     public static async Task DownloadAndCopyFrameworkGenericAsync(string netVersion, string folder, string nugetVersion, ILogger logger = null)

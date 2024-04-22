@@ -274,7 +274,7 @@ public partial class ToolWindowControl : UserControl
             logger.Info(ex.Message);
         }
     }
-    public async void CreateClassClick(object sender, RoutedEventArgs e)
+    public void CreateClassClick(object sender, RoutedEventArgs e)
     {
         var selectedItem = OdaTree?.SelectedItem as StructureViewItem<StructureItem>;
         var innerItem = selectedItem?.Item;
@@ -404,15 +404,22 @@ public partial class ToolWindowControl : UserControl
                 item = ConnectionModel.CreateItemsFromFiles(domain, rootDir);
             }
 
-            rootDir.Delete(true);
+            try
+            {
+
+                rootDir.TryDeleteDirectory();
+            }
+            catch (Exception ex)
+            {
+                logger?.Error($"Can't clear cache: {ex.Message}");
+            }
         }
         catch (Exception ex)
         {
             logger?.Error(ex.Message);
+            return;
         }
-
         logger?.Info("Repository has been cloned.");
-
         OpenModuleDialog.DataContext = item;
         OpenModuleDialog.IsOpen = true;
     }

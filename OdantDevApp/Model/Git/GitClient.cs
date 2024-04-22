@@ -1,14 +1,19 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+
 using GitLabApiClient;
 using GitLabApiClient.Internal.Paths;
 using GitLabApiClient.Models.Groups.Responses;
 using GitLabApiClient.Models.Projects.Requests;
 using GitLabApiClient.Models.Users.Responses;
+
 using oda;
+
 using OdantDev;
+
 using SharedOdantDev.Common;
+
 using File = System.IO.File;
 using Project = GitLabApiClient.Models.Projects.Responses.Project;
 
@@ -31,6 +36,7 @@ public class CreateProjectOptions
 
 public static class GitClient
 {
+    private static string PrivateKey { get; set; }
     public static GitLabClient? Client { get; set; }
     public static Session? Session { get; set; }
 
@@ -39,6 +45,7 @@ public static class GitClient
         if (string.IsNullOrEmpty(apiPath) || string.IsNullOrEmpty(apiKey))
             return;
 
+        PrivateKey = apiKey;
         Client = new GitLabClient(apiPath, apiKey);
         await LoadSessionAsync(Client);
     }
@@ -119,7 +126,10 @@ public static class GitClient
 
         var moduleDir = domainFolder.CreateSubdirectory(moduleDirName);
 
-        DevHelpers.InvokeCmdCommand($"git clone {project.SshUrlToRepo} .", moduleDir.FullName);
+        var repoUri = new Uri(project.HttpUrlToRepo);
+        var cloneUri = $"{repoUri.Scheme}://oauth2:{PrivateKey}@{repoUri.Host}{repoUri.AbsolutePath}";
+
+        DevHelpers.InvokeCmdCommand($"git clone \"{cloneUri}\" . --quiet", moduleDir.FullName);
 
         return moduleDir.FullName;
     }

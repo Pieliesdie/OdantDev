@@ -21,7 +21,7 @@ internal class PopupController(Snackbar snackbar) : ILogger
     {
         if (string.IsNullOrEmpty(message))
             message = "Unknown error";
-        Application.Current.Dispatcher.Invoke(() => MessageDialog.Show(message));
+        Application.Current.Dispatcher.Invoke(() => MessageDialog.Show(message, "Error"));
     }
 
     public void Exception(Exception ex)

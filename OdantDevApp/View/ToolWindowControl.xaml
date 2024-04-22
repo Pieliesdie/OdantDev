@@ -521,7 +521,27 @@
                                 <TextBlock HorizontalAlignment="Center" Text="GitLab" />
                             </StackPanel>
                         </TabItem.Header>
+
                         <Grid x:Name="RepoTreeGrid" Grid.Row="0">
+                            <materialDesign:DialogHost Name="OpenModuleDialog" CloseOnClickAway="False"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <materialDesign:DialogHost.DialogContent>
+                                    <StackPanel Width="230" Margin="10,20,10,20">
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   FontSize="16" Text="Open module in solution?" />
+                                        <StackPanel Margin="0,25,10,0" HorizontalAlignment="Right"
+                                                    VerticalAlignment="Bottom"
+                                                    Orientation="Horizontal">
+                                            <Button Margin="0,0,10,0"
+                                                    Click="DialogOpenModule_OnClick"
+                                                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                    Content="OK" IsDefault="True" />
+                                            <Button Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                                                    Content="Cancel" IsCancel="True" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </materialDesign:DialogHost.DialogContent>
+                            </materialDesign:DialogHost>
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*" />
@@ -559,42 +579,25 @@
                                                                              Kind="Autorenew" />
                                                 </StackPanel>
                                             </Button>
-                                            <materialDesign:DialogHost Name="OpenModuleDialog">
-                                                <materialDesign:DialogHost.DialogContent>
-                                                    <StackPanel Grid.Row="2"
-                                                                Width="200"
-                                                                Margin="16">
-                                                        <TextBlock FontSize="16" Text="Open module in solution?" />
-                                                        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                                                            <Button Margin="0,8,8,0"
-                                                                    Click="DialogOpenModule_OnClick"
-                                                                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                    Content="OK" IsDefault="True" />
-                                                            <Button Margin="0,8,8,0"
-                                                                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
-                                                                    Content="Cancel" IsCancel="True" />
-                                                        </StackPanel>
-                                                    </StackPanel>
-                                                </materialDesign:DialogHost.DialogContent>
-                                                <Button Name="DownloadRepoButton"
-                                                        Width="32" Height="25"
-                                                        Margin="3"
-                                                        Click="DownloadRepoButton_Click"
-                                                        Style="{StaticResource MaterialDesignFlatMidBgButton}"
-                                                        ToolTip="Download module to selected local developer domain" ToolTipService.ShowOnDisabled="True">
-                                                    <Button.IsEnabled>
-                                                        <MultiBinding Converter="{StaticResource BooleanAllConverter}">
-                                                            <Binding ElementName="RepoTree" FallbackValue="false"
-                                                                     Path="SelectedItem.HasModule" TargetNullValue="false" />
-                                                        </MultiBinding>
-                                                    </Button.IsEnabled>
-                                                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                                        <materialDesign:PackIcon Width="18" Height="18"
-                                                                                 Margin="-10,0,-10,0"
-                                                                                 Kind="DownloadOutline" />
-                                                    </StackPanel>
-                                                </Button>
-                                            </materialDesign:DialogHost>
+
+                                            <Button Name="DownloadRepoButton"
+                                                    Width="32" Height="25"
+                                                    Margin="3"
+                                                    Click="DownloadRepoButton_Click"
+                                                    Style="{StaticResource MaterialDesignFlatMidBgButton}"
+                                                    ToolTip="Download module to selected local developer domain" ToolTipService.ShowOnDisabled="True">
+                                                <Button.IsEnabled>
+                                                    <MultiBinding Converter="{StaticResource BooleanAllConverter}">
+                                                        <Binding ElementName="RepoTree" FallbackValue="false"
+                                                                 Path="SelectedItem.HasModule" TargetNullValue="false" />
+                                                    </MultiBinding>
+                                                </Button.IsEnabled>
+                                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Width="18" Height="18"
+                                                                             Margin="-10,0,-10,0"
+                                                                             Kind="DownloadOutline" />
+                                                </StackPanel>
+                                            </Button>
                                         </WrapPanel>
                                     </StackPanel>
                                     <TreeView x:Name="RepoTree"
@@ -840,25 +843,25 @@
                                               SelectionChanged="DeveloperCb_SelectionChanged" ToolTip="Please select developer domain on localhost" />
                                     <StackPanel Grid.Row="1">
                                         <CheckBox Grid.Row="1"
-                                              Margin="0,5,0,0"
-                                              materialDesign:CheckBoxAssist.CheckBoxSize="22" Content="Force update oda libraries"
-                                              FontSize="16"
-                                              IsChecked="{Binding OdaModel.AddinSettings.ForceUpdateReferences}"
-                                              ToolTip="True: always update / False: update only if reference file is missing" />
+                                                  Margin="0,5,0,0"
+                                                  materialDesign:CheckBoxAssist.CheckBoxSize="22" Content="Force update oda libraries"
+                                                  FontSize="16"
+                                                  IsChecked="{Binding OdaModel.AddinSettings.ForceUpdateReferences}"
+                                                  ToolTip="True: always update / False: update only if reference file is missing" />
                                         <CheckBox Grid.Row="2"
-                                              Margin="0,5,0,0"
-                                              materialDesign:CheckBoxAssist.CheckBoxSize="22" Content="Auto login to oda server"
-                                              FontSize="16"
-                                              IsChecked="{Binding OdaModel.AutoLogin}"
-                                              ToolTip="Enable/disable oda login window" />
+                                                  Margin="0,5,0,0"
+                                                  materialDesign:CheckBoxAssist.CheckBoxSize="22" Content="Auto login to oda server"
+                                                  FontSize="16"
+                                                  IsChecked="{Binding OdaModel.AutoLogin}"
+                                                  ToolTip="Enable/disable oda login window" />
                                         <TextBox Grid.Row="3"
-                                             Margin="0,5,0,0" VerticalAlignment="Center"
-                                             materialDesign:TextFieldAssist.SuffixText="items" FontSize="16"
-                                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                             Text="{Binding AddinSettings.MaxlastProjectsLength}">
+                                                 Margin="0,5,0,0" VerticalAlignment="Center"
+                                                 materialDesign:TextFieldAssist.SuffixText="items" FontSize="16"
+                                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                                 Text="{Binding AddinSettings.MaxlastProjectsLength}">
                                             <b:Interaction.Behaviors>
                                                 <bindingHelpers:TextBoxInputRegExBehaviour EmptyValue="10" MaxLength="9"
-                                                                                       RegularExpression="^\d+$" />
+                                                                                           RegularExpression="^\d+$" />
                                             </b:Interaction.Behaviors>
                                             <materialDesign:HintAssist.Hint>
                                                 <TextBlock Text="Count of recently saved projects" />
