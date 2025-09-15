@@ -48,11 +48,11 @@ public class ToolWindow : ToolWindowPane
             var process = ChildProcess = await StartProcessAsync(appPath, args).ConfigureAwait(true);
 
             using var ctsConnect = new CancellationTokenSource(60000);
-            await pipeServer.WaitForConnectionAsync(ctsConnect.Token).ConfigureAwait(false);
+            await pipeServer.WaitForConnectionAsync(ctsConnect.Token).ConfigureAwait(true);
 
             using var ctsRead = new CancellationTokenSource(30000);
             var handleBytes = new byte[IntPtr.Size];
-            _ = await pipeServer.ReadAsync(handleBytes, 0, handleBytes.Length, ctsRead.Token).ConfigureAwait(false);
+            _ = await pipeServer.ReadAsync(handleBytes, 0, handleBytes.Length, ctsRead.Token).ConfigureAwait(true);
             var processHandle = new IntPtr(BitConverter.ToInt64(handleBytes, 0));
 
             WinApi.SetWindow(
