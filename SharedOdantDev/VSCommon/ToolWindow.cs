@@ -33,6 +33,7 @@ public class ToolWindow : ToolWindowPane
     private static string OutOfProcessFolder => Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "app");
     private static string OutOfProcessPath => Path.Combine(OutOfProcessFolder, "OdantDevApp.exe");
     private Process ChildProcess { get; set; }
+    private IntPtr ChildWindowHandle { get; set; }
     private WindowsFormsHost Host { get; }
     private IntPtr HostHandle { get; }
 
@@ -53,7 +54,7 @@ public class ToolWindow : ToolWindowPane
             using var ctsRead = new CancellationTokenSource(30000);
             var handleBytes = new byte[IntPtr.Size];
             _ = await pipeServer.ReadAsync(handleBytes, 0, handleBytes.Length, ctsRead.Token).ConfigureAwait(true);
-            var processHandle = new IntPtr(BitConverter.ToInt64(handleBytes, 0));
+            var processHandle = ChildWindowHandle = new IntPtr(BitConverter.ToInt64(handleBytes, 0));
 
             WinApi.SetWindow(
                 processHandle,
@@ -112,7 +113,7 @@ public class ToolWindow : ToolWindowPane
             Anchor = System.Windows.Forms.AnchorStyles.None
         };
 
-        WindowsFormsHost host = new()
+        var host = new WindowsFormsHost
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
@@ -148,10 +149,10 @@ public class ToolWindow : ToolWindowPane
 
     private void Host_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (Host.Child == null || ChildProcess is null || ChildProcess.MainWindowHandle == IntPtr.Zero) return;
+        if (Host?.Child == null || ChildWindowHandle == IntPtr.Zero) return;
         // Move the window to overlay it on this window
 
-        WinApi.MoveWindow(ChildProcess.MainWindowHandle, 0, 0, Host.Child.Width, Host.Child.Height, false);
+        WinApi.MoveWindow(ChildWindowHandle, 0, 0, Host.Child.Width, Host.Child.Height, false);
     }
 
     /// <summary>
