@@ -12,22 +12,22 @@ namespace OdantDevApp;
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application
+public partial class App
 {
-    void Application_Startup(object sender, StartupEventArgs e)
+    private void Application_Startup(object sender, StartupEventArgs e)
     {
         _ = Task.Run(StartCheckingForZombie);
     }
 
-    void StartCheckingForZombie()
+    private void StartCheckingForZombie()
     {
-        if (CommandLine.TryGetParentProcess() is Process parent)
+        if (CommandLine.TryGetParentProcess() is { } parent)
         {
             _ = TaskEx.StartInfiniteTask(() => CheckForZombie(parent), TimeSpan.FromSeconds(4));
         }
     }
 
-    static void CheckForZombie(Process process)
+    private static void CheckForZombie(Process process)
     {
         if (process.HasExited)
         {

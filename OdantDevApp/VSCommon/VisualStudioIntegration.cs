@@ -51,7 +51,7 @@ public sealed partial class VisualStudioIntegration
         {
             if (dte == null) return false;
             var uintClr = dte.GetThemeColor(vsThemeColors.vsThemeColorToolWindowBackground);
-            byte[] bytes = BitConverter.GetBytes(uintClr);
+            var bytes = BitConverter.GetBytes(uintClr);
             var defaultBackground = Color.FromArgb(bytes[3], bytes[0], bytes[1], bytes[2]);
             var isDarkTheme = (384 - defaultBackground.R - defaultBackground.G - defaultBackground.B) > 0;
             return isDarkTheme;
@@ -62,10 +62,10 @@ public sealed partial class VisualStudioIntegration
         }
     }
 
-    public VisualStudioIntegration(AddinSettings addinSettings, DTE2 dte, ILogger logger = null)
+    public VisualStudioIntegration(AddinSettings addinSettings, DTE2 dte, ILogger? logger = null)
     {
-        this.Logger = logger;
-        this.AddinSettings = addinSettings;
+        Logger = logger;
+        AddinSettings = addinSettings;
 #if DEBUG
         EnvDte = dte;
         return;        
@@ -215,7 +215,7 @@ public sealed partial class VisualStudioIntegration
             var assemblyInfo = FindProjectItem(project, "AssemblyInfo.cs")
                 ?? throw new NullReferenceException($"Missing AssemblyInfo.cs in {project.Name}");
 
-            var version = new Version(VisualStudioIntegration.FindCodeAttribute(assemblyInfo, "AssemblyVersion")?.Value?.Replace("\"", string.Empty)
+            var version = new Version(FindCodeAttribute(assemblyInfo, "AssemblyVersion")?.Value?.Replace("\"", string.Empty)
                 ?? throw new NullReferenceException(@$"Missing AssemblyVersion in {currentDirectory}\AssemblyInfo.cs"));
 
             var outDirParent = new FileInfo(project.FullName).Directory?.Parent
@@ -273,7 +273,9 @@ public sealed partial class VisualStudioIntegration
     {
         try
         {
-            var isCopied = buildInfo.RemoteDir.Class.Dir.OpenOrCreateFolder("modules").FolderToServer(buildInfo.LocalDir.CreateSubdirectory("modules"));
+            var isCopied = buildInfo.RemoteDir.Class.Dir
+                .OpenOrCreateFolder("modules")
+                .FolderToServer(buildInfo.LocalDir.CreateSubdirectory("modules"));
             var isSaved = buildInfo.RemoteDir.Class.Save();
             buildInfo.RemoteDir.Class.Dir.Reset();
             return isCopied && isSaved;
@@ -335,8 +337,8 @@ public sealed partial class VisualStudioIntegration
 
     public async Task<bool> OpenModuleAsync(StructureItem item)
     {
-        bool result = false;
-        System.Threading.Thread staThread = new System.Threading.Thread(() => result = OpenModule(item));
+        var result = false;
+        var staThread = new System.Threading.Thread(() => result = OpenModule(item));
         staThread.SetApartmentState(ApartmentState.STA); //COM needs STA
         staThread.Start();
         await Task.Run(staThread.Join);
@@ -477,7 +479,7 @@ public sealed partial class VisualStudioIntegration
     {
         try
         {
-            List<string> deletedDlls = new();
+            List<string> deletedDlls = [];
             var refs = references.ToList();
             foreach (Reference reference in vsProj.References)
             {

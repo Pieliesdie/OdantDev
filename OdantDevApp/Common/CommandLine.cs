@@ -7,29 +7,33 @@ namespace OdantDevApp.Model;
 
 public static class CommandLine
 {
-    private static CommandLineArgs? _args;
-    private static CommandLineArgs? Args()
+    public static CommandLineArgs? Args
     {
-        try
+        get
         {
-            _args ??= Environment.GetCommandLineArgs().LastOrDefault()?.DeserializeBinary<CommandLineArgs>();
-            return _args;
-        }
-        catch
-        {
-            return default;
+            try
+            {
+                field ??= Environment.GetCommandLineArgs().LastOrDefault()?.DeserializeBinary<CommandLineArgs>();
+                return field;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 
-    public static bool IsOutOfProcess => Args() != null;
+    public static bool IsOutOfProcess => Args != null;
 
     public static System.Diagnostics.Process? TryGetParentProcess()
     {
         try
         {
-            var args = Args();
-            if (args == null) return null;
-            var vsId = args.ProcessId;
+            if (Args == null)
+            {
+                return null;
+            }
+            var vsId = Args.ProcessId;
             var vsProcess = System.Diagnostics.Process.GetProcessById(vsId);
             return vsProcess;
         }

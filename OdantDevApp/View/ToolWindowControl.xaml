@@ -5,10 +5,13 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:mde="https://spiegelp.github.io/MaterialDesignExtensions/winfx/xaml"
              xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml" xmlns:odantdev="clr-namespace:OdantDev"
              xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
-             Background="{DynamicResource MaterialDesignPaper}"
+             Background="{DynamicResource MaterialDesignPaper}"        
              DataContext="{Binding RelativeSource={RelativeSource Self}}"
              FontFamily="{DynamicResource MaterialDesignFont}"
              TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+             UseLayoutRounding="True"
+             CacheMode="BitmapCache"
+             SnapsToDevicePixels="True"
              TextOptions.TextRenderingMode="Auto">
     <UserControl.Resources>
         <ResourceDictionary>
