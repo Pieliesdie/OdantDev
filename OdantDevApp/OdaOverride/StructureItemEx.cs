@@ -10,7 +10,7 @@ using odaServer;
 namespace OdantDev;
 public static class StructureItemEx
 {
-    private static IEnumerable<T> ReadList<T>(IntPtr intPtr)
+    private static HashSet<T> ReadList<T>(IntPtr intPtr)
     {
         int listLength = NativeMethods.OdaServerApi.GetLength(intPtr);
         var ODAItems = Enumerable.Range(0, listLength)

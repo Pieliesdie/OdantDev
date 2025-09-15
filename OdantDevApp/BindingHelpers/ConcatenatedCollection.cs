@@ -15,8 +15,6 @@ public class ConcatenatedCollection<TCollection, T> : IEnumerable<T>, INotifyCol
     {
         firstSubCollection = first ?? throw new ArgumentNullException(nameof(first));
         secondSubCollection = second ?? throw new ArgumentNullException(nameof(second));
-
-        // Подписываемся на события CollectionChanged для входных коллекций
         firstSubCollection.CollectionChanged += OnFirstCollectionChanged;
         secondSubCollection.CollectionChanged += OnSecondCollectionChanged;
     }
@@ -27,10 +25,8 @@ public class ConcatenatedCollection<TCollection, T> : IEnumerable<T>, INotifyCol
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    // Обрабатываем событие CollectionChanged внутренней коллекции _first
     private void OnFirstCollectionChanged(object _, NotifyCollectionChangedEventArgs e) => OnCollectionChanged(e, 0);
 
-    // Обрабатываем событие CollectionChanged внутренней коллекции _second
     private void OnSecondCollectionChanged(object _, NotifyCollectionChangedEventArgs e) => OnCollectionChanged(e, firstSubCollection.Count);
 
     private void OnCollectionChanged(NotifyCollectionChangedEventArgs e, int offset)

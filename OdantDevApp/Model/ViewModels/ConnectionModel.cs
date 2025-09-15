@@ -26,7 +26,7 @@ using RepoBase = OdantDevApp.Model.Git.RepoBase;
 using ViewItem = OdantDevApp.Model.ViewModels.StructureViewItem<oda.StructureItem>;
 namespace OdantDevApp.Model.ViewModels;
 
-public partial class ConnectionModel : ObservableObject, IDisposable
+public sealed partial class ConnectionModel : ObservableObject, IDisposable
 {
     public static List<IntPtr>? ServerAssemblies { get; set; }
     public static List<Assembly>? ClientAssemblies { get; set; }

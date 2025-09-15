@@ -729,9 +729,9 @@ public sealed class INI
         }
     }
 
-    public static void removeSettings(Class ñls, string file)
+    public static void removeSettings(Class cls, string file)
     {
-        Dir dir = ñls.Dir;
+        Dir dir = cls.Dir;
         int num = file.IndexOf(Path.DirectorySeparatorChar);
         while (num > 0 && dir != null)
         {

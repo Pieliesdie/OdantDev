@@ -22,7 +22,7 @@ public sealed partial class VisualStudioIntegration
             //Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs");
             Name = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>()
-                .FirstOrDefault(x => x.Name == "AssemblyDefaultAlias")?.Value.Replace("\"", string.Empty);
+                .FirstOrDefault(x => x.Name == "AssemblyDefaultAlias")?.Value.Replace("\"", string.Empty) ?? project.Name;
 
             string fullPath = project.Properties.Item("FullPath").Value.ToString();
             string outputPath = project.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value.ToString();

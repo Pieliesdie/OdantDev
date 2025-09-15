@@ -10,7 +10,8 @@ namespace OdantDevApp.Model.ViewModels.Settings;
 
 #pragma warning disable CS0657 // Not a valid attribute location for this declaration
 [SuppressMessage("CommunityToolkit.Mvvm.SourceGenerators.ObservablePropertyGenerator", "MVVMTK0034:Direct field reference to [ObservableProperty] backing field")]
-public partial class ThemeColors : ObservableObject, ITheme
+[ObservableObject]
+public partial class ThemeColors : ITheme
 {
     private static Color ToColor(string value)
     {
