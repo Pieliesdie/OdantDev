@@ -36,7 +36,7 @@ namespace OdantDev;
 /// Interaction logic for ToolWindow1Control.
 /// </summary>
 [ObservableObject]
-public partial class ToolWindowControl : UserControl
+public partial class ToolWindowControl
 {
     private IDisposable StatusCleaner() => Disposable.Create(() => Status = string.Empty);
     private readonly ILogger logger;
