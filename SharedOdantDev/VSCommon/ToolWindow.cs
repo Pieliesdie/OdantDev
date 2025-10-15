@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms.Integration;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Threading;
 using NativeMethods;
 using Task = System.Threading.Tasks.Task;
 using System.IO.Pipes;
 using System.Threading;
+using HorizontalAlignment = System.Windows.HorizontalAlignment;
 
 namespace OdantDev;
 
@@ -67,13 +67,14 @@ public class ToolWindow : ToolWindowPane
             RestartIfFail(process);
             if (!restart)
             {
-                Host.SizeChanged += Host_SizeChanged;
+                Host.SizeChanged += (_, _) => HostWindowChanged();
+                Host.DpiChanged += (_, _) => HostWindowChanged();
+                Host.IsVisibleChanged += (_, _) => HostWindowChanged();
             }
         }
         catch (Exception ex)
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            Host.Child = new System.Windows.Forms.Label { Text = ex.ToString() };
+            await ShowErrorAsync(ex.ToString());
         }
     }
 
@@ -90,15 +91,27 @@ public class ToolWindow : ToolWindowPane
         switch (process.ExitCode)
         {
             case (int)ExitCodes.Success:
+            case (int)ExitCodes.Killed:
                 break;
             case < 0:
             case (int)ExitCodes.Restart:
                 _ = RunDevAppAsync(true);
                 break;
             default:
-                Host.Child = new System.Windows.Forms.Label { Text = $"Unexpected exit code: {process.ExitCode}" };
+                _ = ShowErrorAsync($"Unexpected exit code: {process.ExitCode}");
                 break;
         }
+    }
+
+    private async Task ShowErrorAsync(string message)
+    {
+        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+        var label = new System.Windows.Forms.Label
+        {
+            ForeColor = Color.IndianRed,
+            Text = message
+        };
+        Host.Child = label;
     }
 
     private static WindowsFormsHost CreateHost()
@@ -109,19 +122,19 @@ public class ToolWindow : ToolWindowPane
         {
             Image = bitmap,
             Dock = System.Windows.Forms.DockStyle.Fill,
-            SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize,
-            Anchor = System.Windows.Forms.AnchorStyles.None
+            SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage
         };
 
         var host = new WindowsFormsHost
         {
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,           
             Child = new System.Windows.Forms.Panel
             {
                 Dock = System.Windows.Forms.DockStyle.Fill
             }
         };
+
         host.Child.Controls.Add(pb);
         return host;
     }
@@ -147,12 +160,11 @@ public class ToolWindow : ToolWindowPane
         });
     }
 
-    private void Host_SizeChanged(object sender, SizeChangedEventArgs e)
+    private void HostWindowChanged()
     {
         if (Host?.Child == null || ChildWindowHandle == IntPtr.Zero) return;
-        // Move the window to overlay it on this window
-
-        WinApi.MoveWindow(ChildWindowHandle, 0, 0, Host.Child.Width, Host.Child.Height, false);
+        Host.UpdateLayout();
+        WinApi.MoveWindow(ChildWindowHandle, 0, 0, Host.Child.Width, Host.Child.Height, true);
     }
 
     /// <summary>
@@ -165,13 +177,13 @@ public class ToolWindow : ToolWindowPane
         BitmapImageMoniker = Microsoft.VisualStudio.Imaging.KnownMonikers.AbstractCube;
         if (OutOfProcess)
         {
-            Content = Host = CreateHost();
+            base.Content = Host = CreateHost();
             HostHandle = Host.Child.Handle;
         }
         else
         {
             OdantDevApp.VSCommon.EnvDTE.Instance = OdantDevPackage.EnvDte;
-            Content = new ToolWindowControl();
+            base.Content = new ToolWindowControl();
         }
     }
 

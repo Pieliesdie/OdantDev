@@ -20,12 +20,12 @@ internal sealed class ToolWindowCommand
     /// <summary>
     /// Command menu group (command set GUID).
     /// </summary>
-    public static readonly Guid CommandSet = new Guid("c3427eca-1558-4fc1-90b5-d2e10886f49f");
+    public static readonly Guid CommandSet = new("c3427eca-1558-4fc1-90b5-d2e10886f49f");
 
     /// <summary>
     /// VS Package that provides this command, not null.
     /// </summary>
-    private readonly AsyncPackage package;
+    private readonly AsyncPackage _package;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ToolWindowCommand"/> class.
@@ -35,11 +35,11 @@ internal sealed class ToolWindowCommand
     /// <param name="commandService">Command service to add command to, not null.</param>
     private ToolWindowCommand(AsyncPackage package, OleMenuCommandService commandService)
     {
-        this.package = package ?? throw new ArgumentNullException(nameof(package));
+        _package = package ?? throw new ArgumentNullException(nameof(package));
         commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
-        var menuCommandID = new CommandID(CommandSet, CommandId);
-        var menuItem = new MenuCommand(this.Execute, menuCommandID);
+        var menuCommandId = new CommandID(CommandSet, CommandId);
+        var menuItem = new MenuCommand(Execute, menuCommandId);
         commandService.AddCommand(menuItem);
     }
 
@@ -55,7 +55,7 @@ internal sealed class ToolWindowCommand
     /// <summary>
     /// Gets the service provider from the owner package.
     /// </summary>
-    private Microsoft.VisualStudio.Shell.IAsyncServiceProvider ServiceProvider => this.package;
+    private Microsoft.VisualStudio.Shell.IAsyncServiceProvider ServiceProvider => _package;
 
     /// <summary>
     /// Initializes the singleton instance of the command.
@@ -67,7 +67,7 @@ internal sealed class ToolWindowCommand
         // the UI thread.
         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
-        OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
+        var commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
         Instance = new ToolWindowCommand(package, commandService);
     }
 
@@ -83,13 +83,13 @@ internal sealed class ToolWindowCommand
         // Get the instance number 0 of this tool window. This window is single instance so this instance
         // is actually the only one.
         // The last flag is set to true so that if the tool window does not exists it will be created.
-        ToolWindowPane window = this.package.FindToolWindow(typeof(ToolWindow), 0, true);
-        if ((null == window) || (null == window.Frame))
+        var window = _package.FindToolWindow(typeof(ToolWindow), 0, true);
+        if (window?.Frame == null)
         {
             throw new NotSupportedException("Cannot create tool window");
         }
 
-        IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
+        var windowFrame = (IVsWindowFrame)window.Frame;
         Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
     }
 }

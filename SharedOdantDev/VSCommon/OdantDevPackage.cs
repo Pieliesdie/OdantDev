@@ -52,7 +52,7 @@ namespace OdantDev;
 /// </para>
 /// </remarks>
 [PackageRegistration(UseManagedResourcesOnly = false, AllowsBackgroundLoading = true)]
-[Guid(OdantDevPackage.PackageGuidString)]
+[Guid(PackageGuidString)]
 [ProvideMenuResource("Menus.ctmenu", 1)]
 [ProvideToolWindow(typeof(ToolWindow))]
 public sealed class OdantDevPackage : AsyncPackage

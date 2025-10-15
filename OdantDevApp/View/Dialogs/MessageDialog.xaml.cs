@@ -1,7 +1,5 @@
 ﻿using System.Windows;
-
 using MaterialDesignExtensions.Controls;
-
 using OdantDevApp.Common;
 
 namespace OdantDevApp.Dialogs;
@@ -15,18 +13,21 @@ public partial class MessageDialog : MaterialWindow
     {
         return new MessageDialog(question, title).ShowDialog() ?? false;
     }
+
     public MessageDialog()
     {
         InitializeComponent();
         this.ApplyTheming();
     }
+
     public MessageDialog(string question, string title = "Information") : this()
     {
         Title = title;
         lblQuestion.Content = question;
     }
+
     private void btnDialogOk_Click(object sender, RoutedEventArgs e)
     {
-        base.DialogResult = true;
+        DialogResult = true;
     }
 }
