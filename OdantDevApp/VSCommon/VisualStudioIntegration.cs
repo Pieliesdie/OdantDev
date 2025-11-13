@@ -539,18 +539,30 @@ public sealed partial class VisualStudioIntegration
         try
         {
             List<string> deletedDlls = [];
-            var refs = references.ToList();
+            var refs = references.ToHashSet();
+
             foreach (Reference reference in vsProj.References)
             {
                 try
                 {
                     var fullName = GetFullName(reference);
                     var assemblyName = new AssemblyName(fullName);
-                    var newPath = Path.Combine(OdaFolder.FullName, $"{assemblyName.Name}.dll");
-                    var notExist = File.Exists(reference.Path).Not();
                     var isInUpdateList = refs.Contains($"{assemblyName.Name}.dll");
+                    if (!isInUpdateList)
+                    {
+                        continue;
+                    }
+
+                    var newPath = Path.Combine(OdaFolder.FullName, $"{assemblyName.Name}.dll");
+                    var isExistsInOdantFolder = File.Exists(newPath);
+                    if (!isExistsInOdantFolder)
+                    {
+                        continue;
+                    }
+
                     var isSameFileVersion = GetFileVersion(newPath) == GetFileVersion(reference.Path);
-                    if (isInUpdateList && (notExist || !isSameFileVersion || AddinSettings.ForceUpdateReferences))
+                    var exists = File.Exists(reference.Path);
+                    if (!exists || !isSameFileVersion || AddinSettings.ForceUpdateReferences)
                     {
                         reference.Remove();
                         deletedDlls.Add($"{assemblyName.Name}.dll");
