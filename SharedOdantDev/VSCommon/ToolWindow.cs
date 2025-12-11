@@ -53,7 +53,13 @@ public class ToolWindow : ToolWindowPane
 
             using var ctsRead = new CancellationTokenSource(30000);
             var handleBytes = new byte[IntPtr.Size];
-            _ = await pipeServer.ReadAsync(handleBytes, 0, handleBytes.Length, ctsRead.Token).ConfigureAwait(true);
+            var readBytes = await pipeServer.ReadAsync(handleBytes, 0, handleBytes.Length, ctsRead.Token).ConfigureAwait(true);
+            if (readBytes == 0)
+            {
+                await ShowErrorAsync("Can't read data from named pipe");
+                return;
+            }
+
             var processHandle = ChildWindowHandle = new IntPtr(BitConverter.ToInt64(handleBytes, 0));
 
             WinApi.SetWindow(
@@ -114,7 +120,7 @@ public class ToolWindow : ToolWindowPane
         Host.Child = label;
     }
 
-    private static WindowsFormsHost CreateHost()
+    private static WindowsFormsHost CreateHostWindow()
     {
         var imgPath = Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "Spinner.gif");
         var bitmap = new Bitmap(imgPath);
@@ -177,7 +183,7 @@ public class ToolWindow : ToolWindowPane
         BitmapImageMoniker = Microsoft.VisualStudio.Imaging.KnownMonikers.AbstractCube;
         if (OutOfProcess)
         {
-            base.Content = Host = CreateHost();
+            base.Content = Host = CreateHostWindow();
             HostHandle = Host.Child.Handle;
         }
         else

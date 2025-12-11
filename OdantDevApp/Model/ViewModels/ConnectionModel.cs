@@ -5,25 +5,19 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-
 using CommunityToolkit.Mvvm.ComponentModel;
-
 using Microsoft.VisualBasic.FileIO;
-
 using oda;
-
 using OdantDev;
 using OdantDev.Model;
-
 using OdantDevApp.Common;
 using OdantDevApp.Model.Git;
 using OdantDevApp.Model.Git.GitItems;
 using OdantDevApp.Model.ViewModels.Settings;
-
 using SharedOdantDev.Common;
-
 using RepoBase = OdantDevApp.Model.Git.RepoBase;
 using ViewItem = OdantDevApp.Model.ViewModels.StructureViewItem<oda.StructureItem>;
+
 namespace OdantDevApp.Model.ViewModels;
 
 public sealed partial class ConnectionModel : ObservableObject, IDisposable
@@ -36,21 +30,24 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
     private readonly ILogger? logger;
     private Connection Connection { get; }
 
-    [ObservableProperty] Domain develope;
+    [ObservableProperty] public partial oda.Object? User { get; set; }
 
-    [ObservableProperty] Host? localhost;
+    [ObservableProperty] public partial Domain? Develope { get; set; }
 
-    [ObservableProperty] AsyncObservableCollection<ViewItem> hosts;
+    [ObservableProperty] public partial Host? Localhost { get; set; }
 
-    [ObservableProperty] AsyncObservableCollection<ViewItem> pinnedItems;
+    [ObservableProperty] public partial AsyncObservableCollection<ViewItem> Hosts { get; set; }
 
-    [ObservableProperty] ConcatenatedCollection<AsyncObservableCollection<ViewItem>, ViewItem> items;
+    [ObservableProperty] public partial AsyncObservableCollection<ViewItem> PinnedItems { get; set; }
 
-    [ObservableProperty] List<RepoBase>? repos;
+    [ObservableProperty]
+    public partial ConcatenatedCollection<AsyncObservableCollection<ViewItem>, ViewItem> Items { get; set; }
 
-    [ObservableProperty] List<DomainDeveloper>? developers;
+    [ObservableProperty] public partial List<RepoBase>? Repos { get; set; }
 
-    [ObservableProperty] bool autoLogin;
+    [ObservableProperty] public partial List<DomainDeveloper>? Developers { get; set; }
+
+    [ObservableProperty] public partial bool AutoLogin { get; set; }
     partial void OnAutoLoginChanged(bool value) => Connection.AutoLogin = value;
 
     public AddinSettings AddinSettings { get; }
@@ -60,6 +57,9 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
         Connection = connection ?? throw new NullReferenceException(nameof(connection));
         AddinSettings = addinSettings ?? throw new NullReferenceException(nameof(addinSettings));
         this.logger = logger;
+        Hosts = [];
+        PinnedItems = [];
+        Items = new ConcatenatedCollection<AsyncObservableCollection<ViewItem>, ViewItem>([], []);
     }
 
     public async Task<(bool Success, string Error)> LoadAsync()
@@ -73,16 +73,22 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
             Connection.CoreMode = CoreMode.AddIn;
             var connected = await Task.Run(() => Connection.Login());
             if (connected.Not())
+            {
                 return (false, "Can't connect to oda");
+            }
 
+            User = Connection.UserObject;
             AutoLogin = Connection.AutoLogin;
             Hosts = (await HostsListAsync()).ToAsyncObservableCollection();
             PinnedItems = (await PinnedListAsync()).ToAsyncObservableCollection();
             Developers = await DevelopListAsync();
 
-            AddinSettings.SelectedDevelopeDomain ??= Developers?.FirstOrDefault()?.FullId;
+            if (string.IsNullOrEmpty(AddinSettings.SelectedDevelopeDomain))
+            {
+                AddinSettings.SelectedDevelopeDomain = Developers?.FirstOrDefault()?.FullId;
+            }
 
-            Items = new(PinnedItems, Hosts);
+            Items = new ConcatenatedCollection<AsyncObservableCollection<ViewItem>, ViewItem>(PinnedItems, Hosts);
 
             oda.OdaOverride.INI.DebugINI.Clear();
             await oda.OdaOverride.INI.DebugINI.SaveAsync();
@@ -103,16 +109,16 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
             stopWatch?.Stop();
         }
     }
+
     private async Task<IEnumerable<ViewItem>> PinnedListAsync()
     {
         return await Task.Run(() =>
         {
             return AddinSettings
-            .PinnedItems?
-            .Select(x => StructureItemEx.FindItem(Connection, x))
-            .Where(x => x != null)
-            .Select(x => new ViewItem(x, null, logger, this)) ?? Enumerable.Empty<ViewItem>()
-            .ToList();
+                .PinnedItems?
+                .Select(x => StructureItemEx.FindItem(Connection, x))
+                .Where(x => x != null)
+                .Select(x => new ViewItem(x, null, logger, this));
         });
     }
 
@@ -120,6 +126,11 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
     {
         return await Task.Run(async () =>
         {
+            if (Localhost == null)
+            {
+                return [];
+            }
+
             Develope = StructureItemEx.FindDomain(Localhost, "D:DEVELOPE");
 
             var developList = await Retry.RetryAsync(
@@ -153,8 +164,13 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
 
         return await Task.Run(async () =>
         {
+            if (GitClient.Client?.HostUrl == null)
+            {
+                return [];
+            }
+
             await GitClient.CreateClientAsync(AddinSettings.GitLabApiPath, AddinSettings.GitLabApiKey);
-            var uriHost = new Uri(GitClient.Client?.HostUrl).Host;
+            var uriHost = new Uri(GitClient.Client.HostUrl).Host;
             var item = new RootItem(uriHost);
             var list = new List<RepoBase>
             {
@@ -168,17 +184,21 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
     {
         return await Task.Run(async () =>
         {
-            var hosts = Connection.FindHosts().ToList();
+            var remoteHosts = Connection.FindHosts().ToList();
 
-            var localHost = Localhost = hosts.FirstOrDefault(x => x.IsLocal);
+            var localHost = Localhost = remoteHosts.FirstOrDefault(x => x.IsLocal);
 
             await Retry.RetryAsync(
-                 () => { localHost?.Reset(); return localHost?.HostState ?? HostStates.Off; },
-                 (e) => e == HostStates.On,
-                 TimeSpan.FromMilliseconds(300),
-                 TimeSpan.FromSeconds(10));
+                () =>
+                {
+                    localHost?.Reset();
+                    return localHost?.HostState ?? HostStates.Off;
+                },
+                e => e == HostStates.On,
+                TimeSpan.FromMilliseconds(300),
+                TimeSpan.FromSeconds(10));
 
-            return hosts
+            return remoteHosts
                 .OrderBy(x => x.SortIndex)
                 .ThenBy(x => x.Label)
                 .Select(host => new ViewItem(host, logger: logger, connection: this));
@@ -198,12 +218,14 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
             return (false, ex.Message);
         }
     }
+
     public static (bool Success, string Error) LoadOdaLibraries(DirectoryInfo odaFolder)
     {
         try
         {
-            ServerAssemblies = VsixExtension.LoadServerLibraries(odaFolder.FullName, VsixExtension.Platform, OdaServerLibraries);
-            ClientAssemblies = VsixExtension.LoadClientLibraries(odaFolder.FullName, OdaClientLibraries);
+            ServerAssemblies =
+                VsixEx.LoadServerLibraries(odaFolder.FullName, VsixEx.Platform, OdaServerLibraries);
+            ClientAssemblies = VsixEx.LoadClientLibraries(odaFolder.FullName, OdaClientLibraries);
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
             return (true, null);
         }
@@ -213,12 +235,13 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
         }
     }
 
-    private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+    private static Assembly? CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
     {
         var requestAssemblyName = new AssemblyName(args.Name);
 
         //return oda assemblies which was loaded before
-        var tryResolveInClientAssemblies = ClientAssemblies.FirstOrDefault(x => new AssemblyName(x.FullName).Name == requestAssemblyName.Name);
+        var tryResolveInClientAssemblies =
+            ClientAssemblies?.FirstOrDefault(x => new AssemblyName(x.FullName).Name == requestAssemblyName.Name);
         if (tryResolveInClientAssemblies != null)
             return tryResolveInClientAssemblies;
 
@@ -243,20 +266,14 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
             itemType = ItemType.Class;
         }
 
-        var root = CreateItemFromFiles(rootItem, searchDir, itemType, out bool isOclExists);
+        var root = CreateItemFromFiles(rootItem, searchDir, itemType, out var isOclExists);
 
         if (!isOclExists)
         {
-            try
-            {
-                var path = root.Dir.RemoteFolder.LoadFolder();
-                path = DevHelpers.ClearDomainAndClassInPath(path);
+            var path = root.Dir.RemoteFolder.LoadFolder();
+            path = DevHelpers.ClearDomainAndClassInPath(path);
 
-                FileSystem.CopyDirectory(rootDir.FullName, Path.Combine(path, rootDir.Name), UIOption.OnlyErrorDialogs);
-            }
-            catch
-            {
-            }
+            FileSystem.CopyDirectory(rootDir.FullName, Path.Combine(path, rootDir.Name), UIOption.OnlyErrorDialogs);
         }
         else
         {
@@ -280,24 +297,30 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
         return root;
     }
 
-    private static StructureItem CreateItemFromFiles(StructureItem root, DirectoryInfo dir, ItemType itemType, out bool success)
+    private static StructureItem CreateItemFromFiles(StructureItem root, DirectoryInfo dir, ItemType itemType,
+        out bool success)
     {
         success = false;
-        StructureItem tempRoot = root;
+        var tempRoot = root;
 
-        DirectoryInfo[] domainClassDirs = dir.GetDirectories("CLASS");
+        var domainClassDirs = dir.GetDirectories("CLASS");
         if (domainClassDirs.Length <= 0)
             return tempRoot;
 
-        DirectoryInfo classDir = domainClassDirs[0];
+        var classDir = domainClassDirs[0];
         var oclFiles = classDir.GetFiles("class.ocl");
         if (oclFiles.Length <= 0)
             return tempRoot;
         success = true;
 
-        FileInfo oclFile = oclFiles[0];
+        var oclFile = oclFiles[0];
 
         tempRoot = CreateItem(tempRoot, oclFile.FullName, itemType);
+        if (tempRoot is null)
+        {
+            throw new InvalidOperationException("Can't create oda item from file");
+        }
+
         CopyFilesToStructureItem(tempRoot, classDir);
 
         return tempRoot;
@@ -305,11 +328,12 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
 
     private static void CopyFilesToStructureItem(StructureItem item, DirectoryInfo classDir)
     {
-        foreach (DirectoryInfo dir in classDir.EnumerateDirectories())
+        foreach (var dir in classDir.EnumerateDirectories())
         {
             item.Dir.SaveFile(dir.FullName);
         }
-        foreach (FileInfo file in classDir.EnumerateFiles())
+
+        foreach (var file in classDir.EnumerateFiles())
         {
             if (file.Name == "class.ocl")
                 continue;
@@ -320,18 +344,18 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
 
     private static StructureItem? CreateItem(Item rootItem, string oclFilePath, ItemType itemType)
     {
-        string xml = System.IO.File.ReadAllText(oclFilePath);
+        var xml = System.IO.File.ReadAllText(oclFilePath);
 
         StructureItem resultItem;
         switch (itemType)
         {
             case ItemType.Class:
-                string newCid = rootItem.Command("create_class", xml);
+                var newCid = rootItem.Command("create_class", xml);
                 resultItem = rootItem.FindClass(newCid);
                 break;
 
             case ItemType.Domain:
-                string newDomainId = rootItem.Command("create_domain", xml);
+                var newDomainId = rootItem.Command("create_domain", xml);
                 resultItem = rootItem.FindDomain(newDomainId);
                 break;
             default:
@@ -351,6 +375,7 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
             Connection.ServerItem?.Dispose();
             Connection.Dispose();
         }
-        ServerAssemblies.ForEach(x => NativeMethods.WinApi.FreeLibrary(x));
+
+        ServerAssemblies?.ForEach(x => NativeMethods.WinApi.FreeLibrary(x));
     }
 }

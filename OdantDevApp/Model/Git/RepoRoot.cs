@@ -8,8 +8,12 @@ namespace OdantDevApp.Model.Git;
 public class RepoRoot : RepoGroup
 {
     public override bool HasModule => false;
-    public RepoRoot(RootItem item, bool loadProjects, ILogger logger = null)
-        : base(null, null, loadProjects, logger) { this.Item = item; }
+
+    public RepoRoot(RootItem item, bool loadProjects, ILogger? logger = null)
+        : base(null, null, loadProjects, logger)
+    {
+        Item = item;
+    }
 
     public override async Task<IEnumerable<RepoBase>> GetChildrenAsync()
     {

@@ -4,7 +4,7 @@
 		<AssemblyName>OdantDevApp</AssemblyName>
 		<UseWPF>true</UseWPF>
 		<Nullable>enable</Nullable>
-		<TargetFrameworks>net472;net48</TargetFrameworks>
+		<TargetFrameworks>net48</TargetFrameworks>
 		<PublishSingleFile>true</PublishSingleFile>
 		<SelfContained>true</SelfContained>
 		<LangVersion>preview</LangVersion>
@@ -23,9 +23,6 @@
 		<RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 	</PropertyGroup>
-	<ItemGroup>
-	  <None Remove="App.config" />
-	</ItemGroup>
 	<ItemGroup>
 	  <Content Include="App.config" />
 	  <Content Include="app.manifest" />
@@ -73,7 +70,7 @@
 		<PackageReference Include="MdXaml" Version="1.27.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.9" />
 		<PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
-		<PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.10.31321.278"/>
+		<PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.10.31321.278" />
 		<PackageReference Include="Microsoft.VisualStudio.Validation" Version="16.10.26" />
 		<PackageReference Include="morelinq" Version="4.4.0" />
 		<PackageReference Include="PolySharp" Version="1.15.0">
@@ -86,4 +83,7 @@
 		<Exec Command="mkdir &quot;$(SolutionDir)artifacts&quot;&#xD;&#xA;rmdir &quot;$(SolutionDir)artifacts\app&quot; /s /q&#xD;&#xA;mkdir &quot;$(SolutionDir)artifacts\app&quot;&#xD;&#xA;xcopy &quot;$(TargetDir)&quot; &quot;$(SolutionDir)artifacts\app&quot; /s /e /y /q" />
 	</Target>
 	<Import Project="..\SharedFiles\SharedFiles.projitems" Label="Shared" />
+	<ItemGroup>
+	  <Content Remove="Common\VsixEx.cs" />
+	</ItemGroup>
 </Project>

@@ -14,64 +14,102 @@ namespace oda.OdaOverride;
 
 public static class ItemFactory
 {
-    private static Connection? _connection;
+    private static readonly MemoryCache cache = new(new MemoryCacheOptions());
 
-    private static readonly MemoryCache Cache = new(new MemoryCacheOptions());
-
-    private static readonly MemoryCacheEntryOptions DefaultCacheOptions = new MemoryCacheEntryOptions()
+    private static readonly MemoryCacheEntryOptions defaultCacheOptions = new MemoryCacheEntryOptions()
         .SetSize(1)
         .SetPriority(CacheItemPriority.NeverRemove);
 
-    public static Connection Connection
+    public static Connection? Connection { get => field ??= CommonEx.Connection; set; }
+
+    public static Class? CreateClassByXml(this StructureItem item, string xml)
     {
-        get => _connection ??= CommonEx.Connection;
-        set => _connection = value;
+        var cls = item as Class ?? item.Class ?? throw new Exception("Class can't be created here");
+        var newItem = (cls.RemoteItem as ODAClass)?.CreateClassByXML(xml);
+        return GetStorageItem(newItem) as Class;
     }
 
-    public static Class CreateClass(this StructureItem structureItem, string name)
+    public static Class? CreateClass(this StructureItem item, string name)
     {
-        var cls = (structureItem as Class) ?? structureItem.Class ?? throw new Exception("Class can't be created here");
-        return cls.CreateChildClass(name);
+        name = name.Replace('"', '\'');
+        var newItemLink = item.ExecuteCommand($"create_class?name={name}");
+        var newItem = item.RemoteItem?.FindItem(newItemLink);
+        return GetStorageItem(newItem) as Class;
     }
 
-    public static Domain CreateDomain(this Domain domain, string name, string type)
+    public static Domain? CreateDomainByXml(this StructureItem item, string xml)
+    {
+        var newItemLink = item.ExecuteCommand("create_domain", xml);
+        if (string.IsNullOrEmpty(newItemLink)) { return null; }
+        var newItem = item.RemoteItem?.FindItem(newItemLink);
+        return GetStorageItem(newItem) as Domain;
+    }
+
+    private static string ExecuteCommand(this StructureItem structureItem, string cmd, string? parameter = null)
+    {
+        var result = parameter is null
+            ? structureItem.RemoteItem.Command(cmd)
+            : structureItem.RemoteItem.Command(cmd, parameter);
+
+        var error = structureItem.RemoteItem.error;
+        if (!string.IsNullOrEmpty(error))
+        {
+            throw new InvalidOperationException(error);
+        }
+        if (result.Contains("~Error~"))
+        {
+            throw new InvalidOperationException(result);
+        }
+
+        return result;
+    }
+
+    public static Domain? CreateDomain(this Domain domain, string name, string type)
     {
         if (domain.RemoteItem is not ODADomain remoteDomain)
         {
             throw new NullReferenceException("Can't get remote domain");
         }
         var newDomain = StructureItemEx.CreateByType(NativeMethods.OdaServerApi.Create_Domain(remoteDomain.GetIntPtr(), name, type));
-        if (newDomain == null) return null;
+        if (newDomain == null)
+        {
+            return null;
+        }
+
         if (string.IsNullOrEmpty(newDomain.error).Not() || !newDomain.Validate)
         {
             throw new Exception(newDomain.error);
         }
-        return (GetStorageItem(newDomain) as Domain) ?? throw new Exception("Unknown error");
+        return GetStorageItem(newDomain) as Domain ?? throw new Exception("Unknown error");
     }
 
-    public static StructureItem GetStorageItem(ODAItem item)
+    public static StructureItem? GetStorageItem(ODAItem? item)
     {
         if (item == null) { return null; }
 
-        var structureItem = Cache.GetOrCreate(item.FullId, (entry) => 
+        var structureItem = cache.GetOrCreate(item.FullId, (entry) => 
             {
-                entry.SetOptions(DefaultCacheOptions);
+                entry.SetOptions(defaultCacheOptions);
                 return CreateItem(item);
             }
         );
         if (structureItem is not { IsDisposed: true }) 
             return structureItem;
 
-        Cache.Remove(structureItem);
+        cache.Remove(structureItem);
         structureItem = CreateItem(item);
-        Cache.Set(item.FullId, structureItem, DefaultCacheOptions);
+        cache.Set(item.FullId, structureItem, defaultCacheOptions);
 
         return structureItem;
     }
 
-    private static StructureItem CreateItem(ODAItem item)
+    private static StructureItem? CreateItem(ODAItem? item)
     {
-        if (item == null) { return null; }
+        if (item == null)
+        {
+            return null;
+        }
+
         StructureItem structureItem;
         Item item2 = item.Type != ODAItem.ItemType.HOST_ITEM ? GetStorageItem(item.Owner) : Connection;
         switch (item.Type)
@@ -82,7 +120,9 @@ public static class ItemFactory
             case ODAItem.ItemType.CLASS_ITEM:
                 if (item2 != null && item.Owner != null && item.Owner.Id != item.Id && (item2.ItemType == ItemType.Solution || item2.ItemType == ItemType.ClassView))
                 {
-                    ClassView classView = (((item2.Host.AbilityExtension & ODAHost.AbilityExtensionFlags.LinkSupport) != ODAHost.AbilityExtensionFlags.LinkSupport) ? ((ClassView)new ClassViewClient(item2.Root.SelectSingleNode("LINKS/LINK[@id = '" + item.Id + "']") as xmlElement, (StructureItem)item2)) : ((ClassView)new ClassViewServer(item, item2)));
+                    ClassView classView = (item2.Host.AbilityExtension & ODAHost.AbilityExtensionFlags.LinkSupport) != ODAHost.AbilityExtensionFlags.LinkSupport 
+                        ? new ClassViewClient(item2.Root.SelectSingleNode("LINKS/LINK[@id = '" + item.Id + "']") as xmlElement, (StructureItem)item2) 
+                        : new ClassViewServer(item, item2);
                     structureItem = classView;
                     if (!classView.Hide || classView.IsAdmin)
                     {

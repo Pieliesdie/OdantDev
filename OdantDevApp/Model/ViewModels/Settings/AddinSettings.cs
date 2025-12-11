@@ -6,87 +6,96 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-
 using CommunityToolkit.Mvvm.ComponentModel;
-
 using MaterialDesignThemes.Wpf;
-
 using oda.OdaOverride;
-
 using OdantDev;
 using OdantDev.Model;
-
 using OdantDevApp.Common;
 
 namespace OdantDevApp.Model.ViewModels.Settings;
-
 
 public partial class AddinSettings : ObservableObject
 {
     private const string FILE_NAME = "AddinSettings.xml";
     private const string TEMPLATES_FOLDER_NAME = "Templates";
-    private static string TemplatePath => Path.Combine(VsixExtension.VSIXPath.FullName, TEMPLATES_FOLDER_NAME, FILE_NAME);
+    private static string TemplatePath => Path.Combine(VsixEx.VsixPath.FullName, TEMPLATES_FOLDER_NAME, FILE_NAME);
     private static XmlSerializer Serializer => new(typeof(AddinSettings));
+
     private AddinSettings() { }
+
     public static AddinSettings Instance { get; set; } = Create(CommonEx.DefaultSettingsFolder);
-    public static readonly string[] OdaLibraries = ["odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll"];
+
+    public static readonly string[] OdaLibraries =
+        ["odaMain.dll", "odaShare.dll", "odaLib.dll", "odaXML.dll", "odaCore.dll"];
 
     public delegate void ThemeChanged(ITheme theme);
 
-    public event ThemeChanged OnThemeChanged;
-    [ObservableProperty] bool isVirtualizeTreeView;
-    [ObservableProperty] AsyncObservableCollection<string> pinnedItems = [];
-    [ObservableProperty] int maxlastProjectsLength = 15;
+    public event ThemeChanged? OnThemeChanged;
+
+    [ObservableProperty] public partial bool IsVirtualizeTreeView { get; set; }
+    [ObservableProperty] public partial AsyncObservableCollection<string> PinnedItems { get; set; } = [];
+    [ObservableProperty] public partial int MaxlastProjectsLength { get; set; } = 15;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FilteredLastProjects))]
-    AsyncObservableCollection<RecentProject> lastProjects = [];
-    partial void OnLastProjectsChanged(AsyncObservableCollection<RecentProject>? oldValue, AsyncObservableCollection<RecentProject>? value)
+    public partial AsyncObservableCollection<RecentProject> LastProjects { get; set; } = [];
+
+    partial void OnLastProjectsChanged(
+        AsyncObservableCollection<RecentProject>? oldValue,
+        AsyncObservableCollection<RecentProject>? value
+    )
     {
-        oldValue.CollectionChanged -= LastProjectsCollectionChanged;
+        oldValue?.CollectionChanged -= LastProjectsCollectionChanged;
         LastProjects.CollectionChanged += LastProjectsCollectionChanged;
     }
 
-    private void LastProjectsCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    private void LastProjectsCollectionChanged(object sender,
+        System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
         if (LastProjects.Count > MaxlastProjectsLength - 1)
         {
-            LastProjects = LastProjects.OrderByDescending(x => x.OpenTime).Take(MaxlastProjectsLength).ToAsyncObservableCollection();
+            LastProjects = LastProjects
+                .OrderByDescending(x => x.OpenTime)
+                .Take(MaxlastProjectsLength)
+                .ToAsyncObservableCollection();
         }
+
         OnPropertyChanged(nameof(FilteredLastProjects));
     }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FilteredLastProjects))]
-    string lastProjectsFilter = string.Empty;
+    public partial string LastProjectsFilter { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FilteredLastProjects))]
-    SortBy lastProjectsSortBy = SortBy.Date;
+    public partial SortBy LastProjectsSortBy { get; set; } = SortBy.Date;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FilteredLastProjects))]
-    SortOrder lastProjectsSortOrder = SortOrder.Descending;
+    public partial SortOrder LastProjectsSortOrder { get; set; } = SortOrder.Descending;
 
-    [XmlIgnore]
-    public IEnumerable<RecentProject> FilteredLastProjects => GetFilteredLastProjects();
+    [XmlIgnore] public IEnumerable<RecentProject> FilteredLastProjects => GetFilteredLastProjects();
+
     private IEnumerable<RecentProject> GetFilteredLastProjects()
     {
         IEnumerable<RecentProject> filteredProjects = LastProjects;
         if (!string.IsNullOrEmpty(LastProjectsFilter))
         {
-            try
-            {
-                filteredProjects = filteredProjects.Where(x => Regex.Match(x.Name, LastProjectsFilter, RegexOptions.IgnoreCase).Success);
-            }
-            catch { }
+            filteredProjects = filteredProjects
+                .Where(x => Regex.Match(x.Name, LastProjectsFilter, RegexOptions.IgnoreCase).Success);
         }
-        Func<RecentProject, IComparable> keySelector = GetKeySelector(LastProjectsSortBy);
+
+        var keySelector = GetKeySelector(LastProjectsSortBy);
         filteredProjects = ApplySorting(filteredProjects, keySelector, LastProjectsSortOrder);
         return filteredProjects;
 
-        static IEnumerable<RecentProject> ApplySorting<T>(IEnumerable<RecentProject> projects, Func<RecentProject, T> keySelector, SortOrder sortOrder)
-            => sortOrder == SortOrder.Ascending ? projects.OrderBy(keySelector) : projects.OrderByDescending(keySelector);
+        static IEnumerable<RecentProject> ApplySorting<T>(IEnumerable<RecentProject> projects,
+            Func<RecentProject, T> keySelector, SortOrder sortOrder)
+            => sortOrder == SortOrder.Ascending
+                ? projects.OrderBy(keySelector)
+                : projects.OrderByDescending(keySelector);
 
         static Func<RecentProject, IComparable> GetKeySelector(SortBy sortBy)
             => sortBy switch
@@ -98,10 +107,18 @@ public partial class AddinSettings : ObservableObject
             };
     }
 
-    [ObservableProperty] bool forceUpdateReferences = true;
-    [ObservableProperty] AsyncObservableCollection<string> updateReferenceLibraries = [];
-    [ObservableProperty] bool isSimpleTheme;
-    [ObservableProperty] bool? mapToVisualStudioTheme = true;
+    [ObservableProperty]
+    public partial bool ForceUpdateReferences { get; set; } = true;
+
+    [ObservableProperty]
+    public partial AsyncObservableCollection<string> UpdateReferenceLibraries { get; set; } = [];
+
+    [ObservableProperty]
+    public partial bool IsSimpleTheme { get; set; }
+
+    [ObservableProperty]
+    public partial bool? MapToVisualStudioTheme { get; set; } = true;
+
     partial void OnMapToVisualStudioThemeChanging(bool? value)
     {
         if (value is false or null)
@@ -109,24 +126,27 @@ public partial class AddinSettings : ObservableObject
             return;
         }
 
-        bool val = VisualStudioIntegration.IsVisualStudioDark(VSCommon.EnvDTE.Instance);
+        var val = VisualStudioIntegration.IsVisualStudioDark(VSCommon.EnvDTE.Instance);
         AppTheme.SetBaseTheme(val ? Theme.Dark : Theme.Light);
         OnAppThemeChanging(AppTheme);
     }
-    [ObservableProperty] string? selectedDevelopeDomain;
-    [ObservableProperty] AsyncObservableCollection<string> lastOdaFolders = [];
-    [ObservableProperty] AsyncObservableCollection<PathInfo> odaFolders = [];
-    [ObservableProperty] PathInfo selectedOdaFolder;
-    [ObservableProperty] string? gitLabApiKey;
-    [ObservableProperty] string? gitLabApiPath;
-    [ObservableProperty] int gitlabTimeout = 15;
-    [ObservableProperty] int structureItemTimeout = 10;
-    [ObservableProperty] ThemeColors appTheme = ThemeColors.Default;
+
+    [ObservableProperty] public partial string? SelectedDevelopeDomain { get; set; }
+    [ObservableProperty] public partial AsyncObservableCollection<string> LastOdaFolders { get; set; } = [];
+    [ObservableProperty] public partial AsyncObservableCollection<PathInfo> OdaFolders { get; set; } = [];
+    [ObservableProperty] public partial PathInfo SelectedOdaFolder { get; set; }
+    [ObservableProperty] public partial string? GitLabApiKey { get; set; }
+    [ObservableProperty] public partial string? GitLabApiPath { get; set; }
+    [ObservableProperty] public partial int GitlabTimeout { get; set; } = 15;
+    [ObservableProperty] public partial int StructureItemTimeout { get; set; } = 10;
+    [ObservableProperty] public partial ThemeColors AppTheme { get; set; } = ThemeColors.Default;
+
     partial void OnAppThemeChanging(ThemeColors value) => OnThemeChanged?.Invoke(value);
-    [XmlIgnore] public string AddinSettingsPath { get; private set; }
+    [XmlIgnore] public string? AddinSettingsPath { get; private set; }
+
     public static AddinSettings Create(DirectoryInfo folder)
     {
-        AddinSettings settings;
+        AddinSettings? settings;
         var path = Path.Combine(folder.FullName, FILE_NAME);
         try
         {
@@ -136,17 +156,20 @@ public partial class AddinSettings : ObservableObject
         {
             settings = LoadFromPath(TemplatePath);
             settings.AddinSettingsPath = path;
-            //settings.Save();
         }
 
         return settings ?? throw new Exception($"Can't load settings file {path}");
     }
+
     private static AddinSettings LoadFromPath(string path)
     {
         using var fs = new FileStream(path, FileMode.Open, FileAccess.Read);
         var settings = (AddinSettings)Serializer.Deserialize(fs);
         settings.OdaFolders.Remove(x => x.Name == "Last run");
-        settings.OdaFolders?.Insert(0, new PathInfo("Last run", VsixExtension.LastOdaFolder.FullName));
+        if (VsixEx.LastOdaFolder?.FullName is { } lastOdaFolder)
+        {
+            settings.OdaFolders?.Insert(0, new PathInfo("Last run", lastOdaFolder));
+        }
         settings.AddinSettingsPath = path;
         if (settings.OdaFolders?.FirstOrDefault() is { } pathInfo
             && string.IsNullOrEmpty(settings.SelectedOdaFolder.Path)
@@ -160,6 +183,7 @@ public partial class AddinSettings : ObservableObject
         settings.LastProjects.CollectionChanged += settings.LastProjectsCollectionChanged;
         return settings;
     }
+
     public bool Save()
     {
         try
@@ -176,6 +200,7 @@ public partial class AddinSettings : ObservableObject
             return false;
         }
     }
+
     public async Task<bool> SaveAsync()
     {
         return await Task.Run(Save);
@@ -183,12 +208,9 @@ public partial class AddinSettings : ObservableObject
 
     public enum SortBy
     {
-        [Description("Open date")]
-        Date,
-        [Description("Project name")]
-        Name,
-        [Description("Host name")]
-        HostName
+        [Description("Open date")] Date,
+        [Description("Project name")] Name,
+        [Description("Host name")] HostName
     }
 
     public enum SortOrder

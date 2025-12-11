@@ -18,11 +18,11 @@ using Microsoft.Win32;
 
 namespace OdantDev;
 
-public static class VsixExtension
+public static class VsixEx
 {
     public static Bitness Platform => IntPtr.Size == 4 ? Bitness.x86 : Bitness.x64;
 
-    public static DirectoryInfo VSIXPath { get; } = ProcessEx.CurrentExecutingFolder();
+    public static DirectoryInfo VsixPath { get; } = ProcessEx.CurrentExecutingFolder();
 
     public static List<IntPtr> LoadServerLibraries(string odaPath, Bitness bitness, params string[] libPaths)
     {
@@ -40,33 +40,34 @@ public static class VsixExtension
         return libPaths.Select(libPath => Assembly.LoadFrom(Path.Combine(path, libPath))).ToList();
     }
 
-    public static DirectoryInfo LastOdaFolder { get; } = LastOdaPath().Directory;
+    public static DirectoryInfo? LastOdaFolder { get; } = LastOdaPath()?.Directory;
 
-    public static FileInfo LastOdaPath()
+    public static FileInfo? LastOdaPath()
     {
-        string[] strArray = new string[] { "oda", "odant", "Applications\\ODA.exe" };
-        foreach (string name1 in strArray)
+        string[] strArray = ["oda", "odant", "Applications\\ODA.exe"];
+        foreach (var name1 in strArray)
         {
             try
             {
-                RegistryKey registryKey1 = Registry.ClassesRoot.OpenSubKey(name1);
-                if (registryKey1 != null)
+                var registryKey1 = Registry.ClassesRoot.OpenSubKey(name1);
+                if (registryKey1 == null)
                 {
-                    string name2 = "shell\\open\\command";
-                    RegistryKey registryKey2 = registryKey1.OpenSubKey(name2);
-                    if (registryKey2 != null)
-                    {
-                        object obj = registryKey2.GetValue(string.Empty);
-                        if (obj != null)
-                        {
-                            registryKey1.Close();
-                            registryKey2.Close();
-                            string str1 = obj.ToString();
-                            string str2 = str1.Substring(str1.IndexOf("\"") + 1);
-                            return new FileInfo(str2.Substring(0, str2.IndexOf("\"")));
-                        }
-                    }
+                    continue;
                 }
+
+                const string name2 = "shell\\open\\command";
+                var registryKey2 = registryKey1.OpenSubKey(name2);
+                var obj = registryKey2?.GetValue(string.Empty);
+                if (obj == null)
+                {
+                    continue;
+                }
+
+                registryKey1.Close();
+                registryKey2.Close();
+                var str1 = obj.ToString();
+                var str2 = str1.Substring(str1.IndexOf("\"") + 1);
+                return new FileInfo(str2.Substring(0, str2.IndexOf("\"")));
             }
             catch
             {

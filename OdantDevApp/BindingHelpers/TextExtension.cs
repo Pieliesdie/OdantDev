@@ -8,7 +8,7 @@ public class TextExtension(string fileName) : MarkupExtension
     {
         try
         {
-            var path = Path.Combine(VsixExtension.VSIXPath.FullName, fileName);
+            var path = Path.Combine(VsixEx.VsixPath.FullName, fileName);
             return File.ReadAllText(path);
         }
         catch (Exception ex)

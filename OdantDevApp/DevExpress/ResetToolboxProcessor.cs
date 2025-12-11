@@ -34,7 +34,7 @@ namespace DevExpress.ProjectUpgrade.Package
         public static string[] GetInstalledDXPVersions()
         {
             RegistryKey registryKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\DevExpress\\DXperience");
-            return registryKey == null ? new string[0] : registryKey.GetSubKeyNames();
+            return registryKey == null ? [] : registryKey.GetSubKeyNames();
         }
 
         public static List<string> GetToolboxInstalledCategories(

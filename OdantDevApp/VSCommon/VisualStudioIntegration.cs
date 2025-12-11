@@ -34,7 +34,9 @@ public sealed partial class VisualStudioIntegration
     private AddinSettings AddinSettings { get; }
     private DirectoryInfo OdaFolder => new(AddinSettings.SelectedOdaFolder.Path);
     private ILogger? Logger { get; }
-    private Project[] ActiveSolutionProjects => ((EnvDte.ActiveSolutionProjects as object[]) ?? []).Cast<Project>().ToArray();
+
+    private Project[] ActiveSolutionProjects =>
+        ((EnvDte.ActiveSolutionProjects as object[]) ?? []).Cast<Project>().ToArray();
 
     #endregion
 
@@ -64,9 +66,8 @@ public sealed partial class VisualStudioIntegration
         return;
 #else
         EnvDte = dte
-            ?? throw new NullReferenceException("Can't get EnvDTE2 from visual studio");
+                 ?? throw new NullReferenceException("Can't get EnvDTE2 from visual studio");
 #endif
-
         try
         {
             using var retryComCallsfilter = OleMessageFilter.MessageFilterRegister();
@@ -75,8 +76,9 @@ public sealed partial class VisualStudioIntegration
                 EnvDte.Solution.Close();
             }
         }
-        catch
+        catch (Exception e)
         {
+            Logger?.Error($"Error while initialize VisualStudioIntegration: {e}");
         }
     }
 
@@ -321,7 +323,7 @@ public sealed partial class VisualStudioIntegration
             buildInfo.RemoteDir.Class.Dir.Reset();
             return isCopied && isSaved;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Logger?.Error($"Can't copy 'modules' to server: {e.Message}");
             return false;
@@ -346,13 +348,15 @@ public sealed partial class VisualStudioIntegration
                 {
                     throw new NullReferenceException("assemblyInfo.FileCodeModel is null");
                 }
+
                 assemblyInfo.FileCodeModel.AddAttribute("AssemblyVersion", $"\"{Utils.Version}\"");
             }
             else
             {
                 var currentVersion = Version.Parse(version.Value.Replace("\"", string.Empty));
                 var currentOdantVersion = Version.Parse(Utils.Version);
-                version.Value = $"\"{Utils.MajorVersion}.{Utils.ShortVersion}.{Math.Max(currentOdantVersion.Revision, currentVersion.Revision + 1)}\"";
+                version.Value =
+                    $"\"{Utils.MajorVersion}.{Utils.ShortVersion}.{Math.Max(currentOdantVersion.Revision, currentVersion.Revision + 1)}\"";
             }
 
             SaveProjectItem(assemblyInfo);
@@ -409,7 +413,7 @@ public sealed partial class VisualStudioIntegration
             _ = item ?? throw new NullReferenceException("Item was null");
             var module = DownloadModule(item);
             var csProj = module.csProj
-                         ?? throw new DirectoryNotFoundException("Module csproj file not found");
+                         ?? throw new DirectoryNotFoundException("csproj file not found");
 
             if (EnvDte.Solution.IsOpen.Not())
             {
@@ -488,7 +492,7 @@ public sealed partial class VisualStudioIntegration
             throw new NullReferenceException(nameof(project));
         }
 
-        var startProgram = VsixExtension.Platform == Bitness.x64 ? "ODA.exe" : "oda.wrapper32.exe";
+        var startProgram = VsixEx.Platform == Bitness.x64 ? "ODA.exe" : "oda.wrapper32.exe";
         var assemblyFile = @$"{new FileInfo(project.FullName).Directory}\AssemblyInfo.cs";
 
         project.Name = $"{sourceItem.Name}-{sourceItem.Id}";
@@ -517,14 +521,15 @@ public sealed partial class VisualStudioIntegration
             }
 
             assemblyInfo = project.ProjectItems.AddFromFileCopy(
-                Path.Combine(VsixExtension.VSIXPath.FullName,
-                @"Templates\AssemblyInfo.cs")
+                Path.Combine(VsixEx.VsixPath.FullName,
+                    @"Templates\AssemblyInfo.cs")
             );
         }
 
         SetAttributeToProjectItem(assemblyInfo, "AssemblyTitle", $"{sourceItem.Name}-{sourceItem.Id}");
         SetAttributeToProjectItem(assemblyInfo, "AssemblyDescription", sourceItem.Hint ?? string.Empty);
-        SetAttributeToProjectItem(assemblyInfo, "AssemblyCopyright", $"ООО «Инфостандарт» © 2012 — {DateTime.Now.Year}");
+        SetAttributeToProjectItem(assemblyInfo, "AssemblyCopyright",
+            $"ООО «Инфостандарт» © 2012 — {DateTime.Now.Year}");
         SetAttributeToProjectItem(assemblyInfo, "AssemblyDefaultAlias", $"{sourceItem.Name}");
         SetAttributeToProjectItem(assemblyInfo, "AssemblyCompany", "Infostandart");
         SetAttributeToProjectItem(assemblyInfo, "AssemblyTrademark", "www.infostandart.com");
@@ -538,63 +543,79 @@ public sealed partial class VisualStudioIntegration
     {
         try
         {
-            List<string> deletedDlls = [];
-            var refs = references.ToHashSet();
-
-            foreach (Reference reference in vsProj.References)
-            {
-                try
-                {
-                    var fullName = GetFullName(reference);
-                    var assemblyName = new AssemblyName(fullName);
-                    var isInUpdateList = refs.Contains($"{assemblyName.Name}.dll");
-                    if (!isInUpdateList)
-                    {
-                        continue;
-                    }
-
-                    var newPath = Path.Combine(OdaFolder.FullName, $"{assemblyName.Name}.dll");
-                    var isExistsInOdantFolder = File.Exists(newPath);
-                    if (!isExistsInOdantFolder)
-                    {
-                        continue;
-                    }
-
-                    var isSameFileVersion = GetFileVersion(newPath) == GetFileVersion(reference.Path);
-                    var exists = File.Exists(reference.Path);
-                    if (!exists || !isSameFileVersion || AddinSettings.ForceUpdateReferences)
-                    {
-                        reference.Remove();
-                        deletedDlls.Add($"{assemblyName.Name}.dll");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Logger?.Error($"Error while update assembly references : {e.Message}");
-                }
-            }
-
-            foreach (var dll in refs)
-            {
-                if (deletedDlls.Contains(dll).Not())
-                {
-                    continue;
-                }
-
-                var reference = (Reference3)vsProj.References.Add(Path.Combine(OdaFolder.FullName, dll));
-                reference.CopyLocal = false;
-                reference.SpecificVersion = false;
-
-                Logger?.Info($"{dll} updated");
-            }
-
-            return true;
+            return UpdateAssemblyReferencesCore(vsProj, references);
         }
         catch (Exception e)
         {
             Logger?.Error($"Error while update assembly references : {e.Message}");
             return false;
         }
+    }
+
+    private string? UpdateAssemblyReference(Reference reference, HashSet<string> references)
+    {
+        var fullName = GetFullName(reference);
+        var assemblyName = new AssemblyName(fullName);
+        var isInUpdateList = references.Contains($"{assemblyName.Name}.dll");
+        if (!isInUpdateList)
+        {
+            return null;
+        }
+
+        var newPath = Path.Combine(OdaFolder.FullName, $"{assemblyName.Name}.dll");
+        var isExistsInOdantFolder = File.Exists(newPath);
+        if (!isExistsInOdantFolder)
+        {
+            return null;
+        }
+
+        var isSameFileVersion = GetFileVersion(newPath) == GetFileVersion(reference.Path);
+        var exists = File.Exists(reference.Path);
+        if (exists && isSameFileVersion && !AddinSettings.ForceUpdateReferences)
+        {
+            return null;
+        }
+
+        reference.Remove();
+        return $"{assemblyName.Name}.dll";
+    }
+
+    private bool UpdateAssemblyReferencesCore(VSProject vsProj, IEnumerable<string> references)
+    {
+        List<string> deletedDlls = [];
+        var refs = references.ToHashSet();
+
+        foreach (Reference reference in vsProj.References)
+        {
+            try
+            {
+                var updatedReference = UpdateAssemblyReference(reference, refs);
+                if (updatedReference != null)
+                {
+                    deletedDlls.Add(updatedReference);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger?.Error($"Error while update assembly references : {e.Message}");
+            }
+        }
+
+        foreach (var dll in refs)
+        {
+            if (deletedDlls.Contains(dll).Not())
+            {
+                continue;
+            }
+
+            var reference = (Reference3)vsProj.References.Add(Path.Combine(OdaFolder.FullName, dll));
+            reference.CopyLocal = false;
+            reference.SpecificVersion = false;
+
+            Logger?.Info($"{dll} updated");
+        }
+
+        return true;
     }
 
     public static string GetFileVersion(string? path)

@@ -79,7 +79,7 @@ public static class GitClient
         item.Root.SetAttribute(GitClientFieldName.GIT_REPO_HTTP, project.HttpUrlToRepo);
         item.Save();
 
-        var sourceGitignorePath = Path.Combine(VsixExtension.VSIXPath.FullName, ".gitignore");
+        var sourceGitignorePath = Path.Combine(VsixEx.VsixPath.FullName, ".gitignore");
         var destinationGitignorePath = Path.Combine(moduleFolder, ".gitignore");
         if (!File.Exists(destinationGitignorePath))
         {

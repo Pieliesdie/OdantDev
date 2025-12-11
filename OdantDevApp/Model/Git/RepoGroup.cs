@@ -10,7 +10,7 @@ using OdantDevApp.Model.Git.GitItems;
 namespace OdantDevApp.Model.Git;
 public class RepoGroup : RepoBase
 {
-    public RepoGroup(GroupItem item, BaseGitItem parent, bool loadProjects, ILogger? logger = null)
+    public RepoGroup(GroupItem? item, BaseGitItem? parent, bool loadProjects, ILogger? logger = null)
         : base(item, parent, logger)
     {
         LoadProjects = loadProjects;
@@ -57,7 +57,7 @@ public class RepoGroup : RepoBase
         }
         catch
         {
-            return Enumerable.Empty<RepoBase>();
+            return [];
         }
     }
 }

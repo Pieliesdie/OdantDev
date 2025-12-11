@@ -29,6 +29,7 @@ using SharedOdantDev.Common;
 using File = System.IO.File;
 using GroupItem = OdantDevApp.Model.Git.GitItems.GroupItem;
 using RepoBase = OdantDevApp.Model.Git.RepoBase;
+using ItemFactory = oda.OdaOverride.ItemFactory;
 
 namespace OdantDev;
 
@@ -42,16 +43,18 @@ public partial class ToolWindowControl
     private readonly ILogger logger;
     private VisualStudioIntegration? visualStudioIntegration;
 
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(IsBusy))]
-    private string status = string.Empty;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsBusy))]
+    public partial string Status { get; set; } = string.Empty;
 
     public bool IsBusy => !string.IsNullOrWhiteSpace(Status);
-    [ObservableProperty] bool isLoadingRepos;
+    [ObservableProperty] public partial bool IsLoadingRepos { get; set; }
+
     public static AddinSettings AddinSettings => AddinSettings.Instance;
 
-    [ObservableProperty] private List<RepoBase>? groups;
+    [ObservableProperty] public partial List<RepoBase>? Groups { get; set; }
 
-    [ObservableProperty] private ConnectionModel? odaModel;
+    [ObservableProperty] public partial ConnectionModel OdaModel { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ToolWindowControl"/> class.
@@ -95,7 +98,12 @@ public partial class ToolWindowControl
         return false;
     }
 
-    private async void Exit(object sender, RoutedEventArgs e)
+    private void Exit(object sender, RoutedEventArgs e)
+    {
+        _ = ExitAsync();
+    }
+
+    private async Task ExitAsync()
     {
         if (!CommandLine.IsOutOfProcess)
         {
@@ -146,7 +154,12 @@ public partial class ToolWindowControl
 
     #region Connect to oda and get data
 
-    private async void Connect(object sender, RoutedEventArgs e)
+    private void Connect(object sender, RoutedEventArgs e)
+    {
+        _ = ConnectAsync();
+    }
+
+    private async Task ConnectAsync()
     {
         using var cleaner = StatusCleaner();
         Status = "Checking DLLs in oda folder";
@@ -185,8 +198,7 @@ public partial class ToolWindowControl
         }
 
         await DispatcherEx.SwitchToMainThread();
-        visualStudioIntegration =
-            new VisualStudioIntegration(AddinSettings, OdantDevApp.VSCommon.EnvDTE.Instance, logger);
+        visualStudioIntegration = new VisualStudioIntegration(AddinSettings, OdantDevApp.VSCommon.EnvDTE.Instance, logger);
         await AddinSettings.SaveAsync();
     }
 
@@ -218,8 +230,11 @@ public partial class ToolWindowControl
             ExitButton.Visibility = Visibility.Visible;
         }
 
-        DeveloperCb.SelectedItem = OdaModel.Developers?.Where(x => x.FullId == AddinSettings.SelectedDevelopeDomain)
-            .FirstOrDefault();
+        DeveloperCb.SelectedItem = OdaModel
+            .Developers?
+            .Where(x => x.FullId == AddinSettings.SelectedDevelopeDomain)
+            .FirstOrDefault()
+            ?? OdaModel.Developers?.FirstOrDefault();
         return (true, null);
     }
 
@@ -227,10 +242,6 @@ public partial class ToolWindowControl
     {
         using var statusCleaner = Disposable.Create(() => IsLoadingRepos = false);
         IsLoadingRepos = true;
-        if (OdaModel is null)
-        {
-            return;
-        }
 
         var res = await OdaModel.InitReposAsync();
         if (res.Success.Not())
@@ -283,7 +294,7 @@ public partial class ToolWindowControl
 
         try
         {
-            oda.OdaOverride.ItemFactory.CreateDomain(domain, dialog.Answer, "MODULE");
+            ItemFactory.CreateDomain(domain, dialog.Answer, "MODULE");
         }
         catch (Exception ex)
         {
@@ -317,7 +328,7 @@ public partial class ToolWindowControl
         }
     }
 
-    public void RemoveItemClick(object sender, RoutedEventArgs e)
+    public async void RemoveItemClick(object sender, RoutedEventArgs e)
     {
         if (OdaTree?.SelectedItem is not StructureViewItem<StructureItem> { Item: { } structureItem })
             return;
@@ -327,7 +338,6 @@ public partial class ToolWindowControl
             var dialog = new ConfirmDialog($"Remove {structureItem}?", "");
             if (dialog.ShowDialog() != true)
                 return;
-
             structureItem.Remove();
         }
         catch (Exception ex)
@@ -356,12 +366,26 @@ public partial class ToolWindowControl
 
     private void CreateRepoButton_Click(object sender, RoutedEventArgs e)
     {
+        if (GitClient.Client?.HostUrl == null)
+        {
+            logger.Info("Uri for gitlab is not specified");
+            return;
+        }
+
         var item = new RootItem(GitClient.Client.HostUrl);
         Groups = [new RepoRoot(item, false, logger)];
     }
 
-    private async void CreateModuleButton_Click(object sender, RoutedEventArgs e)
+    private void CreateModuleButton_Click(object sender, RoutedEventArgs e)
     {
+        _ = CreateModuleAsync();
+    }
+
+    private async Task CreateModuleAsync()
+    {
+        using var statusCleaner = StatusCleaner();
+        Status = "Creating module...";
+
         if ((OdaTree?.SelectedItem as StructureViewItem<StructureItem>)?.Item is not Class cls)
         {
             logger?.Info("Can't create module here");
@@ -374,7 +398,7 @@ public partial class ToolWindowControl
             {
                 var moduleFolder = cls.Dir.OpenOrCreateFolder("modules");
                 var templateFolder =
-                    new DirectoryInfo(Path.Combine(VsixExtension.VSIXPath.FullName, @"Templates\ProjectTemplate"));
+                    new DirectoryInfo(Path.Combine(VsixEx.VsixPath.FullName, @"Templates\ProjectTemplate"));
                 moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "AssemblyInfo.cs"), @"AssemblyInfo.cs",
                     true);
                 moduleFolder.SaveFile(Path.Combine(templateFolder.FullName, "Init.cs"), @"Init.cs", true);
@@ -492,6 +516,35 @@ public partial class ToolWindowControl
         }
     }
 
+    private void CreateDeveloper(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Dialogs.InputDialog("Developer name", "Insert name");
+        if (dialog.ShowDialog() != true)
+        {
+            return;
+        }
+
+        if ((OdaTree?.SelectedItem as StructureViewItem<StructureItem>)?.Item is not Domain { ItemType: ItemType.DevPart } domain)
+        {
+            logger?.Info("Selected item is not a developer domain");
+            return;
+        }
+
+        try
+        {
+            if (ItemFactory.CreateDomain(domain, dialog.Answer, "DEVELOPER") is not DomainDeveloper newDomain)
+            {
+                return;
+            }
+            OdaModel?.Developers?.Add(newDomain);
+            logger?.Info("Domain created");
+        }
+        catch (Exception err)
+        {
+            logger.Error(err.Message);
+        }
+    }
+
     private async void DownloadModuleButton_Click(object sender, RoutedEventArgs e)
     {
         if ((OdaTree?.SelectedItem as StructureViewItem<StructureItem>)?.Item is not Class cls)
@@ -500,20 +553,37 @@ public partial class ToolWindowControl
             return;
         }
 
-        if (DeveloperCb.SelectedItem is not DomainDeveloper domainDeveloper)
-        {
-            logger?.Info("Please select developer domain on settings tab");
-            return;
-        }
-
         try
         {
+            if (DeveloperCb.SelectedItem is not DomainDeveloper domainDeveloper)
+            {
+                logger?.Info("Developer domain is not selected. Creating new one...");
+
+                if (OdaModel.Localhost?.Develope == null)
+                {
+                    logger?.Info("Develope part is not found on localhost.");
+                    return;
+                }
+                var username = OdaModel.User?.Name ?? "Разработчик";
+                domainDeveloper = ItemFactory.CreateDomain(OdaModel.Localhost.Develope, username, "DEVELOPER") as DomainDeveloper;
+                if (domainDeveloper == null)
+                {
+                    logger?.Info("Can't create developer domain");
+                    return;
+                }
+                OdaModel.Developers?.Add(domainDeveloper);
+                DeveloperCb.SelectedItem = domainDeveloper;
+            }
+
             logger?.Info("Start downloading module");
             var createdClass = await Task.Run(() =>
             {
-                var createdDomain = domainDeveloper.CreateDomain(cls.Domain.Name, "MODULE");
-                createdDomain.Save();
-                var createdClass = createdDomain.CreateClass(cls.Name);
+                var moduleDomain = domainDeveloper.FindDomain($"D:{cls.Domain.Id}")
+                                   ?? domainDeveloper.CreateDomainByXml(cls.Domain.XML);
+                var createdClass = moduleDomain?.CreateClassByXml(cls.XML);
+
+                if (createdClass == null) { return null; }
+
                 createdClass.Type = cls.Type;
                 createdClass.Save();
                 cls.Dir.CopyTo(createdClass.Dir);
@@ -557,10 +627,13 @@ public partial class ToolWindowControl
             }
             case ItemType.Module:
             {
-                foreach (var child in selectedItem.Children)
+                if (selectedItem.Children != null)
                 {
-                    if (child.Item is Class { HasModule: true })
-                        await OpenModuleAsync(child.Item);
+                    foreach (var child in selectedItem.Children)
+                    {
+                        if (child.Item is Class { HasModule: true })
+                            await OpenModuleAsync(child.Item);
+                    }
                 }
 
                 break;
@@ -766,7 +839,7 @@ public partial class ToolWindowControl
         try
         {
             button.IsEnabled = false;
-            await DevHelpers.DownloadAndCopyFramework4_0Async(this.logger);
+            await DevHelpers.DownloadAndCopyFramework4_0Async(logger);
         }
         catch (Exception ex)
         {
@@ -785,7 +858,7 @@ public partial class ToolWindowControl
         try
         {
             button.IsEnabled = false;
-            await DevHelpers.DownloadAndCopyFramework4_5Async(this.logger);
+            await DevHelpers.DownloadAndCopyFramework4_5Async(logger);
         }
         catch (Exception ex)
         {
@@ -821,7 +894,7 @@ public partial class ToolWindowControl
             var description = DialogTextBoxRepoDescription.Text;
             var selectedGroup = DialogRepoGroupTree?.SelectedItem as RepoBase;
             var group = (selectedGroup?.Item as GroupItem)?.Object as Group;
-            var options = new CreateProjectOptions()
+            var options = new CreateProjectOptions
             {
                 Name = name,
                 Item = selectedItem.Item,
@@ -852,7 +925,11 @@ public partial class ToolWindowControl
 
         if (isDeleteLocalRepo.HasValue && isDeleteLocalRepo.Value)
         {
-            var modulePath = selectedItem.Item.Dir.RemoteFolder.LoadFolder();
+            var modulePath = selectedItem.Item?.Dir.RemoteFolder.LoadFolder();
+            if (modulePath == null)
+            {
+                return;
+            }
             modulePath = DevHelpers.ClearDomainAndClassInPath(modulePath);
             var directoryInfo = new DirectoryInfo(Path.Combine(modulePath, ".git"));
             if (directoryInfo.Exists)
