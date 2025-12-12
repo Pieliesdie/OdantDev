@@ -1,15 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows;
-
+﻿using System.Diagnostics;
 using CommunityToolkit.Mvvm.Input;
-
-using oda;
-
-using OdantDev;
-
 using SharedOdantDev.Common;
 
 namespace OdantDevApp.Model.ViewModels;

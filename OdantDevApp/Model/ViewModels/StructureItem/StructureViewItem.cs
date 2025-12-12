@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
-using MoreLinq;
-using oda;
-using OdantDev;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using OdantDev.Model;
 using OdantDevApp.Model.Git;
 using OdantDevApp.Model.ViewModels.Settings;
@@ -115,7 +107,7 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
                 {
                     if (Children is null || Children.Equals(dummyList))
                     {
-                        Children = GetChildren(Item, this, logger, connection).ToArray();
+                        Children = GetDistinctChildren(Item, this, logger, connection).ToArray();
                     }
 
                     return Children?.Any(x => x.HasModule) ?? false;

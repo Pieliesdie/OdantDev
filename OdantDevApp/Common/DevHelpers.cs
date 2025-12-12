@@ -1,9 +1,5 @@
-﻿using System;
-using System.IO;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Net.Http;
-using System.Threading.Tasks;
-
 using OdantDev.Model;
 
 namespace SharedOdantDev.Common;

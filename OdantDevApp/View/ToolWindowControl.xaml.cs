@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using GitLabApiClient.Models.Groups.Responses;
 using MaterialDesignColors;
 using MaterialDesignExtensions.Controls;
 using MaterialDesignThemes.Wpf;
-using oda;
 using oda.OdaOverride;
 using OdantDev.Dialogs;
 using OdantDev.Model;
@@ -30,6 +22,7 @@ using File = System.IO.File;
 using GroupItem = OdantDevApp.Model.Git.GitItems.GroupItem;
 using RepoBase = OdantDevApp.Model.Git.RepoBase;
 using ItemFactory = oda.OdaOverride.ItemFactory;
+using VisualStudioIntegration = OdantDevApp.VSCommon.VisualStudioIntegration;
 
 namespace OdantDev;
 

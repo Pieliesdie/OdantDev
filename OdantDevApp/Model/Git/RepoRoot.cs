@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using OdantDev.Model;
+﻿using OdantDev.Model;
 using OdantDevApp.Model.Git.GitItems;
 
 namespace OdantDevApp.Model.Git;

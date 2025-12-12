@@ -26,6 +26,9 @@
 	<ItemGroup>
 	  <Content Include="App.config" />
 	  <Content Include="app.manifest" />
+	  <Content Include="VSCommon\IProjectStrategy.cs" />
+	  <Content Include="VSCommon\ProjectStrategies\LegacyProjectStrategy.cs" />
+	  <Content Include="VSCommon\ProjectStrategies\SdkProjectStrategy.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="odaCore">
@@ -69,6 +72,7 @@
 		<PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
 		<PackageReference Include="MdXaml" Version="1.27.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
 		<PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
 		<PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.10.31321.278" />
 		<PackageReference Include="Microsoft.VisualStudio.Validation" Version="16.10.26" />
@@ -85,5 +89,8 @@
 	<Import Project="..\SharedFiles\SharedFiles.projitems" Label="Shared" />
 	<ItemGroup>
 	  <Content Remove="Common\VsixEx.cs" />
+	  <Content Remove="VSCommon\IProjectStrategy.cs" />
+	  <Content Remove="VSCommon\ProjectStrategies\LegacyProjectStrategy.cs" />
+	  <Content Remove="VSCommon\ProjectStrategies\SdkProjectStrategy.cs" />
 	</ItemGroup>
 </Project>

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Linq;
-
-using OdantDev;
-
-namespace OdantDevApp.Model;
+﻿namespace OdantDevApp.Model;
 
 public static class CommandLine
 {

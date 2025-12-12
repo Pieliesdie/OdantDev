@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Reflection;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.VisualBasic.FileIO;
-using oda;
-using OdantDev;
 using OdantDev.Model;
 using OdantDevApp.Common;
 using OdantDevApp.Model.Git;

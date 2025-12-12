@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
-using OdantDev;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using OdantDevApp.Model.Git.GitItems;
 using OdantDevApp.Model.ViewModels.Settings;
 

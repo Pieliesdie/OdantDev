@@ -1,6 +1,4 @@
-﻿using System;
-using System.Windows;
-using MaterialDesignThemes.Wpf;
+﻿using MaterialDesignThemes.Wpf;
 using OdantDevApp.Common;
 using OdantDevApp.Dialogs;
 

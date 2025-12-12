@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MaterialDesignThemes.Wpf;
 using oda.OdaOverride;
-using OdantDev;
 using OdantDev.Model;
 using OdantDevApp.Common;
+using File = System.IO.File;
+using VisualStudioIntegration = OdantDevApp.VSCommon.VisualStudioIntegration;
 
 namespace OdantDevApp.Model.ViewModels.Settings;
 
@@ -126,7 +122,7 @@ public partial class AddinSettings : ObservableObject
             return;
         }
 
-        var val = VisualStudioIntegration.IsVisualStudioDark(VSCommon.EnvDTE.Instance);
+        var val = VisualStudioIntegration.IsDarkTheme(VSCommon.EnvDTE.Instance);
         AppTheme.SetBaseTheme(val ? Theme.Dark : Theme.Light);
         OnAppThemeChanging(AppTheme);
     }

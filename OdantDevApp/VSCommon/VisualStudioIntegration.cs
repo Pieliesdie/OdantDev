@@ -1,25 +1,20 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Media;
 using EnvDTE;
 using EnvDTE80;
-using oda;
+using OdantDev.Model;
 using OdantDevApp.Model.ViewModels.Settings;
+using OdantDevApp.VSCommon.ProjectStrategies;
 using SharedOdantDevLib.WinApi;
 using VSLangProj;
 using VSLangProj80;
 using File = System.IO.File;
 using Task = System.Threading.Tasks.Task;
 
-namespace OdantDev.Model;
+namespace OdantDevApp.VSCommon;
 
 public sealed partial class VisualStudioIntegration
 {
@@ -34,33 +29,22 @@ public sealed partial class VisualStudioIntegration
     private AddinSettings AddinSettings { get; }
     private DirectoryInfo OdaFolder => new(AddinSettings.SelectedOdaFolder.Path);
     private ILogger? Logger { get; }
+    private readonly IReadOnlyCollection<IProjectStrategy> projectStrategies;
 
     private Project[] ActiveSolutionProjects =>
         ((EnvDte.ActiveSolutionProjects as object[]) ?? []).Cast<Project>().ToArray();
 
     #endregion
 
-    public static bool IsVisualStudioDark(DTE2? dte)
-    {
-        try
-        {
-            if (dte == null) return false;
-            var uintClr = dte.GetThemeColor(vsThemeColors.vsThemeColorToolWindowBackground);
-            var bytes = BitConverter.GetBytes(uintClr);
-            var defaultBackground = Color.FromArgb(bytes[3], bytes[0], bytes[1], bytes[2]);
-            var isDarkTheme = (384 - defaultBackground.R - defaultBackground.G - defaultBackground.B) > 0;
-            return isDarkTheme;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
     public VisualStudioIntegration(AddinSettings addinSettings, DTE2 dte, ILogger? logger = null)
     {
         Logger = logger;
         AddinSettings = addinSettings;
+        projectStrategies =
+        [
+            new SdkProjectStrategy(logger),
+            new LegacyProjectStrategy(logger)
+        ];
 #if DEBUG
         EnvDte = dte;
         return;
@@ -79,6 +63,28 @@ public sealed partial class VisualStudioIntegration
         catch (Exception e)
         {
             Logger?.Error($"Error while initialize VisualStudioIntegration: {e}");
+        }
+    }
+
+    private IProjectStrategy GetStrategy(Project project)
+    {
+        return projectStrategies.First(s => s.IsMatch(project));
+    }
+
+    public static bool IsDarkTheme(DTE2? dte)
+    {
+        try
+        {
+            if (dte == null) return false;
+            var uintClr = dte.GetThemeColor(vsThemeColors.vsThemeColorToolWindowBackground);
+            var bytes = BitConverter.GetBytes(uintClr);
+            var defaultBackground = Color.FromArgb(bytes[3], bytes[0], bytes[1], bytes[2]);
+            var isDarkTheme = (384 - defaultBackground.R - defaultBackground.G - defaultBackground.B) > 0;
+            return isDarkTheme;
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -137,10 +143,7 @@ public sealed partial class VisualStudioIntegration
     {
         if (!FireEvents) return;
         var guid = GetProjectGuid(project);
-        if (LoadedModules.TryGetValue(guid, out _))
-        {
-            LoadedModules.TryRemove(guid, out _);
-        }
+        LoadedModules.TryRemove(guid, out _);
     }
 
     private void BuildEvents_OnBuildProjConfigDone(string project, string projectConfig, string platform,
@@ -189,7 +192,8 @@ public sealed partial class VisualStudioIntegration
                 continue;
             }
 
-            if (IncreaseVersion(project).Not())
+            var strategy = GetStrategy(project);
+            if (!strategy.IncreaseVersion(project))
             {
                 EnvDte.ExecuteCommand("Build.Cancel");
                 return;
@@ -201,58 +205,12 @@ public sealed partial class VisualStudioIntegration
 
     #region Common Methods for Project item
 
-    private static ProjectItem? FindProjectItem(Project project, string name)
-    {
-        var projectItem = project.ProjectItems?.OfType<ProjectItem>()?.FirstOrDefault(x => x.Name == name);
-        (projectItem?.FileCodeModel as FileCodeModel2)?.Synchronize();
-        return projectItem;
-    }
-
-    private static CodeAttribute2? FindCodeAttribute(ProjectItem projectItem, string name)
-    {
-        return projectItem
-            .FileCodeModel
-            ?.CodeElements
-            ?.OfType<CodeAttribute2>()
-            ?.FirstOrDefault(x => x.Name == name);
-    }
-
-    private static void SaveProjectItem(ProjectItem projectItem)
-    {
-        if (projectItem.IsOpen.Not())
-        {
-            projectItem.Open();
-        }
-
-        projectItem.Save();
-    }
-
-    private void SetProperties(Properties properties, IReadOnlyDictionary<string, object> values)
-    {
-        foreach (var value in values)
-        {
-            try
-            {
-                properties.Item(value.Key).Value = value.Value;
-            }
-            catch (Exception e)
-            {
-                Logger?.Error($"Error while seting project property {value}: {e.Message}");
-            }
-        }
-    }
-
     private bool CopyToOdaBin(Project project)
     {
         try
         {
-            var currentDirectory = new FileInfo(project.FullName).Directory;
-            var assemblyInfo = FindProjectItem(project, "AssemblyInfo.cs")
-                               ?? throw new NullReferenceException($"Missing AssemblyInfo.cs in {project.Name}");
-
-            var version = new Version(
-                FindCodeAttribute(assemblyInfo, "AssemblyVersion")?.Value?.Replace("\"", string.Empty)
-                ?? throw new NullReferenceException(@$"Missing AssemblyVersion in {currentDirectory}\AssemblyInfo.cs"));
+            var projectStrategy = GetStrategy(project);
+            var version = projectStrategy.GetVersion(project);
 
             var outDirParent = new FileInfo(project.FullName).Directory?.Parent
                                ?? throw new DirectoryNotFoundException(project.FullName);
@@ -330,62 +288,9 @@ public sealed partial class VisualStudioIntegration
         }
     }
 
-    private bool IncreaseVersion(Project project)
-    {
-        var assemblyInfo = FindProjectItem(project, "AssemblyInfo.cs")
-                           ?? throw new NullReferenceException($"Missing AssemblyInfo.cs in {project.Name}");
-        return IncreaseVersion(assemblyInfo);
-    }
-
-    private bool IncreaseVersion(ProjectItem assemblyInfo)
-    {
-        try
-        {
-            var version = FindCodeAttribute(assemblyInfo, "AssemblyVersion");
-            if (version == null)
-            {
-                if (assemblyInfo.FileCodeModel == null)
-                {
-                    throw new NullReferenceException("assemblyInfo.FileCodeModel is null");
-                }
-
-                assemblyInfo.FileCodeModel.AddAttribute("AssemblyVersion", $"\"{Utils.Version}\"");
-            }
-            else
-            {
-                var currentVersion = Version.Parse(version.Value.Replace("\"", string.Empty));
-                var currentOdantVersion = Version.Parse(Utils.Version);
-                version.Value =
-                    $"\"{Utils.MajorVersion}.{Utils.ShortVersion}.{Math.Max(currentOdantVersion.Revision, currentVersion.Revision + 1)}\"";
-            }
-
-            SaveProjectItem(assemblyInfo);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Logger?.Error($"Can't increase version in 'AssemblyInfo.cs': {ex.Message}");
-            return false;
-        }
-    }
-
     private static string GetProjectGuid(Project project)
     {
-        return project?.UniqueName;
-    }
-
-    private static void SetAttributeToProjectItem(ProjectItem projectItem, string name, string value)
-    {
-        var attribute = projectItem.FileCodeModel?.CodeElements?.OfType<CodeAttribute2>()
-            ?.FirstOrDefault(x => x.Name == name);
-        if (attribute == null)
-        {
-            projectItem.FileCodeModel?.AddAttribute(name, $"\"{value}\"");
-        }
-        else
-        {
-            attribute.Value = $"\"{value}\"";
-        }
+        return project.UniqueName;
     }
 
     #endregion
@@ -436,7 +341,9 @@ public sealed partial class VisualStudioIntegration
                 return false;
             }
 
-            InitProject(project, item);
+            var strategy = GetStrategy(project);
+            strategy.InitProject(project, item, OdaFolder, VsixEx.VsixPath.FullName);
+
             UpdateAssemblyReferences(vsProject, AddinSettings.OdaLibraries);
             UpdateAssemblyReferences(vsProject, AddinSettings.UpdateReferenceLibraries);
 
@@ -483,60 +390,6 @@ public sealed partial class VisualStudioIntegration
         var moduleDir = localDir.GetDirectories("modules").FirstOrDefault();
         var csproj = moduleDir?.GetFiles("*.csproj")?.OrderByDescending(x => x.LastWriteTime).FirstOrDefault();
         return (csproj, item.Dir, localDir);
-    }
-
-    private void InitProject(Project project, Item sourceItem)
-    {
-        if (project == null)
-        {
-            throw new NullReferenceException(nameof(project));
-        }
-
-        var startProgram = VsixEx.Platform == Bitness.x64 ? "ODA.exe" : "oda.wrapper32.exe";
-        var assemblyFile = @$"{new FileInfo(project.FullName).Directory}\AssemblyInfo.cs";
-
-        project.Name = $"{sourceItem.Name}-{sourceItem.Id}";
-
-        Dictionary<string, object> configurationAttributes = new()
-        {
-            { "StartAction", prjStartAction.prjStartActionProgram },
-            { "StartProgram", Path.Combine(OdaFolder.FullName, startProgram) },
-            { "StartArguments", "debug" }
-        };
-        SetProperties(project.ConfigurationManager.ActiveConfiguration.Properties, configurationAttributes);
-
-        Dictionary<string, object> projectAttributes = new()
-        {
-            { "AssemblyName", project.Name },
-            { "ReferencePath", OdaFolder.FullName }
-        };
-        SetProperties(project.Properties, projectAttributes);
-
-        var assemblyInfo = FindProjectItem(project, "AssemblyInfo.cs");
-        if (assemblyInfo == null || File.Exists(assemblyFile).Not())
-        {
-            if (File.Exists(assemblyFile))
-            {
-                File.Delete(assemblyFile);
-            }
-
-            assemblyInfo = project.ProjectItems.AddFromFileCopy(
-                Path.Combine(VsixEx.VsixPath.FullName,
-                    @"Templates\AssemblyInfo.cs")
-            );
-        }
-
-        SetAttributeToProjectItem(assemblyInfo, "AssemblyTitle", $"{sourceItem.Name}-{sourceItem.Id}");
-        SetAttributeToProjectItem(assemblyInfo, "AssemblyDescription", sourceItem.Hint ?? string.Empty);
-        SetAttributeToProjectItem(assemblyInfo, "AssemblyCopyright",
-            $"ООО «Инфостандарт» © 2012 — {DateTime.Now.Year}");
-        SetAttributeToProjectItem(assemblyInfo, "AssemblyDefaultAlias", $"{sourceItem.Name}");
-        SetAttributeToProjectItem(assemblyInfo, "AssemblyCompany", "Infostandart");
-        SetAttributeToProjectItem(assemblyInfo, "AssemblyTrademark", "www.infostandart.com");
-
-        IncreaseVersion(assemblyInfo);
-
-        SaveProjectItem(assemblyInfo);
     }
 
     private bool UpdateAssemblyReferences(VSProject vsProj, IEnumerable<string> references)

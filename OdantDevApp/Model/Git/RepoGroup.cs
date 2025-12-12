@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-using GitLabApiClient.Models.Groups.Responses;
+﻿using GitLabApiClient.Models.Groups.Responses;
 
 using OdantDev.Model;
 using OdantDevApp.Model.Git.GitItems;

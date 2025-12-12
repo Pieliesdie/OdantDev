@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO.Pipes;
-using System.Windows;
+﻿using System.IO.Pipes;
 using System.Windows.Interop;
 using OdantDevApp.Model;
 

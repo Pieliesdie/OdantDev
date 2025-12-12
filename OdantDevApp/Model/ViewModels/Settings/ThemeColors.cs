@@ -1,10 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Windows.Media;
 using System.Xml.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MaterialDesignColors;
 using MaterialDesignThemes.Wpf;
-using OdantDev;
 
 namespace OdantDevApp.Model.ViewModels.Settings;
 

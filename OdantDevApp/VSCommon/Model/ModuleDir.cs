@@ -1,12 +1,8 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using EnvDTE;
-
+﻿using EnvDTE;
 using EnvDTE80;
+using File = System.IO.File;
 
-namespace OdantDev.Model;
+namespace OdantDevApp.VSCommon;
 
 public sealed partial class VisualStudioIntegration
 {

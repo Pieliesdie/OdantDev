@@ -1,17 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-
-using GitLabApiClient;
+﻿using GitLabApiClient;
 using GitLabApiClient.Internal.Paths;
 using GitLabApiClient.Models.Groups.Responses;
 using GitLabApiClient.Models.Projects.Requests;
 using GitLabApiClient.Models.Users.Responses;
-
-using oda;
-
-using OdantDev;
-
 using SharedOdantDev.Common;
 
 using File = System.IO.File;

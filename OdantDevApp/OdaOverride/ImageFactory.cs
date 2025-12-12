@@ -1,14 +1,8 @@
 ﻿using System.Drawing;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 using Microsoft.Extensions.Caching.Memory;
-
-using oda;
-
-using OdantDev;
 
 namespace SharedOdanDev.OdaOverride;
 

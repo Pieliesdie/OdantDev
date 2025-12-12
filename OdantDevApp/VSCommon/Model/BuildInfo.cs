@@ -1,8 +1,5 @@
-﻿using System.IO;
+﻿namespace OdantDevApp.VSCommon;
 
-using oda;
-
-namespace OdantDev.Model;
 public sealed partial class VisualStudioIntegration
 {
     struct BuildInfo

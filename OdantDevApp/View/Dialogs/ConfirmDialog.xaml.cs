@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-using MaterialDesignExtensions.Controls;
+﻿using MaterialDesignExtensions.Controls;
 
 using OdantDevApp.Common;
 

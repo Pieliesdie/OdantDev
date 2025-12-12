@@ -1,5 +1,4 @@
-﻿using System.Windows.Media;
-using GitLabApiClient.Models.Projects.Responses;
+﻿using GitLabApiClient.Models.Projects.Responses;
 using SharedOdanDev.OdaOverride;
 
 namespace OdantDevApp.Model.Git.GitItems;

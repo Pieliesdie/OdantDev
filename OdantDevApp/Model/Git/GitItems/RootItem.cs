@@ -1,5 +1,4 @@
-﻿using System.Windows.Media;
-using SharedOdanDev.OdaOverride;
+﻿using SharedOdanDev.OdaOverride;
 
 namespace OdantDevApp.Model.Git.GitItems;
 public class RootItem(string name) : BaseGitItem
