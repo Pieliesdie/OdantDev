@@ -4,7 +4,6 @@ using System.Xml.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MaterialDesignThemes.Wpf;
 using oda.OdaOverride;
-using OdantDev.Model;
 using OdantDevApp.Common;
 using File = System.IO.File;
 using VisualStudioIntegration = OdantDevApp.VSCommon.VisualStudioIntegration;

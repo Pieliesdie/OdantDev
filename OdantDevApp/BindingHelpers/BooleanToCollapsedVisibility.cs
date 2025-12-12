@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Windows.Data;
+﻿using System.Windows.Data;
 
 namespace OdantDev;
 

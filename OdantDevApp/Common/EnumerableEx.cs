@@ -1,7 +1,4 @@
-﻿using System.ComponentModel;
-using System.Text;
-
-namespace OdantDevApp.Common;
+﻿namespace OdantDevApp.Common;
 
 internal static class EnumerableEx
 {

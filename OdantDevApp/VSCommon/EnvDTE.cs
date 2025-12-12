@@ -1,9 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
-
-using EnvDTE;
-
 using EnvDTE80;
 
 using OdantDevApp.Model;

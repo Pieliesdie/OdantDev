@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using odaCore.Views;
 using odaServer;
 
