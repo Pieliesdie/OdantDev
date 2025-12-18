@@ -2,7 +2,6 @@
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.VisualBasic.FileIO;
-using OdantDev.Model;
 using OdantDevApp.Common;
 using OdantDevApp.Model.Git;
 using OdantDevApp.Model.Git.GitItems;
@@ -89,7 +88,7 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
             stopWatch.Stop();
             var ts = stopWatch.Elapsed;
             var elapsedTime = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}.{ts.Milliseconds / 10:00}";
-            logger?.Info($"Load time: {elapsedTime}");
+            logger?.LogInformation("Load time: {ElapsedTime}", elapsedTime);
 
             return (true, null);
         }

@@ -80,6 +80,14 @@ public class ToolWindow : ToolWindowPane
         }
         catch (Exception ex)
         {
+            try
+            {
+                ChildProcess?.Kill();
+            }
+            catch
+            {
+                //ignore
+            }
             await ShowErrorAsync(ex.ToString());
         }
     }

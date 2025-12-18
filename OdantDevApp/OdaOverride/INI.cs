@@ -8,21 +8,20 @@ using System.Drawing;
 namespace oda.OdaOverride;
 public sealed class INI
 {
-    private static INI _degugIni;
     public static INI DebugINI
     {
         get
         {
-            if (_degugIni == null)
+            if (field == null)
             {
-                _degugIni = new INI("SOLUTION");
-                if (oda.Common.Mode == CoreMode.AddIn)
+                field = new INI("SOLUTION");
+                if (Common.Mode == CoreMode.AddIn)
                 {
-                    _degugIni.Clear();
+                    field.Clear();
                 }
             }
 
-            return _degugIni;
+            return field;
         }
     }
 
@@ -44,97 +43,85 @@ public sealed class INI
 
     private static readonly Dictionary<string, WeakReference> iniDocMap = new Dictionary<string, WeakReference>();
 
-    private xmlDocument iniDoc;
-
-    private xmlElement iniRoot;
-
     private bool isSaving;
 
     private bool isChanged;
-
-    private string iniFileFullPath;
-
-    private string tmpFileFullPath;
 
     private readonly string inClassFileDir = string.Empty;
 
     private readonly string inClassFileName;
 
-    private static string allSettingsPath;
-
-    private static string userSettingsPath;
-
-    private SettingsPlace SettingsPlace;
+    private readonly SettingsPlace settingsPlace;
 
     private Class Class { get; set; }
 
-    private xmlDocument Doc
+    private xmlDocument? Doc
     {
         get
         {
-            if (iniDoc == null)
+            if (field == null)
             {
                 lock (iniDocMap)
                 {
-                    iniDoc = GetIniDocFromMap(FileName) ?? CreateNewIniDoc(FileName);
+                    field = GetIniDocFromMap(FileName) ?? CreateNewIniDoc(FileName);
                 }
             }
 
-            return iniDoc;
+            return field;
         }
     }
 
-    private xmlElement Root => iniRoot ?? (iniRoot = Doc.DocumentElement);
+    private xmlElement? Root => field ??= Doc?.DocumentElement;
 
-    public string FileName
+    public string? FileName
     {
         get
         {
-            if (iniFileFullPath == null)
+            if (field == null)
             {
                 if (Class != null)
                 {
-                    if (SettingsPlace == SettingsPlace.Local)
+                    if (settingsPlace == SettingsPlace.Local)
                     {
-                        string file_name = PathCombine(inClassFileDir, inClassFileName);
-                        FileInfo fileInfo = loadSettings(Class, file_name, SettingsPlace.Local);
+                        var file_name = PathCombine(inClassFileDir, inClassFileName);
+                        var fileInfo = loadSettings(Class, file_name, SettingsPlace.Local);
                         if (fileInfo != null && fileInfo.Exists)
                         {
-                            iniFileFullPath = fileInfo.FullName;
+                            field = fileInfo.FullName;
                         }
                     }
                     else
                     {
-                        iniFileFullPath = Class.FullId;
+                        field = Class.FullId;
                     }
                 }
 
-                if (iniFileFullPath == null)
+                if (field == null)
                 {
-                    iniFileFullPath = PathCombine(UserSettingsPath, "INI", inClassFileDir, inClassFileName);
+                    field = PathCombine(UserSettingsPath, "INI", inClassFileDir, inClassFileName);
                 }
             }
 
-            return iniFileFullPath;
+            return field;
         }
     }
 
-    private string TmpFileName => tmpFileFullPath ?? (tmpFileFullPath = TempFiles.GetTempFileName("xml"));
+    private string? TmpFileName => field ?? (field = TempFiles.GetTempFileName("xml"));
 
-    public static string AllSettingsPath
+    public static string? AllSettingsPath
     {
         get
         {
-            if (allSettingsPath == null)
+            if (field == null)
             {
-                global::odaServer.odaServer serverItem = ItemFactory.Connection.ServerItem;
+                var serverItem = ItemFactory.Connection.ServerItem;
                 if (serverItem != null)
                 {
-                    allSettingsPath = Utils.forceDirectory(serverItem.SharedDir);
+                    field = Utils.forceDirectory(serverItem.SharedDir);
                 }
             }
 
-            return allSettingsPath;
+            return field;
         }
     }
 
@@ -142,13 +129,13 @@ public sealed class INI
     {
         get
         {
-            if (string.IsNullOrEmpty(userSettingsPath))
+            if (string.IsNullOrEmpty(field))
             {
-                string dirPath = ((ItemFactory.Connection.ServerItem == null) ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ODA") : ItemFactory.Connection.ServerItem.UserAppDir);
-                userSettingsPath = Utils.forceDirectory(dirPath);
+                var dirPath = ((ItemFactory.Connection.ServerItem == null) ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ODA") : ItemFactory.Connection.ServerItem.UserAppDir);
+                field = Utils.forceDirectory(dirPath);
             }
 
-            return userSettingsPath;
+            return field;
         }
     }
 
@@ -194,7 +181,7 @@ public sealed class INI
     public INI(Class cls, string name, SettingsPlace place)
     {
         Class = cls;
-        SettingsPlace = place;
+        settingsPlace = place;
         inClassFileName = Utils.CorrectFileName(name);
         if (!inClassFileName.EndsWith(".xml"))
         {
@@ -240,18 +227,18 @@ public sealed class INI
             return;
         }
 
-        string text = Utils.ObjectToString(key);
-        xmlElement xmlElement = (string.IsNullOrEmpty(section) ? Root : SelectOrCreateElementByName(Root, "SECTION", section));
+        var text = Utils.ObjectToString(key);
+        var xmlElement = (string.IsNullOrEmpty(section) ? Root : SelectOrCreateElementByName(Root, "SECTION", section));
         if (xmlElement != null)
         {
-            xmlElement xmlElement2 = SelectOrCreateElementByName(xmlElement, "VAL", text);
+            var xmlElement2 = SelectOrCreateElementByName(xmlElement, "VAL", text);
             if (xmlElement2 == null)
             {
                 throw new Exception("Can't create element '" + text + " in section '" + section + "'");
             }
 
-            string name = "v" + index;
-            string value2 = Utils.ObjectToString(value);
+            var name = "v" + index;
+            var value2 = Utils.ObjectToString(value);
             xmlElement2.SetAttribute(name, value2);
         }
         isChanged = true;
@@ -259,7 +246,7 @@ public sealed class INI
 
     public void Write(string section, object key, object value)
     {
-        string text = Utils.ObjectToString(key);
+        var text = Utils.ObjectToString(key);
         if (string.IsNullOrEmpty(text))
         {
             return;
@@ -268,14 +255,14 @@ public sealed class INI
         Remove(section, text);
         if (value is object[] array)
         {
-            for (int i = 0; i < array.Length; i++)
+            for (var i = 0; i < array.Length; i++)
             {
                 Write(section, key, array[i], i);
             }
         }
         else if (value is IList<object> list)
         {
-            for (int j = 0; j < list.Count; j++)
+            for (var j = 0; j < list.Count; j++)
             {
                 Write(section, key, list[j], j);
             }
@@ -293,7 +280,7 @@ public sealed class INI
 
     public string ReadString(string section, object key, object def_value)
     {
-        string text = ReadArrayValue(section, key, 0);
+        var text = ReadArrayValue(section, key, 0);
         if (text.Length == 0)
         {
             text = Utils.ObjectToString(def_value);
@@ -319,9 +306,9 @@ public sealed class INI
             return (string[])def_value;
         }
 
-        string name = Utils.ObjectToString(key);
-        string xPath = GetXPath(section, name);
-        xmlElement xmlElement = Root.SelectElement(xPath);
+        var name = Utils.ObjectToString(key);
+        var xPath = GetXPath(section, name);
+        var xmlElement = Root.SelectElement(xPath);
         if (xmlElement == null)
         {
             if (def_value is string[])
@@ -337,7 +324,7 @@ public sealed class INI
 
     public string ReadArrayValue(string section, object key, int index)
     {
-        string[] array = ReadArray(section, key, index);
+        var array = ReadArray(section, key, index);
         if (array.Length > index)
         {
             return array[index];
@@ -413,8 +400,8 @@ public sealed class INI
 
     public Rectangle ReadRect(string section, object key, Rectangle default_value)
     {
-        RectangleConverter rectangleConverter = new RectangleConverter();
-        string text = ReadString(section, key, rectangleConverter.ConvertToString(default_value));
+        var rectangleConverter = new RectangleConverter();
+        var text = ReadString(section, key, rectangleConverter.ConvertToString(default_value));
         if (text.Length == 0)
         {
             return default_value;
@@ -424,7 +411,7 @@ public sealed class INI
         {
             if (rectangleConverter.ConvertToString(default_value) != text)
             {
-                object obj = rectangleConverter.ConvertFromString(text);
+                var obj = rectangleConverter.ConvertFromString(text);
                 if (obj != null)
                 {
                     return (Rectangle)obj;
@@ -461,7 +448,7 @@ public sealed class INI
 
     public async Task<bool> SaveAsync()
     {
-        return await Task.Run(() => Save());
+        return await Task.Run(Save);
     }
     public bool Save()
     {
@@ -470,7 +457,7 @@ public sealed class INI
             return true;
         }
 
-        xmlElement root = Root;
+        var root = Root;
         if (root == null)
         {
             return false;
@@ -484,7 +471,7 @@ public sealed class INI
             if (Class != null)
             {
                 Doc.SaveBinary(TmpFileName);
-                saveSettings(Class, TmpFileName, inClassFileName, SettingsPlace);
+                saveSettings(Class, TmpFileName, inClassFileName, settingsPlace);
             }
             else
             {
@@ -511,8 +498,8 @@ public sealed class INI
             return Array.Empty<string>();
         }
 
-        string xquery = (string.IsNullOrEmpty(section) ? "string-join(VAL/@name,'|')" : ("string-join(//SECTION[@name = '" + section + "']/VAL/@name,'|')"));
-        string text = Root.XQuery(xquery);
+        var xquery = (string.IsNullOrEmpty(section) ? "string-join(VAL/@name,'|')" : ("string-join(//SECTION[@name = '" + section + "']/VAL/@name,'|')"));
+        var text = Root.XQuery(xquery);
         if (string.IsNullOrEmpty(text))
         {
             return Array.Empty<string>();
@@ -559,7 +546,7 @@ public sealed class INI
     {
         if (!(Root == null))
         {
-            string text = Utils.ObjectToString(key);
+            var text = Utils.ObjectToString(key);
             if (!string.IsNullOrEmpty(text))
             {
                 Root.RemoveNodes(GetXPath(section, text));
@@ -584,14 +571,14 @@ public sealed class INI
             return;
         }
 
-        xmlElement xmlElement = SelectOrCreateElementByName(Root, "SECTION", section);
+        var xmlElement = SelectOrCreateElementByName(Root, "SECTION", section);
         if (!(xmlElement == null))
         {
-            xmlElement xmlElement2 = SelectOrCreateElementByName(xmlElement, "VAL", name);
+            var xmlElement2 = SelectOrCreateElementByName(xmlElement, "VAL", name);
             if (!(xmlElement2 == null))
             {
                 xmlElement2.SetAttribute("date", DateTime.Now);
-                int @int = xmlElement2.GetInt("count");
+                var @int = xmlElement2.GetInt("count");
                 xmlElement2.SetAttribute("count", ++@int);
                 xmlElement.RemoveNodes("subsequence(for $a in VAL order by string-join($a/(@date, @count), '-') descending return $a, 21)");
             }
@@ -605,7 +592,7 @@ public sealed class INI
             return Array.Empty<string>();
         }
 
-        string xquery = "string-join(subsequence(for $a in SECTION[@name='" + section + "']/VAL order by $a/(@date) descending return $a/@name, 1, 20), '|')";
+        var xquery = "string-join(subsequence(for $a in SECTION[@name='" + section + "']/VAL order by $a/(@date) descending return $a/@name, 1, 20), '|')";
         return Root.XQuery(xquery).Split('|');
     }
 
@@ -616,7 +603,7 @@ public sealed class INI
         {
             case SettingsPlace.Remote:
                 {
-                    File settingsFile = getSettingsFile(cls, file_name);
+                    var settingsFile = getSettingsFile(cls, file_name);
                     if (settingsFile != null)
                     {
                         fileInfo = new FileInfo(settingsFile.Load());
@@ -627,7 +614,7 @@ public sealed class INI
             case SettingsPlace.Local:
                 if (!file_name.Contains(":\\"))
                 {
-                    Domain classOrganisation = GetClassOrganisation(cls);
+                    var classOrganisation = GetClassOrganisation(cls);
                     if (classOrganisation != null)
                     {
                         file_name = PathCombine(UserSettingsPath, "settings", classOrganisation.Id, cls.Id, file_name);
@@ -672,7 +659,7 @@ public sealed class INI
             file_name = Path.Combine("settings", file_name);
         }
 
-        File file = cls.Dir.GetFile(file_name);
+        var file = cls.Dir.GetFile(file_name);
         if (file == null)
         {
             if (cls.Parent != null)
@@ -711,8 +698,8 @@ public sealed class INI
                     break;
                 case SettingsPlace.Local:
                     {
-                        Domain classOrganisation = GetClassOrganisation(cls);
-                        string path = ((classOrganisation == null) ? PathCombine(UserSettingsPath, "settings", cls.Id) : PathCombine(UserSettingsPath, "settings", classOrganisation.Id, cls.Id));
+                        var classOrganisation = GetClassOrganisation(cls);
+                        var path = ((classOrganisation == null) ? PathCombine(UserSettingsPath, "settings", cls.Id) : PathCombine(UserSettingsPath, "settings", classOrganisation.Id, cls.Id));
                         to_file = Path.Combine(path, to_file);
                         Directory.CreateDirectory(Path.GetDirectoryName(to_file));
                         System.IO.File.Copy(from_file, to_file, overwrite: true);
@@ -727,11 +714,11 @@ public sealed class INI
 
     public static void removeSettings(Class cls, string file)
     {
-        Dir dir = cls.Dir;
-        int num = file.IndexOf(Path.DirectorySeparatorChar);
+        var dir = cls.Dir;
+        var num = file.IndexOf(Path.DirectorySeparatorChar);
         while (num > 0 && dir != null)
         {
-            string path = file.Substring(0, num);
+            var path = file.Substring(0, num);
             dir = dir.GetDir(path);
             file = file.Substring(num + 1);
             num = file.IndexOf(Path.DirectorySeparatorChar);
@@ -762,7 +749,7 @@ public sealed class INI
 
         if (path2 != null)
         {
-            foreach (string text in path2)
+            foreach (var text in path2)
             {
                 if (!string.IsNullOrEmpty(text))
                 {
@@ -780,7 +767,7 @@ public sealed class INI
         {
             if (value != null)
             {
-                xmlDocument xmlDocument = value.Target as xmlDocument;
+                var xmlDocument = value.Target as xmlDocument;
                 if (xmlDocument != null && !xmlDocument.IsNull)
                 {
                     return xmlDocument;
@@ -795,10 +782,10 @@ public sealed class INI
 
     private xmlDocument CreateNewIniDoc(string fileName)
     {
-        xmlDocument xmlDocument = new xmlDocument();
-        if (SettingsPlace == SettingsPlace.Remote)
+        var xmlDocument = new xmlDocument();
+        if (settingsPlace == SettingsPlace.Remote)
         {
-            FileInfo fileInfo = loadSettings(Class, inClassFileName, SettingsPlace.Remote);
+            var fileInfo = loadSettings(Class, inClassFileName, SettingsPlace.Remote);
             if (fileInfo != null)
             {
                 xmlDocument.Load(fileInfo.FullName);
@@ -814,7 +801,7 @@ public sealed class INI
             xmlDocument.LoadXML("<INI/>");
         }
 
-        WeakReference value = new WeakReference(xmlDocument, trackResurrection: false);
+        var value = new WeakReference(xmlDocument, trackResurrection: false);
         iniDocMap.Remove(fileName);
         iniDocMap.Add(fileName, value);
         return xmlDocument;
@@ -822,8 +809,8 @@ public sealed class INI
 
     private static xmlElement SelectOrCreateElementByName(xmlElement root, string name, string attrName)
     {
-        string xpath = name + "[@name='" + attrName + "']";
-        xmlElement xmlElement = root.SelectElement(xpath);
+        var xpath = name + "[@name='" + attrName + "']";
+        var xmlElement = root.SelectElement(xpath);
         if (xmlElement == null)
         {
             xmlElement = root.CreateChildElement(name);
@@ -846,7 +833,7 @@ public sealed class INI
         Domain domain;
         for (domain = cls.Domain; domain != null; domain = domain.Owner as Domain)
         {
-            string text = domain.Type.ToLower();
+            var text = domain.Type.ToLower();
             if (text.Equals("part") || text.Equals("organization") || text.Equals("base"))
             {
                 break;

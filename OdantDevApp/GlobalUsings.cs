@@ -9,3 +9,4 @@ global using System.Windows;
 global using System.Windows.Media;
 global using oda;
 global using OdantDev;
+global using Microsoft.Extensions.Logging;

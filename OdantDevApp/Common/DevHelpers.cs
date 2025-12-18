@@ -1,6 +1,5 @@
 ﻿using System.IO.Compression;
 using System.Net.Http;
-using OdantDev.Model;
 
 namespace SharedOdantDev.Common;
 
@@ -9,18 +8,18 @@ namespace SharedOdantDev.Common;
 /// </summary>
 public class DevHelpers
 {
-    public static async Task DownloadAndCopyFramework4_0And4_5Async(ILogger logger = null)
+    public static async Task DownloadAndCopyFramework4_0And4_5Async(ILogger? logger = null)
     {
         await DownloadAndCopyFramework4_0Async(logger);
         await DownloadAndCopyFramework4_5Async(logger);
     }
 
-    public static async Task DownloadAndCopyFramework4_5Async(ILogger logger = null)
+    public static async Task DownloadAndCopyFramework4_5Async(ILogger? logger = null)
     {
         await DownloadAndCopyFrameworkGenericAsync("net45", "v4.5", "1.0.2", logger);
     }
 
-    public static async Task DownloadAndCopyFramework4_0Async(ILogger logger = null)
+    public static async Task DownloadAndCopyFramework4_0Async(ILogger? logger = null)
     {
         await DownloadAndCopyFrameworkGenericAsync("net40", "v4.0", "1.0.2", logger);
     }
@@ -61,27 +60,27 @@ public class DevHelpers
         if (!string.IsNullOrEmpty(ex))
         {
             throw new Exception(ex);
-        }
+        }    
 
         return process.StandardOutput.ReadToEnd();
     }
 
     public static async Task DownloadAndCopyFrameworkGenericAsync(string netVersion, string folder, string nugetVersion, ILogger logger = null)
     {
-        logger?.Info($"Start loading .Net {folder}");
+        logger?.LogInformation("Start loading .Net {Folder}", folder);
         var url = $"https://www.nuget.org/api/v2/package/Microsoft.NETFramework.ReferenceAssemblies.{netVersion}/{nugetVersion}";
         var netFolder = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\" + folder;
         var netFolder2 = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\" + folder;
 
-        var tempFolder = Path.GetTempPath() + Guid.NewGuid().ToString();
-        string tempFileName = $"{tempFolder}\\{Guid.NewGuid()}.zip";
-        string tempExtractFolder = $"{tempFolder}\\{folder}";
-        string tempExtractNetFolder = $"{tempExtractFolder}\\build\\.NETFramework\\{folder}";
+        var tempFolder = Path.GetTempPath() + Guid.NewGuid();
+        var tempFileName = $"{tempFolder}\\{Guid.NewGuid()}.zip";
+        var tempExtractFolder = $"{tempFolder}\\{folder}";
+        var tempExtractNetFolder = $"{tempExtractFolder}\\build\\.NETFramework\\{folder}";
         try
         {
             Directory.CreateDirectory(tempFolder);
             await DownloadFileAsync(tempFileName, url);
-            logger?.Info("Copy to references folder");
+            logger?.LogInformation("Copy to references folder");
             ZipFile.ExtractToDirectory(tempFileName, tempExtractFolder);
 
             if (Directory.Exists(netFolder))
@@ -95,8 +94,8 @@ public class DevHelpers
                 await RemoveExistsFolderWithAdminRightsAsync(netFolder2);
             }
             await CopyFolderWithAdminRightsAsync(tempExtractNetFolder, netFolder2);
-            logger?.Info($".Net {folder} loaded");
-            logger?.Info($"Please reopen Visual Studio");
+            logger?.LogInformation(".Net {Folder} loaded", folder);
+            logger?.LogInformation($"Please reopen Visual Studio");
         }
         finally
         {
@@ -113,7 +112,7 @@ public class DevHelpers
     private static async Task DownloadFileAsync(string fileName, string url)
     {
         var uri = new Uri(url);
-        using HttpClient client = new HttpClient();
+        using var client = new HttpClient();
         var response = await client.GetAsync(uri);
         using var fs = new FileStream(fileName, FileMode.CreateNew);
         await response.Content.CopyToAsync(fs);

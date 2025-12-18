@@ -29,8 +29,5 @@ public partial class InputDialog : MaterialWindow
         txtAnswer.Focus();
     }
 
-    public string Answer
-    {
-        get { return txtAnswer.Text; }
-    }
+    public string Answer => txtAnswer.Text;
 }

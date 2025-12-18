@@ -2,16 +2,11 @@
 
 public sealed partial class VisualStudioIntegration
 {
-    struct BuildInfo
+    private struct BuildInfo(string name, Dir remoteDir, DirectoryInfo localDir, Item sourceItem)
     {
-        public BuildInfo(string name, Dir remoteDir, DirectoryInfo localDir)
-        {
-            Name = name;
-            RemoteDir = remoteDir;
-            LocalDir = localDir;
-        }
-        public string Name { get; set; }
-        public Dir RemoteDir { get; set; }
-        public DirectoryInfo LocalDir { get; set; }
+        public Item SourceItem { get; set; } = sourceItem;
+        public string Name { get; set; } = name;
+        public Dir RemoteDir { get; set; } = remoteDir;
+        public DirectoryInfo LocalDir { get; set; } = localDir;
     }
 }

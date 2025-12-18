@@ -9,8 +9,8 @@ using MaterialDesignExtensions.Controls;
 using MaterialDesignThemes.Wpf;
 using oda.OdaOverride;
 using OdantDev.Dialogs;
-using OdantDev.Model;
 using OdantDevApp.Common;
+using OdantDevApp.Logger;
 using OdantDevApp.Model;
 using OdantDevApp.Model.Git;
 using OdantDevApp.Model.Git.GitItems;
@@ -33,8 +33,8 @@ namespace OdantDev;
 public partial class ToolWindowControl
 {
     private IDisposable StatusCleaner() => Disposable.Create(() => Status = string.Empty);
-    private readonly ILogger logger;
-    private VisualStudioIntegration? visualStudioIntegration;
+    private readonly ILogger<ToolWindowControl> logger;
+    private VisualStudioIntegration VisualStudioIntegration { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsBusy))]
@@ -57,7 +57,7 @@ public partial class ToolWindowControl
         InitializeMaterialDesign();
         InitializeComponent();
         this.ApplyTheming();
-        logger = new PopupController(MessageContainer);
+        logger = new SnackbarLogger<ToolWindowControl>(MessageContainer, LogLevel.Information);
         Application.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
     }
 
@@ -65,7 +65,7 @@ public partial class ToolWindowControl
         System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
     {
         e.Handled = true;
-        logger?.Exception(e.Exception);
+        logger?.LogCritical(e.Exception, "Unhandeled exception: {Message}", e.Exception.Message);
     }
 
     private static void InitializeMaterialDesign()
@@ -100,7 +100,7 @@ public partial class ToolWindowControl
     {
         if (!CommandLine.IsOutOfProcess)
         {
-            logger.Error("Supported only in out of process");
+            logger.LogError("Supported only in out of process");
             return;
         }
 
@@ -140,7 +140,7 @@ public partial class ToolWindowControl
 #if DEBUG
                 throw;
 #endif
-                logger.Info(ex.Message);
+                logger.LogInformation(ex.Message);
             }
         });
     }
@@ -161,7 +161,7 @@ public partial class ToolWindowControl
         if (Directory.Exists(odaPath).Not())
         {
             var msg = $"Can't find selected oda folder {AddinSettings.SelectedOdaFolder}";
-            logger.Info(msg);
+            logger.LogInformation(msg);
             ShowException(msg);
             return;
         }
@@ -170,7 +170,7 @@ public partial class ToolWindowControl
         {
             var msg = $"Can't find oda DLLs in {AddinSettings.SelectedOdaFolder}\n" +
                       $"Run app with admin rights before start addin or repair default oda folder";
-            logger.Info(msg);
+            logger.LogInformation(msg);
             ShowException(msg);
             return;
         }
@@ -191,7 +191,7 @@ public partial class ToolWindowControl
         }
 
         await DispatcherEx.SwitchToMainThread();
-        visualStudioIntegration = new VisualStudioIntegration(AddinSettings, OdantDevApp.VSCommon.EnvDTE.Instance, logger);
+        VisualStudioIntegration = new VisualStudioIntegration(AddinSettings, OdantDevApp.VSCommon.EnvDTE.Instance, logger);
         await AddinSettings.SaveAsync();
     }
 
@@ -239,7 +239,7 @@ public partial class ToolWindowControl
         var res = await OdaModel.InitReposAsync();
         if (res.Success.Not())
         {
-            logger?.Info($"Gitlab: {res.Error}");
+            logger?.LogInformation($"Gitlab: {res.Error}");
         }
     }
 
@@ -275,7 +275,7 @@ public partial class ToolWindowControl
     {
         if ((OdaTree?.SelectedItem as StructureViewItem<StructureItem>)?.Item is not Domain domain)
         {
-            logger?.Info("Domain can be created only from another domain");
+            logger?.LogInformation("Domain can be created only from another domain");
             return;
         }
 
@@ -291,7 +291,7 @@ public partial class ToolWindowControl
         }
         catch (Exception ex)
         {
-            logger.Info(ex.Message);
+            logger.LogInformation(ex.Message);
         }
     }
 
@@ -301,7 +301,7 @@ public partial class ToolWindowControl
         var innerItem = selectedItem?.Item;
         if (selectedItem is null || innerItem is null)
         {
-            logger?.Info("Class can't be created here");
+            logger?.LogInformation("Class can't be created here");
             return;
         }
 
@@ -317,11 +317,11 @@ public partial class ToolWindowControl
         }
         catch (Exception ex)
         {
-            logger.Info(ex.Message);
+            logger.LogInformation(ex.Message);
         }
     }
 
-    public async void RemoveItemClick(object sender, RoutedEventArgs e)
+    public void RemoveItemClick(object sender, RoutedEventArgs e)
     {
         if (OdaTree?.SelectedItem is not StructureViewItem<StructureItem> { Item: { } structureItem })
             return;
@@ -335,7 +335,7 @@ public partial class ToolWindowControl
         }
         catch (Exception ex)
         {
-            logger.Info(ex.Message);
+            logger.LogInformation(ex.Message);
         }
     }
 
@@ -361,7 +361,7 @@ public partial class ToolWindowControl
     {
         if (GitClient.Client?.HostUrl == null)
         {
-            logger.Info("Uri for gitlab is not specified");
+            logger.LogInformation("Uri for gitlab is not specified");
             return;
         }
 
@@ -381,7 +381,7 @@ public partial class ToolWindowControl
 
         if ((OdaTree?.SelectedItem as StructureViewItem<StructureItem>)?.Item is not Class cls)
         {
-            logger?.Info("Can't create module here");
+            logger?.LogInformation("Can't create module here");
             return;
         }
 
@@ -402,12 +402,12 @@ public partial class ToolWindowControl
                 cls.SetPrivateFieldValue("_has_module", StateBool.True);
             });
 
-            logger?.Info("Module created");
+            logger?.LogInformation("Module created");
             await OpenModuleAsync(cls);
         }
         catch (Exception ex)
         {
-            logger?.Info(ex.ToString());
+            logger?.LogInformation(ex.ToString());
         }
     }
 
@@ -425,7 +425,7 @@ public partial class ToolWindowControl
         var file = await GitClient.FindTopOclFileAsync(project);
         if (file == null)
         {
-            logger?.Info("Classes in repository not found.");
+            logger?.LogInformation("Classes in repository not found.");
             return;
         }
 
@@ -447,7 +447,7 @@ public partial class ToolWindowControl
         var item = domain.FindItem(cid) as StructureItem;
         if (item != null)
         {
-            logger?.Info("Module already exists in developer domain.");
+            logger?.LogInformation("Module already exists in developer domain.");
             return;
         }
 
@@ -467,16 +467,16 @@ public partial class ToolWindowControl
             }
             catch (Exception ex)
             {
-                logger?.Error($"Can't clear cache: {ex.Message}");
+                logger?.LogError(ex, "Can't clear cache: {ExMessage}", ex.Message);
             }
         }
         catch (Exception ex)
         {
-            logger?.Error(ex.Message);
+            logger?.LogError(ex, ex.Message);
             return;
         }
 
-        logger?.Info("Repository has been cloned.");
+        logger?.LogInformation("Repository has been cloned.");
         OpenModuleDialog.DataContext = item;
         OpenModuleDialog.IsOpen = true;
     }
@@ -519,7 +519,7 @@ public partial class ToolWindowControl
 
         if ((OdaTree?.SelectedItem as StructureViewItem<StructureItem>)?.Item is not Domain { ItemType: ItemType.DevPart } domain)
         {
-            logger?.Info("Selected item is not a developer domain");
+            logger?.LogInformation("Selected item is not a developer domain");
             return;
         }
 
@@ -529,12 +529,12 @@ public partial class ToolWindowControl
             {
                 return;
             }
-            OdaModel?.Developers?.Add(newDomain);
-            logger?.Info("Domain created");
+            OdaModel.Developers?.Add(newDomain);
+            logger?.LogInformation("Domain created");
         }
         catch (Exception err)
         {
-            logger.Error(err.Message);
+            logger.LogInformation(err.Message);
         }
     }
 
@@ -542,7 +542,7 @@ public partial class ToolWindowControl
     {
         if ((OdaTree?.SelectedItem as StructureViewItem<StructureItem>)?.Item is not Class cls)
         {
-            logger?.Info("Selected item is not a class");
+            logger?.LogInformation("Selected item is not a class");
             return;
         }
 
@@ -550,25 +550,25 @@ public partial class ToolWindowControl
         {
             if (DeveloperCb.SelectedItem is not DomainDeveloper domainDeveloper)
             {
-                logger?.Info("Developer domain is not selected. Creating new one...");
+                logger?.LogInformation("Developer domain is not selected. Creating new one...");
 
                 if (OdaModel.Localhost?.Develope == null)
                 {
-                    logger?.Info("Develope part is not found on localhost.");
+                    logger?.LogInformation("Develope part is not found on localhost.");
                     return;
                 }
                 var username = OdaModel.User?.Name ?? "Разработчик";
                 domainDeveloper = ItemFactory.CreateDomain(OdaModel.Localhost.Develope, username, "DEVELOPER") as DomainDeveloper;
                 if (domainDeveloper == null)
                 {
-                    logger?.Info("Can't create developer domain");
+                    logger?.LogInformation("Can't create developer domain");
                     return;
                 }
                 OdaModel.Developers?.Add(domainDeveloper);
                 DeveloperCb.SelectedItem = domainDeveloper;
             }
 
-            logger?.Info("Start downloading module");
+            logger?.LogInformation("Start downloading module");
             var createdClass = await Task.Run(() =>
             {
                 var moduleDomain = domainDeveloper.FindDomain($"D:{cls.Domain.Id}")
@@ -583,21 +583,21 @@ public partial class ToolWindowControl
                 createdClass.Dir.Save();
                 createdClass.ReloadClassFromServer();
                 createdClass.SetPrivateFieldValue("_has_module", StateBool.True);
-                logger?.Info($"New module downloaded to {createdClass.FullId}");
+                logger?.LogInformation("New module downloaded to {CreatedClassFullId}", createdClass.FullId);
                 return createdClass;
             });
             if (createdClass is null)
             {
-                logger?.Info("Can't create class in developer domain");
+                logger?.LogInformation("Can't create class in developer domain");
                 return;
             }
 
-            logger?.Info("Module created");
+            logger?.LogInformation("Module created");
             await OpenModuleAsync(createdClass);
         }
         catch (Exception ex)
         {
-            logger?.Info(ex.ToString());
+            logger?.LogInformation(ex.ToString());
         }
     }
 
@@ -607,7 +607,7 @@ public partial class ToolWindowControl
         var structureItem = selectedItem?.Item;
         if (structureItem == null || selectedItem == null)
         {
-            logger?.Info("Item not found.");
+            logger?.LogInformation("Item not found.");
             return;
         }
 
@@ -636,18 +636,21 @@ public partial class ToolWindowControl
 
     private async Task OpenModuleAsync(StructureItem item)
     {
-        await visualStudioIntegration.OpenModuleAsync(item);
-
+        var isOpened = await VisualStudioIntegration.OpenModuleAsync(item);
+        if (isOpened)
+        {
+            logger?.LogInformation("Project loaded successfully");
+        }
         var icon = await item.GetImageSourceAsync();
         AddinSettings.LastProjects.Remove(x => x.FullId == item.FullId);
-        AddinSettings.LastProjects.Insert(0,
-            new RecentProject(item.Name, item.FullId, item.Host.Name, DateTime.Now, icon));
+        var recentProject = new RecentProject(item.Name, item.FullId, item.Host.Name, DateTime.Now, icon);
+        AddinSettings.LastProjects.Insert(0, recentProject);
 
         _ = Task.Run(async () =>
         {
             if ((await AddinSettings.SaveAsync()).Not())
             {
-                logger.Info("Error while saving settings");
+                logger.LogInformation("Error while saving settings");
             }
         });
     }
@@ -718,11 +721,11 @@ public partial class ToolWindowControl
     {
         if (AddinSettings.Save().Not())
         {
-            logger.Info("Error while saving settings");
+            logger.LogInformation("Error while saving settings");
             return;
         }
 
-        logger.Info($"Saved in {AddinSettings.AddinSettingsPath}");
+        logger.LogInformation("Saved in {AddinSettingsAddinSettingsPath}", AddinSettings.AddinSettingsPath);
     }
 
     private void IsSimpleThemeCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -759,7 +762,7 @@ public partial class ToolWindowControl
             return;
         if (AddinSettings.Save().Not())
         {
-            logger.Info("Error while saving settings");
+            logger.LogInformation("Error while saving settings");
         }
     }
 
@@ -779,14 +782,14 @@ public partial class ToolWindowControl
         {
             if (string.IsNullOrWhiteSpace(project.FullId))
             {
-                logger?.Info("Can't find project's ID");
+                logger?.LogInformation("Can't find project's ID");
                 return;
             }
 
             var selectedItem = await Task.Run(() => CommonEx.Connection?.FindItem(project.FullId) as StructureItem);
             if (selectedItem == null)
             {
-                logger?.Info("Can't find this project");
+                logger?.LogInformation("Can't find this project");
                 return;
             }
 
@@ -818,7 +821,7 @@ public partial class ToolWindowControl
     {
         if (CheckDllsInFolder(DialogAddOdaLibrary.Text).Not())
         {
-            logger?.Info($"No oda libraries in {DialogAddOdaLibrary.Text}");
+            logger?.LogInformation("No oda libraries in {Text}", DialogAddOdaLibrary.Text);
             return;
         }
 
@@ -827,8 +830,7 @@ public partial class ToolWindowControl
 
     private async void DownloadNet4_0_Click(object sender, RoutedEventArgs e)
     {
-        var button = sender as Button;
-        if (button == null) return;
+        if (sender is not Button button) return;
         try
         {
             button.IsEnabled = false;
@@ -836,7 +838,7 @@ public partial class ToolWindowControl
         }
         catch (Exception ex)
         {
-            logger.Info(ex.Message);
+            logger.LogError(ex, ex.Message);
         }
         finally
         {
@@ -855,7 +857,7 @@ public partial class ToolWindowControl
         }
         catch (Exception ex)
         {
-            logger.Info(ex.Message);
+            logger.LogError(ex, ex.Message);
         }
         finally
         {
@@ -879,7 +881,7 @@ public partial class ToolWindowControl
             var name = DialogTextBoxRepoName?.Text;
             if (string.IsNullOrWhiteSpace(name))
             {
-                logger?.Error("Name can't be empty");
+                logger?.LogError("Name can't be empty");
                 return;
             }
 
@@ -898,12 +900,12 @@ public partial class ToolWindowControl
             var createdProject = await GitClient.CreateProjectAsync(options);
             if (createdProject != null)
             {
-                logger?.Info("Repository was created");
+                logger?.LogInformation("Repository was created");
             }
         }
         catch (Exception ex)
         {
-            logger?.Error(ex.Message);
+            logger?.LogError(ex, ex.Message);
         }
     }
 

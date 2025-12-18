@@ -38,7 +38,7 @@ public static class EnvDTE
     private static DTE2? GetDTE(int processId, int timeout)
     {
         DTE2 res = null;
-        DateTime startTime = DateTime.Now;
+        var startTime = DateTime.Now;
 
         while (res == null && DateTime.Now.Subtract(startTime).Seconds < timeout)
         {
@@ -70,11 +70,11 @@ public static class EnvDTE
             bindCtx.GetRunningObjectTable(out rot);
             rot.EnumRunning(out enumMonikers);
 
-            IMoniker[] moniker = new IMoniker[1];
-            IntPtr numberFetched = IntPtr.Zero;
+            var moniker = new IMoniker[1];
+            var numberFetched = IntPtr.Zero;
             while (enumMonikers.Next(1, moniker, numberFetched) == 0)
             {
-                IMoniker runningObjectMoniker = moniker[0];
+                var runningObjectMoniker = moniker[0];
 
                 string name = null;
 
@@ -87,8 +87,8 @@ public static class EnvDTE
                     // Do nothing, there is something in the ROT that we do not have access to.
                 }
 
-                Regex monikerRegex = new Regex(@"!VisualStudio.DTE\.\d+\.\d+\:" + processId, RegexOptions.IgnoreCase);
-                Marshal.ThrowExceptionForHR(rot.GetObject(runningObjectMoniker, out var runningObject1));
+                var monikerRegex = new Regex(@"!VisualStudio.DTE\.\d+\.\d+\:" + processId, RegexOptions.IgnoreCase);
+
                 if (!string.IsNullOrEmpty(name) && monikerRegex.IsMatch(name))
                 {
                     Marshal.ThrowExceptionForHR(rot.GetObject(runningObjectMoniker, out runningObject));

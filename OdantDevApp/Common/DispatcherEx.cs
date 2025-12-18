@@ -15,15 +15,8 @@ public static class DispatcherEx
         return new SwitchToUiAwaitable(dispatcher);
     }
 
-    public readonly struct SwitchToUiAwaitable : INotifyCompletion
+    public readonly struct SwitchToUiAwaitable(Dispatcher dispatcher) : INotifyCompletion
     {
-        private readonly Dispatcher _dispatcher;
-
-        public SwitchToUiAwaitable(Dispatcher dispatcher)
-        {
-            _dispatcher = dispatcher;
-        }
-
         public SwitchToUiAwaitable GetAwaiter()
         {
             return this;
@@ -33,11 +26,11 @@ public static class DispatcherEx
         {
         }
 
-        public bool IsCompleted => _dispatcher.CheckAccess();
+        public bool IsCompleted => dispatcher.CheckAccess();
 
         public void OnCompleted(Action continuation)
         {
-            _dispatcher.BeginInvoke(continuation);
+            dispatcher.BeginInvoke(continuation);
         }
     }
 }

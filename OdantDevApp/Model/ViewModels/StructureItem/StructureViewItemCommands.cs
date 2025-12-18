@@ -12,7 +12,7 @@ public partial class StructureViewItem<T>
         if (Item == null) { return; }
         Clipboard.Clear();
         Clipboard.SetText(Item.FullId);
-        logger?.Info($"FullId copied to clipboard!");
+        logger?.LogInformation("FullId copied to clipboard!");
     }
 
     [RelayCommand]
@@ -22,7 +22,7 @@ public partial class StructureViewItem<T>
         {
             if (Item?.Dir is null)
             {
-                logger?.Info($"{Item} has no directory");
+                logger?.LogInformation("{StructureItem} has no directory", Item);
                 return;
             }
 
@@ -30,7 +30,7 @@ public partial class StructureViewItem<T>
 
             if (Directory.Exists(dirPath).Not())
             {
-                logger?.Info($"Folder {dirPath} doesn't exist for {Item}");
+                logger?.LogInformation("Folder {DirPath} doesn't exist for {StructureItem}", dirPath, Item);
                 return;
             }
 
@@ -38,7 +38,7 @@ public partial class StructureViewItem<T>
         }
         catch (Exception ex)
         {
-            logger?.Info(ex.ToString());
+            logger?.LogInformation(ex, ex.ToString());
         }
     }
 
@@ -49,7 +49,7 @@ public partial class StructureViewItem<T>
         {
             if (Item is null)
             {
-                logger?.Info("Can't pin this item");
+                logger?.LogInformation("Can't pin this item");
                 return;
             }
             if (!IsPinned)
@@ -73,7 +73,7 @@ public partial class StructureViewItem<T>
         }
         catch (Exception ex)
         {
-            logger?.Info(ex.ToString());
+            logger?.LogInformation(ex.ToString());
         }
     }
 }

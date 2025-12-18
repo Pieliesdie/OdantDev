@@ -25,6 +25,6 @@ public partial class ConfirmDialog : MaterialWindow
 
     private void btnDialogOk_Click(object sender, RoutedEventArgs e)
     {
-        base.DialogResult = true;
+        DialogResult = true;
     }
 }

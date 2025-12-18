@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using OdantDev.Model;
 using OdantDevApp.Model.Git;
 using OdantDevApp.Model.ViewModels.Settings;
 using odaServer;
@@ -52,7 +51,7 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         }
         catch (Exception ex)
         {
-            logger?.Info(ex.Message);
+            logger?.LogInformation(ex.Message);
         }
     }
 
@@ -187,13 +186,13 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         }
         catch (TimeoutException)
         {
-            logger?.Info($"Timeout when getting children for {this}");
+            logger?.LogInformation("Timeout when getting children for {StructureViewItem}", this);
             Children = null;
             await SetExpanderAsync();
         }
         catch
         {
-            logger?.Info($"Unhandled exception for {this}");
+            logger?.LogInformation("Unhandled exception for {StructureViewItem}", this);
             Children = null;
             throw;
         }
@@ -318,7 +317,7 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         }
         catch (Exception e)
         {
-            logger?.Info(e.ToString());
+            logger?.LogInformation(e.ToString());
         }
 
         try
@@ -327,7 +326,7 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         }
         catch (Exception e)
         {
-            logger?.Info(e.ToString());
+            logger?.LogInformation(e.ToString());
         }
 
         if (isLoaded || force)

@@ -19,7 +19,7 @@ public partial class MainWindow
         }
     }
 
-    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    private void MainWindow_Loaded(object sender, EventArgs e)
     {
         try
         {

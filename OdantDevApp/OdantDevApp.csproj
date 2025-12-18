@@ -71,7 +71,8 @@
 		<PackageReference Include="MaterialDesignColors" Version="5.2.1" />
 		<PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
 		<PackageReference Include="MdXaml" Version="1.27.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.9" />
+		<PackageReference Include="Microsoft.Build" Version="18.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
 		<PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
 		<PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.10.31321.278" />
@@ -81,7 +82,8 @@
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="System.Resources.Extensions" Version="9.0.9" />
+		<PackageReference Include="System.Resources.Extensions" Version="10.0.1" />
+		<PackageReference Include="System.Text.Json" Version="10.0.1" />
 	</ItemGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="mkdir &quot;$(SolutionDir)artifacts&quot;&#xD;&#xA;rmdir &quot;$(SolutionDir)artifacts\app&quot; /s /q&#xD;&#xA;mkdir &quot;$(SolutionDir)artifacts\app&quot;&#xD;&#xA;xcopy &quot;$(TargetDir)&quot; &quot;$(SolutionDir)artifacts\app&quot; /s /e /y /q" />
@@ -89,8 +91,10 @@
 	<Import Project="..\SharedFiles\SharedFiles.projitems" Label="Shared" />
 	<ItemGroup>
 	  <Content Remove="Common\VsixEx.cs" />
+	  <Content Remove="Logger\SnackbarLogger.cs" />
 	  <Content Remove="VSCommon\IProjectStrategy.cs" />
 	  <Content Remove="VSCommon\ProjectStrategies\LegacyProjectStrategy.cs" />
+	  <Content Remove="VSCommon\ProjectStrategies\ProjectStrategyBase.cs" />
 	  <Content Remove="VSCommon\ProjectStrategies\SdkProjectStrategy.cs" />
 	</ItemGroup>
 </Project>

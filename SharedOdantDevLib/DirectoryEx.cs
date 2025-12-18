@@ -9,7 +9,8 @@ public static class DirectoryEx
             CopyDirectory(directoryInfo, Directory.CreateDirectory(Path.Combine(destinationDir.FullName, directoryInfo.Name)));
             return true;
         }
-        else if (fileSystemInfo is FileInfo fileInfo)
+
+        if (fileSystemInfo is FileInfo fileInfo)
         {
             return fileInfo.CopyTo(Path.Combine(destinationDir.FullName, fileInfo.Name), true) != null;
         }
@@ -21,16 +22,15 @@ public static class DirectoryEx
         Directory.CreateDirectory(target.FullName);
 
         // Copy each file into the new directory.
-        foreach (FileInfo fi in source.GetFiles())
+        foreach (var fi in source.GetFiles())
         {
             fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
         }
 
         // Copy each subdirectory using recursion.
-        foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+        foreach (var diSourceSubDir in source.GetDirectories())
         {
-            DirectoryInfo nextTargetSubDir =
-                target.CreateSubdirectory(diSourceSubDir.Name);
+            var nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
             CopyDirectory(diSourceSubDir, nextTargetSubDir);
         }
     }
@@ -43,7 +43,7 @@ public static class DirectoryEx
         if (millisecondsDelay < 1)
             throw new ArgumentOutOfRangeException(nameof(millisecondsDelay));
 
-        for (int i = 0; i < maxRetries; ++i)
+        for (var i = 0; i < maxRetries; ++i)
         {
             try
             {

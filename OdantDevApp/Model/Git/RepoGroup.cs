@@ -1,6 +1,4 @@
 ﻿using GitLabApiClient.Models.Groups.Responses;
-
-using OdantDev.Model;
 using OdantDevApp.Model.Git.GitItems;
 
 namespace OdantDevApp.Model.Git;
@@ -18,7 +16,7 @@ public class RepoGroup : RepoBase
     {
         if (GitClient.Client == null || Item == null)
         {
-            return Enumerable.Empty<RepoBase>();
+            return [];
         }
 
         try

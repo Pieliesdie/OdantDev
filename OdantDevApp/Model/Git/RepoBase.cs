@@ -6,10 +6,10 @@ namespace OdantDevApp.Model.Git;
 
 public partial class RepoBase : ObservableObject
 {
-    private static readonly IEnumerable<RepoBase> dummyList = new[] { new RepoLoading() };
+    private static readonly IEnumerable<RepoBase> dummyList = [new RepoLoading()];
     private IEnumerable<RepoBase>? DefaultChildren => CanBeExpanded ? dummyList : null;
 
-    public RepoBase(BaseGitItem? item, BaseGitItem? parent, OdantDev.Model.ILogger? logger = null)
+    public RepoBase(BaseGitItem? item, BaseGitItem? parent, ILogger? logger = null)
     {
         Item = item;
         Parent = parent;
@@ -23,7 +23,7 @@ public partial class RepoBase : ObservableObject
 
     [ObservableProperty] protected BaseGitItem? parent;
 
-    protected OdantDev.Model.ILogger? Logger { get; }
+    protected ILogger? Logger { get; }
 
     public virtual string Name => Item?.Name ?? string.Empty;
 
@@ -42,7 +42,7 @@ public partial class RepoBase : ObservableObject
     {
         if (!value || isLoaded) return;
         isLoaded = true;
-        if (Children is null || Children == dummyList)
+        if (Children is null || Children.Equals(dummyList))
         {
             await SetChildrenAsync();
         }
@@ -59,7 +59,7 @@ public partial class RepoBase : ObservableObject
         }
         catch (TimeoutException)
         {
-            Logger?.Info($"Timeout when getting children for {this}");
+            Logger?.LogInformation($"Timeout when getting children for {this}");
             СlearState();
         }
         catch

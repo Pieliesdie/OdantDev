@@ -1,18 +1,16 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using EnvDTE;
 using EnvDTE80;
-using OdantDev.Model;
 using OdantDevApp.Model.ViewModels.Settings;
 using OdantDevApp.VSCommon.ProjectStrategies;
 using SharedOdantDevLib.WinApi;
 using VSLangProj;
-using VSLangProj80;
-using File = System.IO.File;
-using Task = System.Threading.Tasks.Task;
+using BuildEvents = EnvDTE.BuildEvents;
+using Project = EnvDTE.Project;
+using SolutionEvents = EnvDTE.SolutionEvents;
 
 namespace OdantDevApp.VSCommon;
 
@@ -21,7 +19,7 @@ public sealed partial class VisualStudioIntegration
     #region Private Variables
 
     private bool IsLastBuildSuccess { get; set; } = true;
-    private bool FireEvents { get; set; } = false;
+    private bool FireEvents { get; set; }
     private BuildEvents? BuildEvents { get; set; }
     private SolutionEvents? SolutionEvents { get; set; }
     private DTE2 EnvDte { get; }
@@ -32,7 +30,7 @@ public sealed partial class VisualStudioIntegration
     private readonly IReadOnlyCollection<IProjectStrategy> projectStrategies;
 
     private Project[] ActiveSolutionProjects =>
-        ((EnvDte.ActiveSolutionProjects as object[]) ?? []).Cast<Project>().ToArray();
+        (EnvDte.ActiveSolutionProjects as object[] ?? []).OfType<Project>().ToArray();
 
     #endregion
 
@@ -62,11 +60,11 @@ public sealed partial class VisualStudioIntegration
         }
         catch (Exception e)
         {
-            Logger?.Error($"Error while initialize VisualStudioIntegration: {e}");
+            Logger?.LogCritical(e, $"Error while initialize VisualStudioIntegration: {e}");
         }
     }
 
-    private IProjectStrategy GetStrategy(Project project)
+    private IProjectStrategy GetProjectStrategy(Project project)
     {
         return projectStrategies.First(s => s.IsMatch(project));
     }
@@ -103,7 +101,7 @@ public sealed partial class VisualStudioIntegration
             }
             else
             {
-                Logger?.Info("Can't initialize EnvDTE.Events.SolutionEvents");
+                Logger?.LogInformation("Can't initialize EnvDTE.Events.SolutionEvents");
             }
         }
 
@@ -118,7 +116,7 @@ public sealed partial class VisualStudioIntegration
             }
             else
             {
-                Logger?.Info("Can't initialize EnvDTE.Events.BuildEvents");
+                Logger?.LogInformation("Can't initialize EnvDTE.Events.BuildEvents");
             }
         }
     }
@@ -132,7 +130,10 @@ public sealed partial class VisualStudioIntegration
     // добавил эвент SolutionEvents_AfterClosing, думаю в таком случае будет правильнее там очищать
     private void SolutionEvents_AfterClosing()
     {
-        if (!FireEvents) return;
+        if (!FireEvents)
+        {
+            return;
+        }
         LoadedModules.Clear();
         oda.OdaOverride.INI.DebugINI.Clear();
         oda.OdaOverride.INI.DebugINI.Save();
@@ -141,22 +142,35 @@ public sealed partial class VisualStudioIntegration
 
     private void SolutionEvents_ProjectRemoved(Project project)
     {
-        if (!FireEvents) return;
+        if (!FireEvents)
+        {
+            return;
+        }
         var guid = GetProjectGuid(project);
-        LoadedModules.TryRemove(guid, out _);
+        if (LoadedModules.TryRemove(guid, out var module))
+        {
+            oda.OdaOverride.INI.DebugINI.Remove("DEBUG", module.SourceItem.FullId);
+        }
     }
 
     private void BuildEvents_OnBuildProjConfigDone(string project, string projectConfig, string platform,
         string solutionConfig, bool success)
     {
-        if (!FireEvents) return;
+        if (!FireEvents)
+        {
+            return;
+        }
         IsLastBuildSuccess = success;
     }
 
     private void BuildEvents_OnBuildDone(vsBuildScope scope, vsBuildAction action)
     {
-        if (!FireEvents) return;
-        if ((action != vsBuildAction.vsBuildActionBuild && action != vsBuildAction.vsBuildActionRebuildAll))
+        if (!FireEvents)
+        {
+            return;
+        }
+
+        if (action != vsBuildAction.vsBuildActionBuild && action != vsBuildAction.vsBuildActionRebuildAll)
         {
             return;
         }
@@ -173,7 +187,11 @@ public sealed partial class VisualStudioIntegration
                 continue;
             }
 
-            CopyToOdaBin(project);
+            var isCopySuccessful = CopyToOdaBin(project);
+            if (!isCopySuccessful)
+            {
+                Logger?.LogError("Can't copy bin to oda folder");
+            }
         }
     }
 
@@ -192,8 +210,8 @@ public sealed partial class VisualStudioIntegration
                 continue;
             }
 
-            var strategy = GetStrategy(project);
-            if (!strategy.IncreaseVersion(project))
+            var projectStrategy = GetProjectStrategy(project);
+            if (!projectStrategy.IncreaseVersion(project))
             {
                 EnvDte.ExecuteCommand("Build.Cancel");
                 return;
@@ -209,7 +227,7 @@ public sealed partial class VisualStudioIntegration
     {
         try
         {
-            var projectStrategy = GetStrategy(project);
+            var projectStrategy = GetProjectStrategy(project);
             var version = projectStrategy.GetVersion(project);
 
             var outDirParent = new FileInfo(project.FullName).Directory?.Parent
@@ -263,7 +281,7 @@ public sealed partial class VisualStudioIntegration
         }
         catch (Exception ex)
         {
-            Logger?.Error($"Can't copy files to odant 'Bin' folder: {ex.Message}");
+            Logger?.LogCritical(ex, "Can't copy files to odant 'Bin' folder: {ExMessage}", ex.Message);
             return false;
         }
 
@@ -283,7 +301,7 @@ public sealed partial class VisualStudioIntegration
         }
         catch (Exception e)
         {
-            Logger?.Error($"Can't copy 'modules' to server: {e.Message}");
+            Logger?.LogCritical(e, "Can't copy 'modules' to the server: {EMessage}", e.Message);
             return false;
         }
     }
@@ -300,14 +318,15 @@ public sealed partial class VisualStudioIntegration
     public async Task<bool> OpenModuleAsync(StructureItem item)
     {
         var result = false;
-        var staThread = new System.Threading.Thread(() => result = OpenModule(item));
+        var staThread = new System.Threading.Thread(void () => result = OpenModuleInternal(item));
         staThread.SetApartmentState(ApartmentState.STA); //COM needs STA
         staThread.Start();
         await Task.Run(staThread.Join);
+
         return result;
     }
 
-    private bool OpenModule(StructureItem item)
+    private bool OpenModuleInternal(StructureItem item)
     {
         using var retryComCallsfilter = OleMessageFilter.MessageFilterRegister();
 
@@ -327,25 +346,43 @@ public sealed partial class VisualStudioIntegration
 
             try
             {
+                if (EnvDte.Solution.Projects.OfType<Project>().Any(x => x.FullName == csProj.FullName))
+                {
+                    Logger?.LogInformation("The project is already open");
+                    return false;
+                }
+
                 project = EnvDte.Solution.AddFromFile(csProj.FullName);
             }
             catch
             {
-                Logger?.Info("Can't add this project to solution");
+                Logger?.LogInformation("Can't add this project to the solution");
                 return false;
             }
 
             if (project.Object is not VSProject vsProject)
             {
-                Logger?.Error($"{csProj.FullName} isn't a VSProject");
+                Logger?.LogCritical("{CsProjFullName} isn't a VSProject", csProj.FullName);
                 return false;
             }
 
-            var strategy = GetStrategy(project);
-            strategy.InitProject(project, item, OdaFolder, VsixEx.VsixPath.FullName);
+            var projectStrategy = GetProjectStrategy(project);
+            var isProjectInit = projectStrategy.InitProject(project, item, OdaFolder, VsixEx.VsixPath);
+            if (!isProjectInit)
+            {
+                Logger?.LogCritical("Can't initialize current project");
+                return false;
+            }
 
-            UpdateAssemblyReferences(vsProject, AddinSettings.OdaLibraries);
-            UpdateAssemblyReferences(vsProject, AddinSettings.UpdateReferenceLibraries);
+            var isVersionIncreased = projectStrategy.IncreaseVersion(project);
+            if (!isVersionIncreased)
+            {
+                Logger?.LogCritical("Can't increase version for current project");
+                return false;
+            }
+
+            projectStrategy.UpdateReferences(vsProject, OdaFolder, AddinSettings.OdaLibraries, AddinSettings.ForceUpdateReferences);
+            projectStrategy.UpdateReferences(vsProject, OdaFolder, AddinSettings.UpdateReferenceLibraries, AddinSettings.ForceUpdateReferences);
 
             project.Save();
             var projectId = GetProjectGuid(project);
@@ -353,31 +390,39 @@ public sealed partial class VisualStudioIntegration
             oda.OdaOverride.INI.DebugINI.Write("DEBUG", item.FullId, true);
             if (!oda.OdaOverride.INI.DebugINI.Save())
             {
-                throw new Exception("Can't save debug INI");
+                throw new Exception("Can't save the debug INI");
             }
 
-            var moduleBuildInfo = new BuildInfo(project.UniqueName, module.remoteDir, module.localDir);
-            LoadedModules.TryAdd(projectId, moduleBuildInfo);
+            var moduleBuildInfo = new BuildInfo(project.UniqueName, module.remoteDir, module.localDir, item);
+            LoadedModules[projectId] = moduleBuildInfo;
         }
         catch (COMException ex)
         {
             if (ex.Message.Contains("E_FAIL"))
             {
-                Logger?.Error("Visual studio returns error");
+                Logger?.LogCritical("Visual Studio returned an error");
                 return false;
             }
 
-            Logger?.Error("Project was not initialized, Visual studio too busy");
+            Logger?.LogCritical("Project was not initialized, Visual Studio is too busy");
             return false;
         }
         catch (Exception ex)
         {
             if (project != null)
             {
-                EnvDte.Solution.Remove(project);
+                try
+                {
+                    EnvDte.Solution.Remove(project);
+                }
+                catch (Exception innerEx)
+                {
+                    Logger?.LogWarning(innerEx, "Can't remove project from solution after an exception");
+                }
             }
 
-            Logger?.Error($"Error while load project from item {item.Name}: {ex.Message}");
+            Logger?.LogCritical(ex, "Error while loading project from item '{ItemName}': {ExMessage}", item.Name,
+                ex.Message);
             return false;
         }
 
@@ -390,99 +435,6 @@ public sealed partial class VisualStudioIntegration
         var moduleDir = localDir.GetDirectories("modules").FirstOrDefault();
         var csproj = moduleDir?.GetFiles("*.csproj")?.OrderByDescending(x => x.LastWriteTime).FirstOrDefault();
         return (csproj, item.Dir, localDir);
-    }
-
-    private bool UpdateAssemblyReferences(VSProject vsProj, IEnumerable<string> references)
-    {
-        try
-        {
-            return UpdateAssemblyReferencesCore(vsProj, references);
-        }
-        catch (Exception e)
-        {
-            Logger?.Error($"Error while update assembly references : {e.Message}");
-            return false;
-        }
-    }
-
-    private string? UpdateAssemblyReference(Reference reference, HashSet<string> references)
-    {
-        var fullName = GetFullName(reference);
-        var assemblyName = new AssemblyName(fullName);
-        var isInUpdateList = references.Contains($"{assemblyName.Name}.dll");
-        if (!isInUpdateList)
-        {
-            return null;
-        }
-
-        var newPath = Path.Combine(OdaFolder.FullName, $"{assemblyName.Name}.dll");
-        var isExistsInOdantFolder = File.Exists(newPath);
-        if (!isExistsInOdantFolder)
-        {
-            return null;
-        }
-
-        var isSameFileVersion = GetFileVersion(newPath) == GetFileVersion(reference.Path);
-        var exists = File.Exists(reference.Path);
-        if (exists && isSameFileVersion && !AddinSettings.ForceUpdateReferences)
-        {
-            return null;
-        }
-
-        reference.Remove();
-        return $"{assemblyName.Name}.dll";
-    }
-
-    private bool UpdateAssemblyReferencesCore(VSProject vsProj, IEnumerable<string> references)
-    {
-        List<string> deletedDlls = [];
-        var refs = references.ToHashSet();
-
-        foreach (Reference reference in vsProj.References)
-        {
-            try
-            {
-                var updatedReference = UpdateAssemblyReference(reference, refs);
-                if (updatedReference != null)
-                {
-                    deletedDlls.Add(updatedReference);
-                }
-            }
-            catch (Exception e)
-            {
-                Logger?.Error($"Error while update assembly references : {e.Message}");
-            }
-        }
-
-        foreach (var dll in refs)
-        {
-            if (deletedDlls.Contains(dll).Not())
-            {
-                continue;
-            }
-
-            var reference = (Reference3)vsProj.References.Add(Path.Combine(OdaFolder.FullName, dll));
-            reference.CopyLocal = false;
-            reference.SpecificVersion = false;
-
-            Logger?.Info($"{dll} updated");
-        }
-
-        return true;
-    }
-
-    public static string GetFileVersion(string? path)
-    {
-        if (path == null) return string.Empty;
-
-        var versionInfo = FileVersionInfo.GetVersionInfo(path);
-        return versionInfo.FileVersion;
-    }
-
-    public static string GetFullName(Reference reference)
-    {
-        return
-            $@"{reference.Name}, Version={reference.MajorVersion}.{reference.MinorVersion}.{reference.BuildNumber}.{reference.RevisionNumber}, Culture={reference.Culture.Or("neutral")}, PublicKeyToken={reference.PublicKeyToken.Or("null")}";
     }
 
     #endregion

@@ -1,5 +1,4 @@
-﻿using OdantDev.Model;
-using OdantDevApp.Model.Git.GitItems;
+﻿using OdantDevApp.Model.Git.GitItems;
 
 namespace OdantDevApp.Model.Git;
 public class RepoProject : RepoBase
