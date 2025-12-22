@@ -4,11 +4,8 @@
 // MVID: E043B518-C45C-4005-9918-F43EDCB8C9DE
 // Assembly location: C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\DevExpress\ProjectConverter\DevExpress.ProjectUpgrade.Package.Async.2022.dll
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-
 using Microsoft.Win32;
+using File = System.IO.File;
 
 namespace DevExpress.ProjectUpgrade.Package
 {
@@ -34,7 +31,7 @@ namespace DevExpress.ProjectUpgrade.Package
         public static string[] GetInstalledDXPVersions()
         {
             RegistryKey registryKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\DevExpress\\DXperience");
-            return registryKey == null ? new string[0] : registryKey.GetSubKeyNames();
+            return registryKey == null ? [] : registryKey.GetSubKeyNames();
         }
 
         public static List<string> GetToolboxInstalledCategories(

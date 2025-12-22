@@ -1,23 +1,20 @@
-﻿using System.Windows.Media;
-
-using GitLabApiClient.Models.Groups.Responses;
-
+﻿using GitLabApiClient.Models.Groups.Responses;
 using SharedOdanDev.OdaOverride;
 
-namespace SharedOdantDev.Model;
+namespace OdantDevApp.Model.Git.GitItems;
 public class GroupItem : BaseGitItem
 {
-    private readonly Group _group;
+    private readonly Group group;
 
     public GroupItem(Group group)
     {
-        _group = group;
-        FullPath = _group.FullPath;
+        this.group = group;
+        FullPath = this.group.FullPath;
     }
 
-    public override string Name => _group.Name;
+    public override string Name => group.Name;
 
-    public override object Object => _group;
+    public override object Object => group;
 
     public override bool HasModule => false;
 

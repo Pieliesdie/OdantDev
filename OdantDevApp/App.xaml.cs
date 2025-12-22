@@ -1,10 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Windows;
-
-using OdantDev;
-
+﻿using System.Runtime.InteropServices;
 using OdantDevApp.Model;
 
 namespace OdantDevApp;
@@ -12,26 +6,31 @@ namespace OdantDevApp;
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application
+public partial class App
 {
-    void Application_Startup(object sender, StartupEventArgs e)
-    {
-        _ = Task.Run(StartCheckingForZombie);
-    }
+    private static readonly IntPtr DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = new(-4);
 
-    void StartCheckingForZombie()
+    [DllImport("user32.dll")]
+    private static extern IntPtr SetProcessDpiAwarenessContext(IntPtr dpiContext);
+
+    public static void EnablePerMonitorV2()
     {
-        if (CommandLine.TryGetParentProcess() is Process parent)
+        // Вызывать как можно раньше (до создания форм/окон)
+        try
         {
-            _ = TaskEx.StartInfiniteTask(() => CheckForZombie(parent), TimeSpan.FromSeconds(4));
+            SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+        }
+        catch
+        {
+            // на старых ОС может не быть функции — игнорируем
         }
     }
 
-    static void CheckForZombie(Process process)
+    private void Application_Startup(object sender, StartupEventArgs e)
     {
-        if (process.HasExited)
+        if (CommandLine.TryGetParentProcess() is { } parent)
         {
-            Environment.Exit((int)ExitCodes.Killed);
+            parent.Exited += (_, _) => Environment.Exit((int)ExitCodes.Killed);
         }
     }
 }

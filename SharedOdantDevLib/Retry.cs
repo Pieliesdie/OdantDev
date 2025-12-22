@@ -1,5 +1,4 @@
 ﻿namespace OdantDev;
-
 public class Retry
 {
     public static async Task<T> RetryAsync<T>(Func<T> action, Func<T, bool> successCondition, TimeSpan retryDelay, TimeSpan retryTime)

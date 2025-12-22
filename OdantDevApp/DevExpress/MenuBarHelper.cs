@@ -4,7 +4,6 @@
 // MVID: E043B518-C45C-4005-9918-F43EDCB8C9DE
 // Assembly location: C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\DevExpress\ProjectConverter\DevExpress.ProjectUpgrade.Package.Async.2022.dll
 
-using System;
 using System.Collections;
 
 using EnvDTE;

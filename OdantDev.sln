@@ -22,6 +22,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedOdantDevLib", "Shared
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedFiles", "SharedFiles\SharedFiles.shproj", "{71B65BF2-8BA1-49B0-98C5-FA6BE828FAD6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaterialDesign.PropertyGrid", "MaterialDesign.PropertyGrid\MaterialDesign.PropertyGrid.csproj", "{00991B6E-8470-4B2B-A38A-83A58C0B5835}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,14 @@ Global
 		{5B6D1F87-2805-42E9-90ED-40A37B0344FD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5B6D1F87-2805-42E9-90ED-40A37B0344FD}.Release|x86.ActiveCfg = Release|Any CPU
 		{5B6D1F87-2805-42E9-90ED-40A37B0344FD}.Release|x86.Build.0 = Release|Any CPU
+		{00991B6E-8470-4B2B-A38A-83A58C0B5835}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00991B6E-8470-4B2B-A38A-83A58C0B5835}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00991B6E-8470-4B2B-A38A-83A58C0B5835}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{00991B6E-8470-4B2B-A38A-83A58C0B5835}.Debug|x86.Build.0 = Debug|Any CPU
+		{00991B6E-8470-4B2B-A38A-83A58C0B5835}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00991B6E-8470-4B2B-A38A-83A58C0B5835}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00991B6E-8470-4B2B-A38A-83A58C0B5835}.Release|x86.ActiveCfg = Release|Any CPU
+		{00991B6E-8470-4B2B-A38A-83A58C0B5835}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

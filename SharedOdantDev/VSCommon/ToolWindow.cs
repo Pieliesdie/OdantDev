@@ -6,13 +6,12 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms.Integration;
-
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Threading;
-
 using NativeMethods;
-
 using Task = System.Threading.Tasks.Task;
+using System.IO.Pipes;
+using System.Threading;
+using HorizontalAlignment = System.Windows.HorizontalAlignment;
 
 namespace OdantDev;
 
@@ -30,41 +29,66 @@ namespace OdantDev;
 [Guid("e477ca93-32f7-4a68-ab0d-7472ff3e7964")]
 public class ToolWindow : ToolWindowPane
 {
-    private bool OutOfProcess => true;
-    private string OutOfProcessFolder => Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "app");
-    private string OutOfProcessPath => Path.Combine(OutOfProcessFolder, "OdantDevApp.exe");
+    private static bool OutOfProcess => true;
+    private static string OutOfProcessFolder => Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "app");
+    private static string OutOfProcessPath => Path.Combine(OutOfProcessFolder, "OdantDevApp.exe");
     private Process ChildProcess { get; set; }
+    private IntPtr ChildWindowHandle { get; set; }
     private WindowsFormsHost Host { get; }
     private IntPtr HostHandle { get; }
+
     private async Task RunDevAppAsync(bool restart = false)
     {
+        var pipeName = $"odantdev-pipe-{Guid.NewGuid()}";
+        using var pipeServer = new NamedPipeServerStream(pipeName, PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
         try
         {
             var currentProcess = Process.GetCurrentProcess();
-            var args = new CommandLineArgs() { ProcessId = currentProcess.Id };
+            var args = new CommandLineArgs { ProcessId = currentProcess.Id, PipeName = pipeName };
             var appPath = OutOfProcessPath;
             var process = ChildProcess = await StartProcessAsync(appPath, args).ConfigureAwait(true);
-            var processHandle = process.MainWindowHandle;
-            //Remove border and whatnot
-            WinApi.SetWindowLong(processHandle, WindowLongFlags.GWL_STYLE,
-             WindowStyles.WS_CHILD | WindowStyles.WS_BORDER | WindowStyles.WS_VISIBLE);
 
-            //Move our app to visual studio
+            using var ctsConnect = new CancellationTokenSource(60000);
+            await pipeServer.WaitForConnectionAsync(ctsConnect.Token).ConfigureAwait(true);
+
+            using var ctsRead = new CancellationTokenSource(30000);
+            var handleBytes = new byte[IntPtr.Size];
+            var readBytes = await pipeServer.ReadAsync(handleBytes, 0, handleBytes.Length, ctsRead.Token).ConfigureAwait(true);
+            if (readBytes == 0)
+            {
+                await ShowErrorAsync("Can't read data from named pipe");
+                return;
+            }
+
+            var processHandle = ChildWindowHandle = new IntPtr(BitConverter.ToInt64(handleBytes, 0));
+
+            WinApi.SetWindow(
+                processHandle,
+                WindowLongFlags.GWL_STYLE, 
+                new IntPtr((uint)(WindowStyles.WS_CHILD | WindowStyles.WS_BORDER | WindowStyles.WS_VISIBLE))
+            );
             WinApi.SetParent(processHandle, HostHandle);
-
-            //Initial size
-            WinApi.MoveWindow(processHandle, 0, 0, (Host.Child.Width), (Host.Child.Height), true);
+            WinApi.MoveWindow(processHandle, 0, 0, Host.Child.Width, Host.Child.Height, true);
 
             RestartIfFail(process);
             if (!restart)
             {
-                SubscribeToSizeChanging(Host);
+                Host.SizeChanged += (_, _) => HostWindowChanged();
+                Host.DpiChanged += (_, _) => HostWindowChanged();
+                Host.IsVisibleChanged += (_, _) => HostWindowChanged();
             }
         }
         catch (Exception ex)
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            Host.Child = new System.Windows.Forms.Label() { Text = ex.ToString() };
+            try
+            {
+                ChildProcess?.Kill();
+            }
+            catch
+            {
+                //ignore
+            }
+            await ShowErrorAsync(ex.ToString());
         }
     }
 
@@ -73,49 +97,63 @@ public class ToolWindow : ToolWindowPane
         process.EnableRaisingEvents = true;
         process.Exited += Process_Exited;
     }
-    private async void Process_Exited(object sender, EventArgs e)
+
+    private void Process_Exited(object sender, EventArgs e)
     {
         if (sender is not Process process)
             return;
         switch (process.ExitCode)
         {
             case (int)ExitCodes.Success:
+            case (int)ExitCodes.Killed:
                 break;
             case < 0:
             case (int)ExitCodes.Restart:
                 _ = RunDevAppAsync(true);
                 break;
             default:
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                Host.Child = new System.Windows.Forms.Label() { Text = $"Unexpected exit code: {process.ExitCode}" };
+                _ = ShowErrorAsync($"Unexpected exit code: {process.ExitCode}");
                 break;
         }
     }
-    private WindowsFormsHost CreateHost()
+
+    private async Task ShowErrorAsync(string message)
+    {
+        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+        var label = new System.Windows.Forms.Label
+        {
+            ForeColor = Color.IndianRed,
+            Text = message
+        };
+        Host.Child = label;
+    }
+
+    private static WindowsFormsHost CreateHostWindow()
     {
         var imgPath = Path.Combine(ProcessEx.CurrentExecutingFolder().FullName, "Spinner.gif");
         var bitmap = new Bitmap(imgPath);
-        var pb = new System.Windows.Forms.PictureBox()
+        var pb = new System.Windows.Forms.PictureBox
         {
             Image = bitmap,
             Dock = System.Windows.Forms.DockStyle.Fill,
-            SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize,
-            Anchor = System.Windows.Forms.AnchorStyles.None
+            SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage
         };
 
-        WindowsFormsHost host = new()
+        var host = new WindowsFormsHost
         {
-            HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Child = new System.Windows.Forms.Panel()
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,           
+            Child = new System.Windows.Forms.Panel
             {
                 Dock = System.Windows.Forms.DockStyle.Fill
             }
         };
+
         host.Child.Controls.Add(pb);
         return host;
     }
-    private async Task<Process> StartProcessAsync(string path, CommandLineArgs arguments)
+
+    private static async Task<Process> StartProcessAsync(string path, CommandLineArgs arguments)
     {
         return await Task.Run(() =>
         {
@@ -124,51 +162,45 @@ public class ToolWindow : ToolWindowPane
                 WorkingDirectory = OutOfProcessFolder,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
-                UseShellExecute = false,
-
+                UseShellExecute = false
             };
-            var process = Process.Start(psi);
 
-            try
-            {
-                while (process.MainWindowHandle == IntPtr.Zero)
-                {
-                    process.Refresh();
-                }
-            }
-            catch
-            {
-                process.Close();
-                throw;
-            }
+            //Для hot-reload дебаггера
+#if DEBUG
+            psi.EnvironmentVariables["COMPLUS_ForceENC"] = "1";
+#endif
+            var process = Process.Start(psi) ?? throw new Exception($"Can't start addin process {path}");
             return process;
         });
     }
-    private void SubscribeToSizeChanging(WindowsFormsHost host) => host.SizeChanged += Host_SizeChanged;
-    private void Host_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        if (Host.Child == null || ChildProcess is null || ChildProcess.MainWindowHandle == IntPtr.Zero) return;
-        // Move the window to overlay it on this window
 
-        WinApi.MoveWindow(ChildProcess.MainWindowHandle, 0, 0, ((Host.Child).Width), (Host.Child.Height), false);
+    private void HostWindowChanged()
+    {
+        if (Host?.Child == null || ChildWindowHandle == IntPtr.Zero) return;
+        Host.UpdateLayout();
+        WinApi.MoveWindow(ChildWindowHandle, 0, 0, Host.Child.Width, Host.Child.Height, true);
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ToolWindow"/> class.
     /// </summary>
-    public ToolWindow() : base()
+    public ToolWindow()
     {
-        this.Caption = "ODANT Dev";
+        Caption = "ODANT Dev";
+
+        BitmapImageMoniker = Microsoft.VisualStudio.Imaging.KnownMonikers.AbstractCube;
         if (OutOfProcess)
         {
-            this.Content = Host = CreateHost();
+            base.Content = Host = CreateHostWindow();
             HostHandle = Host.Child.Handle;
         }
         else
         {
-            this.Content = new ToolWindow1Control(OdantDevPackage.Env_DTE);
+            OdantDevApp.VSCommon.EnvDTE.Instance = OdantDevPackage.EnvDte;
+            base.Content = new ToolWindowControl();
         }
     }
+
     public override void OnToolWindowCreated()
     {
         base.OnToolWindowCreated();

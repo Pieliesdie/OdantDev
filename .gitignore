@@ -38,3 +38,4 @@ packages/
 /vsix
 .artifacts/*
 artifacts
+/.idea

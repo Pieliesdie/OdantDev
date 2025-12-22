@@ -1,10 +1,6 @@
-﻿<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="clr-namespace:MaterialDesignExtensions.Controls"
-    xmlns:converters="clr-namespace:MaterialDesignExtensions.Converters"
-    xmlns:internalCommands="clr-namespace:MaterialDesignExtensions.Commands.Internal"
-    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes">
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:MaterialDesignExtensions.Controls" xmlns:converters="clr-namespace:MaterialDesignExtensions.Converters"
+                    xmlns:internalCommands="clr-namespace:MaterialDesignExtensions.Commands.Internal" xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Shadows.xaml" />
@@ -15,24 +11,16 @@
         </ResourceDictionary>
     </ResourceDictionary.MergedDictionaries>
 
-    <converters:BooleanOrToVisibilityConverter
-        x:Key="orTrueAsVisibleConverter"
-        FalseValue="Hidden"
-        TrueValue="Visible" />
-    <converters:BooleanAndToVisibilityConverter
-        x:Key="andTrueAsVisibleConverter"
-        FalseValue="Hidden"
-        TrueValue="Visible" />
-    <converters:BooleanOrToVisibilityConverter
-        x:Key="orFalseAsVisibleConverter"
-        FalseValue="Visible"
-        TrueValue="Hidden" />
+    <converters:BooleanOrToVisibilityConverter x:Key="orTrueAsVisibleConverter"
+                                               FalseValue="Hidden" TrueValue="Visible" />
+    <converters:BooleanAndToVisibilityConverter x:Key="andTrueAsVisibleConverter"
+                                                FalseValue="Hidden" TrueValue="Visible" />
+    <converters:BooleanOrToVisibilityConverter x:Key="orFalseAsVisibleConverter"
+                                               FalseValue="Visible" TrueValue="Hidden" />
     <converters:NotNullBooleanConverter x:Key="notNullBooleanConverter" />
     <converters:EmptyEnumerableToBoolConverter x:Key="emptyEnumerableToFalseConverter" EmptyValue="False" />
-    <converters:BoolToVisibilityConverter
-        x:Key="falseToHiddenConverter"
-        FalseValue="Hidden"
-        TrueValue="Visible" />
+    <converters:BoolToVisibilityConverter x:Key="falseToHiddenConverter"
+                                          FalseValue="Hidden" TrueValue="Visible" />
     <converters:BooleanOrConverter x:Key="booleanOrConverter" />
 
     <Style x:Key="MaterialDesignPersistentSearch" TargetType="{x:Type controls:PersistentSearch}">
@@ -47,11 +35,9 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:PersistentSearch}">
                     <Grid HorizontalAlignment="{TemplateBinding HorizontalAlignment}" VerticalAlignment="{TemplateBinding VerticalAlignment}">
-                        <Border
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            Background="{TemplateBinding Background}"
-                            Effect="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(md:ShadowAssist.ShadowDepth), Converter={x:Static md:ShadowConverter.Instance}}">
+                        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                Background="{TemplateBinding Background}"
+                                Effect="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(md:ShadowAssist.ShadowDepth), Converter={x:Static md:ShadowConverter.Instance}}">
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Style.Triggers>
@@ -65,102 +51,82 @@
                                 </Style>
                             </Border.Style>
                         </Border>
-                        <Border
-                            x:Name="rootBorder"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            Background="Transparent">
+                        <Border x:Name="rootBorder"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                Background="Transparent">
                             <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="100*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <ContentControl
-                                    Width="{TemplateBinding IconSize}"
-                                    Height="{TemplateBinding IconSize}"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Content="{TemplateBinding SearchIcon}">
+                                <ContentControl Width="{TemplateBinding IconSize}"
+                                                Height="{TemplateBinding IconSize}"
+                                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                Content="{TemplateBinding SearchIcon}">
                                     <ContentControl.Resources>
                                         <DataTemplate DataType="{x:Type md:PackIconKind}">
-                                            <md:PackIcon
-                                                Width="{Binding Path=IconSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type controls:PersistentSearch}}}"
-                                                Height="{Binding Path=IconSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type controls:PersistentSearch}}}"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                                Kind="{Binding}" />
+                                            <md:PackIcon Width="{Binding Path=IconSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type controls:PersistentSearch}}}"
+                                                         Height="{Binding Path=IconSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type controls:PersistentSearch}}}"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                         Kind="{Binding}" />
                                         </DataTemplate>
                                     </ContentControl.Resources>
                                     <ContentControl.Visibility>
                                         <MultiBinding Converter="{StaticResource orFalseAsVisibleConverter}">
                                             <Binding ElementName="searchTextBox" Path="IsFocused" />
-                                            <Binding
-                                                Converter="{StaticResource notNullBooleanConverter}"
-                                                Path="SearchTerm"
-                                                RelativeSource="{RelativeSource TemplatedParent}" />
+                                            <Binding Converter="{StaticResource notNullBooleanConverter}"
+                                                     Path="SearchTerm"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
                                         </MultiBinding>
                                     </ContentControl.Visibility>
                                 </ContentControl>
-                                <Button
-                                    x:Name="cancelButton"
-                                    Margin="8,0,8,0"
-                                    VerticalAlignment="Center"
-                                    Style="{DynamicResource MaterialDesignToolForegroundButton}">
+                                <Button x:Name="cancelButton"
+                                        Margin="8,0,8,0" VerticalAlignment="Center"
+                                        Style="{DynamicResource MaterialDesignToolForegroundButton}">
                                     <Button.Visibility>
                                         <MultiBinding Converter="{StaticResource orTrueAsVisibleConverter}">
                                             <Binding ElementName="searchTextBox" Path="IsFocused" />
-                                            <Binding
-                                                Converter="{StaticResource notNullBooleanConverter}"
-                                                Path="SearchTerm"
-                                                RelativeSource="{RelativeSource TemplatedParent}" />
+                                            <Binding Converter="{StaticResource notNullBooleanConverter}"
+                                                     Path="SearchTerm"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
                                         </MultiBinding>
                                     </Button.Visibility>
-                                    <md:PackIcon
-                                        Width="{TemplateBinding IconSize}"
-                                        Height="{TemplateBinding IconSize}"
-                                        Kind="{TemplateBinding CancelIcon}" />
+                                    <md:PackIcon Width="{TemplateBinding IconSize}"
+                                                 Height="{TemplateBinding IconSize}"
+                                                 Kind="{TemplateBinding CancelIcon}" />
                                 </Button>
-                                <TextBox
-                                    x:Name="searchTextBox"
-                                    Grid.Column="1"
-                                    Margin="{TemplateBinding Padding}"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Center"
-                                    md:HintAssist.Hint="{TemplateBinding SearchHint}"
-                                    BorderBrush="Transparent"
-                                    FontSize="{TemplateBinding FontSize}"
-                                    Text="{Binding Path=SearchTerm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource TemplatedParent}}" />
-                                <Button
-                                    x:Name="clearButton"
-                                    Grid.Column="2"
-                                    Margin="8,0,8,0"
-                                    VerticalAlignment="Center"
-                                    Style="{DynamicResource MaterialDesignToolForegroundButton}">
+                                <TextBox x:Name="searchTextBox"
+                                         Grid.Column="1"
+                                         Margin="{TemplateBinding Padding}"
+                                         HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                         md:HintAssist.Hint="{TemplateBinding SearchHint}"
+                                         BorderBrush="Transparent"
+                                         FontSize="{TemplateBinding FontSize}"
+                                         Text="{Binding Path=SearchTerm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource TemplatedParent}}" />
+                                <Button x:Name="clearButton"
+                                        Grid.Column="2"
+                                        Margin="8,0,8,0" VerticalAlignment="Center"
+                                        Style="{DynamicResource MaterialDesignToolForegroundButton}">
                                     <Button.Visibility>
                                         <MultiBinding Converter="{StaticResource andTrueAsVisibleConverter}">
                                             <Binding ElementName="rootBorder" Path="IsMouseOver" />
-                                            <Binding
-                                                Converter="{StaticResource notNullBooleanConverter}"
-                                                Path="SearchTerm"
-                                                RelativeSource="{RelativeSource TemplatedParent}" />
+                                            <Binding Converter="{StaticResource notNullBooleanConverter}"
+                                                     Path="SearchTerm"
+                                                     RelativeSource="{RelativeSource TemplatedParent}" />
                                         </MultiBinding>
                                     </Button.Visibility>
-                                    <md:PackIcon
-                                        Width="{TemplateBinding IconSize}"
-                                        Height="{TemplateBinding IconSize}"
-                                        Kind="{TemplateBinding ClearIcon}" />
+                                    <md:PackIcon Width="{TemplateBinding IconSize}"
+                                                 Height="{TemplateBinding IconSize}"
+                                                 Kind="{TemplateBinding ClearIcon}" />
                                 </Button>
-                                <controls:AutocompletePopup
-                                    x:Name="searchSuggestionsPopup"
-                                    Width="{Binding Path=ActualWidth, ElementName=rootBorder}"
-                                    MaxHeight="300"
-                                    AllowsTransparency="True"
-                                    Focusable="False"
-                                    Placement="Bottom"
-                                    PlacementTarget="{Binding ElementName=rootBorder}"
-                                    PopupAnimation="Fade"
-                                    SnapsToDevicePixels="True">
+                                <controls:AutocompletePopup x:Name="searchSuggestionsPopup"
+                                                            Width="{Binding Path=ActualWidth, ElementName=rootBorder}"
+                                                            MaxHeight="300"
+                                                            AllowsTransparency="True" Focusable="False"
+                                                            Placement="Bottom"
+                                                            PlacementTarget="{Binding ElementName=rootBorder}"
+                                                            PopupAnimation="Fade" SnapsToDevicePixels="True">
                                     <controls:AutocompletePopup.Style>
                                         <Style TargetType="{x:Type Popup}">
                                             <Style.Triggers>
@@ -175,25 +141,19 @@
                                         </Style>
                                     </controls:AutocompletePopup.Style>
                                     <Border HorizontalAlignment="Stretch">
-                                        <Border
-                                            HorizontalAlignment="Stretch"
-                                            Background="{TemplateBinding Background}"
-                                            BorderBrush="{DynamicResource MaterialDesignDivider}"
-                                            BorderThickness="1"
-                                            CornerRadius="0,0,2,2"
-                                            SnapsToDevicePixels="True">
+                                        <Border HorizontalAlignment="Stretch"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                                                BorderThickness="1" CornerRadius="0,0,2,2"
+                                                SnapsToDevicePixels="True">
                                             <!--  Effect="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(md:ShadowAssist.ShadowDepth), Converter={x:Static md:ShadowConverter.Instance}}"  -->
-                                            <ItemsControl
-                                                x:Name="searchSuggestionsItemsControl"
-                                                Margin="0,4,0,4"
-                                                HorizontalAlignment="Stretch"
-                                                VerticalAlignment="Stretch"
-                                                FontSize="{TemplateBinding FontSize}"
-                                                IsEnabled="{TemplateBinding IsEnabled}"
-                                                ScrollViewer.CanContentScroll="True"
-                                                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                                ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                                VirtualizingStackPanel.IsVirtualizing="True">
+                                            <ItemsControl x:Name="searchSuggestionsItemsControl"
+                                                          Margin="0,4,0,4" HorizontalAlignment="Stretch"
+                                                          VerticalAlignment="Stretch"
+                                                          FontSize="{TemplateBinding FontSize}"
+                                                          IsEnabled="{TemplateBinding IsEnabled}"
+                                                          ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                          ScrollViewer.VerticalScrollBarVisibility="Auto" VirtualizingStackPanel.IsVirtualizing="True">
                                                 <ItemsControl.Template>
                                                     <ControlTemplate TargetType="{x:Type ItemsControl}">
                                                         <Border SnapsToDevicePixels="True">
@@ -210,14 +170,11 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Grid
-                                                            Height="56"
-                                                            HorizontalAlignment="Stretch"
-                                                            Background="Transparent">
-                                                            <Border
-                                                                HorizontalAlignment="Stretch"
-                                                                VerticalAlignment="Stretch"
-                                                                Background="{Binding Path=Foreground, Converter={StaticResource brushRoundConverter}, ElementName=itemButton}">
+                                                        <Grid Height="56"
+                                                              HorizontalAlignment="Stretch"
+                                                              Background="Transparent">
+                                                            <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                                    Background="{Binding Path=Foreground, Converter={StaticResource brushRoundConverter}, ElementName=itemButton}">
                                                                 <Border.Style>
                                                                     <Style TargetType="{x:Type Border}">
                                                                         <Style.Triggers>
@@ -243,10 +200,9 @@
                                                                     </Style>
                                                                 </Border.Style>
                                                             </Border>
-                                                            <Button
-                                                                x:Name="itemButton"
-                                                                Command="{x:Static internalCommands:SearchControlCommands.SelectSearchSuggestionCommand}"
-                                                                CommandParameter="{Binding Path=Suggestion}">
+                                                            <Button x:Name="itemButton"
+                                                                    Command="{x:Static internalCommands:SearchControlCommands.SelectSearchSuggestionCommand}"
+                                                                    CommandParameter="{Binding Path=Suggestion}">
                                                                 <Button.Style>
                                                                     <Style TargetType="{x:Type Button}">
                                                                         <Setter Property="Background" Value="Transparent" />
@@ -263,33 +219,29 @@
                                                                         <Setter Property="Template">
                                                                             <Setter.Value>
                                                                                 <ControlTemplate TargetType="Button">
-                                                                                    <md:Ripple
-                                                                                        Padding="{TemplateBinding Padding}"
-                                                                                        HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                                                        VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                                                        Content="{TemplateBinding Content}"
-                                                                                        ContentTemplate="{TemplateBinding ContentTemplate}"
-                                                                                        Focusable="False"
-                                                                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                                                    <md:Ripple Padding="{TemplateBinding Padding}"
+                                                                                               HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                                               Content="{TemplateBinding Content}"
+                                                                                               ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                                                               Focusable="False"
+                                                                                               SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                                                                                 </ControlTemplate>
                                                                             </Setter.Value>
                                                                         </Setter>
                                                                     </Style>
                                                                 </Button.Style>
                                                                 <DockPanel>
-                                                                    <md:PackIcon
-                                                                        Width="{Binding Path=IconSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type controls:PersistentSearch}}}"
-                                                                        Height="{Binding Path=IconSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type controls:PersistentSearch}}}"
-                                                                        VerticalAlignment="Center"
-                                                                        Foreground="{DynamicResource MaterialDesignDivider}"
-                                                                        Kind="Clock"
-                                                                        Visibility="{Binding Path=IsFromHistory, Converter={StaticResource falseToHiddenConverter}}" />
-                                                                    <TextBlock
-                                                                        Margin="24,0,0,0"
-                                                                        HorizontalAlignment="Stretch"
-                                                                        VerticalAlignment="Center"
-                                                                        Text="{Binding Path=Suggestion}"
-                                                                        TextTrimming="CharacterEllipsis" />
+                                                                    <md:PackIcon Width="{Binding Path=IconSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type controls:PersistentSearch}}}"
+                                                                                 Height="{Binding Path=IconSize, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type controls:PersistentSearch}}}"
+                                                                                 VerticalAlignment="Center"
+                                                                                 Foreground="{DynamicResource MaterialDesignDivider}"
+                                                                                 Kind="Clock"
+                                                                                 Visibility="{Binding Path=IsFromHistory, Converter={StaticResource falseToHiddenConverter}}" />
+                                                                    <TextBlock Margin="24,0,0,0" HorizontalAlignment="Stretch"
+                                                                               VerticalAlignment="Center"
+                                                                               Text="{Binding Path=Suggestion}"
+                                                                               TextTrimming="CharacterEllipsis" />
                                                                 </DockPanel>
                                                             </Button>
                                                         </Grid>
@@ -307,10 +259,9 @@
         </Setter>
     </Style>
 
-    <Style
-        x:Key="MaterialDesignPersistentSearchDense"
-        BasedOn="{StaticResource MaterialDesignPersistentSearch}"
-        TargetType="{x:Type controls:PersistentSearch}">
+    <Style x:Key="MaterialDesignPersistentSearchDense"
+           BasedOn="{StaticResource MaterialDesignPersistentSearch}"
+           TargetType="{x:Type controls:PersistentSearch}">
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Padding" Value="8,2,0,2" />
         <Setter Property="IconSize" Value="16" />

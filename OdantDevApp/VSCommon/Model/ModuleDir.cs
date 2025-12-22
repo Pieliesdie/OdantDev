@@ -1,12 +1,8 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using EnvDTE;
-
+﻿using EnvDTE;
 using EnvDTE80;
+using File = System.IO.File;
 
-namespace OdantDev.Model;
+namespace OdantDevApp.VSCommon;
 
 public sealed partial class VisualStudioIntegration
 {
@@ -22,7 +18,7 @@ public sealed partial class VisualStudioIntegration
             //Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             var assemblyInfo = project.ProjectItems.OfType<ProjectItem>().FirstOrDefault(x => x.Name == "AssemblyInfo.cs");
             Name = assemblyInfo.FileCodeModel.CodeElements.OfType<CodeAttribute2>()
-                .FirstOrDefault(x => x.Name == "AssemblyDefaultAlias")?.Value.Replace("\"", string.Empty);
+                .FirstOrDefault(x => x.Name == "AssemblyDefaultAlias")?.Value.Replace("\"", string.Empty) ?? project.Name;
 
             string fullPath = project.Properties.Item("FullPath").Value.ToString();
             string outputPath = project.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value.ToString();
