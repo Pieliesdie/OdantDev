@@ -22,24 +22,32 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
     private readonly ILogger? logger;
     private Connection Connection { get; }
 
-    [ObservableProperty] public partial oda.Object? User { get; set; }
+    [ObservableProperty] 
+    public partial oda.Object? User { get; set; }
 
-    [ObservableProperty] public partial Domain? Develope { get; set; }
+    [ObservableProperty] 
+    public partial Domain? Develope { get; set; }
 
-    [ObservableProperty] public partial Host? Localhost { get; set; }
+    [ObservableProperty]
+    public partial Host? Localhost { get; set; }
 
-    [ObservableProperty] public partial AsyncObservableCollection<ViewItem> Hosts { get; set; }
+    [ObservableProperty] 
+    public partial AsyncObservableCollection<ViewItem> Hosts { get; set; }
 
-    [ObservableProperty] public partial AsyncObservableCollection<ViewItem> PinnedItems { get; set; }
+    [ObservableProperty] 
+    public partial AsyncObservableCollection<ViewItem> PinnedItems { get; set; }
 
     [ObservableProperty]
     public partial ConcatenatedCollection<AsyncObservableCollection<ViewItem>, ViewItem> Items { get; set; }
 
-    [ObservableProperty] public partial List<RepoBase>? Repos { get; set; }
+    [ObservableProperty] 
+    public partial List<RepoBase>? Repos { get; set; }
 
-    [ObservableProperty] public partial List<DomainDeveloper>? Developers { get; set; }
+    [ObservableProperty] 
+    public partial List<DomainDeveloper>? Developers { get; set; }
 
-    [ObservableProperty] public partial bool AutoLogin { get; set; }
+    [ObservableProperty] 
+    public partial bool AutoLogin { get; set; }
     partial void OnAutoLoginChanged(bool value) => Connection.AutoLogin = value;
 
     public AddinSettings AddinSettings { get; }
@@ -127,7 +135,7 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
 
             var developList = await Retry.RetryAsync(
                 () => Develope?.FindDomains()?.OfType<DomainDeveloper>()?.ToList(),
-                (e) => e != null,
+                e => e != null,
                 TimeSpan.FromMilliseconds(300),
                 TimeSpan.FromSeconds(5)
             );
@@ -211,14 +219,13 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
         }
     }
 
-    public static (bool Success, string Error) LoadOdaLibraries(DirectoryInfo odaFolder)
+    public static (bool Success, string Error) LoadOdaLibraries(DirectoryInfo odaFolder, ILogger? logger = null)
     {
         try
         {
-            ServerAssemblies =
-                VsixEx.LoadServerLibraries(odaFolder.FullName, VsixEx.Platform, OdaServerLibraries);
+            ServerAssemblies = VsixEx.LoadServerLibraries(odaFolder.FullName, VsixEx.Platform, OdaServerLibraries);
             ClientAssemblies = VsixEx.LoadClientLibraries(odaFolder.FullName, OdaClientLibraries);
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+            AppDomain.CurrentDomain.AssemblyResolve += (_, e) => CurrentDomain_AssemblyResolve(ClientAssemblies, e, logger);
             return (true, null);
         }
         catch (Exception ex)
@@ -227,18 +234,21 @@ public sealed partial class ConnectionModel : ObservableObject, IDisposable
         }
     }
 
-    private static Assembly? CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+    private static Assembly? CurrentDomain_AssemblyResolve(IReadOnlyCollection<Assembly> assemblylist, ResolveEventArgs e, ILogger? logger = null)
     {
-        var requestAssemblyName = new AssemblyName(args.Name);
+        try
+        {
+            var requestAssemblyName = new AssemblyName(e.Name);
 
-        //return oda assemblies which was loaded before
-        var tryResolveInClientAssemblies =
-            ClientAssemblies?.FirstOrDefault(x => new AssemblyName(x.FullName).Name == requestAssemblyName.Name);
-        if (tryResolveInClientAssemblies != null)
+            var tryResolveInClientAssemblies =
+                assemblylist?.FirstOrDefault(x => new AssemblyName(x.FullName).Name == requestAssemblyName.Name);
             return tryResolveInClientAssemblies;
-
-        //other cases
-        return null;
+        }
+        catch (Exception err)
+        {
+            logger?.LogError(err, "Can't resolve assembly '{AssemblyName}'", e.Name);
+            return null;
+        }
     }
 
     public static StructureItem CreateItemsFromFiles(StructureItem rootItem, DirectoryInfo rootDir)

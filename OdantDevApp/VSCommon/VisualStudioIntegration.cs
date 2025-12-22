@@ -43,13 +43,7 @@ public sealed partial class VisualStudioIntegration
             new SdkProjectStrategy(logger),
             new LegacyProjectStrategy(logger)
         ];
-#if DEBUG
         EnvDte = dte;
-        return;
-#else
-        EnvDte = dte
-                 ?? throw new NullReferenceException("Can't get EnvDTE2 from visual studio");
-#endif
         try
         {
             using var retryComCallsfilter = OleMessageFilter.MessageFilterRegister();
@@ -60,7 +54,7 @@ public sealed partial class VisualStudioIntegration
         }
         catch (Exception e)
         {
-            Logger?.LogCritical(e, $"Error while initialize VisualStudioIntegration: {e}");
+            Logger?.LogCritical(e, "Error while initialize VisualStudioIntegration: {Exception}", e);
         }
     }
 

@@ -84,9 +84,11 @@ public partial class ToolWindowControl
     private bool InitializeOdaComponents()
     {
         var odaFolder = new DirectoryInfo(AddinSettings.SelectedOdaFolder.Path);
-        var loadOdaLibrariesResult = ConnectionModel.LoadOdaLibraries(odaFolder);
+        var loadOdaLibrariesResult = ConnectionModel.LoadOdaLibraries(odaFolder, logger);
         if (loadOdaLibrariesResult.Success)
+        {
             return true;
+        }
         ShowException(loadOdaLibrariesResult.Error);
         return false;
     }
@@ -191,7 +193,13 @@ public partial class ToolWindowControl
         }
 
         await DispatcherEx.SwitchToMainThread();
-        VisualStudioIntegration = new VisualStudioIntegration(AddinSettings, OdantDevApp.VSCommon.EnvDTE.Instance, logger);
+#if DEBUG
+        var envDte = OdantDevApp.VSCommon.EnvDTE.Instance!;
+#else
+        var envDte = OdantDevApp.VSCommon.EnvDTE.Instance
+                 ?? throw new NullReferenceException("Can't get EnvDTE2 from visual studio");
+#endif
+        VisualStudioIntegration = new VisualStudioIntegration(AddinSettings, envDte, logger);
         await AddinSettings.SaveAsync();
     }
 

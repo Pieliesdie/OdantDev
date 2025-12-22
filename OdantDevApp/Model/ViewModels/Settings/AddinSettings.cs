@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MaterialDesignThemes.Wpf;
 using oda.OdaOverride;
 using OdantDevApp.Common;
@@ -28,9 +30,14 @@ public partial class AddinSettings : ObservableObject
 
     public event ThemeChanged? OnThemeChanged;
 
-    [ObservableProperty] public partial bool IsVirtualizeTreeView { get; set; }
-    [ObservableProperty] public partial AsyncObservableCollection<string> PinnedItems { get; set; } = [];
-    [ObservableProperty] public partial int MaxlastProjectsLength { get; set; } = 15;
+    [ObservableProperty]
+    public partial bool IsVirtualizeTreeView { get; set; }
+    
+    [ObservableProperty] 
+    public partial AsyncObservableCollection<string> PinnedItems { get; set; } = [];
+    
+    [ObservableProperty] 
+    public partial int MaxlastProjectsLength { get; set; } = 15;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FilteredLastProjects))]
@@ -71,7 +78,8 @@ public partial class AddinSettings : ObservableObject
     [NotifyPropertyChangedFor(nameof(FilteredLastProjects))]
     public partial SortOrder LastProjectsSortOrder { get; set; } = SortOrder.Descending;
 
-    [XmlIgnore] public IEnumerable<RecentProject> FilteredLastProjects => GetFilteredLastProjects();
+    [XmlIgnore] 
+    public IEnumerable<RecentProject> FilteredLastProjects => GetFilteredLastProjects();
 
     private IEnumerable<RecentProject> GetFilteredLastProjects()
     {
@@ -126,15 +134,32 @@ public partial class AddinSettings : ObservableObject
         OnAppThemeChanging(AppTheme);
     }
 
-    [ObservableProperty] public partial string? SelectedDevelopeDomain { get; set; }
-    [ObservableProperty] public partial AsyncObservableCollection<string> LastOdaFolders { get; set; } = [];
-    [ObservableProperty] public partial AsyncObservableCollection<PathInfo> OdaFolders { get; set; } = [];
-    [ObservableProperty] public partial PathInfo SelectedOdaFolder { get; set; }
-    [ObservableProperty] public partial string? GitLabApiKey { get; set; }
-    [ObservableProperty] public partial string? GitLabApiPath { get; set; }
-    [ObservableProperty] public partial int GitlabTimeout { get; set; } = 15;
-    [ObservableProperty] public partial int StructureItemTimeout { get; set; } = 10;
-    [ObservableProperty] public partial ThemeColors AppTheme { get; set; } = ThemeColors.Default;
+    [ObservableProperty] 
+    public partial string? SelectedDevelopeDomain { get; set; }
+    
+    [ObservableProperty] 
+    public partial AsyncObservableCollection<string> LastOdaFolders { get; set; } = [];
+    
+    [ObservableProperty] 
+    public partial AsyncObservableCollection<PathInfo> OdaFolders { get; set; } = [];
+    
+    [ObservableProperty] 
+    public partial PathInfo SelectedOdaFolder { get; set; }
+    
+    [ObservableProperty] 
+    public partial string? GitLabApiKey { get; set; }
+    
+    [ObservableProperty] 
+    public partial string? GitLabApiPath { get; set; }
+    
+    [ObservableProperty] 
+    public partial int GitlabTimeout { get; set; } = 15;
+    
+    [ObservableProperty] 
+    public partial int StructureItemTimeout { get; set; } = 10;
+   
+    [ObservableProperty] 
+    public partial ThemeColors AppTheme { get; set; } = ThemeColors.Default;
 
     partial void OnAppThemeChanging(ThemeColors value) => OnThemeChanged?.Invoke(value);
     [XmlIgnore] public string? AddinSettingsPath { get; private set; }
@@ -199,6 +224,15 @@ public partial class AddinSettings : ObservableObject
     public async Task<bool> SaveAsync()
     {
         return await Task.Run(Save);
+    }
+
+    [RelayCommand]
+    public void Open()
+    {
+        if (AddinSettingsPath != null)
+        {
+            Process.Start(AddinSettingsPath);
+        }
     }
 
     public enum SortBy

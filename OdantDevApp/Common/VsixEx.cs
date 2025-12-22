@@ -22,7 +22,7 @@ public static class VsixEx
 
     public static List<IntPtr> LoadServerLibraries(string odaPath, Bitness bitness, params string[] libPaths)
     {
-        var serverPath = Path.Combine(odaPath, "server", Enum.GetName(typeof(Bitness), bitness));
+        var serverPath = Path.Combine(odaPath, "server", bitness.ToString());
         var output = new List<IntPtr>();
         foreach (var path in libPaths)
         {
@@ -31,6 +31,7 @@ public static class VsixEx
         }
         return output;
     }
+
     public static List<Assembly> LoadClientLibraries(string path, params string[] libPaths)
     {
         return libPaths.Select(libPath => Assembly.LoadFrom(Path.Combine(path, libPath))).ToList();

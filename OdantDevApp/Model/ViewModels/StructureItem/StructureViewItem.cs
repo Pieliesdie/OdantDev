@@ -1,20 +1,23 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Diagnostics;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using OdantDevApp.Model.Git;
 using OdantDevApp.Model.ViewModels.Settings;
 using odaServer;
 using SharedOdanDev.OdaOverride;
+using SharedOdantDev.Common;
+#pragma warning disable CA1860
 
 namespace OdantDevApp.Model.ViewModels;
 
 public partial class StructureViewItem<T> : ObservableObject where T : StructureItem
 {
-    private static readonly IEnumerable<StructureViewItem<T>> dummyList = new List<StructureViewItem<T>>
-        { new() { Name = "Loading...", Icon = PredefinedImages.LoadImage } };
+    private static readonly List<StructureViewItem<T>> dummyList = [new() { Name = "Loading...", Icon = PredefinedImages.LoadImage }];
 
     private readonly ILogger? logger;
     private readonly ConnectionModel? connection;
     private bool isLoaded;
-    private readonly NativeMethods.OdaServerApi.OnUpdate_CALLBACK updateCallback;
+    private readonly NativeMethods.OdaServerApi.OnUpdate_CALLBACK? updateCallback;
 
     private async void Updated(int type, IntPtr @params)
     {
@@ -48,10 +51,11 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         }
         catch (TimeoutException)
         {
+            //ignore
         }
-        catch (Exception ex)
+        catch (Exception err)
         {
-            logger?.LogInformation(ex.Message);
+            logger?.LogInformation(err, "Error in 'Updated': {Error}", err.Message);
         }
     }
 
@@ -62,13 +66,13 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
 
     public bool HasRepository => !string.IsNullOrWhiteSpace(Item?.Root?.GetAttribute("GitLabRepository"));
     public bool CanCreateModule => Item is Class && !HasModule && IsLocal;
-    public bool CanCreateDeveloper => Item?.ItemType == ItemType.DevPart && IsLocal;
+    public bool CanCreateDeveloper => ItemType == oda.ItemType.DevPart && IsLocal;
     public bool CanOpenModule => HasModule && IsLocal;
     public bool CanDownloadModule => Item is Class && HasModule && !IsLocal;
     public bool CanCreateRepo => GitClient.Client?.HostUrl != null;
     public bool IsLocal => Item?.Host?.IsLocal ?? false;
     public bool IsItemAvailable => Item is { IsDisposed: false };
-    public ItemType ItemType { get; }
+    public ItemType? ItemType => Item?.ItemType;
 
     [ObservableProperty] public partial string Name { get; set; }
 
@@ -84,12 +88,28 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
 
     async partial void OnIsExpandedChanged(bool value)
     {
-        if (!value || isLoaded) return;
-        isLoaded = true;
-        if (Children is not null && !Children.Equals(dummyList))
-            return;
-        if (Item != null)
-            await SetChildrenAsync(Item, logger, connection);
+        try
+        {
+            if (!value || isLoaded)
+            {
+                return;
+            }
+
+            isLoaded = true;
+            if (Children is not null && !Children.Equals(dummyList))
+            {
+                return;
+            }
+
+            if (Item != null)
+            {
+                await SetChildrenAsync();
+            }
+        }
+        catch (Exception err)
+        {
+            logger?.LogError(err, "Error 'OnIsExpandedChanged': {Error}", err.Message);
+        }
     }
 
     public bool HasModule
@@ -100,13 +120,13 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
                 return false;
             switch (ItemType)
             {
-                case ItemType.Class:
+                case oda.ItemType.Class:
                     return (Item as Class)?.HasModule ?? false;
-                case ItemType.Module:
+                case oda.ItemType.Module:
                 {
                     if (Children is null || Children.Equals(dummyList))
                     {
-                        Children = GetDistinctChildren(Item, this, logger, connection).ToArray();
+                        Children = GetChildren().ToArray();
                     }
 
                     return Children?.Any(x => x.HasModule) ?? false;
@@ -127,7 +147,7 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
             }
 
             var hasChildren = Item.RemoteItem.HasChilds;
-            if (!hasChildren && ItemType != ItemType.Class)
+            if (!hasChildren && ItemType != oda.ItemType.Class)
             {
                 hasChildren = Item.Class?.RemoteItem?.HasChilds ?? false;
             }
@@ -136,20 +156,30 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         }
     }
 
-    public StructureViewItem() { }
-
-    public StructureViewItem(T item, StructureViewItem<T>? parent = null, ILogger? logger = null,
-        ConnectionModel? connection = null) : this()
+    public StructureViewItem(
+        StructureViewItem<T>? parent = null,
+        ILogger? logger = null,
+        ConnectionModel? connection = null
+    )
     {
         this.logger = logger;
         this.connection = connection;
-        Item = item;
         Parent = parent;
-        ItemType = Item.ItemType;
-        Name = $"{RemoteItem?.Label ?? RemoteItem?.Name}";
-        updateCallback = Updated;
+    }
+
+    public StructureViewItem(
+        T item,
+        StructureViewItem<T>? parent = null,
+        ILogger? logger = null,
+        ConnectionModel? connection = null
+    ) : this(parent, logger, connection)
+    {
+        Item = item;
+        Name = $"{item.RemoteItem?.Label ?? item.RemoteItem?.Name}";
+
         if (Item.RemoteItem is not null)
         {
+            updateCallback = Updated;
             NativeMethods.OdaServerApi.SetOnUpdate(Item.RemoteItem.GetIntPtr(), updateCallback);
         }
 
@@ -176,12 +206,12 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         }
     }
 
-    private async Task SetChildrenAsync(T item, ILogger? logger = null, ConnectionModel? connection = null)
+    private async Task SetChildrenAsync()
     {
         try
         {
             Children = await Task
-                .Run(() => GetDistinctChildren(item, this, logger, connection).ToArray())
+                .Run(() => GetChildren().ToArray())
                 .WithTimeout(TimeSpan.FromSeconds(AddinSettings.Instance.StructureItemTimeout));
         }
         catch (TimeoutException)
@@ -198,50 +228,57 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         }
     }
 
-    private static IEnumerable<StructureViewItem<T>> GetDistinctChildren(T item, StructureViewItem<T>? parent = null,
-        ILogger? logger = null, ConnectionModel? connection = null)
+    public IEnumerable<StructureViewItem<T>> GetChildren()
     {
-        return GetChildren(item, parent, logger, connection)
+        return GetChildrenCore()
             .ToArray()
             .GroupBy(x => x.Item?.FullId ?? x.Name)
             .Select(x => x.Last());
     }
 
-    private static IEnumerable<StructureViewItem<T>> GetChildren(T item, StructureViewItem<T>? parent = null,
-        ILogger? logger = null, ConnectionModel? connection = null)
+    private IEnumerable<StructureViewItem<T>> GetChildrenCore()
     {
-        var items = item
+        if (Item == null)
+        {
+            yield break;
+        }
+
+        var items = Item
             .FindConfigItems()
             .OrderBy(x => x.Name)
-            .ToLookup(x => x.ItemType != ItemType.Module && x.ItemType != ItemType.Solution);
+            .ToLookup(x => x.ItemType != oda.ItemType.Module && x.ItemType != oda.ItemType.Solution);
 
         var children = items[true]
             .OfType<T>()
-            .Select(child => new StructureViewItem<T>(child, parent, logger, connection))
+            .Select(child => new StructureViewItem<T>(child, this, logger, connection))
             .OrderBy(x => x.Item?.SortIndex)
             .ThenBy(x => x.Name);
 
         //create folders for modules and workplaces
-        var modules = items[false].OfType<DomainModule>();
-        var workplaces = items[false].OfType<DomainSolution>();
+        var modules = items[false].OfType<DomainModule>().ToArray();
+        var workplaces = items[false].OfType<DomainSolution>().ToArray();
         if (workplaces.Any())
         {
-            var workplace = new StructureViewItem<T>
+            var workplace = new StructureViewItem<T>(this, logger, connection)
             {
                 Name = "Workplaces",
                 Icon = PredefinedImages.WorkplaceImage,
-                Children = workplaces.OfType<T>().Select(child => new StructureViewItem<T>(child, parent, logger, connection))
+                Children = workplaces
+                    .OfType<T>()
+                    .Select(child => new StructureViewItem<T>(child, this, logger, connection))
             };
             yield return workplace;
         }
 
         if (modules.Any())
         {
-            var module = new StructureViewItem<T>
+            var module = new StructureViewItem<T>(this, logger, connection)
             {
                 Name = "Modules",
                 Icon = PredefinedImages.ModuleImage,
-                Children = modules.OfType<T>().Select(child => new StructureViewItem<T>(child, parent, logger, connection))
+                Children = modules
+                    .OfType<T>()
+                    .Select(child => new StructureViewItem<T>(child, this, logger, connection))
             };
             yield return module;
         }
@@ -249,25 +286,37 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         //hide inner class in domain
         foreach (var child in children)
         {
-            if (child.RemoteItem?.Id == item.RemoteItem.Id)
+            if (child.RemoteItem?.Id == Item.RemoteItem.Id)
             {
                 var childPtr = child.RemoteItem?.GetIntPtr();
 
-                if (childPtr is null || parent is null || child.Item is null)
+                if (childPtr is null || child.Item is null)
                 {
                     continue;
                 }
 
-                NativeMethods.OdaServerApi.SetOnUpdate(childPtr.Value, parent.updateCallback);
-                var rootItems = GetDistinctChildren(child.Item, parent, logger, connection);
+                if (updateCallback != null)
+                {
+                    NativeMethods.OdaServerApi.SetOnUpdate(childPtr.Value, updateCallback);
+                }
+
+                var rootItems = child
+                    .GetChildren()
+                    .Select(x =>
+                    {
+                        x.Parent = this;
+                        return x;
+                    });
+
                 //create folders for categories
-                if (item.ItemType == ItemType.Organization)
+                if (Item.ItemType == oda.ItemType.Organization)
                 {
                     rootItems = ApplyCategories(rootItems);
                 }
 
                 foreach (var rootItem in rootItems)
                 {
+                    rootItem.Parent = this;
                     yield return rootItem;
                 }
 
@@ -279,10 +328,12 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         }
     }
 
-    private static IEnumerable<StructureViewItem<T>> ApplyCategories
-        (IEnumerable<StructureViewItem<T>> structureItems, string subGroupParent = "")
+    private IEnumerable<StructureViewItem<T>> ApplyCategories(
+        IEnumerable<StructureViewItem<T>> items,
+        string subGroupParent = ""
+    )
     {
-        var emptyGroupedChildren = structureItems.ToLookup(x => string.IsNullOrWhiteSpace(x.Item?.Category));
+        var emptyGroupedChildren = items.ToLookup(x => string.IsNullOrWhiteSpace(x.Item?.Category));
 
         var groups = emptyGroupedChildren[false]
             .GroupBy(x => x.Item?.Category.SubstringAfter(subGroupParent).SubstringBefore("/"))
@@ -290,7 +341,7 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         foreach (var group in groups)
         {
             var rootItems = group.ToLookup(x => group.Key == x.Item?.Category.SubstringAfter(subGroupParent));
-            yield return new StructureViewItem<T>
+            yield return new StructureViewItem<T>(this, logger, connection)
             {
                 Name = group.Key,
                 Icon = PredefinedImages.FolderImage,
@@ -317,7 +368,7 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         }
         catch (Exception e)
         {
-            logger?.LogInformation(e.ToString());
+            logger?.LogInformation(e, "Error in 'Item.Reset()': {Error}", e.Message);
         }
 
         try
@@ -326,12 +377,21 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         }
         catch (Exception e)
         {
-            logger?.LogInformation(e.ToString());
+            logger?.LogInformation(e, "Error in 'Item.ReloadClassFromServer()': {Error}", e.Message);
+        }
+
+        try
+        {
+            (Item as Domain)?.Class.ReloadClassFromServer();
+        }
+        catch (Exception e)
+        {
+            logger?.LogInformation(e, "Error in 'Item.ReloadClassFromServer()': {Error}", e.Message);
         }
 
         if (isLoaded || force)
         {
-            await SetChildrenAsync(Item, logger, connection);
+            await SetChildrenAsync();
         }
         else
         {
@@ -342,6 +402,86 @@ public partial class StructureViewItem<T> : ObservableObject where T : Structure
         Name = $"{RemoteItem?.Label ?? RemoteItem?.Name}";
         OnPropertyChanged(nameof(Item));
         OnPropertyChanged(nameof(HasModule));
+    }
+
+    [RelayCommand]
+    public void Info()
+    {
+        if (Item == null)
+        {
+            return;
+        }
+
+        Clipboard.Clear();
+        Clipboard.SetText(Item.FullId);
+        logger?.LogInformation("FullId copied to clipboard!");
+    }
+
+    [RelayCommand]
+    public async Task OpenDirAsync()
+    {
+        try
+        {
+            if (Item?.Dir is null)
+            {
+                logger?.LogInformation("{StructureItem} has no directory", Item);
+                return;
+            }
+
+            var dirPath = await Task.Run(Item.Dir.RemoteFolder.LoadFolder).ConfigureAwait(true);
+
+            if (Directory.Exists(dirPath).Not())
+            {
+                logger?.LogInformation("Folder {DirPath} doesn't exist for {StructureItem}", dirPath, Item);
+                return;
+            }
+
+            Process.Start("explorer", DevHelpers.ClearDomainAndClassInPath(dirPath));
+        }
+        catch (Exception ex)
+        {
+            logger?.LogInformation(ex, "Error in 'OpenDirAsync()': {Error}", ex.Message);
+        }
+    }
+
+    [RelayCommand]
+    public void Pin()
+    {
+        try
+        {
+            if (Item is null)
+            {
+                logger?.LogInformation("Can't pin this item");
+                return;
+            }
+
+            if (!IsPinned)
+            {
+                var copy = new StructureViewItem<StructureItem>(
+                    Item,
+                    Parent as StructureViewItem<StructureItem>,
+                    logger, connection
+                );
+                if (copy.Item?.FullId is null || connection is null)
+                    return;
+                connection.PinnedItems.Add(copy);
+                connection.AddinSettings.PinnedItems?.Add(copy.Item.FullId);
+            }
+            else
+            {
+                if (connection is null)
+                    return;
+                connection.PinnedItems.Remove(x => x.Item?.FullId == Item.FullId);
+                connection.AddinSettings.PinnedItems?.Remove(Item.FullId);
+            }
+
+            _ = connection.AddinSettings.SaveAsync();
+            OnPropertyChanged(nameof(IsPinned));
+        }
+        catch (Exception ex)
+        {
+            logger?.LogInformation(ex, "Error in 'Pin()': {Error}", ex.Message);
+        }
     }
 
     public override string ToString() => Name;
