@@ -97,7 +97,4 @@
 	  <Content Remove="VSCommon\ProjectStrategies\ProjectStrategyBase.cs" />
 	  <Content Remove="VSCommon\ProjectStrategies\SdkProjectStrategy.cs" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Commands\" />
-	</ItemGroup>
 </Project>

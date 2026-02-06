@@ -2,12 +2,18 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+
 using EnvDTE;
+
 using EnvDTE80;
+
 using OdantDevApp.Model.ViewModels.Settings;
 using OdantDevApp.VSCommon.ProjectStrategies;
+
 using SharedOdantDevLib.WinApi;
+
 using VSLangProj;
+
 using BuildEvents = EnvDTE.BuildEvents;
 using Project = EnvDTE.Project;
 using SolutionEvents = EnvDTE.SolutionEvents;
@@ -254,21 +260,32 @@ public sealed partial class VisualStudioIntegration
 
             if (moduleDir.Refs.Any())
             {
-                var refDir = outputDir.CreateSubdirectory("ref");
+                var refDir = outputDir.CreateSubdirectory("ref");          
                 var remoteRefDir = remoteBinDir.OpenOrCreateFolder("ref");
                 var clientRefDir = OdaFolder.CreateSubdirectory(Path.Combine("bin", "ref"));
-                moduleDir.Refs.ToList().ForEach(x =>
-                {
-                    x.CopyToDir(refDir);
-                    if (x is not FileInfo || x.Extension != ".dll") return;
 
-                    var isValidVersion = Version.TryParse(FileVersionInfo.GetVersionInfo(x.FullName).FileVersion,
-                        out var fileVersion);
-                    x.CopyToDir(isValidVersion
-                        ? clientRefDir.CreateSubdirectory(fileVersion.ToString())
-                        : clientRefDir);
-                    remoteRefDir.SaveFile(x.FullName);
-                });
+                foreach (var reference in moduleDir.Refs)
+                {
+                    if (reference is DirectoryInfo)
+                    {
+                        reference.CopyToDir(refDir);
+                        continue;
+                    }
+
+                    var fileVersion = TryGetFileVersion(reference.FullName);
+
+                    var versionSubfolder = !AddinSettings.SkipVersionedRefFolders && fileVersion != null
+                        ? fileVersion.ToString()
+                        : string.Empty;
+
+                    CopyToVersionedDirectory(reference, refDir, versionSubfolder);
+
+                    if (IsDllFile(reference))
+                    {
+                        CopyToVersionedDirectory(reference, clientRefDir, versionSubfolder);
+                        remoteRefDir.OpenOrCreateFolder(versionSubfolder).SaveFile(reference.FullName);
+                    }
+                }
             }
 
             CopyModuleDirToServer(buildInfo);
@@ -280,6 +297,25 @@ public sealed partial class VisualStudioIntegration
         }
 
         return true;
+    }
+
+    private static Version? TryGetFileVersion(string filePath)
+    {
+        var versionString = FileVersionInfo.GetVersionInfo(filePath).FileVersion;
+        return Version.TryParse(versionString, out var version) ? version : null;
+    }
+
+    private static bool IsDllFile(FileSystemInfo file)
+    {
+        return file is FileInfo && file.Extension == ".dll";
+    }
+
+    private static void CopyToVersionedDirectory(FileSystemInfo file, DirectoryInfo baseDir, string versionSubfolder)
+    {
+        var targetDir = string.IsNullOrEmpty(versionSubfolder)
+            ? baseDir
+            : baseDir.CreateSubdirectory(versionSubfolder);
+        file.CopyToDir(targetDir);
     }
 
     private bool CopyModuleDirToServer(BuildInfo buildInfo)

@@ -31,6 +31,9 @@ public partial class AddinSettings : ObservableObject
     public event ThemeChanged? OnThemeChanged;
 
     [ObservableProperty]
+    public partial bool SkipVersionedRefFolders { get; set; }
+
+    [ObservableProperty]
     public partial bool IsVirtualizeTreeView { get; set; }
     
     [ObservableProperty] 

@@ -897,11 +897,17 @@
                                                   ToolTip="True: always update / False: update only if reference file is missing" />
                                         <CheckBox Grid.Row="2"
                                                   Margin="0,5,0,0"
+                                                  materialDesign:CheckBoxAssist.CheckBoxSize="22" Content="Skip versioned ref folders "
+                                                  FontSize="16"
+                                                  IsChecked="{Binding OdaModel.AddinSettings.SkipVersionedRefFolders}"
+                                                  ToolTip="True: all refs in one folder / False: ref splitted by file version" />
+                                        <CheckBox Grid.Row="3"
+                                                  Margin="0,5,0,0"
                                                   materialDesign:CheckBoxAssist.CheckBoxSize="22" Content="Auto login to oda server"
                                                   FontSize="16"
                                                   IsChecked="{Binding OdaModel.AutoLogin}"
                                                   ToolTip="Enable/disable oda login window" />
-                                        <TextBox Grid.Row="3"
+                                        <TextBox Grid.Row="4"
                                                  Margin="0,5,0,0" VerticalAlignment="Center"
                                                  materialDesign:TextFieldAssist.SuffixText="items" FontSize="16"
                                                  Style="{StaticResource MaterialDesignFloatingHintTextBox}"
